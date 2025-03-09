@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en",
+  "globRoot": "./",
+  "dictionaryDefinitions": [
+    {
+      "name": "project-words",
+      "path": "dictionaries/project-words.txt"
+    },
+    {
+      "name": "custom-python",
+      "path": "dictionaries/python.txt"
+    }
+  ],
+  "dictionaries": ["project-words", "python", "en-gb", "custom-python"],
+  "ignorePaths": [".github/spellcheck/dictionaries", ".*"]
+}
