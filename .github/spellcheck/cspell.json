@@ -13,6 +13,18 @@
       "path": "dictionaries/python.txt"
     }
   ],
-  "dictionaries": ["project-words", "python", "en-gb", "custom-python"],
-  "ignorePaths": [".github/spellcheck/dictionaries", ".*"]
+  "dictionaries": [
+    "project-words",
+    "python",
+    "en-gb",
+    "custom-python"
+  ],
+  "ignorePaths": [
+    "**/.github/spellcheck/dictionaries/**",
+    "**/*.xml*",
+    "**/*.in",
+    "**/*.sh",
+    "**/data/icons/**",
+    "**/meson.build"
+  ]
 }

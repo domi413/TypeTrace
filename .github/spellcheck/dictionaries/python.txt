@@ -1,0 +1,5 @@
+# GTK
+gapplication
+gresource
+gresources
+accels

@@ -1,0 +1,7 @@
+# Names
+typetrace
+
+# Words
+
+# Build
+bindir

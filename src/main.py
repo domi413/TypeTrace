@@ -1,11 +1,10 @@
 import sys
 import gi
+from gi.repository import Gio, Adw
+from .window import TypetraceWindow
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-
-from gi.repository import Gtk, Gio, Adw
-from .window import TypetraceWindow
 
 
 class TypetraceApplication(Adw.Application):
