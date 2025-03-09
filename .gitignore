@@ -169,3 +169,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Build related files
+.flatpak-builder/
+_build/
+_install/
+/subprojects/blueprint-compiler

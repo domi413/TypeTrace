@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="typetrace">
+	<schema id="edu.ost.typetrace" path="/edu/ost/typetrace/">
+	</schema>
+</schemalist>
