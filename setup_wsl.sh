@@ -14,18 +14,11 @@ sudo apt install -y \
   libglib2.0-dev \
   libadwaita-1-dev \
   libgtk-4-dev \
-  blueprint-compiler
+  blueprint-compiler \
+  meson
 
 echo "Creating symbolic link for Wayland support..."
-WAYLAND_DIR="/mnt/wslg/runtime-dir/wayland-0*"
-USER_RUN_DIR="/run/user/$(id -u)"
 
-# Check if the Wayland directory exists
-if [ -d "$WAYLAND_DIR" ]; then
-  ln -s "$WAYLAND_DIR" "$USER_RUN_DIR/"
-  echo "Wayland symbolic link created at $USER_RUN_DIR"
-else
-  echo "Wayland directory not found, skipping symbolic link creation."
-fi
+ln -s /mnt/wslg/runtime-dir/wayland-0* /run/user/$(id -u)/
 
 echo "Setup complete!"
