@@ -1,0 +1,48 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $TypetraceWindow: Adw.ApplicationWindow {
+  title: "TypeTrace";
+  default-width: 800;
+  default-height: 600;
+
+  content: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      [end]
+      MenuButton {
+        primary: true;
+        icon-name: "open-menu-symbolic";
+        tooltip-text: "Main Menu";
+        menu-model: primary_menu;
+      }
+    }
+
+    content: Label label {
+      label: "Hello, World!";
+
+      styles [
+        "title-1",
+      ]
+    };
+  };
+}
+
+menu primary_menu {
+  section {
+    item {
+      label: "_Preferences";
+      action: "app.preferences";
+    }
+
+    item {
+      label: "_Keyboard Shortcuts";
+      action: "win.show-help-overlay";
+    }
+
+    item {
+      label: "_About TypeTrace";
+      action: "app.about";
+    }
+  }
+}

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=typetrace
+Exec=typetrace
+Icon=edu.ost.typetrace
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=GTK;
+StartupNotify=true
+DBusActivatable=true
