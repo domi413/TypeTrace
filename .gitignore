@@ -175,3 +175,12 @@ cython_debug/
 _build/
 _install/
 /subprojects/blueprint-compiler
+
+run.sh
+
+# Backend
+main
+TypeTrace.db
+typetrace/__pycache__
+typetrace_timing/__pycache__
+timing_data.csv
