@@ -1,4 +1,4 @@
-moduledir = pkgdatadir / 'backend'
+backenddir = pkgdatadir / 'backend'
 
 backend_sources = [
   '__init__.py',
@@ -13,8 +13,7 @@ backend_sources = [
 
 install_data(
   backend_sources,
-  install_dir: moduledir,
-  # install_mode: ['rw-r--r--', 'root', 'root'] TODO: figure out permissions
+  install_dir: backenddir,
 )
 
 conf = configuration_data()

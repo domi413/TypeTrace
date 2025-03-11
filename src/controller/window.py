@@ -3,7 +3,7 @@
 from gi.repository import Adw, Gtk
 
 
-@Gtk.Template(resource_path="/edu/ost/typetrace/window.ui")
+@Gtk.Template(resource_path="/edu/ost/typetrace/view/window.ui")
 class TypetraceWindow(Adw.ApplicationWindow):
     """Main application window class for Typetrace.
 

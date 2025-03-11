@@ -5,7 +5,7 @@ blueprints = custom_target(
   'blueprints',
   input: files(
     'gtk/help-overlay.blp',
-    'window.blp',
+    'view/window.blp',
   ),
   output: '.',
   command: [
@@ -39,12 +39,18 @@ configure_file(
   install_mode: 'r-xr-xr-x',
 )
 
-frontend_sources = [
+sources = [
   '__init__.py',
   'main.py',
-  'window.py',
 ]
+install_data(sources, install_dir: moduledir)
 
-install_data(frontend_sources, install_dir: moduledir)
+sources_model = []
+install_data(sources_model, install_dir: moduledir / 'model')
+
+sources_controller = [
+  'controller/window.py',
+]
+install_data(sources_controller, install_dir: moduledir / 'controller')
 
 subdir('backend')

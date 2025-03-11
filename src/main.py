@@ -8,7 +8,7 @@ from typing import Any, Callable
 import gi
 from gi.repository import Adw, Gio
 
-from .window import TypetraceWindow
+from .controller.window import TypetraceWindow
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
