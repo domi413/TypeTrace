@@ -11,17 +11,6 @@ from pathlib import Path
 from backend.config import DB_NAME, PROJECT_VERSION, ExitCodes
 
 
-def check_root_permissions() -> None:
-    """Check if the script is running with root permissions.
-
-    Raises:
-        PermissionError: If the script is not running with root permissions.
-
-    """
-    if os.geteuid() != 0:
-        raise PermissionError
-
-
 def print_help() -> None:
     """Display help information."""
     print("The backend of TypeTrace.")
@@ -35,6 +24,14 @@ def print_help() -> None:
         "\nWarning: This is the backend and is not designed to run by users.",
         "\nYou should run the frontend of TypeTrace which will run this.",
     )
+
+
+def resolve_db_path() -> Path:
+    """Determine the database path following XDG Base Directory specs."""
+    xdg_data_home = os.getenv("XDG_DATA_HOME", os.path.expanduser("~/.local/share"))
+    db_dir = Path(xdg_data_home) / "typetrace"
+    db_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+    return db_dir / DB_NAME
 
 
 def main() -> int:
@@ -68,18 +65,22 @@ def main() -> int:
         setup_logging()
 
     try:
-        check_root_permissions()
-        db_path: Path = Path(DB_NAME).resolve()
+        from backend.devices import check_device_accessibility
+
+        check_device_accessibility()
+        db_path: Path = resolve_db_path()
+
         from backend.db import initialize_database
 
         initialize_database(db_path)
+
         from backend.events import trace_keys
 
         trace_keys()
-    except PermissionError:
+    except PermissionError as e:
         print(
-            "Permission denied when accessing input devices.",
-            "\nPlease run this script with sudo or adjust permissions.",
+        f"{e}",
+        "\nPlease ensure you have sufficient permissions (e.g., 'input' group)."
         )
         return ExitCodes.PERMISSION_ERROR
     except sqlite3.Error:

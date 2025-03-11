@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from contextlib import contextmanager, suppress
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import evdev
 
@@ -51,3 +51,31 @@ def select_keyboards() -> list[evdev.device.InputDevice]:
                 logging.debug("Found keyboard device: %s, %r", device.name, device.path)
 
     return keyboards
+
+def check_device_accessibility() -> None:
+    """Check if the script has access to any input devices.
+
+    Raises:
+        PermissionError: If no input devices can be accessed.
+    """
+    try:
+        device_paths = evdev.list_devices()
+        if not device_paths:
+            raise PermissionError("No input devices found.")
+
+        accessible_devices: List[evdev.InputDevice] = []
+        for path in device_paths:
+            try:
+                dev = evdev.InputDevice(path)
+                accessible_devices.append(dev)
+                # Close the device to avoid keeping it open unnecessarily
+                dev.close()
+            except PermissionError:
+                # Skip devices we can't access (e.g., restricted by ACLs or group)
+                continue
+
+        if not accessible_devices:
+            raise PermissionError("No accessible input devices available.")
+        # At least one device is accessible; no need to keep them open here
+    except Exception as e:
+        raise PermissionError(f"Failed trying to access input devices: {e}")
