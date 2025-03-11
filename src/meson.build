@@ -1,16 +1,24 @@
-pkgdatadir = (get_option('prefix') / get_option('datadir') / meson.project_name())
+pkgdatadir = get_option('prefix') / get_option('datadir') / meson.project_name()
 moduledir = pkgdatadir / 'typetrace'
 
-blueprints = custom_target('blueprints',
+blueprints = custom_target(
+  'blueprints',
   input: files(
-    'window.blp',
     'gtk/help-overlay.blp',
+    'window.blp',
   ),
   output: '.',
-  command: [find_program('blueprint-compiler'), 'batch-compile', '@OUTPUT@', '@CURRENT_SOURCE_DIR@', '@INPUT@'],
+  command: [
+    find_program('blueprint-compiler'),
+    'batch-compile',
+    '@OUTPUT@',
+    '@CURRENT_SOURCE_DIR@',
+    '@INPUT@',
+  ],
 )
 
-gnome.compile_resources('typetrace',
+gnome.compile_resources(
+  'typetrace',
   'typetrace.gresource.xml',
   gresource_bundle: true,
   install: true,
@@ -21,21 +29,22 @@ gnome.compile_resources('typetrace',
 conf = configuration_data()
 conf.set('PYTHON', python.find_installation('python3').full_path())
 conf.set('VERSION', meson.project_version())
-# conf.set('pkgdatadir', pkgdatadir)
-
+conf.set('pkgdatadir', pkgdatadir)
 configure_file(
   input: 'typetrace.in',
   output: 'typetrace',
   configuration: conf,
   install: true,
   install_dir: get_option('bindir'),
-  install_mode: 'r-xr-xr-x'
+  install_mode: 'r-xr-xr-x',
 )
 
-typetrace_sources = [
+frontend_sources = [
   '__init__.py',
   'main.py',
   'window.py',
 ]
 
-install_data(typetrace_sources, install_dir: moduledir)
+install_data(frontend_sources, install_dir: moduledir)
+
+subdir('backend')

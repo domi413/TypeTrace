@@ -4,7 +4,7 @@ import sys
 import signal
 
 VERSION = "@VERSION@"
-pkgdatadir = os.path.join(os.path.dirname(__file__), "../share/typetrace")
+pkgdatadir = "@pkgdatadir@"
 
 sys.path.insert(1, pkgdatadir)
 signal.signal(signal.SIGINT, signal.SIG_DFL)

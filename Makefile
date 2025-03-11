@@ -9,13 +9,9 @@ BP_BRANCH = v0.16.0
 # Default target
 all: build
 
-# Clone blueprint-compiler as a subproject
-$(BP_DIR):
-	mkdir -p subprojects
-	git clone --depth 1 --branch $(BP_BRANCH) $(BP_REPO) $(BP_DIR)
 
 # Flatpak targets
-flatpak-build: $(MANIFEST) $(BP_DIR)
+flatpak-build: clean $(MANIFEST)
 	flatpak-builder --force-clean $(BUILD_DIR) $(MANIFEST)
 
 flatpak-run: flatpak-build
@@ -25,7 +21,7 @@ flatpak-install: clean
 	flatpak-builder --install --user $(BUILD_DIR) $(MANIFEST)
 
 # Meson targets
-meson-setup: $(BP_DIR)
+meson-setup: clean
 	meson setup $(BUILD_DIR) --prefix=$(CURDIR)/$(INSTALL_DIR)
 
 meson-build: meson-setup
