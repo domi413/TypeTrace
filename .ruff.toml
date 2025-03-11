@@ -1,0 +1,9 @@
+[lint]
+extend-select = [
+  "ALL",
+]
+ignore = [
+  "T201", # Ignore print statements
+  "ANN003", # Ignore missing type annotation for **kwargs
+  "ANN401"  # Ignore missing type annotation for functions
+]

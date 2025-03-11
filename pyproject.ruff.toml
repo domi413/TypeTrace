@@ -1,3 +1,0 @@
-[tool.ruff]
-select = ["ALL"]
-ignore = ["T201"]
