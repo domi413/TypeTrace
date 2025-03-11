@@ -1,0 +1,28 @@
+name: Spellcheck
+
+on:
+  pull_request:
+   types: [opened, edited, synchronize, reopened]
+jobs:
+  spellcheck:
+    runs-on: ubuntu-latest
+    name: Checks the documents for spelling
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Starting cspell
+        uses: streetsidesoftware/cspell-action@v6
+        with:
+          files: ""
+          root: "."
+          check_dot_files: false
+          inline: error
+          treat_flagged_words_as_errors: false
+          suggestions: true
+          strict: true
+          config: ".github/spellcheck/cspell.json"
+          incremental_files_only: false
+          verbose: true
+          use_cspell_files: false
