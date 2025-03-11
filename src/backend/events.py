@@ -8,6 +8,7 @@ import time
 
 import evdev
 
+from pathlib import Path
 from backend.config import BUFFER_SIZE, BUFFER_TIMEOUT, DEBUG, KeyEvent
 from backend.db import write_to_database
 from backend.devices import select_keyboards
@@ -31,6 +32,7 @@ def process_single_event(
     event: evdev.events.InputEvent,
     buffer: list[KeyEvent],
     start_time: float,
+    db_path: Path,
 ) -> tuple[list[KeyEvent], float]:
     """Process a single keyboard event.
 
@@ -58,7 +60,7 @@ def process_single_event(
             buffer.append(key_event)
 
         if len(buffer) >= BUFFER_SIZE:
-            write_to_database(buffer)
+            write_to_database(db_path, buffer)
             buffer.clear()
             start_time = time.time()
 
@@ -69,6 +71,7 @@ def read_device_events(
     device: evdev.device.InputDevice,
     buffer: list[KeyEvent],
     start_time: float,
+    db_path: Path,
 ) -> tuple[list[KeyEvent], float]:
     """Read events from a single device.
 
@@ -83,7 +86,7 @@ def read_device_events(
     """
     try:
         for event in device.read():
-            buffer, start_time = process_single_event(event, buffer, start_time)
+            buffer, start_time = process_single_event(event, buffer, start_time, db_path)
     except OSError:
         logging.exception("Error reading from device")
         # We'll handle device reconnection in the main loop
@@ -94,6 +97,7 @@ def read_device_events(
 def check_timeout_and_flush(
     buffer: list[KeyEvent],
     start_time: float,
+    db_path: Path,
 ) -> tuple[list[KeyEvent], float]:
     """Check if buffer timeout has been reached and flush buffer if needed.
 
@@ -106,14 +110,14 @@ def check_timeout_and_flush(
 
     """
     if buffer and time.time() - start_time >= BUFFER_TIMEOUT:
-        write_to_database(buffer)
+        write_to_database(db_path, buffer)
         buffer.clear()
         start_time = time.time()
 
     return buffer, start_time
 
 
-def buffer_keys(devices: list[evdev.device.InputDevice]) -> None:
+def buffer_keys(devices: list[evdev.device.InputDevice], db_path: Path) -> None:
     """Buffer up to BUFFER_SIZE keystrokes or until BUFFER_TIMEOUT, then write them.
 
     Args:
@@ -136,7 +140,7 @@ def buffer_keys(devices: list[evdev.device.InputDevice]) -> None:
 
             # Process events from ready devices
             for device in r:
-                buffer, start_time = read_device_events(device, buffer, start_time)
+                buffer, start_time = read_device_events(device, buffer, start_time, db_path)
 
             # If we had device errors, refresh devices list
             if not devices:
@@ -144,10 +148,10 @@ def buffer_keys(devices: list[evdev.device.InputDevice]) -> None:
 
     except KeyboardInterrupt:
         if buffer:
-            write_to_database(buffer)
+            write_to_database(db_path, buffer)
 
 
-def trace_keys() -> None:
+def trace_keys(db_path: Path) -> None:
     """Start tracing keyboard events."""
     from backend.devices import managed_devices
 
@@ -156,4 +160,4 @@ def trace_keys() -> None:
             logging.warning("No keyboard devices found")
             return
 
-        buffer_keys(devices)
+        buffer_keys(devices, db_path)

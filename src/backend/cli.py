@@ -30,7 +30,7 @@ def resolve_db_path() -> Path:
     """Determine the database path following XDG Base Directory specs."""
     xdg_data_home = os.getenv("XDG_DATA_HOME", os.path.expanduser("~/.local/share"))
     db_dir = Path(xdg_data_home) / "typetrace"
-    db_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+    db_dir.mkdir(parents=True, exist_ok=True)
     return db_dir / DB_NAME
 
 
@@ -76,11 +76,11 @@ def main() -> int:
 
         from backend.events import trace_keys
 
-        trace_keys()
+        trace_keys(db_path)
     except PermissionError as e:
         print(
-        f"{e}",
-        "\nPlease ensure you have sufficient permissions (e.g., 'input' group)."
+            f"{e}",
+            "\nPlease ensure you have sufficient permissions (e.g., 'input' group).",
         )
         return ExitCodes.PERMISSION_ERROR
     except sqlite3.Error:

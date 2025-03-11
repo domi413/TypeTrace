@@ -95,14 +95,11 @@ def update_keystroke_counts(
             logging.debug("Updated database with %d keystroke events", len(events))
 
 
-def write_to_database(events: list[KeyEvent]) -> None:
+def write_to_database(db_path: Path, events: list[KeyEvent]) -> None:
     """Write keystroke events to the database.
 
     Args:
         events: List of dictionaries containing key details.
 
     """
-    from backend.config import DB_NAME
-
-    db_path: Path = Path(DB_NAME).resolve()
     update_keystroke_counts(db_path, events)
