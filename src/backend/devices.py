@@ -59,11 +59,11 @@ def check_device_accessibility() -> None:
         PermissionError: If no input devices can be accessed.
     """
     try:
-        device_paths: List[str] = evdev.util.list_devices()
+        device_paths: list[str] = evdev.util.list_devices()
         if not device_paths:
             raise PermissionError("No input devices found.")
 
-        accessible_devices: List[evdev.device.InputDevice] = []
+        accessible_devices: list[evdev.device.InputDevice] = []
         for path in device_paths:
             try:
                 dev = evdev.device.InputDevice(path)
