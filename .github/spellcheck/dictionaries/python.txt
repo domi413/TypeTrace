@@ -3,3 +3,6 @@ gapplication
 gresource
 gresources
 accels
+evdev
+ecodes
+levelname
