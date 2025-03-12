@@ -5,10 +5,9 @@ from __future__ import annotations
 import logging
 import select
 import time
+from pathlib import Path
 
 import evdev
-
-from pathlib import Path
 from backend.config import BUFFER_SIZE, BUFFER_TIMEOUT, DEBUG, KeyEvent
 from backend.db import write_to_database
 from backend.devices import select_keyboards
@@ -47,17 +46,26 @@ def process_single_event(
     """
     # Trigger on keypress
     if event.type == evdev.ecodes.EV_KEY and event.value == 1:
-        # Ignore unknown keycodes (e.g. mouse input)
-        if event.code in evdev.ecodes.KEY:
-            key_event: KeyEvent = {
+        event_map: dict[int, str | tuple[str]] | None = None
+        event_code: int = event.code
+
+        # Keyboard input
+        if event_code in evdev.ecodes.KEY:
+            event_map = evdev.ecodes.KEY
+        # Mouse input
+        # elif event_code in evdev.ecodes.BTN:
+        #     event_map = evdev.ecodes.BTN
+
+        if event_map is not None:
+            event_data: KeyEvent = {
                 "scan_code": event.code,
-                "name": evdev.ecodes.KEY[event.code],
+                "name": event_map[event.code],
             }
 
             if DEBUG:
-                print_key(key_event)
+                print_key(event_data)
 
-            buffer.append(key_event)
+            buffer.append(event_data)
 
         if len(buffer) >= BUFFER_SIZE:
             write_to_database(db_path, buffer)
@@ -86,7 +94,9 @@ def read_device_events(
     """
     try:
         for event in device.read():
-            buffer, start_time = process_single_event(event, buffer, start_time, db_path)
+            buffer, start_time = process_single_event(
+                event, buffer, start_time, db_path
+            )
     except OSError:
         logging.exception("Error reading from device")
         # We'll handle device reconnection in the main loop
@@ -135,12 +145,16 @@ def buffer_keys(devices: list[evdev.device.InputDevice], db_path: Path) -> None:
 
             # If no events but timeout reached
             if not r:
-                buffer, start_time = check_timeout_and_flush(buffer, start_time, db_path)
+                buffer, start_time = check_timeout_and_flush(
+                    buffer, start_time, db_path
+                )
                 continue
 
             # Process events from ready devices
             for device in r:
-                buffer, start_time = read_device_events(device, buffer, start_time, db_path)
+                buffer, start_time = read_device_events(
+                    device, buffer, start_time, db_path
+                )
 
             # If we had device errors, refresh devices list
             if not devices:
