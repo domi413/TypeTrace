@@ -45,7 +45,9 @@ sources = [
 ]
 install_data(sources, install_dir: moduledir)
 
-sources_model = []
+sources_model = [
+  'model/keystrokes.py'
+]
 install_data(sources_model, install_dir: moduledir / 'model')
 
 sources_controller = [
