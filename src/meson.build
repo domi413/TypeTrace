@@ -6,6 +6,8 @@ blueprints = custom_target(
   input: files(
     'gtk/help-overlay.blp',
     'view/window.blp',
+    'view/heatmap.blp',
+    'view/verbose.blp',
   ),
   output: '.',
   command: [
@@ -54,6 +56,8 @@ install_data(sources_model, install_dir: moduledir / 'model')
 sources_controller = [
   'controller/__init__.py',
   'controller/window.py',
+  'controller/heatmap.py',
+  'controller/verbose.py',
 ]
 install_data(sources_controller, install_dir: moduledir / 'controller')
 

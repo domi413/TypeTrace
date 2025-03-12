@@ -9,6 +9,10 @@ template $TypetraceWindow: Adw.ApplicationWindow {
   content: Adw.ToolbarView {
     [top]
     Adw.HeaderBar {
+      title-widget: Adw.ViewSwitcher view_switcher {
+        policy: wide;
+        stack: stack;
+      };
       [end]
       MenuButton {
         primary: true;
@@ -18,13 +22,21 @@ template $TypetraceWindow: Adw.ApplicationWindow {
       }
     }
 
-    content: Label label {
-      label: "Hello, World!";
-
-      styles [
-        "title-1",
-      ]
+    content: Adw.ViewStack stack {
+      hexpand: true;
+      vexpand: true;
     };
+
+    // content: Gtk.Box {
+    //   orientation: vertical;
+
+    //   Adw.Carousel carousel {}
+
+    //   Adw.CarouselIndicatorDots {
+    //     carousel: carousel;
+    //     valign: center;
+    //   }
+    // };
   };
 }
 

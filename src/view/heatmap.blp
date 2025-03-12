@@ -1,0 +1,125 @@
+using Gtk 4.0;
+
+template $Heatmap : Gtk.Box {
+    orientation: vertical;
+    halign: center;
+    valign: center;
+    hexpand: true;
+    vexpand: true;
+
+    Box {
+        css-classes: ["container"];
+        orientation: vertical;
+        spacing: 5;
+
+        Box {
+            orientation: horizontal;
+            spacing: 5;
+            homogeneous: true;
+            Button { label: "Esc"; }
+            Button { label: "F1"; }
+            Button { label: "F2"; }
+            Button { label: "F3"; }
+            Button { label: "F4"; }
+            Button { label: "F5"; }
+            Button { label: "F6"; }
+            Button { label: "F7"; }
+            Button { label: "F8"; }
+            Button { label: "F9"; }
+            Button { label: "F10"; }
+            Button { label: "F11"; }
+            Button { label: "F12"; }
+        }
+
+        Box {
+            orientation: horizontal;
+            spacing: 5;
+            Button { label: "~"; }
+            Button { label: "1"; }
+            Button { label: "2"; }
+            Button { label: "3"; }
+            Button { label: "4"; }
+            Button { label: "5"; }
+            Button { label: "6"; }
+            Button { label: "7"; }
+            Button { label: "8"; }
+            Button { label: "9"; }
+            Button { label: "0"; }
+            Button { label: "-"; }
+            Button { label: "="; }
+            Button { 
+                label: "Backspace"; 
+                icon-name: "edit-clear-symbolic"; 
+                hexpand: true; 
+            }
+        }
+
+        Box {
+            orientation: horizontal;
+            spacing: 5;
+            Button { label: "Tab"; hexpand: true; }
+            Button { label: "Q"; }
+            Button { label: "W"; }
+            Button { label: "E"; }
+            Button { label: "R"; }
+            Button { label: "T"; }
+            Button { label: "Y"; }
+            Button { label: "U"; }
+            Button { label: "I"; }
+            Button { label: "O"; }
+            Button { label: "P"; }
+            Button { label: "["; }
+            Button { label: "]"; }
+            Button { label: "\\"; hexpand: true; }
+        }
+
+        Box {
+            orientation: horizontal;
+            spacing: 5;
+            Button { label: "Caps"; hexpand: true; }
+            Button { label: "A"; }
+            Button { label: "S"; }
+            Button { label: "D"; }
+            Button { label: "F"; }
+            Button { label: "G"; }
+            Button { label: "H"; }
+            Button { label: "J"; }
+            Button { label: "K"; }
+            Button { label: "L"; }
+            Button { label: ";"; }
+            Button { label: "'"; }
+            Button { label: "Enter"; hexpand: true; }
+        }
+
+        Box {
+            orientation: horizontal;
+            spacing: 5;
+            Button { label: "Shift"; hexpand: true; }
+            Button { label: "Z"; }
+            Button { label: "X"; }
+            Button { label: "C"; }
+            Button { label: "V"; }
+            Button { label: "B"; }
+            Button { label: "N"; }
+            Button { label: "M"; }
+            Button { label: ","; }
+            Button { label: "."; }
+            Button { label: "/"; }
+            Button { label: "Shift"; hexpand: true; }
+        }
+
+        Box {
+            orientation: horizontal;
+            spacing: 5;
+            Button { label: "Ctrl"; }
+            Button { label: "Alt"; }
+            Button { label: "Space"; hexpand: true; }
+            Button { label: "Alt"; }
+            Button { label: "Ctrl"; }
+            Button { icon-name: "go-previous-symbolic"; }
+            Button { icon-name: "go-up-symbolic"; }
+            Button { icon-name: "go-down-symbolic"; }
+            Button { icon-name: "go-next-symbolic"; }
+        }
+    }
+}

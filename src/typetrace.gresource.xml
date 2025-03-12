@@ -2,6 +2,9 @@
 <gresources>
   <gresource prefix="/edu/ost/typetrace">
     <file preprocess="xml-stripblanks">view/window.ui</file>
+    <file preprocess="xml-stripblanks">view/heatmap.ui</file>
+    <file preprocess="xml-stripblanks">view/verbose.ui</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
+    <file>style.css</file>
   </gresource>
 </gresources>

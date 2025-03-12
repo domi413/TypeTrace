@@ -2,6 +2,9 @@
 
 from gi.repository import Adw, Gtk
 
+from .heatmap import Heatmap
+from .verbose import Verbose
+
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/window.ui")
 class TypetraceWindow(Adw.ApplicationWindow):
@@ -12,8 +15,8 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
     __gtype_name__ = "TypetraceWindow"
 
-    # Template child for accessing the label widget
-    label = Gtk.Template.Child()
+    view_switcher = Gtk.Template.Child()
+    stack = Gtk.Template.Child()
 
     def __init__(self, **kwargs) -> None:
         """Initialize the application window.
@@ -23,3 +26,8 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         """
         super().__init__(**kwargs)
+        heatmap_page = self.stack.add_titled(Heatmap(), "heatmap", "Heatmap")
+        heatmap_page.set_icon_name("input-keyboard-symbolic")
+        verbose_page = self.stack.add_titled(Verbose(), "verbose", "Verbose")
+        verbose_page.set_icon_name("text-x-generic-symbolic")
+        self.view_switcher.set_stack(self.stack)
