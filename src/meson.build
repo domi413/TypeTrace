@@ -46,11 +46,13 @@ sources = [
 install_data(sources, install_dir: moduledir)
 
 sources_model = [
+  'model/__init__.py',
   'model/keystrokes.py'
 ]
 install_data(sources_model, install_dir: moduledir / 'model')
 
 sources_controller = [
+  'controller/__init__.py',
   'controller/window.py',
 ]
 install_data(sources_controller, install_dir: moduledir / 'controller')

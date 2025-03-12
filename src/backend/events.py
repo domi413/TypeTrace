@@ -5,12 +5,16 @@ from __future__ import annotations
 import logging
 import select
 import time
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import evdev
+
 from backend.config import BUFFER_SIZE, BUFFER_TIMEOUT, DEBUG, KeyEvent
 from backend.db import write_to_database
 from backend.devices import select_keyboards
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def print_key(event: KeyEvent) -> None:
@@ -39,6 +43,7 @@ def process_single_event(
         event: Evdev event to process
         buffer: Current buffer of key events
         start_time: Time when the buffer started
+        db_path: Path to the database
 
     Returns:
         Updated buffer and start time
@@ -53,8 +58,8 @@ def process_single_event(
         if event_code in evdev.ecodes.KEY:
             event_map = evdev.ecodes.KEY
         # Mouse input
-        # elif event_code in evdev.ecodes.BTN:
-        #     event_map = evdev.ecodes.BTN
+        # elif event_code in evdev.ecodes.BTN:  # noqa: ERA001
+        #     event_map = evdev.ecodes.BTN  # noqa: ERA001
 
         if event_map is not None:
             event_data: KeyEvent = {
@@ -87,6 +92,7 @@ def read_device_events(
         device: Input device to read from
         buffer: Current buffer of key events
         start_time: Time when the buffer started
+        db_path: Path to the database
 
     Returns:
         Updated buffer and start time
@@ -95,7 +101,7 @@ def read_device_events(
     try:
         for event in device.read():
             buffer, start_time = process_single_event(
-                event, buffer, start_time, db_path
+                event, buffer, start_time, db_path,
             )
     except OSError:
         logging.exception("Error reading from device")
@@ -114,6 +120,7 @@ def check_timeout_and_flush(
     Args:
         buffer: Current buffer of key events
         start_time: Time when the buffer started
+        db_path: Path to the database
 
     Returns:
         Updated buffer and start time
@@ -132,6 +139,7 @@ def buffer_keys(devices: list[evdev.device.InputDevice], db_path: Path) -> None:
 
     Args:
         devices: List of keyboard input devices to monitor.
+        db_path: Path to the database.
 
     """
     buffer: list[KeyEvent] = []
@@ -146,14 +154,14 @@ def buffer_keys(devices: list[evdev.device.InputDevice], db_path: Path) -> None:
             # If no events but timeout reached
             if not r:
                 buffer, start_time = check_timeout_and_flush(
-                    buffer, start_time, db_path
+                    buffer, start_time, db_path,
                 )
                 continue
 
             # Process events from ready devices
             for device in r:
                 buffer, start_time = read_device_events(
-                    device, buffer, start_time, db_path
+                    device, buffer, start_time, db_path,
                 )
 
             # If we had device errors, refresh devices list

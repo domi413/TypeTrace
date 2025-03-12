@@ -8,6 +8,7 @@ import sqlite3
 from pathlib import Path
 
 import appdirs
+
 from backend.config import DB_NAME, PROJECT_NAME, PROJECT_VERSION, ExitCodes
 
 
@@ -80,7 +81,7 @@ def main() -> int:
         trace_keys(db_path)
     except PermissionError:
         logging.exception(
-            "\nPlease ensure you have sufficient permissions (e.g., 'input' group)."
+            "\nPlease ensure you have sufficient permissions (e.g., 'input' group).",
         )
         return ExitCodes.PERMISSION_ERROR
     except sqlite3.Error:

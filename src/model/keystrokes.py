@@ -1,14 +1,17 @@
 """Model layer for accessing keystrokes data from the TypeTrace database."""
 
 from __future__ import annotations
-from dataclasses import dataclass
+
 import sqlite3
+from dataclasses import dataclass
 
 from backend.cli import resolve_db_path  # Shared path resolution
 
 
 @dataclass
 class Keystroke:
+    """Dataclass to model keystrokes."""
+
     scan_code: int
     count: int
     key_name: str | None  # key_name can be optional or unknown
@@ -17,7 +20,7 @@ class Keystroke:
 class KeystrokesModel:
     """Model for interacting with the keystrokes table in the database."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the model with the database path."""
         self.db_path = resolve_db_path()
 

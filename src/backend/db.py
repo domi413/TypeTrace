@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 import sqlite3
 from contextlib import contextmanager
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from backend.config import DEBUG, KeyEvent
@@ -17,6 +16,7 @@ from backend.sql import (
 
 if TYPE_CHECKING:
     from collections.abc import Generator
+    from pathlib import Path
 
 
 @contextmanager
@@ -99,6 +99,7 @@ def write_to_database(db_path: Path, events: list[KeyEvent]) -> None:
     """Write keystroke events to the database.
 
     Args:
+        db_path: Path to the SQLite database file.
         events: List of dictionaries containing key details.
 
     """

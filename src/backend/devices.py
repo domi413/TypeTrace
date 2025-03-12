@@ -7,6 +7,7 @@ from contextlib import contextmanager, suppress
 from typing import TYPE_CHECKING
 
 import evdev
+
 from backend.config import DEBUG
 
 if TYPE_CHECKING:
@@ -57,25 +58,11 @@ def check_device_accessibility() -> None:
 
     Raises:
         PermissionError: If no input devices can be accessed.
+
     """
     try:
-        device_paths: list[str] = evdev.util.list_devices()
-        if not device_paths:
-            raise PermissionError("No input devices found.")
+        if not select_keyboards():
+            logging.exception("No accessible input devices available")
 
-        accessible_devices: list[evdev.device.InputDevice] = []
-        for path in device_paths:
-            try:
-                dev = evdev.device.InputDevice(path)
-                accessible_devices.append(dev)
-                # Close the device to avoid keeping it open unnecessarily
-                dev.close()
-            except PermissionError:
-                # Skip devices we can't access
-                continue
-
-        if not accessible_devices:
-            raise PermissionError("No accessible input devices available.")
-
-    except Exception as e:
-        raise PermissionError(f"Failed trying to access input devices: {e}")
+    except Exception:
+        logging.exception("Failed trying to access input devices")
