@@ -4,6 +4,6 @@
     "ms-vscode.makefile-tools",
     "mesonbuild.mesonbuild",
     "ms-python.python",
-    "ms-python.black-formatter"
+    "charliermarsh.ruff"
   ]
 }

@@ -135,7 +135,7 @@ def buffer_keys(devices: list[evdev.device.InputDevice], db_path: Path) -> None:
 
             # If no events but timeout reached
             if not r:
-                buffer, start_time = check_timeout_and_flush(buffer, start_time)
+                buffer, start_time = check_timeout_and_flush(buffer, start_time, db_path)
                 continue
 
             # Process events from ready devices
