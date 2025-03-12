@@ -27,13 +27,12 @@ def print_help() -> None:
 
 
 def resolve_db_path() -> Path:
-    """Determine the database path following XDG Base Directory specs."""
-    xdg_data_home: str = os.getenv(
-        "XDG_DATA_HOME", os.path.expanduser("~/.local/share")
-    )
-    db_dir: Path = Path(xdg_data_home) / "typetrace"
-    db_dir.mkdir(parents=True, exist_ok=True)
-    return db_dir / DB_NAME
+    """Determine the database path using appdirs for cross-platform support."""
+    app_name = PROJECT_NAME.lower()
+    data_dir = appdirs.user_data_dir(app_name)
+    db_path = Path(data_dir) / DB_NAME
+    db_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+    return db_path
 
 
 def main() -> int:
