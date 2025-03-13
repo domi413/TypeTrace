@@ -2,6 +2,7 @@
 
 from gi.repository import Adw, Gtk
 
+from ..model.keystrokes import KeystrokesModel  # noqa: TID252
 from .heatmap import Heatmap
 from .verbose import Verbose
 
@@ -15,8 +16,8 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
     __gtype_name__ = "TypetraceWindow"
 
-    view_switcher = Gtk.Template.Child()
-    stack = Gtk.Template.Child()
+    view_switcher = Gtk.Template.Child("view_switcher")
+    stack = Gtk.Template.Child("stack")
 
     def __init__(self, **kwargs) -> None:
         """Initialize the application window.
@@ -26,8 +27,13 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         """
         super().__init__(**kwargs)
-        heatmap_page = self.stack.add_titled(Heatmap(), "heatmap", "Heatmap")
+        self.model = KeystrokesModel()
+        heatmap_page = self.stack.add_titled(
+            Heatmap(model=self.model), "heatmap", "Heatmap",
+        )
         heatmap_page.set_icon_name("input-keyboard-symbolic")
-        verbose_page = self.stack.add_titled(Verbose(), "verbose", "Verbose")
+        verbose_page = self.stack.add_titled(
+            Verbose(model=self.model), "verbose", "Verbose",
+        )
         verbose_page.set_icon_name("text-x-generic-symbolic")
         self.view_switcher.set_stack(self.stack)

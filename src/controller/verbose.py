@@ -11,20 +11,20 @@ class Verbose(Gtk.Box):
 
     __gtype_name__ = "Verbose"
 
-    model: KeystrokesModel
-    list_store: Gio.ListStore
     column_view = Gtk.Template.Child("column_view")
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, model : KeystrokesModel, **kwargs) -> None:
         """Initialize the verbose widget.
 
         Args:
+            model: Access to keystrokes models
             **kwargs: Keyword arguments passed to the parent constructor
 
         """
         super().__init__(**kwargs)
-        self.model = KeystrokesModel()
+        self.model = model
         self.list_store = Gio.ListStore()
+
         self.populate_list_store()
         self.setup_column_view()
 

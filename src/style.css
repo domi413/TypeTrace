@@ -1,3 +1,5 @@
 .container button {
     min-height: 2rem;
+    min-width: 2rem;
+    border: 2pt solid rgba(0, 0, 0, 0.1);
 }
