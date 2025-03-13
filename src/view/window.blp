@@ -3,8 +3,8 @@ using Adw 1;
 
 template $TypetraceWindow: Adw.ApplicationWindow {
   title: "TypeTrace";
-  default-width: 800;
-  default-height: 600;
+  default-width: 600;
+  default-height: 400;
 
   content: Adw.ToolbarView {
     [top]
@@ -22,21 +22,7 @@ template $TypetraceWindow: Adw.ApplicationWindow {
       }
     }
 
-    content: Adw.ViewStack stack {
-      hexpand: true;
-      vexpand: true;
-    };
-
-    // content: Gtk.Box {
-    //   orientation: vertical;
-
-    //   Adw.Carousel carousel {}
-
-    //   Adw.CarouselIndicatorDots {
-    //     carousel: carousel;
-    //     valign: center;
-    //   }
-    // };
+    content: Adw.ViewStack stack {};
   };
 }
 
