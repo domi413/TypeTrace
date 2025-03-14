@@ -11,10 +11,6 @@ finish-args:
   - --device=dri
   - --socket=wayland
 
-build-options:
-  env:
-    GTK_A11Y: none
-
 cleanup:
   - /include
   - /lib/pkgconfig
@@ -26,6 +22,10 @@ cleanup:
   - "*.la"
   - "*.a"
 
+build-options:
+  build-args:
+    - --share=network
+
 modules:
   - name: blueprint-compiler
     buildsystem: meson
@@ -35,6 +35,11 @@ modules:
       - type: git
         url: https://gitlab.gnome.org/jwestman/blueprint-compiler
         tag: v0.16.0
+
+  - name: python-dependencies
+    buildsystem: simple
+    build-commands:
+      - pip3 install --prefix=/app appdirs
 
   - name: typetrace
     builddir: true

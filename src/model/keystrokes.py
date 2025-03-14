@@ -3,18 +3,25 @@
 from __future__ import annotations
 
 import sqlite3
-from dataclasses import dataclass
+
+from gi.repository import GObject
 
 from backend.cli import resolve_db_path  # Shared path resolution
 
 
-@dataclass
-class Keystroke:
-    """Dataclass to model keystrokes."""
+class Keystroke(GObject.Object):
+    """Class to model keystrokes."""
 
     scan_code: int
     count: int
-    key_name: str | None  # key_name can be optional or unknown
+    key_name: str
+
+    def __init__(self, scan_code: int, count: int, key_name: str) -> None:
+        """Initialize the Keystroke object."""
+        super().__init__()
+        self.scan_code = scan_code
+        self.count = count
+        self.key_name = key_name
 
 
 class KeystrokesModel:

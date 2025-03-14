@@ -1,0 +1,7 @@
+.container {
+    padding: 2rem;
+}
+
+.container button {
+    border: 2pt solid rgba(0, 0, 0, 0.1);
+}

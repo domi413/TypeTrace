@@ -1,3 +1,4 @@
+line-length=100
 [lint]
 extend-select = [
   "ALL",
