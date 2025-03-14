@@ -49,7 +49,8 @@ install_data(sources, install_dir: moduledir)
 
 sources_model = [
   'model/__init__.py',
-  'model/keystrokes.py'
+  'model/keystrokes.py',
+  'model/layouts.py',
 ]
 install_data(sources_model, install_dir: moduledir / 'model')
 
