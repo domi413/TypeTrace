@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import logging
 import sqlite3
 from contextlib import contextmanager
 from typing import TYPE_CHECKING
+
+from logging_setup import logging
 
 from backend.config import DEBUG, KeyEvent
 from backend.sql import (

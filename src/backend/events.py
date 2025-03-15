@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import logging
 import select
 import time
 from typing import TYPE_CHECKING
 
 import evdev
+from logging_setup import logging
 
 from backend.config import BUFFER_SIZE, BUFFER_TIMEOUT, DEBUG, KeyEvent
 from backend.db import write_to_database
@@ -101,7 +101,10 @@ def read_device_events(
     try:
         for event in device.read():
             buffer, start_time = process_single_event(
-                event, buffer, start_time, db_path,
+                event,
+                buffer,
+                start_time,
+                db_path,
             )
     except OSError:
         logging.exception("Error reading from device")
@@ -154,14 +157,19 @@ def buffer_keys(devices: list[evdev.device.InputDevice], db_path: Path) -> None:
             # If no events but timeout reached
             if not r:
                 buffer, start_time = check_timeout_and_flush(
-                    buffer, start_time, db_path,
+                    buffer,
+                    start_time,
+                    db_path,
                 )
                 continue
 
             # Process events from ready devices
             for device in r:
                 buffer, start_time = read_device_events(
-                    device, buffer, start_time, db_path,
+                    device,
+                    buffer,
+                    start_time,
+                    db_path,
                 )
 
             # If we had device errors, refresh devices list

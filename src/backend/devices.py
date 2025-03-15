@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import logging
 from contextlib import contextmanager, suppress
 from typing import TYPE_CHECKING
 
 import evdev
+from logging_setup import logging
 
 from backend.config import DEBUG
 
@@ -64,5 +64,5 @@ def check_device_accessibility() -> None:
         if not select_keyboards():
             logging.exception("No accessible input devices available")
 
-    except Exception:
+    except PermissionError:
         logging.exception("Failed trying to access input devices")

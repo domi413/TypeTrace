@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import argparse
-import logging
 import sqlite3
 from pathlib import Path
 
 import appdirs
+from logging_setup import logging
 
 from backend.config import DB_NAME, PROJECT_NAME, PROJECT_VERSION, ExitCodes
 
