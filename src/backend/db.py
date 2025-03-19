@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import sqlite3
 from contextlib import contextmanager
 from typing import TYPE_CHECKING
 
-from logging_setup import logging
-
 from backend.config import DEBUG, KeyEvent
+
+logger = logging.getLogger(__name__)
+
 from backend.sql import (
     BEGIN_TRANSACTION,
     CREATE_KEYSTROKES_TABLE,
@@ -54,7 +56,7 @@ def initialize_database(db_path: Path) -> None:
         conn.commit()
 
         if DEBUG:
-            logging.debug("Database initialized at %s", db_path)
+            logger.debug("Database initialized at %s", db_path)
 
 
 def update_keystroke_counts(
@@ -93,7 +95,7 @@ def update_keystroke_counts(
         conn.commit()
 
         if DEBUG:
-            logging.debug("Updated database with %d keystroke events", len(events))
+            logger.debug("Updated database with %d keystroke events", len(events))
 
 
 def write_to_database(db_path: Path, events: list[KeyEvent]) -> None:

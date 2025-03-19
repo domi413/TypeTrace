@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
+import logging
 import select
 import time
 from typing import TYPE_CHECKING
 
 import evdev
-from logging_setup import logging
 
 from backend.config import BUFFER_SIZE, BUFFER_TIMEOUT, DEBUG, KeyEvent
 from backend.db import write_to_database
 from backend.devices import select_keyboards
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -24,7 +26,7 @@ def print_key(event: KeyEvent) -> None:
         event: Dictionary containing key details.
 
     """
-    logging.debug(
+    logger.debug(
         '{"key_name": "%s", "key_code": %s}',
         event["name"],
         event["scan_code"],
@@ -107,7 +109,7 @@ def read_device_events(
                 db_path,
             )
     except OSError:
-        logging.exception("Error reading from device")
+        logger.exception("Error reading from device")
         # We'll handle device reconnection in the main loop
 
     return buffer, start_time
@@ -187,7 +189,7 @@ def trace_keys(db_path: Path) -> None:
 
     with managed_devices() as devices:
         if not devices:
-            logging.warning("No keyboard devices found")
+            logger.warning("No keyboard devices found")
             return
 
         buffer_keys(devices, db_path)
