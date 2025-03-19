@@ -13,6 +13,8 @@ from backend.config import BUFFER_SIZE, BUFFER_TIMEOUT, DEBUG, KeyEvent
 from backend.db import write_to_database
 from backend.devices import select_keyboards
 
+logger = logging.getLogger(__name__)
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -24,7 +26,7 @@ def print_key(event: KeyEvent) -> None:
         event: Dictionary containing key details.
 
     """
-    logging.debug(
+    logger.debug(
         '{"key_name": "%s", "key_code": %s}',
         event["name"],
         event["scan_code"],
@@ -101,10 +103,13 @@ def read_device_events(
     try:
         for event in device.read():
             buffer, start_time = process_single_event(
-                event, buffer, start_time, db_path,
+                event,
+                buffer,
+                start_time,
+                db_path,
             )
     except OSError:
-        logging.exception("Error reading from device")
+        logger.exception("Error reading from device")
         # We'll handle device reconnection in the main loop
 
     return buffer, start_time
@@ -154,14 +159,19 @@ def buffer_keys(devices: list[evdev.device.InputDevice], db_path: Path) -> None:
             # If no events but timeout reached
             if not r:
                 buffer, start_time = check_timeout_and_flush(
-                    buffer, start_time, db_path,
+                    buffer,
+                    start_time,
+                    db_path,
                 )
                 continue
 
             # Process events from ready devices
             for device in r:
                 buffer, start_time = read_device_events(
-                    device, buffer, start_time, db_path,
+                    device,
+                    buffer,
+                    start_time,
+                    db_path,
                 )
 
             # If we had device errors, refresh devices list
@@ -179,7 +189,7 @@ def trace_keys(db_path: Path) -> None:
 
     with managed_devices() as devices:
         if not devices:
-            logging.warning("No keyboard devices found")
+            logger.warning("No keyboard devices found")
             return
 
         buffer_keys(devices, db_path)

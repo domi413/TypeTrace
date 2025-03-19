@@ -11,6 +11,8 @@ import appdirs
 
 from backend.config import DB_NAME, PROJECT_NAME, PROJECT_VERSION, ExitCodes
 
+logger = logging.getLogger(__name__)
+
 
 def print_help() -> None:
     """Display help information."""
@@ -80,15 +82,15 @@ def main() -> int:
 
         trace_keys(db_path)
     except PermissionError:
-        logging.exception(
+        logger.exception(
             "\nPlease ensure you have sufficient permissions (e.g., 'input' group).",
         )
         return ExitCodes.PERMISSION_ERROR
     except sqlite3.Error:
-        logging.exception("Database error")
+        logger.exception("Database error")
         return ExitCodes.DATABASE_ERROR
     except (OSError, ValueError, RuntimeError):
-        logging.exception("Unexpected error")
+        logger.exception("Unexpected error")
         return ExitCodes.RUNTIME_ERROR
     else:
         return ExitCodes.SUCCESS
