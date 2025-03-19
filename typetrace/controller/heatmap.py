@@ -106,4 +106,4 @@ class Heatmap(Gtk.Box):
     def _get_colors(self, usage_ratio: float) -> str:
         """Calculate color based on usage ratio."""
         ratio = max(0.0, min(1.0, usage_ratio * 3))
-        return f"rgb({int(255 * ratio)}, {0}, {int(255 * (1 - ratio))})"
+        return f"rgba({int(255 * ratio)}, {0}, {int(255 * (1 - ratio))}, 0.6)"
