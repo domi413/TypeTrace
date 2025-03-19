@@ -8,9 +8,6 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING
 
 from backend.config import DEBUG, KeyEvent
-
-logger = logging.getLogger(__name__)
-
 from backend.sql import (
     BEGIN_TRANSACTION,
     CREATE_KEYSTROKES_TABLE,
@@ -20,6 +17,8 @@ from backend.sql import (
 if TYPE_CHECKING:
     from collections.abc import Generator
     from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 @contextmanager
