@@ -9,6 +9,6 @@ pkgdatadir = "@pkgdatadir@"
 sys.path.insert(1, pkgdatadir)
 
 if __name__ == "__main__":
-    from backend.cli import main
+    from backend import cli
 
-    sys.exit(main())
+    sys.exit(cli.main())

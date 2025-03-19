@@ -18,6 +18,8 @@ if TYPE_CHECKING:
     from collections.abc import Generator
     from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 
 @contextmanager
 def get_db_connection(db_path: Path) -> Generator[sqlite3.Connection, None, None]:
@@ -53,7 +55,7 @@ def initialize_database(db_path: Path) -> None:
         conn.commit()
 
         if DEBUG:
-            logging.debug("Database initialized at %s", db_path)
+            logger.debug("Database initialized at %s", db_path)
 
 
 def update_keystroke_counts(
@@ -92,7 +94,7 @@ def update_keystroke_counts(
         conn.commit()
 
         if DEBUG:
-            logging.debug("Updated database with %d keystroke events", len(events))
+            logger.debug("Updated database with %d keystroke events", len(events))
 
 
 def write_to_database(db_path: Path, events: list[KeyEvent]) -> None:

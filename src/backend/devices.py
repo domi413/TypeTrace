@@ -10,6 +10,8 @@ import evdev
 
 from backend.config import DEBUG
 
+logger = logging.getLogger(__name__)
+
 if TYPE_CHECKING:
     from collections.abc import Generator
 
@@ -48,7 +50,7 @@ def select_keyboards() -> list[evdev.device.InputDevice]:
         if evdev.ecodes.EV_KEY in device.capabilities():
             keyboards.append(device)
             if DEBUG:
-                logging.debug("Found keyboard device: %s, %r", device.name, device.path)
+                logger.debug("Found keyboard device: %s, %r", device.name, device.path)
 
     return keyboards
 
@@ -62,7 +64,7 @@ def check_device_accessibility() -> None:
     """
     try:
         if not select_keyboards():
-            logging.exception("No accessible input devices available")
+            logger.exception("No accessible input devices available")
 
-    except Exception:
-        logging.exception("Failed trying to access input devices")
+    except PermissionError:
+        logger.exception("Failed trying to access input devices")
