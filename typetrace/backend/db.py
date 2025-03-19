@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from collections.abc import Generator
     from pathlib import Path
 
+
 logger = logging.getLogger(__name__)
 
 

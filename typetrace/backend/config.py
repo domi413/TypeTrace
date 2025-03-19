@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from enum import IntEnum
-from typing import Final, TypedDict
+from typing import Final, TypedDict, Union
 
 # Constants
 PROJECT_VERSION: Final[str] = "0.1.0 (alpha)"
@@ -25,8 +25,21 @@ class ExitCodes(IntEnum):
     DATABASE_ERROR = 3
 
 
-class KeyEvent(TypedDict):
-    """Type definition for keyboard event data."""
+from typing import Literal, TypedDict
 
+
+class KeyEvent(TypedDict):
     scan_code: int
     name: str | tuple[str, ...]
+
+
+class MouseEvent(TypedDict):
+    type: Literal["absolute", "relative"]
+    x: int
+    y: int
+
+
+# This is for the internal tracking of mouse positions
+MousePosition = dict
+
+EventData = Union[KeyEvent, MouseEvent]

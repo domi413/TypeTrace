@@ -9,10 +9,11 @@ from typing import TYPE_CHECKING
 import evdev
 from backend.config import DEBUG
 
-logger = logging.getLogger(__name__)
-
 if TYPE_CHECKING:
     from collections.abc import Generator
+
+
+logger = logging.getLogger(__name__)
 
 
 @contextmanager
