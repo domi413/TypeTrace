@@ -15,9 +15,8 @@ class Application(Adw.Application):
         """Initialize the application with default settings."""
         super().__init__(
             application_id=application_id,
-            flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
-            version=version,
-        )
+            flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+        self.version=version
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
         self.create_action("preferences", self.on_preferences_action)
@@ -35,10 +34,10 @@ class Application(Adw.Application):
     def on_about_action(self, *_: Any) -> None:
         """Display the about dialog with application information."""
         about = Adw.AboutDialog(
-            application_name="typetrace",
+            application_name="TypeTrace",
             application_icon="edu.ost.typetrace",
             developer_name="Unknown",
-            version="0.1.0",
+            version=self.version,
             developers=["Unknown"],
             copyright="© 2025 Unknown",
         )
