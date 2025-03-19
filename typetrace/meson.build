@@ -29,11 +29,12 @@ gnome.compile_resources(
 )
 
 conf = configuration_data()
+conf.set('application_id', 'edu.ost.typetrace')
 conf.set('PYTHON', python.find_installation('python3').full_path())
-conf.set('VERSION', meson.project_version())
 conf.set('pkgdatadir', pkgdatadir)
+conf.set('VERSION', meson.project_version())
 configure_file(
-  input: 'typetrace.in',
+  input: '../typetrace.in',
   output: 'typetrace',
   configuration: conf,
   install: true,
@@ -43,7 +44,7 @@ configure_file(
 
 sources = [
   '__init__.py',
-  'main.py',
+  'application.py',
 ]
 install_data(sources, install_dir: moduledir)
 

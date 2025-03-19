@@ -15,15 +15,3 @@ install_data(
   backend_sources,
   install_dir: backenddir,
 )
-
-conf = configuration_data()
-conf.set('PYTHON', python.find_installation('python3').full_path())
-conf.set('pkgdatadir', pkgdatadir)
-configure_file(
-  input: 'typetrace-backend.in',
-  output: 'typetrace-backend',
-  configuration: conf,
-  install: true,
-  install_dir: get_option('bindir'),
-  install_mode: 'r-xr-xr-x',
-)

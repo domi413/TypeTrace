@@ -2,32 +2,20 @@
 
 from __future__ import annotations
 
-import argparse
 import grp
 import logging
 import os
 import sqlite3
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import appdirs
-from backend.config import DB_NAME, PROJECT_NAME, PROJECT_VERSION, ExitCodes
+from backend.config import DB_NAME, PROJECT_NAME, ExitCodes
+
+if TYPE_CHECKING:
+    import argparse
 
 logger = logging.getLogger(__name__)
-
-
-def print_help() -> None:
-    """Display help information."""
-    print("The backend of TypeTrace.")
-    print(f"Version: {PROJECT_VERSION}")
-    print("\nUsage: sudo python -m typetrace [OPTION...]")
-    print("Options:")
-    print("\t-h, --help\tDisplay help then exit.")
-    print("\t-v, --version\tDisplay version then exit.")
-    print("\t-d, --debug\tEnable debug mode.")
-    print(
-        "\nWarning: This is the backend and is not designed to run by users.",
-        "\nYou should run the frontend of TypeTrace which will run this.",
-    )
 
 
 def resolve_db_path() -> Path:
@@ -48,27 +36,13 @@ def check_input_group() -> None:
         raise PermissionError
 
 
-def main() -> int:
+def main(args: argparse.Namespace) -> int:
     """Run the main logic of the TypeTrace backend.
 
     Returns:
         Exit code for the application.
 
     """
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("-v", "--version", action="store_true")
-    parser.add_argument("-h", "--help", action="store_true")
-    parser.add_argument("-d", "--debug", action="store_true")
-
-    args = parser.parse_args()
-    if args.help:
-        print_help()
-        return ExitCodes.SUCCESS
-
-    if args.version:
-        print(PROJECT_VERSION)
-        return ExitCodes.SUCCESS
-
     if args.debug:
         # Update the global DEBUG variable
         import backend.config

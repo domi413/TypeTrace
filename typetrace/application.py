@@ -1,8 +1,6 @@
-"""Typetrace application entry point module."""
-
+"""Typetrace frontend application."""
 from __future__ import annotations
 
-import sys
 from typing import Any, Callable
 
 from gi.repository import Adw, Gio
@@ -10,14 +8,15 @@ from gi.repository import Adw, Gio
 from .controller.window import TypetraceWindow
 
 
-class TypetraceApplication(Adw.Application):
+class Application(Adw.Application):
     """The main application singleton class."""
 
-    def __init__(self) -> None:
+    def __init__(self, application_id: str, version: str) -> None:
         """Initialize the application with default settings."""
         super().__init__(
-            application_id="edu.ost.typetrace",
+            application_id=application_id,
             flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
+            version=version,
         )
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
@@ -68,16 +67,3 @@ class TypetraceApplication(Adw.Application):
         self.add_action(action)
         if shortcuts:
             self.set_accels_for_action(f"app.{name}", shortcuts)
-
-
-def main() -> int:
-    """Run the application.
-
-    Creates and starts the main application instance.
-
-    Returns:
-        The application exit code
-
-    """
-    app = TypetraceApplication()
-    return app.run(sys.argv)
