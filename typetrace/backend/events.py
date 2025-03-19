@@ -8,7 +8,6 @@ import time
 from typing import TYPE_CHECKING
 
 import evdev
-
 from backend.config import BUFFER_SIZE, BUFFER_TIMEOUT, DEBUG, KeyEvent
 from backend.db import write_to_database
 from backend.devices import select_keyboards

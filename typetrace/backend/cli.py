@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import grp
 import logging
+import os
 import sqlite3
 from pathlib import Path
 
 import appdirs
-
 from backend.config import DB_NAME, PROJECT_NAME, PROJECT_VERSION, ExitCodes
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,15 @@ def resolve_db_path() -> Path:
     db_path = Path(data_dir) / DB_NAME
     db_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
     return db_path
+
+
+def check_input_group() -> None:
+    """Check if the current user is in the 'input' group."""
+    username = os.getlogin()
+    input_group = grp.getgrnam("input")
+    if username not in input_group.gr_mem:
+        logger.error("The User %s is not in the 'input' group", username)
+        raise PermissionError
 
 
 def main() -> int:
@@ -69,6 +79,8 @@ def main() -> int:
         setup_logging()
 
     try:
+        check_input_group()
+
         from backend.devices import check_device_accessibility
 
         check_device_accessibility()
@@ -82,9 +94,6 @@ def main() -> int:
 
         trace_keys(db_path)
     except PermissionError:
-        logger.exception(
-            "\nPlease ensure you have sufficient permissions (e.g., 'input' group).",
-        )
         return ExitCodes.PERMISSION_ERROR
     except sqlite3.Error:
         logger.exception("Database error")
