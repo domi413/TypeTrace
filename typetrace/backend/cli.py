@@ -68,6 +68,9 @@ def main(args: argparse.Namespace) -> int:
 
         trace_keys(db_path)
     except PermissionError:
+        logger.exception(
+            "\nPlease ensure you have sufficient permissions (e.g., 'input' group).",
+        )
         return ExitCodes.PERMISSION_ERROR
     except sqlite3.Error:
         logger.exception("Database error")
