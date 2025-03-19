@@ -36,10 +36,13 @@ class Application(Adw.Application):
         about = Adw.AboutDialog(
             application_name="TypeTrace",
             application_icon="edu.ost.typetrace",
-            developer_name="Unknown",
             version=self.version,
-            developers=["Unknown"],
-            copyright="© 2025 Unknown",
+            developers=[
+                "David Yves Bachmann",
+                "Dominik Bühler",
+                "Gioele Petrillo",
+                "Ivan Knöfler",
+                "Mustafa Alali"],
         )
         about.present(self.props.active_window)
 
