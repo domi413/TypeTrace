@@ -5,13 +5,9 @@ from __future__ import annotations
 import sys
 from typing import Any, Callable
 
-import gi
+from gi.repository import Adw, Gio
 
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio  # noqa: E402
-
-from .controller.window import TypetraceWindow  # noqa: E402
+from .controller.window import TypetraceWindow
 
 
 class TypetraceApplication(Adw.Application):
