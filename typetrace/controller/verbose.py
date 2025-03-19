@@ -2,7 +2,7 @@
 
 from gi.repository import Gio, Gtk
 
-from ..model.keystrokes import Keystroke, KeystrokesModel  # noqa: TID252
+from typetrace.model.keystrokes import Keystroke, KeystrokesModel
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/verbose.ui")

@@ -2,7 +2,8 @@
 
 from gi.repository import Adw, Gtk
 
-from ..model.keystrokes import KeystrokesModel  # noqa: TID252
+from typetrace.model.keystrokes import KeystrokesModel
+
 from .heatmap import Heatmap
 from .verbose import Verbose
 

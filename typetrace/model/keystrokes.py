@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import sqlite3
 
-from gi.repository import GObject
-
 from backend.cli import resolve_db_path  # Shared path resolution
+from gi.repository import GObject
 
 
 class Keystroke(GObject.Object):

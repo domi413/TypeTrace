@@ -16,7 +16,7 @@ dependency('libadwaita-1', version: '>= 1.0')
 find_program('blueprint-compiler', required: true)
 
 subdir('data')
-subdir('src')
+subdir('typetrace')
 
 gnome.post_install(
   glib_compile_schemas: true,

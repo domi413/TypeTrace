@@ -2,8 +2,8 @@
 
 from gi.repository import Gtk
 
-from ..model.keystrokes import KeystrokesModel  # noqa: TID252
-from ..model.layouts import KEYBOARD_LAYOUTS  # noqa: TID252
+from typetrace.model.keystrokes import KeystrokesModel
+from typetrace.model.layouts import KEYBOARD_LAYOUTS
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/heatmap.ui")
@@ -71,7 +71,7 @@ class Heatmap(Gtk.Box):
         for keystroke in keystrokes:
             scancode = keystroke.scan_code
             if scancode in self.key_buttons:
-                button, provider = self.key_buttons[scancode]
+                _, provider = self.key_buttons[scancode]
                 usage_ratio = keystroke.count / total_presses
                 border_color = self._get_colors(usage_ratio)
                 css = f"button {{ border: 2pt solid {border_color}; }}"

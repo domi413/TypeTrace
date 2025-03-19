@@ -1,7 +1,7 @@
 #!@PYTHON@
 import os
-import sys
 import signal
+import sys
 
 VERSION = "@VERSION@"
 pkgdatadir = "@pkgdatadir@"
@@ -11,7 +11,6 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 if __name__ == "__main__":
     import gi
-
     from gi.repository import Gio
 
     resource = Gio.Resource.load(os.path.join(pkgdatadir, "typetrace.gresource"))
