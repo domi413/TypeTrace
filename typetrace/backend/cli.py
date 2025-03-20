@@ -10,13 +10,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import appdirs
+
 from backend.config import DB_NAME, PROJECT_NAME, ExitCodes
 
 if TYPE_CHECKING:
     import argparse
 
 logger = logging.getLogger(__name__)
-
 
 def resolve_db_path() -> Path:
     """Determine the database path using appdirs for cross-platform support."""
