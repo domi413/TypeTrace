@@ -3,7 +3,7 @@
 }
 
 .container label {
-    border: 2pt solid rgba(0, 0, 0, 0.2);
+    border: 1pt solid rgba(0, 0, 0, 0.2);
     border-radius: 4pt;
     font-size: 1rem;
     font-family: "Sans", "Arial", sans-serif;
@@ -12,6 +12,11 @@
     color: #333;
     box-shadow: 0 1pt 3pt rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease;
+}
+
+.container label:hover {
+    box-shadow: 0 3pt 6pt rgba(0, 0, 0, 0.5);
+    transform: translateY(-2pt);
 }
 
 .container label.low-usage {
@@ -27,25 +32,4 @@
 .container label.high-usage {
     color: white;
     background-color: rgba(255, 0, 0, 0.6);
-}
-
-.container label:hover {
-    box-shadow: 0 3pt 6pt rgba(0, 0, 0, 0.5);
-    transform: translateY(-2pt);
-    animation: borderGradient 1.5s infinite linear;
-}
-
-@keyframes borderGradient {
-    0% {
-        border-color: rgba(255, 0, 0, 0.8); /* Red */
-    }
-    33% {
-        border-color: rgba(0, 255, 0, 0.8); /* Green */
-    }
-    66% {
-        border-color: rgba(0, 0, 255, 0.8); /* Blue */
-    }
-    100% {
-        border-color: rgba(255, 0, 0, 0.8); /* Back to red */
-    }
 }
