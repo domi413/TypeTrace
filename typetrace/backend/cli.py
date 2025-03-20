@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import appdirs
-
 from backend.config import DB_NAME, PROJECT_NAME, ExitCodes
 
 if TYPE_CHECKING:
