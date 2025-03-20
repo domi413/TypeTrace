@@ -1,12 +1,11 @@
 using Gtk 4.0;
 
-template $Heatmap : Gtk.Box {
+template $Heatmap : Gtk.Box  {
     orientation: vertical;
     halign: center;
     valign: center;
-    hexpand: true;
 
-    Box keyboard_container {
+    Gtk.Box keyboard_container {
         css-classes: ["container"];
         orientation: vertical;
         spacing: 5;

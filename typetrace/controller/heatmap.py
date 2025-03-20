@@ -38,7 +38,7 @@ class Heatmap(Gtk.Box):
         super().__init__(**kwargs)
         self.model: KeystrokesModel = model
         self.layout = layout
-        self.key_buttons: dict[int, Gtk.Button] = {}  # Keyed by scancode
+        self.key_widgets: dict[int, Gtk.Label] = {}  # Keyed by scancode
         self._build_keyboard()
         self._update_colors()
 
@@ -52,23 +52,22 @@ class Heatmap(Gtk.Box):
             box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
             if row_count == 0:
                 box.set_homogeneous(True)
-
             self.keyboard_container.append(box)
 
             for scancode, key_label in row:
-                button = self._create_key_button(key_label)
-                self.key_buttons[scancode] = button
-                box.append(button)
+                label = self._create_key_widget(key_label)
+                self.key_widgets[scancode] = label
+                box.append(label)
 
-    def _create_key_button(self, key_label: str) -> Gtk.Button:
-        """Create a single key button with the appropriate properties."""
-        button = Gtk.Button()
-        button.set_label(key_label)
+    def _create_key_widget(self, key_label: str) -> Gtk.Label:
+        """Create a single key widget with the appropriate properties."""
+        label = Gtk.Label(label=key_label)
+        label.set_size_request(40, 30)
 
         if key_label in self.EXPANDED_KEYS:
-            button.set_hexpand(True)
+            label.set_hexpand(True)
 
-        return button
+        return label
 
     def _update_colors(self) -> None:
         keystrokes = self.model.get_all_keystrokes()
@@ -78,10 +77,10 @@ class Heatmap(Gtk.Box):
 
         for keystroke in keystrokes:
             scancode = keystroke.scan_code
-            if scancode in self.key_buttons:
-                button = self.key_buttons[scancode]
+            if scancode in self.key_widgets:
+                label = self.key_widgets[scancode]
                 usage_ratio = keystroke.count / most_pressed
-                style_context = button.get_style_context()
+                style_context = label.get_style_context()
                 for cls in ["low-usage", "mid-usage", "high-usage"]:
                     style_context.remove_class(cls)
                 if usage_ratio < 0.33:
@@ -90,7 +89,7 @@ class Heatmap(Gtk.Box):
                     style_context.add_class("mid-usage")
                 else:
                     style_context.add_class("high-usage")
-                button.set_tooltip_text(str(keystroke.count))
+                label.set_tooltip_text(str(keystroke.count))
 
     def _get_colors(self, usage_ratio: float) -> str:
         """Calculate color based on usage ratio."""
