@@ -24,7 +24,7 @@ class Heatmap(Gtk.Box):
         "\\",
     ]
 
-    USAGE_THRESHOLDS: ClassVar[list[str]] = { # For coloring
+    USAGE_THRESHOLDS: ClassVar[dict[str, float]] = {
         "low": 0.33,
         "mid": 0.66,
     }
