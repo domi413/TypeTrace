@@ -56,7 +56,7 @@ class Verbose(Gtk.Box):
         for title, bind_func, prop_name, sort_type in columns:
             # Set up the factory for rendering items
             factory = Gtk.SignalListItemFactory()
-            factory.connect("setup", self._on_factory_setup)
+            factory.connect("setup", self._factory_setup)
             factory.connect("bind", bind_func)
 
             column = Gtk.ColumnViewColumn(title=title, factory=factory, expand=True)
@@ -74,23 +74,23 @@ class Verbose(Gtk.Box):
         # Set an initial sort order
         self.column_view.sort_by_column(self.column_view.get_columns()[0], Gtk.SortType.ASCENDING)
 
-    def _on_factory_setup(self, factory, list_item) -> None:
+    def _factory_setup(self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:  # noqa: ARG002
         """Set up a label widget for each list item."""
         label = Gtk.Label()
         label.set_halign(Gtk.Align.START)
         list_item.set_child(label)
 
-    def _bind_scan_code(self, factory, list_item) -> None:
+    def _bind_scan_code(self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:  # noqa: ARG002
         """Bind scan_code property to the label."""
         keystroke = list_item.get_item()
         list_item.get_child().set_text(str(keystroke.scan_code))
 
-    def _bind_count(self, factory, list_item) -> None:
+    def _bind_count(self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:  # noqa: ARG002
         """Bind count property to the label."""
         keystroke = list_item.get_item()
         list_item.get_child().set_text(str(keystroke.count))
 
-    def _bind_key_name(self, factory, list_item) -> None:
+    def _bind_key_name(self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:  # noqa: ARG002
         """Bind key_name property to the label."""
         keystroke = list_item.get_item()
         list_item.get_child().set_text(keystroke.key_name)

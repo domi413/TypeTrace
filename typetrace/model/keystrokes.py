@@ -22,7 +22,7 @@ class Keystroke(GObject.Object):
         super().__init__()
         self.scan_code = scan_code
         self.count = count
-        self.key_name = key_name
+        self.key_name = key_name.replace("KEY_", "")
 
 
 class KeystrokesModel:
