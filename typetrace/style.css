@@ -7,6 +7,7 @@
   border-radius: 4pt;
   font-size: 1rem;
   padding: 6pt 8pt;
+  min-width: 12pt;
   background-color: rgba(245, 245, 245, 0.9);
   color: #333;
   box-shadow: 0 1pt 3pt rgba(0, 0, 0, 0.1);
