@@ -17,6 +17,7 @@ vexpand
 bindir
 
 # Team Names
+Dominik
 Bühler
 Gioele
 Petrillo
