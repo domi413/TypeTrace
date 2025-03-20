@@ -58,3 +58,15 @@ class KeystrokesModel:
         except sqlite3.Error as e:
             print(f"Database error: {e}")
             return 0
+
+    def get_highest_count(self) -> int:
+        """Retrieve the count of the most-used keystroke."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT MAX(count) FROM keystrokes")
+                result = cursor.fetchone()[0]
+                return result if result is not None else 0
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+            return 0

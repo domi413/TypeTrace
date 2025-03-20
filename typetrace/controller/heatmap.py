@@ -88,16 +88,16 @@ class Heatmap(Gtk.Box):
     def _update_colors(self) -> None:
         """Color the keys based on model data using scancodes."""
         keystrokes = self.model.get_all_keystrokes()
-        total_presses = self.model.get_total_presses()
+        most_pressed = self.model.get_highest_count()
 
-        if total_presses == 0:
+        if most_pressed == 0:
             return  # Avoid division by zero
 
         for keystroke in keystrokes:
             scancode = keystroke.scan_code
             if scancode in self.key_buttons:
                 button, provider = self.key_buttons[scancode]
-                usage_ratio = keystroke.count / total_presses
+                usage_ratio = keystroke.count / most_pressed
                 color = self._get_colors(usage_ratio)
                 css = f"button {{ background-color: {color}; }}"
                 provider.load_from_data(css.encode("utf-8"))
@@ -105,5 +105,5 @@ class Heatmap(Gtk.Box):
 
     def _get_colors(self, usage_ratio: float) -> str:
         """Calculate color based on usage ratio."""
-        ratio = max(0.0, min(1.0, usage_ratio * 3))
+        ratio = max(0.0, min(1.0, usage_ratio))
         return f"rgba({int(255 * ratio)}, {0}, {int(255 * (1 - ratio))}, 0.6)"
