@@ -4,7 +4,7 @@ from typing import ClassVar
 
 from gi.repository import Gtk
 
-from typetrace.model.keystrokes import KeystrokesModel
+from typetrace.model.keystrokes import KeystrokeStore
 from typetrace.model.layouts import KEYBOARD_LAYOUTS
 
 
@@ -31,17 +31,17 @@ class Heatmap(Gtk.Box):
 
     keyboard_container = Gtk.Template.Child("keyboard_container")
 
-    def __init__(self, model: KeystrokesModel, layout: str = "en_US", **kwargs) -> None:
+    def __init__(self, keystroke_store: KeystrokeStore, layout: str = "en_US", **kwargs) -> None:
         """Initialize the heatmap widget.
 
         Args:
-            model: Access to keystrokes models
+            keystroke_store: Access to keystrokes
             layout: Keyboard layout to use
             **kwargs: Keyword arguments passed to the parent constructor
 
         """
         super().__init__(**kwargs)
-        self.model: KeystrokesModel = model
+        self.keystroke_store: KeystrokeStore = keystroke_store
         self.layout = layout
         self.key_widgets: dict[int, Gtk.Label] = {}  # Keyed by scancode
 
@@ -72,8 +72,8 @@ class Heatmap(Gtk.Box):
         return label
 
     def _update_colors(self) -> None:
-        keystrokes = self.model.get_all_keystrokes()
-        most_pressed = self.model.get_highest_count()
+        keystrokes = self.keystroke_store.get_all_keystrokes()
+        most_pressed = self.keystroke_store.get_highest_count()
         if not most_pressed:
             return
 

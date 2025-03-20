@@ -2,7 +2,7 @@
 
 from gi.repository import Gio, Gtk
 
-from typetrace.model.keystrokes import Keystroke, KeystrokesModel
+from typetrace.model.keystrokes import Keystroke, KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/verbose.ui")
@@ -13,16 +13,16 @@ class Verbose(Gtk.Box):
 
     column_view = Gtk.Template.Child("column_view")
 
-    def __init__(self, model: KeystrokesModel, **kwargs) -> None:
+    def __init__(self, keystroke_store: KeystrokeStore, **kwargs) -> None:
         """Initialize the verbose widget with keystroke data.
 
         Args:
-            model: Access to keystrokes models
+            keystroke_store: Access to keystrokes models
             **kwargs: Keyword arguments passed to the parent constructor
 
         """
         super().__init__(**kwargs)
-        self.model = model
+        self.keystroke_store = keystroke_store
         self.list_store = Gio.ListStore()
         self.sort_model = Gtk.SortListModel(model=self.list_store)
         self.selection_model = Gtk.SingleSelection(model=self.sort_model)
@@ -36,7 +36,7 @@ class Verbose(Gtk.Box):
 
     def _populate_list_store(self) -> None:
         """Populate the list store with keystroke data."""
-        for keystroke in self.model.get_all_keystrokes():
+        for keystroke in self.keystroke_store.get_all_keystrokes():
             self.list_store.append(
                 Keystroke(
                     scan_code=keystroke.scan_code,

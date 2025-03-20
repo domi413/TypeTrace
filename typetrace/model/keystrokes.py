@@ -25,7 +25,7 @@ class Keystroke(GObject.Object):
         self.key_name = key_name.replace("KEY_", "")
 
 
-class KeystrokesModel:
+class KeystrokeStore:
     """Model for interacting with the keystrokes table in the database."""
 
     def __init__(self) -> None:
