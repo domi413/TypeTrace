@@ -19,6 +19,7 @@ class Verbose(Gtk.Box):
         Args:
             model: Access to keystrokes models
             **kwargs: Keyword arguments passed to the parent constructor
+
         """
         super().__init__(**kwargs)
         self.model = model
