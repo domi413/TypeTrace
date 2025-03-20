@@ -71,14 +71,14 @@ def calibrate_screen_size(devices: list) -> tuple[int, int]:
     _mouse_x = 0
     _mouse_y = 0
 
-    # Get first corner - we'll consider this (0,0)
+    # Get the first corner - we'll consider this (0,0)
     wait_for_mouse_click(devices)
     print("Origin point set to (0,0)")
 
     print("3. Now move your mouse to the BOTTOM-RIGHT corner of your screen")
     print("4. Click the left mouse button")
 
-    # Get second corner - this will be our max coordinates
+    # Get the second corner - this will be our max coordinates
     corner2 = wait_for_mouse_click(devices)
 
     # The second click gives us the screen dimensions directly
@@ -118,6 +118,13 @@ def wait_for_mouse_click(devices: list) -> tuple[int, int]:
                             _mouse_x += event.value
                         elif event.code == evdev.ecodes.REL_Y:
                             _mouse_y += event.value
+
+                    # Process absolute movement events for touchpads
+                    elif event.type == evdev.ecodes.EV_ABS:
+                        if event.code == evdev.ecodes.ABS_X:
+                            _mouse_x = event.value
+                        elif event.code == evdev.ecodes.ABS_Y:
+                            _mouse_y = event.value
 
                     # Check for left mouse button click
                     if (

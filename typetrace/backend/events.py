@@ -90,6 +90,7 @@ def process_single_event(
 
     # Capture event timestamp
     event_time = event.timestamp()
+    global _mouse_x, _mouse_y
 
     # Process keyboard events (Trigger on keypress)
     if event.type == evdev.ecodes.EV_KEY and event.value == 1:
@@ -120,13 +121,23 @@ def process_single_event(
 
             buffer.append(event_data)
 
+    # Touchpad
+    elif event.type == evdev.ecodes.EV_ABS:
+        if event.code == evdev.ecodes.ABS_X:
+            _mouse_x = event.value
+            # Clamp to screen boundaries
+            _mouse_x = max(0, min(_mouse_x, SCREEN_WIDTH))
+
+        elif event.code == evdev.ecodes.ABS_Y:
+            _mouse_y = event.value
+            # Clamp to screen boundaries
+            _mouse_y = max(0, min(_mouse_y, SCREEN_HEIGHT))
+
+        if DEBUG:
+            logger.debug("X/Y: %d, %d", _mouse_x, _mouse_y)
+
+    # Mouse
     elif event.type == evdev.ecodes.EV_REL:
-        global _mouse_x, _mouse_y
-
-        # Previous position (for logging)
-        prev_x, prev_y = _mouse_x, _mouse_y
-
-        # Update global position variables
         if event.code == evdev.ecodes.REL_X:
             _mouse_x += event.value
             # Clamp to screen boundaries
@@ -137,20 +148,13 @@ def process_single_event(
             # Clamp to screen boundaries
             _mouse_y = max(0, min(_mouse_y, SCREEN_HEIGHT))
 
-        # After updating coordinates, create a mouse event
-        if event.code in (evdev.ecodes.REL_X, evdev.ecodes.REL_Y):
-            mouse_event: MouseEvent = {
-                "type": "absolute",
-                "x": _mouse_x,
-                "y": _mouse_y,
-            }
-
         if DEBUG:
             logger.debug("X/Y: %d, %d", _mouse_x, _mouse_y)
-        if len(buffer) >= BUFFER_SIZE:
-            write_to_database(db_path, _buffer)
-            buffer.clear()
-            start_time = time.time()
+
+    if len(buffer) >= BUFFER_SIZE:
+        write_to_database(db_path, _buffer)
+        buffer.clear()
+        start_time = time.time()
 
     return buffer, start_time
 
