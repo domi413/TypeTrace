@@ -24,8 +24,10 @@ class Heatmap(Gtk.Box):
         "\\",
     ]
 
-    LOW_USAGE = 0.33
-    MID_USAGE = 0.66
+    USAGE_THRESHOLDS: ClassVar[list[str]] = { # For coloring
+        "low": 0.33,
+        "mid": 0.66,
+    }
 
     keyboard_container = Gtk.Template.Child("keyboard_container")
 
@@ -42,6 +44,7 @@ class Heatmap(Gtk.Box):
         self.model: KeystrokesModel = model
         self.layout = layout
         self.key_widgets: dict[int, Gtk.Label] = {}  # Keyed by scancode
+
         self._build_keyboard()
         self._update_colors()
 
@@ -65,36 +68,28 @@ class Heatmap(Gtk.Box):
     def _create_key_widget(self, key_label: str) -> Gtk.Label:
         """Create a single key widget with the appropriate properties."""
         label = Gtk.Label(label=key_label)
-        label.set_size_request(40, 30)
-
-        if key_label in self.EXPANDED_KEYS:
-            label.set_hexpand(True)
-
+        label.set_hexpand(True) if key_label in self.EXPANDED_KEYS else None
         return label
 
     def _update_colors(self) -> None:
         keystrokes = self.model.get_all_keystrokes()
         most_pressed = self.model.get_highest_count()
-        if most_pressed == 0:
+        if not most_pressed:
             return
 
         for keystroke in keystrokes:
-            scancode = keystroke.scan_code
-            if scancode in self.key_widgets:
-                label = self.key_widgets[scancode]
+            if label := self.key_widgets.get(keystroke.scan_code):
                 usage_ratio = keystroke.count / most_pressed
-                style_context = label.get_style_context()
-                for cls in ["low-usage", "mid-usage", "high-usage"]:
-                    style_context.remove_class(cls)
-                if usage_ratio < self.LOW_USAGE:
-                    style_context.add_class("low-usage")
-                elif usage_ratio < self.MID_USAGE:
-                    style_context.add_class("mid-usage")
-                else:
-                    style_context.add_class("high-usage")
+                self._get_key_color(label, usage_ratio)
                 label.set_tooltip_text(str(keystroke.count))
 
-    def _get_colors(self, usage_ratio: float) -> str:
-        """Calculate color based on usage ratio."""
-        ratio = max(0.0, min(1.0, usage_ratio))
-        return f"rgba({int(255 * ratio)}, {0}, {int(255 * (1 - ratio))}, 0.6)"
+    def _get_key_color(self, label: Gtk.Label, usage_ratio: float) -> str:
+        """Assign color class based on usage ratio."""
+        style_context = label.get_style_context()
+        style_context.remove_class("low-usage mid-usage high-usage")
+        class_name = (
+            "low-usage" if usage_ratio < self.USAGE_THRESHOLDS["low"] else
+            "mid-usage" if usage_ratio < self.USAGE_THRESHOLDS["mid"] else
+            "high-usage"
+        )
+        style_context.add_class(class_name)
