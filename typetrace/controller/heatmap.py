@@ -24,6 +24,9 @@ class Heatmap(Gtk.Box):
         "\\",
     ]
 
+    LOW_USAGE = 0.33
+    MID_USAGE = 0.66
+
     keyboard_container = Gtk.Template.Child("keyboard_container")
 
     def __init__(self, model: KeystrokesModel, layout: str = "en_US", **kwargs) -> None:
@@ -83,9 +86,9 @@ class Heatmap(Gtk.Box):
                 style_context = label.get_style_context()
                 for cls in ["low-usage", "mid-usage", "high-usage"]:
                     style_context.remove_class(cls)
-                if usage_ratio < 0.33:
+                if usage_ratio < self.LOW_USAGE:
                     style_context.add_class("low-usage")
-                elif usage_ratio < 0.66:
+                elif usage_ratio < self.MID_USAGE:
                     style_context.add_class("mid-usage")
                 else:
                     style_context.add_class("high-usage")

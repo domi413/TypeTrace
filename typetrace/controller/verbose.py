@@ -13,26 +13,29 @@ class Verbose(Gtk.Box):
 
     column_view = Gtk.Template.Child("column_view")
 
-    def __init__(self, model : KeystrokesModel, **kwargs) -> None:
-        """Initialize the verbose widget.
+    def __init__(self, model: KeystrokesModel, **kwargs) -> None:
+        """Initialize the verbose widget with keystroke data.
 
         Args:
             model: Access to keystrokes models
             **kwargs: Keyword arguments passed to the parent constructor
-
         """
         super().__init__(**kwargs)
         self.model = model
         self.list_store = Gio.ListStore()
+        self.sort_model = Gtk.SortListModel(model=self.list_store)
+        self.selection_model = Gtk.SingleSelection(model=self.sort_model)
+        self.column_view.set_model(self.selection_model)
 
-        self.populate_list_store()
-        self.setup_column_view()
+        self._populate_list_store()
+        self._setup_column_view()
 
-    def populate_list_store(self) -> None:
-        """Populate the list box with keystroke data."""
-        keystrokes = self.model.get_all_keystrokes()
+        # Set the sort_model's sorter to the column_view's sorter
+        self.sort_model.set_sorter(self.column_view.get_sorter())
 
-        for keystroke in keystrokes:
+    def _populate_list_store(self) -> None:
+        """Populate the list store with keystroke data."""
+        for keystroke in self.model.get_all_keystrokes():
             self.list_store.append(
                 Keystroke(
                     scan_code=keystroke.scan_code,
@@ -41,75 +44,53 @@ class Verbose(Gtk.Box):
                 ),
             )
 
-    def setup_column_view(self) -> None:
-        """Set up the ColumnView with columns and data binding."""
-        # Create a selection model for the ColumnView
-        selection_model = Gtk.SingleSelection(model=self.list_store)
-        self.column_view.set_model(selection_model)
+    def _setup_column_view(self) -> None:
+        """Set up the ColumnView with columns, data binding, and sorting."""
+        columns = [
+            ("Scan Code", self._bind_scan_code, "scan_code", "numeric"),
+            ("Count", self._bind_count, "count", "numeric"),
+            ("Key Name", self._bind_key_name, "key_name", "string"),
+        ]
 
-        # Define factories for rendering each column
-        scan_code_factory = Gtk.SignalListItemFactory()
-        count_factory = Gtk.SignalListItemFactory()
-        key_name_factory = Gtk.SignalListItemFactory()
+        # Create and add all columns with sorters
+        for title, bind_func, prop_name, sort_type in columns:
+            # Set up the factory for rendering items
+            factory = Gtk.SignalListItemFactory()
+            factory.connect("setup", self._on_factory_setup)
+            factory.connect("bind", bind_func)
 
-        # Connect the setup and bind signals for each factory
-        scan_code_factory.connect("setup", self.on_factory_setup)
-        scan_code_factory.connect("bind", self.on_scan_code_bind)
-        count_factory.connect("setup", self.on_factory_setup)
-        count_factory.connect("bind", self.on_count_bind)
-        key_name_factory.connect("setup", self.on_factory_setup)
-        key_name_factory.connect("bind", self.on_key_name_bind)
+            column = Gtk.ColumnViewColumn(title=title, factory=factory, expand=True)
 
-        # Create columns and assign factories
-        scan_code_column = Gtk.ColumnViewColumn(
-            title="Scan Code",
-            factory=scan_code_factory,
-            expand=True,
-        )
-        count_column = Gtk.ColumnViewColumn(
-            title="Count",
-            factory=count_factory,
-            expand=True,
-        )
-        key_name_column = Gtk.ColumnViewColumn(
-            title="Key Name",
-            factory=key_name_factory,
-            expand=True,
-        )
+            # Create and set the sorter based on the sort type
+            expression = Gtk.PropertyExpression.new(Keystroke, None, prop_name)
+            if sort_type == "numeric":
+                sorter = Gtk.NumericSorter(expression=expression)
+            elif sort_type == "string":
+                sorter = Gtk.StringSorter(expression=expression)
+            column.set_sorter(sorter)
 
-        # Add columns to the ColumnView
-        self.column_view.append_column(scan_code_column)
-        self.column_view.append_column(count_column)
-        self.column_view.append_column(key_name_column)
+            self.column_view.append_column(column)
 
-    def on_factory_setup(
-        self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,  # noqa: ARG002
-    ) -> None:
-        """Set up the widget for each list item (called once per row)."""
+        # Set an initial sort order
+        self.column_view.sort_by_column(self.column_view.get_columns()[0], Gtk.SortType.ASCENDING)
+
+    def _on_factory_setup(self, factory, list_item) -> None:
+        """Set up a label widget for each list item."""
         label = Gtk.Label()
         label.set_halign(Gtk.Align.START)
         list_item.set_child(label)
 
-    def on_scan_code_bind(
-        self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,  # noqa: ARG002
-    ) -> None:
-        """Bind the scan_code property to the label."""
+    def _bind_scan_code(self, factory, list_item) -> None:
+        """Bind scan_code property to the label."""
         keystroke = list_item.get_item()
-        label = list_item.get_child()
-        label.set_text(str(keystroke.scan_code))
+        list_item.get_child().set_text(str(keystroke.scan_code))
 
-    def on_count_bind(
-        self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,  # noqa: ARG002
-    ) -> None:
-        """Bind the count property to the label."""
+    def _bind_count(self, factory, list_item) -> None:
+        """Bind count property to the label."""
         keystroke = list_item.get_item()
-        label = list_item.get_child()
-        label.set_text(str(keystroke.count))
+        list_item.get_child().set_text(str(keystroke.count))
 
-    def on_key_name_bind(
-        self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,  # noqa: ARG002
-    ) -> None:
-        """Bind the key_name property to the label."""
+    def _bind_key_name(self, factory, list_item) -> None:
+        """Bind key_name property to the label."""
         keystroke = list_item.get_item()
-        label = list_item.get_child()
-        label.set_text(keystroke.key_name)
+        list_item.get_child().set_text(keystroke.key_name)

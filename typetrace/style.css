@@ -6,7 +6,6 @@
     border: 1pt solid rgba(0, 0, 0, 0.2);
     border-radius: 4pt;
     font-size: 1rem;
-    font-family: "Sans", "Arial", sans-serif;
     padding: 6pt 8pt;
     background-color: rgba(245, 245, 245, 0.9);
     color: #333;
@@ -15,8 +14,7 @@
 }
 
 .container label:hover {
-    box-shadow: 0 3pt 6pt rgba(0, 0, 0, 0.5);
-    transform: translateY(-2pt);
+    box-shadow: 0 2pt 4pt rgba(0, 0, 0, 0.5);
 }
 
 .container label.low-usage {
