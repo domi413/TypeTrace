@@ -5,3 +5,15 @@
 .container button {
     border: 2pt solid rgba(0, 0, 0, 0.1);
 }
+
+.low-usage {
+    background-color: rgba(0, 0, 255, 0.6);
+}
+
+.mid-usage {
+    background-color: rgba(128, 0, 128, 0.6);
+}
+
+.high-usage {
+    background-color: rgba(255, 0, 0, 0.6);
+}

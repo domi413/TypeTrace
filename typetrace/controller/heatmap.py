@@ -14,13 +14,6 @@ class Heatmap(Gtk.Box):
 
     __gtype_name__ = "Heatmap"
 
-    ARROW_ICONS: ClassVar[dict[str, str]] = {
-        "Left": "go-previous-symbolic",
-        "Up": "go-up-symbolic",
-        "Down": "go-down-symbolic",
-        "Right": "go-next-symbolic",
-    }
-
     EXPANDED_KEYS: ClassVar[list[str]] = [
         "Backspace",
         "Tab",
@@ -45,7 +38,7 @@ class Heatmap(Gtk.Box):
         super().__init__(**kwargs)
         self.model: KeystrokesModel = model
         self.layout = layout
-        self.key_buttons: dict[int, tuple] = {}  # Keyed by scancode
+        self.key_buttons: dict[int, Gtk.Button] = {}  # Keyed by scancode
         self._build_keyboard()
         self._update_colors()
 
@@ -63,44 +56,40 @@ class Heatmap(Gtk.Box):
             self.keyboard_container.append(box)
 
             for scancode, key_label in row:
-                button, provider = self._create_key_button(key_label)
-                self.key_buttons[scancode] = (button, provider)
+                button = self._create_key_button(key_label)
+                self.key_buttons[scancode] = button
                 box.append(button)
 
-    def _create_key_button(self, key_label: str) -> tuple[Gtk.Button, Gtk.CssProvider]:
+    def _create_key_button(self, key_label: str) -> Gtk.Button:
         """Create a single key button with the appropriate properties."""
         button = Gtk.Button()
-
-        if key_label in self.ARROW_ICONS:
-            button.set_icon_name(self.ARROW_ICONS[key_label])
-        else:
-            button.set_label(key_label)
+        button.set_label(key_label)
 
         if key_label in self.EXPANDED_KEYS:
             button.set_hexpand(True)
 
-        provider = Gtk.CssProvider()
-        style_context = button.get_style_context()
-        style_context.add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
-
-        return button, provider
+        return button
 
     def _update_colors(self) -> None:
-        """Color the keys based on model data using scancodes."""
         keystrokes = self.model.get_all_keystrokes()
         most_pressed = self.model.get_highest_count()
-
         if most_pressed == 0:
-            return  # Avoid division by zero
+            return
 
         for keystroke in keystrokes:
             scancode = keystroke.scan_code
             if scancode in self.key_buttons:
-                button, provider = self.key_buttons[scancode]
+                button = self.key_buttons[scancode]
                 usage_ratio = keystroke.count / most_pressed
-                color = self._get_colors(usage_ratio)
-                css = f"button {{ background-color: {color}; }}"
-                provider.load_from_data(css.encode("utf-8"))
+                style_context = button.get_style_context()
+                for cls in ["low-usage", "mid-usage", "high-usage"]:
+                    style_context.remove_class(cls)
+                if usage_ratio < 0.33:
+                    style_context.add_class("low-usage")
+                elif usage_ratio < 0.66:
+                    style_context.add_class("mid-usage")
+                else:
+                    style_context.add_class("high-usage")
                 button.set_tooltip_text(str(keystroke.count))
 
     def _get_colors(self, usage_ratio: float) -> str:
