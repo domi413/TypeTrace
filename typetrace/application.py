@@ -1,4 +1,5 @@
 """Typetrace frontend application."""
+
 from __future__ import annotations
 
 from typing import Any, Callable
@@ -13,10 +14,8 @@ class Application(Adw.Application):
 
     def __init__(self, application_id: str, version: str) -> None:
         """Initialize the application with default settings."""
-        super().__init__(
-            application_id=application_id,
-            flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
-        self.version=version
+        super().__init__(application_id=application_id, flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+        self.version = version
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
         self.create_action("preferences", self.on_preferences_action)
@@ -36,13 +35,15 @@ class Application(Adw.Application):
         about = Adw.AboutDialog(
             application_name="TypeTrace",
             application_icon="edu.ost.typetrace",
+            website="https://github.com/domi413/TypeTrace",
             version=self.version,
             developers=[
                 "David Yves Bachmann",
                 "Dominik Bühler",
                 "Gioele Petrillo",
                 "Ivan Knöfler",
-                "Mustafa Alali"],
+                "Mustafa Alali",
+            ],
         )
         about.present(self.props.active_window)
 
