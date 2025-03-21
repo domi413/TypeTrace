@@ -1,3 +1,6 @@
 {
-  "mesonbuild.configureOnOpen": false
+  "mesonbuild.configureOnOpen": false,
+  "python.analysis.extraPaths": [
+    "./typetrace"
+  ]
 }

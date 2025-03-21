@@ -2,7 +2,7 @@
 Description=TypeTrace Backend Service
 
 [Service]
-ExecStart=@bindir@/typetrace-backend
+ExecStart=@bindir@/typetrace -b
 Restart=on-failure
 
 [Install]

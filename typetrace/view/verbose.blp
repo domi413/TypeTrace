@@ -1,0 +1,12 @@
+using Gtk 4.0;
+
+template $Verbose : Gtk.Box {
+    orientation: vertical;
+    halign: baseline;
+
+    ScrolledWindow {
+        vexpand: true;
+
+        ColumnView column_view {}
+    }
+}

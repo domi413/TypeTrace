@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=typetrace
+Name=TypeTrace
 Exec=typetrace
 Icon=edu.ost.typetrace
 Terminal=false

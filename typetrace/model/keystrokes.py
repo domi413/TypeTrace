@@ -3,21 +3,29 @@
 from __future__ import annotations
 
 import sqlite3
-from dataclasses import dataclass
 
 from backend.cli import resolve_db_path  # Shared path resolution
+from gi.repository import GObject
 
 
-@dataclass
-class Keystroke:
-    """Dataclass to model keystrokes."""
+class Keystroke(GObject.Object):
+    """Class to model keystrokes."""
 
-    scan_code: int
-    count: int
-    key_name: str | None  # key_name can be optional or unknown
+    __gtype_name__ = "Keystroke"
+
+    scan_code: int = GObject.Property(type=int, default=0)
+    count: int = GObject.Property(type=int, default=0)
+    key_name: str = GObject.Property(type=str, default="")
+
+    def __init__(self, scan_code: int, count: int, key_name: str) -> None:
+        """Initialize the Keystroke object."""
+        super().__init__()
+        self.scan_code = scan_code
+        self.count = count
+        self.key_name = key_name.replace("KEY_", "")
 
 
-class KeystrokesModel:
+class KeystrokeStore:
     """Model for interacting with the keystrokes table in the database."""
 
     def __init__(self) -> None:
@@ -47,6 +55,18 @@ class KeystrokesModel:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute("SELECT SUM(count) FROM keystrokes")
+                result = cursor.fetchone()[0]
+                return result if result is not None else 0
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+            return 0
+
+    def get_highest_count(self) -> int:
+        """Retrieve the count of the most-used keystroke."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT MAX(count) FROM keystrokes")
                 result = cursor.fetchone()[0]
                 return result if result is not None else 0
         except sqlite3.Error as e:

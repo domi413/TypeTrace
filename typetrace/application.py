@@ -1,28 +1,22 @@
-"""Typetrace application entry point module."""
-
+"""Typetrace frontend application."""
 from __future__ import annotations
 
-import sys
 from typing import Any, Callable
 
-import gi
+from gi.repository import Adw, Gio
 
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio  # noqa: E402
-
-from .controller.window import TypetraceWindow  # noqa: E402
+from .controller.window import TypetraceWindow
 
 
-class TypetraceApplication(Adw.Application):
+class Application(Adw.Application):
     """The main application singleton class."""
 
-    def __init__(self) -> None:
+    def __init__(self, application_id: str, version: str) -> None:
         """Initialize the application with default settings."""
         super().__init__(
-            application_id="edu.ost.typetrace",
-            flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
-        )
+            application_id=application_id,
+            flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+        self.version=version
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
         self.create_action("preferences", self.on_preferences_action)
@@ -40,12 +34,15 @@ class TypetraceApplication(Adw.Application):
     def on_about_action(self, *_: Any) -> None:
         """Display the about dialog with application information."""
         about = Adw.AboutDialog(
-            application_name="typetrace",
+            application_name="TypeTrace",
             application_icon="edu.ost.typetrace",
-            developer_name="Unknown",
-            version="0.1.0",
-            developers=["Unknown"],
-            copyright="© 2025 Unknown",
+            version=self.version,
+            developers=[
+                "David Yves Bachmann",
+                "Dominik Bühler",
+                "Gioele Petrillo",
+                "Ivan Knöfler",
+                "Mustafa Alali"],
         )
         about.present(self.props.active_window)
 
@@ -72,16 +69,3 @@ class TypetraceApplication(Adw.Application):
         self.add_action(action)
         if shortcuts:
             self.set_accels_for_action(f"app.{name}", shortcuts)
-
-
-def main() -> int:
-    """Run the application.
-
-    Creates and starts the main application instance.
-
-    Returns:
-        The application exit code
-
-    """
-    app = TypetraceApplication()
-    return app.run(sys.argv)

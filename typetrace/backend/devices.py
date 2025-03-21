@@ -7,7 +7,6 @@ from contextlib import contextmanager, suppress
 from typing import TYPE_CHECKING
 
 import evdev
-
 from backend.config import DEBUG
 
 logger = logging.getLogger(__name__)

@@ -2,6 +2,24 @@
 typetrace
 
 # Words
+getlogin
+getgrnam
+levelno
+hdlr
+scancode
+scancodes
+hexpand
+halign
+QWERTZ
+vexpand
 
 # Build
 bindir
+
+# Team Names
+Dominik
+Bühler
+Gioele
+Petrillo
+Knöfler
+Alali
