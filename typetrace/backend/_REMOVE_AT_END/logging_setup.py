@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from backend.config import Config
+from backend.config import DEBUG
 
 # Define colors
 YELLOW = "\033[33m"
@@ -36,26 +36,22 @@ class ColoredFormatter(logging.Formatter):
         return result
 
 
-class LoggerSetup:
-    """Logger setup for TypeTrace."""
+def setup_logging() -> None:
+    """Configure logging based on debug mode."""
+    level: int = logging.DEBUG if DEBUG else logging.INFO
 
-    @staticmethod
-    def setup_logging() -> None:
-        """Configure logging based on debug mode."""
-        level: int = logging.DEBUG if Config.DEBUG else logging.INFO
+    handler = logging.StreamHandler()
+    formatter = ColoredFormatter(
+        fmt="%(asctime)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    handler.setFormatter(formatter)
 
-        handler = logging.StreamHandler()
-        formatter = ColoredFormatter(
-            fmt="%(asctime)s - %(levelname)s - %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-        handler.setFormatter(formatter)
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
 
-        root_logger = logging.getLogger()
-        root_logger.setLevel(level)
+    # Remove any existing handlers to avoid duplicate logs
+    for hdlr in root_logger.handlers[:]:
+        root_logger.removeHandler(hdlr)
 
-        # Remove any existing handlers to avoid duplicate logs
-        for hdlr in root_logger.handlers[:]:
-            root_logger.removeHandler(hdlr)
-
-        root_logger.addHandler(handler)
+    root_logger.addHandler(handler)

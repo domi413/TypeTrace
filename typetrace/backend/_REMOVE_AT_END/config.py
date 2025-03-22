@@ -5,19 +5,15 @@ from __future__ import annotations
 from enum import IntEnum
 from typing import Final, TypedDict
 
+# Constants
+PROJECT_VERSION: Final[str] = "0.1.0 (alpha)"
+PROJECT_NAME: Final[str] = "TypeTrace"
+DB_NAME: Final[str] = "TypeTrace.db"
+BUFFER_SIZE: Final[int] = 50
+BUFFER_TIMEOUT: Final[float] = 60.0
 
-class Config:
-    """Configuration settings for TypeTrace."""
-
-    # Constants
-    PROJECT_VERSION: Final[str] = "0.1.0 (alpha)"
-    PROJECT_NAME: Final[str] = "TypeTrace"
-    DB_NAME: Final[str] = "TypeTrace.db"
-    BUFFER_SIZE: Final[int] = 50
-    BUFFER_TIMEOUT: Final[float] = 60.0
-
-    # Global settings
-    DEBUG: bool = False
+# Global settings
+DEBUG: bool = False
 
 
 class ExitCodes(IntEnum):
