@@ -29,12 +29,18 @@ class TypetraceWindow(Adw.ApplicationWindow):
         """
         super().__init__(**kwargs)
         self.keystroke_store = KeystrokeStore()
+
         heatmap_page = self.stack.add_titled(
-            Heatmap(keystroke_store=self.keystroke_store), "heatmap", "Heatmap",
+            Heatmap(keystroke_store=self.keystroke_store),
+            "heatmap",
+            "Heatmap",
         )
         heatmap_page.set_icon_name("input-keyboard-symbolic")
         verbose_page = self.stack.add_titled(
-            Verbose(keystroke_store=self.keystroke_store), "verbose", "Verbose",
+            Verbose(keystroke_store=self.keystroke_store),
+            "verbose",
+            "Verbose",
         )
         verbose_page.set_icon_name("text-x-generic-symbolic")
+
         self.view_switcher.set_stack(self.stack)

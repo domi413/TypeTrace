@@ -1,34 +1,58 @@
 .container {
-  padding: 2rem;
+    padding: 2rem;
 }
 
 .container label {
-  border: 1pt solid rgba(0, 0, 0, 0.2);
-  border-radius: 4pt;
-  font-size: 1rem;
-  padding: 6pt 8pt;
-  min-width: 12pt;
-  background-color: rgba(245, 245, 245, 0.9);
-  color: #333;
-  box-shadow: 0 1pt 3pt rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease;
+    border-radius: 4pt;
+    font-size: 1rem;
+    padding: 6pt 8pt;
+    min-width: 12pt;
+    background-color: #ddddde;
+    color: #black;
+    transition: background-color 0.3s ease;
 }
 
 .container label:hover {
-  box-shadow: 0 2pt 4pt rgba(0, 0, 0, 0.5);
+    filter: brightness(75%);
 }
 
-.container label.low-usage {
-  color: white;
-  background-color: rgba(0, 0, 255, 0.6);
+.container label.usage-10 {
+    color: white;
+    background-color: #1a73e8;
 }
-
-.container label.mid-usage {
-  color: white;
-  background-color: rgba(128, 0, 128, 0.6);
+.container label.usage-20 {
+    color: white;
+    background-color: #4285f4;
 }
-
-.container label.high-usage {
-  color: white;
-  background-color: rgba(255, 0, 0, 0.6);
+.container label.usage-30 {
+    color: black;
+    background-color: #82b1ff;
+}
+.container label.usage-40 {
+    color: black;
+    background-color: #bbdefb;
+}
+.container label.usage-50 {
+    color: black;
+    background-color: #fff176;
+}
+.container label.usage-60 {
+    color: black;
+    background-color: #ffb300;
+}
+.container label.usage-70 {
+    color: white;
+    background-color: #f57c00;
+}
+.container label.usage-80 {
+    color: white;
+    background-color: #d32f2f;
+}
+.container label.usage-90 {
+    color: white;
+    background-color: #c62828;
+}
+.container label.usage-100 {
+    color: white;
+    background-color: #b71c1c;
 }

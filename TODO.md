@@ -1,0 +1,7 @@
+- Add type annotation
+- Better (correct?) layout reading
+- use rgba colors
+- Cleanup code
+- Better error handling (especially sql)
+- Increase performance?
+- Make code more readable?

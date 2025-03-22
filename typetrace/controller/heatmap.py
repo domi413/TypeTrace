@@ -1,5 +1,8 @@
 """The heatmap widget that displays a keyboard."""
 
+import platform
+import re
+import subprocess
 from typing import ClassVar
 
 from gi.repository import Gtk
@@ -24,14 +27,13 @@ class Heatmap(Gtk.Box):
         "\\",
     ]
 
-    USAGE_THRESHOLDS: ClassVar[dict[str, float]] = {
-        "low": 0.33,
-        "mid": 0.66,
-    }
-
     keyboard_container = Gtk.Template.Child("keyboard_container")
 
-    def __init__(self, keystroke_store: KeystrokeStore, layout: str = "en_US", **kwargs) -> None:
+    def __init__(
+        self,
+        keystroke_store: KeystrokeStore,
+        **kwargs,
+    ) -> None:
         """Initialize the heatmap widget.
 
         Args:
@@ -42,20 +44,62 @@ class Heatmap(Gtk.Box):
         """
         super().__init__(**kwargs)
         self.keystroke_store: KeystrokeStore = keystroke_store
-        self.layout = layout
-        self.key_widgets: dict[int, Gtk.Label] = {}  # Keyed by scancode
+        self.layout = self._get_keyboard_layout()
+        self.key_widgets: dict[int, Gtk.Label] = {}
 
         self._build_keyboard()
         self._update_colors()
 
-    def color_keys(self) -> None:
-        """Public method to refresh the heatmap."""
-        self._update_colors()
+    def _get_keyboard_layout(self) -> str:
+        """Determine the current keyboard layout of the system.
+
+        On Linux, checks /etc/vconsole.conf for KEYMAP
+        On Windows and macOS, does nothing yet
+
+        Returns:
+            str: The detected keyboard layout or "en_US" as default.
+
+        """
+        match platform.system().lower():
+            case "linux":
+                try:
+                    result = subprocess.run(
+                        ["grep", "^KEYMAP=", "/etc/vconsole.conf"],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+
+                    if result.returncode == 0:
+                        # Extract keymap value using regex
+                        match = re.search(r'^KEYMAP="?([^"]*)"?', result.stdout.strip())
+                        if match:
+                            keymap = match.group(1)
+
+                            for layout in KEYBOARD_LAYOUTS:
+                                if keymap == layout or keymap.startswith(
+                                    f"{layout}-",
+                                ):
+                                    return layout
+
+                except Exception:
+                    print("Error detecting keyboard layout")
+
+            case "windows":
+                pass
+
+            case "darwin":
+                pass
+
+        return "en_US"
 
     def _build_keyboard(self) -> None:
         """Build the keyboard layout dynamically using scancodes."""
         for row_count, row in enumerate(KEYBOARD_LAYOUTS[self.layout]):
-            box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+            box = Gtk.Box(
+                orientation=Gtk.Orientation.HORIZONTAL,
+                spacing=5,
+            )
             if row_count == 0:
                 box.set_homogeneous(True)
             self.keyboard_container.append(box)
@@ -74,22 +118,26 @@ class Heatmap(Gtk.Box):
     def _update_colors(self) -> None:
         keystrokes = self.keystroke_store.get_all_keystrokes()
         most_pressed = self.keystroke_store.get_highest_count()
+
         if not most_pressed:
             return
 
         for keystroke in keystrokes:
             if label := self.key_widgets.get(keystroke.scan_code):
-                usage_ratio = keystroke.count / most_pressed
-                self._get_key_color(label, usage_ratio)
+                percentil = round((keystroke.count / most_pressed) * 10) * 10
+                self._get_key_color(label, percentil)
                 label.set_tooltip_text(str(keystroke.count))
 
-    def _get_key_color(self, label: Gtk.Label, usage_ratio: float) -> str:
-        """Assign color class based on usage ratio."""
+    def _get_key_color(
+        self,
+        label: Gtk.Label,
+        percentile: int,
+    ) -> None:
+        """Assign color class based on percentile (rounded to 10s)."""
         style_context = label.get_style_context()
-        style_context.remove_class("low-usage mid-usage high-usage")
-        class_name = (
-            "low-usage" if usage_ratio < self.USAGE_THRESHOLDS["low"] else
-            "mid-usage" if usage_ratio < self.USAGE_THRESHOLDS["mid"] else
-            "high-usage"
-        )
+
+        for i in range(10, 101, 10):
+            style_context.remove_class(f"usage-{i}")
+
+        class_name = f"usage-{percentile}"
         style_context.add_class(class_name)

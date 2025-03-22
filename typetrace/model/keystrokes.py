@@ -42,7 +42,11 @@ class KeystrokeStore:
 
                 # Convert rows to Keystroke objects
                 return [
-                    Keystroke(scan_code=row[0], count=row[1], key_name=row[2])
+                    Keystroke(
+                        scan_code=row[0],
+                        count=row[1],
+                        key_name=row[2],
+                    )
                     for row in rows
                 ]
         except sqlite3.Error as e:
