@@ -5,11 +5,10 @@ import time
 from pathlib import Path
 from typing import Any, override
 
+from backend.config import Config, KeyEvent
+from backend.db import DatabaseManager
+from backend.events.base import BaseEventProcessor
 from pynput import keyboard
-
-from typetrace.backend.config import Config, KeyEvent
-from typetrace.backend.db import DatabaseManager
-from typetrace.backend.events.base import BaseEventProcessor
 
 logger = logging.getLogger(__name__)
 

@@ -10,12 +10,11 @@ from pathlib import Path
 from typing import final
 
 import appdirs
-
-from typetrace.backend.config import Config, ExitCodes
-from typetrace.backend.db import DatabaseManager
-from typetrace.backend.events.linux import LinuxEventProcessor
-from typetrace.backend.events.windows_darwin import WindowsDarwinEventProcessor
-from typetrace.backend.logging_setup import LoggerSetup
+from backend.config import Config, ExitCodes
+from backend.db import DatabaseManager
+from backend.events.linux import LinuxEventProcessor
+from backend.events.windows_darwin import WindowsDarwinEventProcessor
+from backend.logging_setup import LoggerSetup
 
 logger = logging.getLogger(__name__)
 
@@ -90,3 +89,17 @@ class CLI:
         db_path = Path(data_dir) / Config.DB_NAME
         db_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
         return db_path
+
+
+def main(args: argparse.Namespace) -> int:
+    """Execute the TypeTrace backend.
+
+    Args:
+        args: Command-line arguments.
+
+    Returns:
+        int: Exit code for the application.
+
+    """
+    cli = CLI()
+    return cli.run(args)

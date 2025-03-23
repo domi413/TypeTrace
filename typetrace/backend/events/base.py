@@ -6,8 +6,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, final
 
-from typetrace.backend.config import Config, KeyEvent
-from typetrace.backend.db import DatabaseManager
+from backend.config import Config, KeyEvent
+from backend.db import DatabaseManager
 
 logger = logging.getLogger(__name__)
 

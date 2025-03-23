@@ -7,8 +7,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import final
 
-from typetrace.backend.config import Config, KeyEvent
-from typetrace.backend.sql import SQLQueries
+from backend.config import Config, KeyEvent
+from backend.sql import SQLQueries
 
 logger = logging.getLogger(__name__)
 

@@ -9,10 +9,9 @@ from pathlib import Path
 from typing import final, override
 
 import evdev
-
-from typetrace.backend.config import Config, KeyEvent
-from typetrace.backend.db import DatabaseManager
-from typetrace.backend.events.base import BaseEventProcessor
+from backend.config import Config, KeyEvent
+from backend.db import DatabaseManager
+from backend.events.base import BaseEventProcessor
 
 logger = logging.getLogger(__name__)
 

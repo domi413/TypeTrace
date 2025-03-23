@@ -1,6 +1,6 @@
 """Windows-specific IPC communication using pipes."""
 
-from typetrace.backend.ipc.base import BaseIPC
+from backend.ipc.base import BaseIPC
 
 
 class WindowsIPC(BaseIPC):

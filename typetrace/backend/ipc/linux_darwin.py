@@ -1,6 +1,6 @@
 """Linux and Darwin-specific IPC communication using sockets."""
 
-from typetrace.backend.ipc.base import BaseIPC
+from backend.ipc.base import BaseIPC
 
 
 class LinuxMacOSIPC(BaseIPC):

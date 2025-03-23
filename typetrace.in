@@ -10,15 +10,19 @@ PKGDATA_DIR = "@pkgdatadir@"
 
 sys.path.insert(1, PKGDATA_DIR)
 
+
 def set_resources() -> None:
     """Set application ressource file."""
     import gi
+
     gi.require_version("Adw", "1")
     gi.require_version("Gtk", "4.0")
     from gi.repository import Gio
+
     resource_path = Path(PKGDATA_DIR) / "typetrace.gresource"
     resource = Gio.Resource.load(resource_path.as_posix())
     resource._register()
+
 
 def run_application() -> int:
     """Run TypeTrace application and returns its exit code."""
@@ -27,6 +31,7 @@ def run_application() -> int:
     app = Application(APPLICATION_ID, VERSION)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     return app.run(sys.argv)
+
 
 def print_help() -> None:
     """Display help information."""
@@ -42,6 +47,7 @@ def print_help() -> None:
         "\nWarning: This is the backend and is not designed to run by users.",
         "\nYou should run the frontend of TypeTrace which will run this.",
     )
+
 
 def main() -> int:
     """Run the TypeTrace application.
@@ -67,6 +73,7 @@ def main() -> int:
         sys.exit()
     if args.backend:
         from backend import cli
+
         sys.exit(cli.main(args))
 
     set_resources()

@@ -1,6 +1,7 @@
 pkgdatadir = get_option('prefix') / get_option('datadir') / meson.project_name()
 moduledir = pkgdatadir / 'typetrace'
 
+# Blueprint compilation
 blueprints = custom_target(
   'blueprints',
   input: files(
@@ -19,6 +20,7 @@ blueprints = custom_target(
   ],
 )
 
+# GResource compilation
 gnome.compile_resources(
   'typetrace',
   'typetrace.gresource.xml',
@@ -28,6 +30,7 @@ gnome.compile_resources(
   dependencies: blueprints,
 )
 
+# Configuration
 conf = configuration_data()
 conf.set('application_id', 'edu.ost.typetrace')
 conf.set('PYTHON', python.find_installation('python3').full_path())
@@ -42,25 +45,38 @@ configure_file(
   install_mode: 'r-xr-xr-x',
 )
 
+
+# Main module files
 sources = [
   '__init__.py',
   'application.py',
 ]
-install_data(sources, install_dir: moduledir)
+install_data(
+  sources,
+  install_dir: moduledir
+)
 
+# Model files
 sources_model = [
   'model/__init__.py',
   'model/keystrokes.py',
   'model/layouts.py',
 ]
-install_data(sources_model, install_dir: moduledir / 'model')
+install_data(
+  sources_model,
+  install_dir: moduledir / 'model'
+)
 
+# Controller files
 sources_controller = [
   'controller/__init__.py',
   'controller/window.py',
   'controller/heatmap.py',
   'controller/verbose.py',
 ]
-install_data(sources_controller, install_dir: moduledir / 'controller')
+install_data(
+  sources_controller,
+  install_dir: moduledir / 'controller'
+)
 
 subdir('backend')
