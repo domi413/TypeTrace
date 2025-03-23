@@ -96,7 +96,7 @@ class Application(Adw.Application):
                 text="Export Failed",
                 secondary_text=str(e),
             )
-        except Exception as e:
+        except OSError as e:
             self._show_message_dialog(
                 message_type=Gtk.MessageType.ERROR,
                 text="Export Failed",
@@ -112,11 +112,11 @@ class Application(Adw.Application):
             is_save=False,
         )
 
-        filter = Gtk.FileFilter()
-        filter.set_name("Database files")
-        filter.add_pattern("*.db")
+        file_filter = Gtk.FileFilter()
+        file_filter.set_name("Database files")
+        file_filter.add_pattern("*.db")
         filters = Gio.ListStore.new(Gtk.FileFilter)
-        filters.append(filter)
+        filters.append(file_filter)
         dialog.set_filters(filters)
 
         active_window = self.get_active_window()
@@ -147,7 +147,7 @@ class Application(Adw.Application):
                 text="Import Failed",
                 secondary_text=str(e),
             )
-        except Exception as e:
+        except OSError as e:
             self._show_message_dialog(
                 message_type=Gtk.MessageType.ERROR,
                 text="Import Failed",
@@ -164,7 +164,7 @@ class Application(Adw.Application):
                 text="Data Imported Successfully",
                 secondary_text="Data has been imported. Refresh the application to see changes.",
             )
-        except Exception as e:
+        except OSError as e:
             self._show_message_dialog(
                 message_type=Gtk.MessageType.ERROR,
                 text="Import Failed",
@@ -174,7 +174,8 @@ class Application(Adw.Application):
     def _create_file_dialog(
         self,
         title: str,
-        initial_name: str = None,
+        initial_name: str | None = None,
+        *,
         is_save: bool = True,
     ) -> Gtk.FileDialog:
         """Create and configure a file dialog.
@@ -202,7 +203,7 @@ class Application(Adw.Application):
         self,
         message_type: Gtk.MessageType,
         text: str,
-        secondary_text: str = None,
+        secondary_text: str | None = None,
     ) -> None:
         """Show a message dialog with the given parameters.
 
