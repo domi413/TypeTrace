@@ -3,7 +3,7 @@
 from typing import ClassVar
 from pathlib import Path
 import shutil
-from gi.repository import Gtk, GLib, Gio
+from gi.repository import Gtk
 
 from typetrace.model.keystrokes import KeystrokeStore
 from typetrace.model.layouts import KEYBOARD_LAYOUTS
@@ -31,7 +31,6 @@ class Heatmap(Gtk.Box):
     }
 
     keyboard_container = Gtk.Template.Child("keyboard_container")
-    refresh_button = Gtk.Template.Child("refresh_button")
 
     def __init__(self, keystroke_store: KeystrokeStore, layout: str = "en_US", **kwargs) -> None:
         """Initialize the heatmap widget.
@@ -47,56 +46,8 @@ class Heatmap(Gtk.Box):
         self.layout = layout
         self.key_widgets: dict[int, Gtk.Label] = {}  # Keyed by scancode
 
-        self.refresh_button.connect("clicked", self._on_export_clicked)
-
         self._build_keyboard()
         self._update_colors()
-
-    def _on_export_clicked(self, button: Gtk.Button) -> None:
-        """Handle export button click."""
-        src_path = Path(GLib.get_user_data_dir()) / "typetrace" / "TypeTrace.db"
-
-        dialog = Gtk.FileDialog.new()
-        dialog.set_title("Export data")
-        dialog.set_initial_name("TypeTrace.db")
-
-        # Set default folder to Downloads
-        initial_folder = Gio.File.new_for_path(
-            GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD)
-        )
-        dialog.set_initial_folder(initial_folder)
-
-        dialog.save(self.get_root(), None, self._on_file_chooser_response, src_path)
-
-    def _on_file_chooser_response(
-        self, dialog: Gtk.FileDialog, result: Gio.AsyncResult, src_path: Path
-    ) -> None:
-        """Handle the file chooser dialog response."""
-        try:
-            file = dialog.save_finish(result)
-            if file:
-                dst_path = Path(file.get_path())
-                shutil.copy2(src_path, dst_path)
-
-                success_dialog = Gtk.MessageDialog(
-                    transient_for=self.get_root(),
-                    message_type=Gtk.MessageType.INFO,
-                    buttons=Gtk.ButtonsType.OK,
-                    text="Data Exported Successfully",
-                    secondary_text=f"Saved to: {dst_path}",
-                )
-                success_dialog.connect("response", lambda d, r: d.destroy())
-                success_dialog.present()
-        except Exception as e:
-            error_dialog = Gtk.MessageDialog(
-                transient_for=self.get_root(),
-                message_type=Gtk.MessageType.ERROR,
-                buttons=Gtk.ButtonsType.OK,
-                text="Export Failed",
-                secondary_text=str(e),
-            )
-            error_dialog.connect("response", lambda d, r: d.destroy())
-            error_dialog.present()
 
     def color_keys(self) -> None:
         """Public method to refresh the heatmap."""
