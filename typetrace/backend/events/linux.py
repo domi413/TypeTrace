@@ -20,6 +20,12 @@ logger = logging.getLogger(__name__)
 class LinuxEventProcessor(BaseEventProcessor):
     """Event processor for Linux platform."""
 
+    def __init__(self) -> None:
+        """Initialize the processor."""
+        super().__init__()
+        self.__db_path: Path
+        self.__cached_keyboards: list[evdev.device.InputDevice] | None = None
+
     def check_device_accessibility(self) -> None:
         """Check if the script has access to any input devices.
 
@@ -50,7 +56,7 @@ class LinuxEventProcessor(BaseEventProcessor):
         db_path: Path,
     ) -> None:
         """See base class."""
-        self._db_path = db_path
+        self.__db_path = db_path
         buffer: list[KeyEvent] = []
         start_time: float = time.time()
 
@@ -79,11 +85,14 @@ class LinuxEventProcessor(BaseEventProcessor):
 
                 # If we had device errors, refresh devices list
                 if not devices:
+                    self._cached_keyboards = None
                     devices = self._select_keyboards()
 
+        # TODO: Handle crashes -> signal.SIGTERM
         except KeyboardInterrupt:
             if buffer:
                 DatabaseManager.write_to_database(db_path, buffer)
+            self._cached_keyboards = None
 
     @override
     def _process_single_event(
@@ -117,7 +126,7 @@ class LinuxEventProcessor(BaseEventProcessor):
                 buffer.append(event_data)
 
             if len(buffer) >= Config.BUFFER_SIZE:
-                DatabaseManager.write_to_database(self._db_path, buffer)
+                DatabaseManager.write_to_database(self.__db_path, buffer)
                 buffer.clear()
                 start_time = time.time()
 
@@ -139,6 +148,8 @@ class LinuxEventProcessor(BaseEventProcessor):
             for device in devices:
                 with suppress(Exception):
                     device.close()
+            # Clear the cached keyboards since we have closed them
+            self.__cached_keyboards = None
 
     def _select_keyboards(self) -> list[evdev.device.InputDevice]:
         """Find and return all keyboard devices.
@@ -147,6 +158,9 @@ class LinuxEventProcessor(BaseEventProcessor):
             List of keyboard input devices.
 
         """
+        if self.__cached_keyboards is not None:
+            return self.__cached_keyboards
+
         devices: list[evdev.device.InputDevice] = [
             evdev.device.InputDevice(fn) for fn in evdev.util.list_devices()
         ]
@@ -162,6 +176,8 @@ class LinuxEventProcessor(BaseEventProcessor):
                         device.path,
                     )
 
+        # Cache the list of keyboards
+        self.__cached_keyboards = keyboards
         return keyboards
 
     def _read_device_events(
