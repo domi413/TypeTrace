@@ -1,8 +1,7 @@
 """The heatmap widget that displays a keyboard."""
 
 from typing import ClassVar
-from pathlib import Path
-import shutil
+
 from gi.repository import Gtk
 
 from typetrace.model.keystrokes import KeystrokeStore
