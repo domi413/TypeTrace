@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import logging
+from enum import StrEnum
 
 from backend.config import Config
 
-# Define colors
-YELLOW = "\033[33m"
-RED = "\033[31m"
-RESET = "\033[0m"
+
+class LogColor(StrEnum):
+    """ANSI color codes for logger."""
+
+    YELLOW = "\033[33m"
+    RED = "\033[31m"
+    RESET = "\033[0m"
 
 
 class ColoredFormatter(logging.Formatter):
@@ -21,13 +25,13 @@ class ColoredFormatter(logging.Formatter):
         original_msg = record.msg
 
         if record.levelno == logging.WARNING:
-            record.levelname = f"{YELLOW}{original_levelname}{RESET}"
+            record.levelname = f"{LogColor.YELLOW}{original_levelname}{LogColor.RESET}"
             if isinstance(record.msg, str):
-                record.msg = f"{YELLOW}{original_msg}{RESET}"
+                record.msg = f"{LogColor.YELLOW}{original_msg}{LogColor.RED}"
         elif record.levelno >= logging.ERROR:
-            record.levelname = f"{RED}{original_levelname}{RESET}"
+            record.levelname = f"{LogColor.RED}{original_levelname}{LogColor.RESET}"
             if isinstance(record.msg, str):
-                record.msg = f"{RED}{original_msg}{RESET}"
+                record.msg = f"{LogColor.RED}{original_msg}{LogColor.RESET}"
 
         result = super().format(record)
         record.levelname = original_levelname

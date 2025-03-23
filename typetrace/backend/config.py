@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from enum import IntEnum
-from typing import Final, TypedDict
+from typing import Final, TypedDict, final
 
 
+@final
 class Config:
-    """Configuration settings for TypeTrace."""
+    """Constants and global settings for TypeTrace."""
 
     # Constants
     PROJECT_VERSION: Final[str] = "0.1.0 (alpha)"

@@ -1,31 +1,32 @@
 """Command-line interface for TypeTrace."""
 
 import argparse
+import grp
 import logging
 import os
 import sqlite3
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import appdirs
-from backend.config import DB_NAME, PROJECT_NAME, ExitCodes
 
-if TYPE_CHECKING:
-    import argparse
+from .config import Config, ExitCodes
 
 logger = logging.getLogger(__name__)
 
 
 class CLI:
+    """Command-line interface for TypeTrace."""
+
     def __init__(self):
+        """Initialize the CLI."""
         self.db_path = self.resolve_db_path()
 
     @staticmethod
     def resolve_db_path() -> Path:
         """Determine the database path using appdirs for cross-platform support."""
-        app_name = PROJECT_NAME.lower()
+        app_name = Config.PROJECT_NAME.lower()
         data_dir = appdirs.user_data_dir(app_name)
-        db_path = Path(data_dir) / DB_NAME
+        db_path = Path(data_dir) / Config.DB_NAME
         db_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
         return db_path
 
@@ -43,29 +44,30 @@ class CLI:
 
         Returns:
             Exit code for the application.
+
         """
         if args.debug:
             # Update the global DEBUG variable
-            import backend.config
+            from .config import Config
 
-            backend.config.DEBUG = True
-            from backend.logging_setup import setup_logging
+            Config.DEBUG = True
+            from .logging_setup import LoggerSetup
 
-            setup_logging()
+            LoggerSetup.setup_logging()
 
         try:
             self.check_input_group()
 
-            from backend.devices import check_device_accessibility
+            from .devices.linux import check_device_accessibility
 
             check_device_accessibility()
             db_path: Path = self.db_path
 
-            from backend.db import initialize_database
+            from .db import DatabaseManager
 
-            initialize_database(db_path)
+            DatabaseManager.initialize_database(db_path)
 
-            from backend.events import trace_keys
+            from .events import trace_keys
 
             trace_keys(db_path)
         except PermissionError:
