@@ -12,8 +12,11 @@ class Config:
 
     # Constants
     PROJECT_VERSION: Final[str] = "0.1.0 (alpha)"
+
     PROJECT_NAME: Final[str] = "TypeTrace"
-    DB_NAME: Final[str] = "TypeTrace.db"
+    APP_NAME: Final[str] = PROJECT_NAME.lower()
+    DB_NAME: Final[str] = PROJECT_NAME + ".db"
+
     BUFFER_SIZE: Final[int] = 50
     BUFFER_TIMEOUT: Final[float] = 60.0
 
@@ -28,6 +31,7 @@ class ExitCodes(IntEnum):
     PERMISSION_ERROR = 1
     RUNTIME_ERROR = 2
     DATABASE_ERROR = 3
+    PLATFORM_ERROR = 4
 
 
 class KeyEvent(TypedDict):
