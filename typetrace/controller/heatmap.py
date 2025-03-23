@@ -31,7 +31,12 @@ class Heatmap(Gtk.Box):
 
     keyboard_container = Gtk.Template.Child("keyboard_container")
 
-    def __init__(self, keystroke_store: KeystrokeStore, layout: str = "en_US", **kwargs) -> None:
+    def __init__(
+        self,
+        keystroke_store: KeystrokeStore,
+        layout: str = "en_US",
+        **kwargs,
+    ) -> None:
         """Initialize the heatmap widget.
 
         Args:
@@ -55,9 +60,13 @@ class Heatmap(Gtk.Box):
     def _build_keyboard(self) -> None:
         """Build the keyboard layout dynamically using scancodes."""
         for row_count, row in enumerate(KEYBOARD_LAYOUTS[self.layout]):
-            box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+            box = Gtk.Box(
+                orientation=Gtk.Orientation.HORIZONTAL,
+                spacing=5,
+            )
             if row_count == 0:
                 box.set_homogeneous(True)
+
             self.keyboard_container.append(box)
 
             for scancode, key_label in row:
@@ -83,13 +92,15 @@ class Heatmap(Gtk.Box):
                 self._get_key_color(label, usage_ratio)
                 label.set_tooltip_text(str(keystroke.count))
 
-    def _get_key_color(self, label: Gtk.Label, usage_ratio: float) -> str:
+    def _get_key_color(self, label: Gtk.Label, usage_ratio: float) -> None:
         """Assign color class based on usage ratio."""
         style_context = label.get_style_context()
         style_context.remove_class("low-usage mid-usage high-usage")
         class_name = (
-            "low-usage" if usage_ratio < self.USAGE_THRESHOLDS["low"] else
-            "mid-usage" if usage_ratio < self.USAGE_THRESHOLDS["mid"] else
-            "high-usage"
+            "low-usage"
+            if usage_ratio < self.USAGE_THRESHOLDS["low"]
+            else "mid-usage"
+            if usage_ratio < self.USAGE_THRESHOLDS["mid"]
+            else "high-usage"
         )
         style_context.add_class(class_name)
