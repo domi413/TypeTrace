@@ -221,7 +221,7 @@ class Application(Adw.Application):
             text=text,
             secondary_text=secondary_text,
         )
-        dialog.connect("response", lambda d, r: d.destroy())
+        dialog.connect("response", lambda d, _: d.destroy())
         dialog.present()
 
     def _show_confirmation_dialog(
