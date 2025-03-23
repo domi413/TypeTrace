@@ -87,6 +87,15 @@ class Application(Adw.Application):
                     text="Data Exported Successfully",
                     secondary_text=f"Saved to: {dst_path}",
                 )
+        except GLib.Error as e:
+            # If dialog is closed (escape or cancel button) don't show error
+            if e.matches(Gtk.dialog_error_quark(), Gtk.DialogError.DISMISSED):
+                return
+            self._show_message_dialog(
+                message_type=Gtk.MessageType.ERROR,
+                text="Export Failed",
+                secondary_text=str(e),
+            )
         except Exception as e:
             self._show_message_dialog(
                 message_type=Gtk.MessageType.ERROR,
@@ -129,6 +138,15 @@ class Application(Adw.Application):
                     secondary_text="This will override your current data. Do you want to continue?",
                     callback=lambda: self._perform_import(src_path, dst_path),
                 )
+        except GLib.Error as e:
+            # If dialog is closed (escape or cancel button) don't show error
+            if e.matches(Gtk.dialog_error_quark(), Gtk.DialogError.DISMISSED):
+                return
+            self._show_message_dialog(
+                message_type=Gtk.MessageType.ERROR,
+                text="Import Failed",
+                secondary_text=str(e),
+            )
         except Exception as e:
             self._show_message_dialog(
                 message_type=Gtk.MessageType.ERROR,
