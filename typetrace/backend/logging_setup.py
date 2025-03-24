@@ -59,8 +59,6 @@ class ColoredFormatter(logging.Formatter):
 class LoggerSetup:
     """Logger setup for TypeTrace."""
 
-    __initialized: bool = False
-
     def __init__(self) -> None:
         """Private constructor to prevent instantiation."""
         raise TypeError
@@ -84,6 +82,3 @@ class LoggerSetup:
         root_logger.handlers.clear()
 
         root_logger.addHandler(handler)
-
-        # Mark as initialized to prevent duplicate setup
-        LoggerSetup.__initialized = True
