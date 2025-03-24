@@ -1,11 +1,10 @@
 .container {
-  padding: 2rem;
+  padding: 4rem;
 }
 
 .container label {
   border: 1pt solid rgba(0, 0, 0, 0.2);
   border-radius: 4pt;
-  font-size: 1rem;
   padding: 6pt 8pt;
   min-width: 12pt;
   background-color: rgba(245, 245, 245, 0.9);

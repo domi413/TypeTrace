@@ -1,0 +1,28 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $Preferences: Adw.PreferencesDialog {
+  Adw.PreferencesPage {
+    Adw.PreferencesGroup {
+      title: "Database";
+
+      Adw.ActionRow {
+        title: "Import Data";
+        Button import_button {
+          valign: center;
+          icon-name: "document-send-symbolic";
+          has-frame: false;
+        }
+      }
+
+      Adw.ActionRow {
+        title: "Export Data";
+        Button export_button {
+          valign: center;
+          icon-name: "document-save-symbolic";
+          has-frame: false;
+        }
+      }
+    }
+  }
+}

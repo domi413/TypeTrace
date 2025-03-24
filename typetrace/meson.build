@@ -5,7 +5,7 @@ blueprints = custom_target(
   'blueprints',
   input: files(
     'gtk/help-overlay.blp',
-    'view/AdwPreferencesWindow.blp',
+    'view/preferences.blp',
     'view/window.blp',
     'view/heatmap.blp',
     'view/verbose.blp',
@@ -61,7 +61,7 @@ sources_controller = [
   'controller/window.py',
   'controller/heatmap.py',
   'controller/verbose.py',
-  'controller/adw_preferences_window.py',
+  'controller/preferences.py',
 ]
 install_data(sources_controller, install_dir: moduledir / 'controller')
 
