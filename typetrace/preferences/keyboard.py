@@ -17,10 +17,10 @@ class KeyboardPreferencesGroup(BasePreferencesGroup):
     def __init__(self, parent_dialog: Adw.PreferencesWindow) -> None:
         """See base class."""
         super().__init__(parent_dialog, title="Keyboard")
-        self._initialize_rows()
+        self._initialize()
 
     @override
-    def _initialize_rows(self) -> None:
+    def _initialize(self) -> None:
         """See base class."""
         self.add(self._create_keyboard_layout_selector())
 

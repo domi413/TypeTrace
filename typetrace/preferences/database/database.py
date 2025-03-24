@@ -25,10 +25,10 @@ class DatabasePreferencesGroup(BasePreferencesGroup):
         self._export_handler = DatabaseExportHandler(parent_dialog)
         self._open_handler = DatabaseOpenHandler(parent_dialog)
         self._delete_handler = DatabaseDeleteHandler(parent_dialog)
-        self._initialize_rows()
+        self._initialize()
 
     @override
-    def _initialize_rows(self) -> None:
+    def _initialize(self) -> None:
         """See base class."""
         self.add(self._import_handler.create_row())
         self.add(self._export_handler.create_row())

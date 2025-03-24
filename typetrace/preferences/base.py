@@ -23,5 +23,5 @@ class BasePreferencesGroup(Adw.PreferencesGroup):
         self.parent_dialog = parent_dialog
 
     @abstractmethod
-    def _initialize_rows(self) -> None:
+    def _initialize(self) -> None:
         """Initialize all preference rows for this group."""

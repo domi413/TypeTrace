@@ -17,10 +17,10 @@ class AppearancePreferencesGroup(BasePreferencesGroup):
     def __init__(self, parent_dialog: Adw.PreferencesWindow) -> None:
         """See base class."""
         super().__init__(parent_dialog, title="Appearance")
-        self._initialize_rows()
+        self._initialize()
 
     @override
-    def _initialize_rows(self) -> None:
+    def _initialize(self) -> None:
         """See base class."""
         self.add(self._create_theme_switcher())
 
@@ -31,7 +31,9 @@ class AppearancePreferencesGroup(BasePreferencesGroup):
             The configured theme switcher combo row
 
         """
-        theme_row = Adw.ComboRow(title="Theme", subtitle="Application color scheme preference")
+        theme_row = Adw.ComboRow(
+            title="Theme", subtitle="Application color scheme preference"
+        )
         theme_model = Gtk.StringList()
         theme_model.append("System")
         theme_model.append("Light")
