@@ -12,8 +12,6 @@ from typing import final
 import appdirs
 from backend.config import Config, ExitCodes
 from backend.db import DatabaseManager
-from backend.events.linux import LinuxEventProcessor
-from backend.events.windows_darwin import WindowsDarwinEventProcessor
 from backend.logging_setup import LoggerSetup
 
 logger = logging.getLogger(__name__)
@@ -52,11 +50,17 @@ class CLI:
         try:
             match platform.system().lower():
                 case "linux":
+                    from backend.events.linux import LinuxEventProcessor
+
                     self._check_input_group()
 
                     processor = LinuxEventProcessor()
                     processor.check_device_accessibility()
                 case "darwin" | "windows":
+                    from backend.events.windows_darwin import (
+                        WindowsDarwinEventProcessor,
+                    )
+
                     processor = WindowsDarwinEventProcessor()
                 case _:
                     logger.error("Unsupported platform: %s", platform.system())
