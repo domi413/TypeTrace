@@ -7,7 +7,7 @@ from typing import Any, Callable
 from gi.repository import Adw, Gio
 
 from typetrace.controller.window import TypetraceWindow
-from typetrace.preferences import show_preferences_dialog
+from typetrace.preferences.dialog import PreferencesDialog
 
 
 class Application(Adw.Application):
@@ -15,7 +15,10 @@ class Application(Adw.Application):
 
     def __init__(self, application_id: str, version: str) -> None:
         """Initialize the application with default settings."""
-        super().__init__(application_id=application_id, flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+        super().__init__(
+            application_id=application_id,
+            flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
+        )
         self.version = version
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
@@ -49,7 +52,7 @@ class Application(Adw.Application):
 
     def on_preferences_action(self, _widget: Any, _: Any) -> None:
         """Show the application preferences dialog."""
-        show_preferences_dialog(self.props.active_window)
+        PreferencesDialog.show_preferences_dialog(self.props.active_window)
 
     def create_action(
         self,

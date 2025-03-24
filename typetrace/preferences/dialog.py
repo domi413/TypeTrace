@@ -39,3 +39,14 @@ class PreferencesDialog(Adw.PreferencesWindow):
         general_page.add(AppearancePreferencesGroup(self))
         general_page.add(DatabasePreferencesGroup(self))
         general_page.add(KeyboardPreferencesGroup(self))
+
+    @classmethod
+    def show_preferences_dialog(cls, parent_window: Gtk.Window) -> None:
+        """Show the preferences dialog.
+
+        Args:
+            parent_window: The parent window for the dialog
+
+        """
+        dialog = cls(parent_window)
+        dialog.present()

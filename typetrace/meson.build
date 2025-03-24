@@ -73,13 +73,13 @@ sources_preferences = [
 install_data(sources_preferences, install_dir: moduledir / 'preferences')
 
 sources_preferences_database = [
-    'preferences/__init__.py',
-    'preferences/base.py',
-    'preferences/database.py',
-    'preferences/delete_handler.py',
-    'preferences/export_handler.py',
-    'preferences/import_handler.py',
-    'preferences/open_handler.py',
+    'preferences/database/__init__.py',
+    'preferences/database/base.py',
+    'preferences/database/database.py',
+    'preferences/database/delete_handler.py',
+    'preferences/database/export_handler.py',
+    'preferences/database/import_handler.py',
+    'preferences/database/open_handler.py',
 ]
-install_data(sources_preferences, install_dir: moduledir / 'preferences/database')
+install_data(sources_preferences_database, install_dir: moduledir / 'preferences/database')
 subdir('backend')

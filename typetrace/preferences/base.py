@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 
-from gi.repository import Adw, Gtk
+from gi.repository import Adw
 
 
 class BasePreferencesGroup(Adw.PreferencesGroup):
