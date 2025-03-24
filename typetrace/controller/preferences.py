@@ -1,3 +1,5 @@
+"""A preferences dialog that handles various settings and preferences."""
+
 from __future__ import annotations
 
 import shutil
@@ -10,7 +12,7 @@ from gi.repository import Adw, Gio, GLib, Gtk
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/preferences.ui")
 class Preferences(Adw.PreferencesDialog):
-    """A preferences window for TypeTrace that handles various settings and preferences."""
+    """A preferences dialog that handles various settings and preferences."""
 
     __gtype_name__ = "Preferences"
 
@@ -53,7 +55,11 @@ class Preferences(Adw.PreferencesDialog):
 
         dialog.open(self.parent_window, None, self._handle_import_response)
 
-    def _handle_export_response(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult) -> None:
+    def _handle_export_response(
+        self,
+        dialog: Gtk.FileDialog,
+        result: Gio.AsyncResult,
+    ) -> None:
         """Handle the export file dialog response."""
         try:
             file = dialog.save_finish(result)
@@ -68,7 +74,11 @@ class Preferences(Adw.PreferencesDialog):
         except OSError as e:
             self._show_error_dialog("Export Failed", str(e))
 
-    def _handle_import_response(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult) -> None:
+    def _handle_import_response(
+        self,
+        dialog: Gtk.FileDialog,
+        result: Gio.AsyncResult,
+    ) -> None:
         """Handle the import file dialog response."""
         try:
             file = dialog.open_finish(result)
@@ -76,7 +86,7 @@ class Preferences(Adw.PreferencesDialog):
                 src_path = Path(file.get_path())
                 self._show_confirmation_dialog(
                     text="Confirm Data Import",
-                    secondary_text="This will override your current data. Do you want to continue?",
+                    secondary_text="This will override your current data, continue?",
                     callback=lambda: self._perform_import(src_path),
                 )
         except GLib.Error as e:
