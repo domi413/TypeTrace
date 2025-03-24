@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from gi.repository import Adw, Gio
 
-from .controller.AdwPreferencesWindow import AdwPreferencesWindow
+from .controller.adw_preferences_window import AdwPreferencesWindow
 from .controller.window import TypetraceWindow
 
 DB_FILENAME = "TypeTrace.db"

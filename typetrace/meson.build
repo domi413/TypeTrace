@@ -61,7 +61,7 @@ sources_controller = [
   'controller/window.py',
   'controller/heatmap.py',
   'controller/verbose.py',
-  'controller/AdwPreferencesWindow.py',
+  'controller/adw_preferences_window.py',
 ]
 install_data(sources_controller, install_dir: moduledir / 'controller')
 
