@@ -34,8 +34,7 @@ class DatabaseManager:
             cursor.execute(SQLQueries.CREATE_TABLE)
             conn.commit()
 
-            if Config.DEBUG:
-                logger.debug("Database initialized at %s", db_path)
+            logger.debug("Database initialized at %s", db_path)
 
     @staticmethod
     def write_to_database(db_path: Path, events: list[KeyEvent]) -> None:
@@ -93,5 +92,4 @@ class DatabaseManager:
             cursor.executemany(SQLQueries.INSERT_OR_UPDATE_KEYSTROKE, processed_events)
             conn.commit()
 
-            if Config.DEBUG:
-                logger.debug("Updated database with %d keystroke events", len(events))
+            logger.debug("Updated database with %d keystroke events", len(events))

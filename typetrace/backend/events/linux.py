@@ -2,6 +2,7 @@
 
 import logging
 import select
+import signal
 import time
 from collections.abc import Generator
 from contextlib import contextmanager, suppress
@@ -23,8 +24,9 @@ class LinuxEventProcessor(BaseEventProcessor):
     def __init__(self) -> None:
         """Initialize the processor."""
         super().__init__()
-        self.__db_path: Path
         self.__cached_keyboards: list[evdev.device.InputDevice] | None = None
+        self.__db_path: Path
+        self.__terminate = False
 
     def check_device_accessibility(self) -> None:
         """Check if the script has access to any input devices.
@@ -42,6 +44,9 @@ class LinuxEventProcessor(BaseEventProcessor):
     @override
     def trace_keys(self, db_path: Path) -> None:
         """See base class."""
+        # Set up signal handler
+        self.__setup_signal_handlers()
+
         with self._managed_devices() as devices:
             if not devices:
                 logger.warning("No keyboard devices found")
@@ -59,9 +64,10 @@ class LinuxEventProcessor(BaseEventProcessor):
         self.__db_path = db_path
         buffer: list[KeyEvent] = []
         start_time: float = time.time()
+        self.__terminate = False
 
         try:
-            while True:
+            while not self.__terminate:
                 # Wait for events with timeout
                 r: list[evdev.device.InputDevice]
                 r, _, _ = select.select(devices, [], [], Config.BUFFER_TIMEOUT)
@@ -88,11 +94,11 @@ class LinuxEventProcessor(BaseEventProcessor):
                     self._cached_keyboards = None
                     devices = self._select_keyboards()
 
-        # TODO: Handle crashes -> signal.SIGTERM
-        except KeyboardInterrupt:
+        finally:
             if buffer:
                 DatabaseManager.write_to_database(db_path, buffer)
-            self._cached_keyboards = None
+                self._cached_keyboards = None
+                logger.debug("Flushing %d events to database before exit", len(buffer))
 
     @override
     def _process_single_event(
@@ -120,9 +126,7 @@ class LinuxEventProcessor(BaseEventProcessor):
                     "name": event_map[event.code],
                 }
 
-                if Config.DEBUG:
-                    self._print_key(event_data)
-
+                self._print_key(event_data)
                 buffer.append(event_data)
 
             if len(buffer) >= Config.BUFFER_SIZE:
@@ -169,12 +173,11 @@ class LinuxEventProcessor(BaseEventProcessor):
         for device in devices:
             if evdev.ecodes.EV_KEY in device.capabilities():
                 keyboards.append(device)
-                if Config.DEBUG:
-                    logger.debug(
-                        "Found keyboard device: %s, %r",
-                        device.name,
-                        device.path,
-                    )
+                logger.debug(
+                    "Found keyboard device: %s, %r",
+                    device.name,
+                    device.path,
+                )
 
         # Cache the list of keyboards
         self.__cached_keyboards = keyboards
@@ -208,3 +211,13 @@ class LinuxEventProcessor(BaseEventProcessor):
             logger.exception("Error reading from device")
 
         return buffer, start_time
+
+    def __setup_signal_handlers(self) -> None:
+        """Set up signal handlers for graceful termination."""
+        signal.signal(signal.SIGTERM, self.__handle_termination_signal)
+        signal.signal(signal.SIGINT, self.__handle_termination_signal)
+
+    def __handle_termination_signal(self, signum, frame):
+        """Handle termination signals."""
+        logger.debug("Received signal %s, shutting down...", signum)
+        self.__terminate = True
