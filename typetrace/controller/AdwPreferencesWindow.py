@@ -1,5 +1,7 @@
 """Python - GTK - PyGObject."""
 
+from __future__ import annotations
+
 import shutil
 from pathlib import Path
 from typing import Callable
@@ -17,12 +19,15 @@ DB_FILENAME = "TypeTrace.db"
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/AdwPreferencesWindow.ui")
 class AdwPreferencesWindow(Adw.PreferencesWindow):
+    """A preferences window for TypeTrace that handles various settings and preferences."""
+
     __gtype_name__ = "PreferencesWindow"
 
     import_button = Gtk.Template.Child()
     export_button = Gtk.Template.Child()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
+        """Initialize the preferences window and connect button signals."""
         super().__init__(**kwargs)
         self.app = kwargs["transient_for"].get_application()
 
