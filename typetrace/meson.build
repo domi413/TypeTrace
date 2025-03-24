@@ -46,6 +46,7 @@ configure_file(
 sources = [
   '__init__.py',
   'application.py',
+  'config.py',
 ]
 install_data(sources, install_dir: moduledir)
 
