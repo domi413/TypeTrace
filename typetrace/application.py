@@ -17,7 +17,11 @@ class Application(Adw.Application):
 
     def __init__(self, application_id: str, version: str) -> None:
         """Initialize the application with default settings."""
-        super().__init__(application_id=application_id, flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+        super().__init__(
+            application_id=application_id,
+            flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
+        )
+
         self.version = version
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)

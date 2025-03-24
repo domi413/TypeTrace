@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from backend.config import DEBUG
+from .config import DEBUG
 
 # Define colors
 YELLOW = "\033[33m"

@@ -68,30 +68,51 @@ class Verbose(Gtk.Box):
                 sorter = Gtk.NumericSorter(expression=expression)
             elif sort_type == "string":
                 sorter = Gtk.StringSorter(expression=expression)
+            else:
+                raise ValueError
             column.set_sorter(sorter)
 
             self.column_view.append_column(column)
 
         # Set an initial sort order
-        self.column_view.sort_by_column(self.column_view.get_columns()[0], Gtk.SortType.ASCENDING)
+        self.column_view.sort_by_column(
+            self.column_view.get_columns()[0],
+            Gtk.SortType.ASCENDING,
+        )
 
-    def _factory_setup(self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:  # noqa: ARG002
+    def _factory_setup(
+        self,
+        factory: Gtk.SignalListItemFactory,
+        list_item: Gtk.ListItem,
+    ) -> None:
         """Set up a label widget for each list item."""
         label = Gtk.Label()
         label.set_halign(Gtk.Align.START)
         list_item.set_child(label)
 
-    def _bind_scan_code(self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:  # noqa: ARG002
+    def _bind_scan_code(
+        self,
+        factory: Gtk.SignalListItemFactory,
+        list_item: Gtk.ListItem,
+    ) -> None:
         """Bind scan_code property to the label."""
         keystroke = list_item.get_item()
         list_item.get_child().set_text(str(keystroke.scan_code))
 
-    def _bind_count(self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:  # noqa: ARG002
+    def _bind_count(
+        self,
+        factory: Gtk.SignalListItemFactory,
+        list_item: Gtk.ListItem,
+    ) -> None:
         """Bind count property to the label."""
         keystroke = list_item.get_item()
         list_item.get_child().set_text(str(keystroke.count))
 
-    def _bind_key_name(self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:  # noqa: ARG002
+    def _bind_key_name(
+        self,
+        factory: Gtk.SignalListItemFactory,
+        list_item: Gtk.ListItem,
+    ) -> None:
         """Bind key_name property to the label."""
         keystroke = list_item.get_item()
         list_item.get_child().set_text(keystroke.key_name)
