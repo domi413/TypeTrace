@@ -63,4 +63,23 @@ sources_controller = [
 ]
 install_data(sources_controller, install_dir: moduledir / 'controller')
 
+sources_preferences = [
+    'preferences/__init__.py',
+    'preferences/appearance.py',
+    'preferences/base.py',
+    'preferences/dialog.py',
+    'preferences/keyboard.py',
+]
+install_data(sources_preferences, install_dir: moduledir / 'preferences')
+
+sources_preferences_database = [
+    'preferences/__init__.py',
+    'preferences/base.py',
+    'preferences/database.py',
+    'preferences/delete_handler.py',
+    'preferences/export_handler.py',
+    'preferences/import_handler.py',
+    'preferences/open_handler.py',
+]
+install_data(sources_preferences, install_dir: moduledir / 'preferences/database')
 subdir('backend')
