@@ -10,12 +10,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import appdirs
-from backend.config import DB_NAME, PROJECT_NAME, ExitCodes
+
+from .config import DB_NAME, PROJECT_NAME, ExitCodes
 
 if TYPE_CHECKING:
     import argparse
 
 logger = logging.getLogger(__name__)
+
 
 def resolve_db_path() -> Path:
     """Determine the database path using appdirs for cross-platform support."""
@@ -44,26 +46,26 @@ def main(args: argparse.Namespace) -> int:
     """
     if args.debug:
         # Update the global DEBUG variable
-        import backend.config
+        from . import config
 
-        backend.config.DEBUG = True
-        from backend.logging_setup import setup_logging
+        config.DEBUG = True
+        from .logging_setup import setup_logging
 
         setup_logging()
 
     try:
         check_input_group()
 
-        from backend.devices import check_device_accessibility
+        from .devices import check_device_accessibility
 
         check_device_accessibility()
         db_path: Path = resolve_db_path()
 
-        from backend.db import initialize_database
+        from .db import initialize_database
 
         initialize_database(db_path)
 
-        from backend.events import trace_keys
+        from .events import trace_keys
 
         trace_keys(db_path)
     except PermissionError:

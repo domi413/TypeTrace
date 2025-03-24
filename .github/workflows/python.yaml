@@ -1,6 +1,6 @@
 name: Check Python Code
 
-on: [push, pull_request]
+on: pull_request
 
 jobs:
   lint:
@@ -20,3 +20,9 @@ jobs:
 
       - name: Run Ruff
         run: ruff check typetrace/
+
+      - name: Install mypy
+        run: pip install mypy evdev appdirs
+
+      - name: Run mypy
+        run: mypy typetrace/backend/

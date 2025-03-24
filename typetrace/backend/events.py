@@ -8,9 +8,10 @@ import time
 from typing import TYPE_CHECKING
 
 import evdev
-from backend.config import BUFFER_SIZE, BUFFER_TIMEOUT, DEBUG, KeyEvent
-from backend.db import write_to_database
-from backend.devices import select_keyboards
+
+from .config import BUFFER_SIZE, BUFFER_TIMEOUT, DEBUG, KeyEvent
+from .db import write_to_database
+from .devices import select_keyboards
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +185,7 @@ def buffer_keys(devices: list[evdev.device.InputDevice], db_path: Path) -> None:
 
 def trace_keys(db_path: Path) -> None:
     """Start tracing keyboard events."""
-    from backend.devices import managed_devices
+    from .devices import managed_devices
 
     with managed_devices() as devices:
         if not devices:

@@ -7,8 +7,8 @@ import sqlite3
 from contextlib import contextmanager
 from typing import TYPE_CHECKING
 
-from backend.config import DEBUG, KeyEvent
-from backend.sql import (
+from .config import DEBUG, KeyEvent
+from .sql import (
     BEGIN_TRANSACTION,
     CREATE_KEYSTROKES_TABLE,
     INSERT_OR_UPDATE_KEYSTROKE,
