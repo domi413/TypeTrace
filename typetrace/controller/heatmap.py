@@ -32,6 +32,7 @@ class Heatmap(Gtk.Box):
     def __init__(
         self,
         keystroke_store: KeystrokeStore,
+        layout: str = "en_US",
         **kwargs,
     ) -> None:
         """Initialize the heatmap widget.
@@ -102,6 +103,7 @@ class Heatmap(Gtk.Box):
             )
             if row_count == 0:
                 box.set_homogeneous(True)
+
             self.keyboard_container.append(box)
 
             for scancode, key_label in row:

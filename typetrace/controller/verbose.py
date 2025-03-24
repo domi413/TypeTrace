@@ -76,8 +76,8 @@ class Verbose(Gtk.Box):
 
         # Set an initial sort order
         self.column_view.sort_by_column(
-            self.column_view.get_columns()[1],
-            Gtk.SortType.DESCENDING,
+            self.column_view.get_columns()[0],
+            Gtk.SortType.ASCENDING,
         )
 
     def _factory_setup(
