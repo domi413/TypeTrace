@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 
-from backend.cli import resolve_db_path  # Shared path resolution
+from backend.cli import CLI
 from gi.repository import GObject
 
 
@@ -30,7 +30,7 @@ class KeystrokeStore:
 
     def __init__(self) -> None:
         """Initialize the model with the database path."""
-        self.db_path = resolve_db_path()
+        self.db_path = CLI.resolve_db_path()
 
     def get_all_keystrokes(self) -> list[Keystroke]:
         """Retrieve all keystrokes with their counts and names."""

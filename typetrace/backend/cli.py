@@ -25,7 +25,15 @@ class CLI:
 
     def __init__(self) -> None:
         """Initialize the CLI."""
-        self.db_path = self._resolve_db_path()
+        self.__db_path = self.resolve_db_path()
+
+    @staticmethod
+    def resolve_db_path() -> Path:
+        """Determine the database path using appdirs for cross-platform support."""
+        data_dir = appdirs.user_data_dir(Config.APP_NAME)
+        db_path = Path(data_dir) / Config.DB_NAME
+        db_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+        return db_path
 
     def run(self, args: argparse.Namespace) -> int:
         """Run the main logic of the TypeTrace backend.
@@ -54,10 +62,8 @@ class CLI:
                     logger.error("Unsupported platform: %s", platform.system())
                     return ExitCodes.PLATFORM_ERROR
 
-            db_path: Path = self.db_path
-            DatabaseManager.initialize_database(db_path)
-
-            processor.trace_keys(db_path)
+            DatabaseManager.initialize_database(self.__db_path)
+            processor.trace_keys(self.__db_path)
         except PermissionError:
             logger.exception(
                 "\nPlease ensure you have sufficient permissions "
@@ -82,14 +88,6 @@ class CLI:
             logger.error("The User %s is not in the 'input' group", username)
             raise PermissionError
 
-    @staticmethod
-    def _resolve_db_path() -> Path:
-        """Determine the database path using appdirs for cross-platform support."""
-        data_dir = appdirs.user_data_dir(Config.APP_NAME)
-        db_path = Path(data_dir) / Config.DB_NAME
-        db_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
-        return db_path
-
 
 def main(args: argparse.Namespace) -> int:
     """Execute the TypeTrace backend.
@@ -98,7 +96,7 @@ def main(args: argparse.Namespace) -> int:
         args: Command-line arguments.
 
     Returns:
-        int: Exit code for the application.
+        Exit code for the application.
 
     """
     cli = CLI()
