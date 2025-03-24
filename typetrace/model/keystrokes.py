@@ -72,3 +72,16 @@ class KeystrokeStore:
         except sqlite3.Error as e:
             print(f"Database error: {e}")
             return 0
+
+    def clear(self) -> bool:
+        """Remove all entries."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM keystrokes")
+                conn.commit()
+        except sqlite3.Error as e:
+            print(f"Clear failed: {e}")
+            return False
+        else:
+            return True

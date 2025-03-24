@@ -72,6 +72,7 @@ class Application(Adw.Application):
         pref_dialog = Preferences(
             parent_window=self.props.active_window,
             db_manager=self.db_manager,
+            keystroke_store=self.keystroke_store,
         )
         pref_dialog.present(self.props.active_window)
 

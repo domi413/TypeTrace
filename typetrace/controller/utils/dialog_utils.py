@@ -31,7 +31,7 @@ def show_error_dialog(
     dialog.present(window)
 
 
-def show_save_dialog(
+def open_file_save_dialog(
     parent: Gtk.Window,
     title: str,
     initial_name: str,
@@ -57,7 +57,7 @@ def show_save_dialog(
     dialog.show()
 
 
-def show_open_dialog(
+def open_file_open_dialog(
     parent: Gtk.Window,
     title: str,
     filters: Gio.ListStore,
