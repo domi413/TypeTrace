@@ -52,6 +52,7 @@ install_data(sources, install_dir: moduledir)
 
 sources_model = [
   'model/__init__.py',
+  'model/database_manager.py',
   'model/keystrokes.py',
   'model/layouts.py',
 ]
@@ -65,5 +66,11 @@ sources_controller = [
   'controller/preferences.py',
 ]
 install_data(sources_controller, install_dir: moduledir / 'controller')
+
+sources_controller_utils = [
+  'controller/utils/__init__.py',
+  'controller/utils/dialog_utils.py',
+]
+install_data(sources_controller_utils, install_dir: moduledir / 'controller' / 'utils')
 
 subdir('backend')

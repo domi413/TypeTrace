@@ -20,15 +20,16 @@ class TypetraceWindow(Adw.ApplicationWindow):
     view_switcher = Gtk.Template.Child("view_switcher")
     stack = Gtk.Template.Child("stack")
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, keystroke_store: KeystrokeStore, **kwargs) -> None:
         """Initialize the application window.
 
         Args:
             **kwargs: Keyword arguments passed to the parent constructor
+            keystroke_store: Access to keystrokes
 
         """
         super().__init__(**kwargs)
-        self.keystroke_store = KeystrokeStore()
+        self.keystroke_store = keystroke_store
         heatmap_page = self.stack.add_titled(
             Heatmap(keystroke_store=self.keystroke_store),
             "heatmap",

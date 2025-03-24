@@ -6,10 +6,11 @@ from typing import Any, Callable
 
 from gi.repository import Adw, Gio
 
+from typetrace.model.database_manager import DatabaseManager
+from typetrace.model.keystrokes import KeystrokeStore
+
 from .controller.preferences import Preferences
 from .controller.window import TypetraceWindow
-
-DB_FILENAME = "TypeTrace.db"
 
 
 class Application(Adw.Application):
@@ -23,6 +24,10 @@ class Application(Adw.Application):
         )
 
         self.version = version
+
+        self.keystroke_store = KeystrokeStore()
+        self.db_manager = DatabaseManager()
+
         self._setup_actions()
 
     def do_activate(self) -> None:
@@ -32,7 +37,7 @@ class Application(Adw.Application):
         """
         win = self.props.active_window
         if not win:
-            win = TypetraceWindow(application=self)
+            win = TypetraceWindow(self.keystroke_store, application=self)
         win.present()
 
     def _setup_actions(self) -> None:
@@ -64,7 +69,10 @@ class Application(Adw.Application):
 
     def on_preferences_action(self, *_: Any) -> None:
         """Show the application preferences dialog."""
-        pref_dialog = Preferences(parent_window=self.props.active_window)
+        pref_dialog = Preferences(
+            parent_window=self.props.active_window,
+            db_manager=self.db_manager,
+        )
         pref_dialog.present(self.props.active_window)
 
     def create_action(
