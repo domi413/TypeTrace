@@ -1,6 +1,12 @@
 name: Check Python Code
 
-on: [push, pull_request]
+on:
+pull_request:
+  types:
+    - opened
+    - synchronize
+    - ready_for_review
+    - reopened
 
 jobs:
   lint:
