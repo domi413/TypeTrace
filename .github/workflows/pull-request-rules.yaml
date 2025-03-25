@@ -1,4 +1,4 @@
-name: Git Commit Rules
+name: PR title rule
 
 on:
   pull_request:
@@ -9,16 +9,12 @@ on:
       - reopened
 
 jobs:
-  pull-request-title-check:
+  pull-request-title:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-  pull-request-title:
-    runs-on: ubuntu-latest
-    needs: pull-request-title-check
-    steps:
       - name: Validate PR Title
         if: env.ACT != 'true'
         run: |

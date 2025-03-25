@@ -10,32 +10,33 @@ on:
 
 jobs:
   lint:
-    runs-on: Ubuntu latest
+    runs-on: Ubuntu-latest
     strategy:
       matrix:
-        check: ["ruff", "mypy"]
+        tool: [ruff, mypy]
+
     steps:
       - name: Checkout code
-        uses: actions checkout@v4
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions setup python@v5
+        uses: actions/setup-python@v5
         with:
           python-version: "3.13"
           cache: "pip"
 
       - name: Install ruff dependencies
-        if: matrix.check == 'ruff'
+        if: matrix.tool == 'ruff'
         run: pip install ruff
 
       - name: Install mypy dependencies
-        if: matrix.check == 'mypy'
+        if: matrix.tool == 'mypy'
         run: pip install mypy evdev appdirs
 
       - name: Run ruff
-        if: matrix.check == 'ruff'
+        if: matrix.tool == 'ruff'
         run: ruff check typetrace/
 
       - name: Run mypy
-        if: matrix.check == 'mypy'
+        if: matrix.tool == 'mypy'
         run: mypy typetrace/backend/
