@@ -4,8 +4,7 @@ extend-select = [
 ]
 ignore = [
   "ANN003", # Ignore missing type annotation for **kwargs
-  "ANN401", # Ignore missing type annotation for functions
-  "ARG002", # Ignore unused argument
+  # "ANN401", # Ignore missing type annotation for functions
 ]
 
 [tool.mypy]

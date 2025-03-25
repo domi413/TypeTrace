@@ -1,13 +1,18 @@
 """Linux-specific event processing."""
 
+from __future__ import annotations
+
 import logging
 import select
 import signal
 import time
-from collections.abc import Generator
 from contextlib import contextmanager, suppress
-from pathlib import Path
-from typing import final, override
+from typing import TYPE_CHECKING, final, override
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+    from pathlib import Path
+    from types import FrameType
 
 import evdev
 from backend.config import Config, KeyEvent
@@ -217,7 +222,7 @@ class LinuxEventProcessor(BaseEventProcessor):
         signal.signal(signal.SIGTERM, self.__handle_termination_signal)
         signal.signal(signal.SIGINT, self.__handle_termination_signal)
 
-    def __handle_termination_signal(self, signum, frame):
+    def __handle_termination_signal(self, signum: int, _: FrameType | None) -> None:
         """Handle termination signals."""
         logger.debug("Received signal %s, shutting down...", signum)
         self.__terminate = True

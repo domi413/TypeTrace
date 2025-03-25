@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import final
 
-from backend.config import Config, KeyEvent
+from backend.config import KeyEvent
 from backend.sql import SQLQueries
 
 logger = logging.getLogger(__name__)
