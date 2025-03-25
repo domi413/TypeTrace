@@ -1,15 +1,15 @@
 name: Git Commit Rules
 
 on:
-pull_request:
-  types:
-    - opened
-    - synchronize
-    - ready_for_review
-    - reopened
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+      - reopened
 
 jobs:
-  commit-message-check:
+  pull-request-title-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -17,7 +17,7 @@ jobs:
 
   pull-request-title:
     runs-on: ubuntu-latest
-    needs: commit-message-check
+    needs: pull-request-title-check
     steps:
       - name: Validate PR Title
         if: env.ACT != 'true'
@@ -29,4 +29,3 @@ jobs:
               echo "Allowed format: fix|feat|pipeline|doc|wip(#TICKET-ID): Description"
               exit 1
           fi
-

@@ -1,34 +1,41 @@
 name: Check Python Code
 
 on:
-pull_request:
-  types:
-    - opened
-    - synchronize
-    - ready_for_review
-    - reopened
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+      - reopened
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
-
+    runs-on: Ubuntu latest
+    strategy:
+      matrix:
+        check: ["ruff", "mypy"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions setup python@v5
         with:
-          python-version: "3.x"
+          python-version: "3.13"
+          cache: "pip"
 
-      - name: Install Ruff
+      - name: Install ruff dependencies
+        if: matrix.check == 'ruff'
         run: pip install ruff
 
-      - name: Run Ruff
-        run: ruff check typetrace/
-
-      - name: Install mypy
+      - name: Install mypy dependencies
+        if: matrix.check == 'mypy'
         run: pip install mypy evdev appdirs
 
+      - name: Run ruff
+        if: matrix.check == 'ruff'
+        run: ruff check typetrace/
+
       - name: Run mypy
+        if: matrix.check == 'mypy'
         run: mypy typetrace/backend/
