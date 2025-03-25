@@ -175,6 +175,7 @@ cython_debug/
 _build/
 _install/
 /subprojects/blueprint-compiler
+run.sh
 
 # ACT
 .secrets

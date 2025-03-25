@@ -1,0 +1,76 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $Preferences: Adw.PreferencesDialog {
+  Adw.PreferencesPage {
+    Adw.PreferencesGroup {
+      title: "Appearance";
+
+      Adw.ComboRow theme_row {
+        title: "Theme";
+        subtitle: "Application color scheme preference";
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: "Database";
+
+      Adw.ActionRow {
+        title: "Import Database";
+        subtitle: "Import database from a file";
+
+        Button import_button {
+          valign: center;
+          has-frame: false;
+          icon-name: "document-send-symbolic";
+        }
+      }
+
+      Adw.ActionRow {
+        title: "Export Database";
+        subtitle: "Export database as CSV";
+
+        Button export_button {
+          valign: center;
+          has-frame: false;
+          icon-name: "document-save-symbolic";
+        }
+      }
+
+      Adw.ActionRow {
+        title: "Open Database Location";
+        subtitle: "Open the folder containing the database file";
+
+        Button locate_button {
+          valign: center;
+          has-frame: false;
+          icon-name: "document-save-symbolic";
+        }
+      }
+
+      Adw.ActionRow {
+        title: "Clear Database";
+        subtitle: "Clear all current typing statistics";
+
+        Button delete_button {
+          valign: center;
+          has-frame: false;
+          icon-name: "user-trash-symbolic";
+
+          css-classes: [
+            "destructive-action",
+          ];
+        }
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: "Keyboard";
+
+      Adw.ComboRow keyboard_row {
+        title: "Keyboard Layout";
+        subtitle: "Select your preferred keyboard layout";
+      }
+    }
+  }
+}

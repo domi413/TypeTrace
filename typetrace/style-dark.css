@@ -1,22 +1,12 @@
-.container button {
-  border: 2pt solid rgba(0, 0, 0, 0.2);
-}
-
 .container label {
   border: 1pt solid rgba(255, 255, 255, 0.1);
-  border-radius: 4pt;
-  font-size: 1rem;
-  padding: 6pt 8pt;
-  min-width: 12pt;
   background-color: rgba(50, 50, 50, 0.9);
   color: #ddd;
-  transition: background-color 0.3s ease;
 }
 
 .container label:hover {
   box-shadow: 0 1pt 2pt rgba(255, 255, 255, 0.3);
 }
-
 
 .container label.low-usage {
   color: #fff;

@@ -6,6 +6,10 @@ from typing import Any, Callable
 
 from gi.repository import Adw, Gio
 
+from typetrace.model.database_manager import DatabaseManager
+from typetrace.model.keystrokes import KeystrokeStore
+
+from .controller.preferences import Preferences
 from .controller.window import TypetraceWindow
 
 
@@ -18,10 +22,13 @@ class Application(Adw.Application):
             application_id=application_id,
             flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
         )
+
         self.version = version
-        self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
-        self.create_action("about", self.on_about_action)
-        self.create_action("preferences", self.on_preferences_action)
+
+        self.keystroke_store = KeystrokeStore()
+        self.db_manager = DatabaseManager()
+
+        self._setup_actions()
 
     def do_activate(self) -> None:
         """Activate the application.
@@ -30,14 +37,25 @@ class Application(Adw.Application):
         """
         win = self.props.active_window
         if not win:
-            win = TypetraceWindow(application=self)
+            win = TypetraceWindow(self.keystroke_store, application=self)
         win.present()
+
+    def _setup_actions(self) -> None:
+        """Set up application actions and their shortcuts."""
+        actions = [
+            ("quit", self.quit, ["<primary>q"]),
+            ("about", self.on_about_action),
+            ("preferences", self.on_preferences_action),
+        ]
+        for args in actions:
+            self.create_action(*args)
 
     def on_about_action(self, *_: Any) -> None:
         """Display the about dialog with application information."""
         about = Adw.AboutDialog(
             application_name="TypeTrace",
             application_icon="edu.ost.typetrace",
+            website="https://github.com/domi413/TypeTrace",
             version=self.version,
             developers=[
                 "David Yves Bachmann",
@@ -49,9 +67,14 @@ class Application(Adw.Application):
         )
         about.present(self.props.active_window)
 
-    def on_preferences_action(self, _widget: Any, _: Any) -> None:
+    def on_preferences_action(self, *_: Any) -> None:
         """Show the application preferences dialog."""
-        print("app.preferences action activated")
+        pref_dialog = Preferences(
+            parent_window=self.props.active_window,
+            db_manager=self.db_manager,
+            keystroke_store=self.keystroke_store,
+        )
+        pref_dialog.present(self.props.active_window)
 
     def create_action(
         self,
