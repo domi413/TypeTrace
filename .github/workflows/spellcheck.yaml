@@ -2,7 +2,12 @@ name: Spellcheck
 
 on:
   pull_request:
-   types: [opened, edited, synchronize, reopened]
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+      - reopened
+
 jobs:
   spellcheck:
     runs-on: ubuntu-latest
@@ -10,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Starting cspell
         uses: streetsidesoftware/cspell-action@v6
