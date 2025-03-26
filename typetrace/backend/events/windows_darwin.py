@@ -17,7 +17,7 @@ class WindowsDarwinEventProcessor(BaseEventProcessor):
     """Event processor for Windows and Darwin platforms."""
 
     @override
-    def trace_keys(self, db_path: Path) -> None:
+    def trace(self, db_path: Path) -> None:
         """See base class."""
         with keyboard.Listener(
             on_press=lambda key: self._on_key_event(key, True, db_path),
@@ -27,7 +27,7 @@ class WindowsDarwinEventProcessor(BaseEventProcessor):
             listener.join()
 
     @override
-    def _buffer_keys(self, devices: list[Any], db_path: Path) -> None:
+    def _buffer(self, devices: list[Any], db_path: Path) -> None:
         """See base class."""
         buffer: list[KeyEvent] = []
         start_time = time.time()

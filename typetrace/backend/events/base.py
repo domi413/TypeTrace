@@ -16,7 +16,7 @@ class BaseEventProcessor(ABC):
     """Abstract base class for event processing."""
 
     @abstractmethod
-    def trace_keys(self, db_path: Path) -> None:
+    def trace(self, db_path: Path) -> None:
         """Start tracing keyboard events."""
 
     @final
@@ -29,7 +29,7 @@ class BaseEventProcessor(ABC):
         """Check if buffer timeout has been reached and flush buffer if needed.
 
         Args:
-            buffer: Current buffer of key events
+            buffer: Current buffer of events
             start_time: Time when the buffer started
             db_path: Path to the database
 
@@ -59,13 +59,13 @@ class BaseEventProcessor(ABC):
         )
 
     @abstractmethod
-    def _buffer_keys(self, devices: list[Any], db_path: Path) -> None:
-        """Buffer up to BUFFER_SIZE keystrokes or until BUFFER_TIMEOUT, then write them.
+    def _buffer(self, devices: list[Any], db_path: Path) -> None:
+        """Buffer up to BUFFER_SIZE or until BUFFER_TIMEOUT, then write them.
 
         Buffer will be flushed by calling _check_timeout_and_flush.
 
         Args:
-            devices: List of keyboard input devices to monitor.
+            devices: List of input devices to monitor.
             db_path: Path to the database.
 
         """
@@ -77,11 +77,11 @@ class BaseEventProcessor(ABC):
         buffer: list[KeyEvent],
         start_time: float,
     ) -> tuple[list[KeyEvent], float]:
-        """Process a single keyboard event.
+        """Process a single input event.
 
         Args:
             event: Event to process
-            buffer: Current buffer of key events
+            buffer: Current buffer of events
             start_time: Time when the buffer started
 
         Returns:

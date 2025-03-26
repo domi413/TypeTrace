@@ -47,7 +47,7 @@ class LinuxEventProcessor(BaseEventProcessor):
             logger.exception("Failed trying to access input devices")
 
     @override
-    def trace_keys(self, db_path: Path) -> None:
+    def trace(self, db_path: Path) -> None:
         """See base class."""
         # Set up signal handler
         self.__setup_signal_handlers()
@@ -57,10 +57,10 @@ class LinuxEventProcessor(BaseEventProcessor):
                 logger.warning("No keyboard devices found")
                 return
 
-            self._buffer_keys(devices, db_path)
+            self._buffer(devices, db_path)
 
     @override
-    def _buffer_keys(
+    def _buffer(
         self,
         devices: list[evdev.device.InputDevice],
         db_path: Path,
@@ -134,6 +134,10 @@ class LinuxEventProcessor(BaseEventProcessor):
                 self._print_key(event_data)
                 buffer.append(event_data)
 
+            # TODO: Don't think we should call the write_to_database in
+            # multiple places This is also not what _process_single_event is
+            # meant to do, this is and shouldbe the job of
+            # _check_timeout_and_flush
             if len(buffer) >= Config.BUFFER_SIZE:
                 DatabaseManager.write_to_database(self.__db_path, buffer)
                 buffer.clear()
@@ -213,6 +217,12 @@ class LinuxEventProcessor(BaseEventProcessor):
                     start_time,
                 )
         except OSError:
+            # FIXME: When unplugging devices during runtime, this exception is
+            # raised. I think we are good by raising an exception since it
+            # should be treated as an error when the keyboard suddenly
+            # disappears, but we should recover from this. Since we're already
+            # using the time library, an option could be to call the
+            # _select_keyboards every 5 seconds.
             logger.exception("Error reading from device")
 
         return buffer, start_time
