@@ -47,4 +47,12 @@ class SQLQueries:
         key_count = key_count + 1
     """
 
-    # TODO: create index for tables
+    CREATE_KEYSTROKE_NAME_INDEX = """
+    CREATE INDEX IF NOT EXISTS idx_keystrokes_key_name 
+    ON keystrokes(key_name);
+    """
+
+    CREATE_KEYSTROKE_LOGS_COMPOSITE_INDEX = """
+    CREATE INDEX IF NOT EXISTS idx_keystroke_logs_date_id 
+    ON keystroke_logs(log_date, keystroke_id);
+    """

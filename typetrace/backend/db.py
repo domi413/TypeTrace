@@ -33,6 +33,8 @@ class DatabaseManager:
             cursor = conn.cursor()
             cursor.execute(SQLQueries.CREATE_KEYSTROKE_TABLE)
             cursor.execute(SQLQueries.CREATE_KEYSTROKE_LOGS_TABLE)
+            cursor.execute(SQLQueries.CREATE_KEYSTROKE_NAME_INDEX)
+            cursor.execute(SQLQueries.CREATE_KEYSTROKE_LOGS_COMPOSITE_INDEX)
             conn.commit()
 
             logger.debug("Database initialized at %s", db_path)
