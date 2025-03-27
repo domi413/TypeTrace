@@ -115,4 +115,6 @@ class Verbose(Gtk.Box):
     ) -> None:
         """Bind key_name property to the label."""
         keystroke = list_item.get_item()
-        list_item.get_child().set_text(keystroke.key_name)
+        key_name = keystroke.key_name
+        key_name = key_name.removeprefix("KEY_").lower()
+        list_item.get_child().set_text(key_name)
