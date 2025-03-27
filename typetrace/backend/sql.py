@@ -21,14 +21,6 @@ class SQLQueries:
     )
     """
 
-    CREATE_TABLE = """
-    CREATE TABLE IF NOT EXISTS keystrokes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        keycode TEXT NOT NULL,
-        timestamp REAL NOT NULL
-    )
-    """
-
     INSERT_OR_UPDATE_KEYSTROKE = """
     INSERT INTO keystrokes (scan_code, count, key_name)
     VALUES (:scan_code, 1, :key_name)

@@ -31,7 +31,7 @@ class DatabaseManager:
         """
         with DatabaseManager._get_db_connection(db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(SQLQueries.CREATE_TABLE)
+            cursor.execute(SQLQueries.CREATE_KEYSTROKES_TABLE)
             conn.commit()
 
             logger.debug("Database initialized at %s", db_path)
