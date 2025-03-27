@@ -6,55 +6,17 @@ template $Heatmap : Gtk.Box {
     valign: center;
 
     Gtk.Box {
-        css-classes: ["container"];
+        css-classes: ["container", "legend-container"];
         orientation: horizontal;
         spacing: 5;
         margin-bottom: 20;
+        halign: center;
 
-        Gtk.Label {
-            label: "Usage:";
-            margin-end: 10;
-        }
-
-        Gtk.Label {
-            label: "10%";
-            css-classes: ["usage-10"];
-        }
-        Gtk.Label {
-            label: "20%";
-            css-classes: ["usage-20"];
-        }
-        Gtk.Label {
-            label: "30%";
-            css-classes: ["usage-30"];
-        }
-        Gtk.Label {
-            label: "40%";
-            css-classes: ["usage-40"];
-        }
-        Gtk.Label {
-            label: "50%";
-            css-classes: ["usage-50"];
-        }
-        Gtk.Label {
-            label: "60%";
-            css-classes: ["usage-60"];
-        }
-        Gtk.Label {
-            label: "70%";
-            css-classes: ["usage-70"];
-        }
-        Gtk.Label {
-            label: "80%";
-            css-classes: ["usage-80"];
-        }
-        Gtk.Label {
-            label: "90%";
-            css-classes: ["usage-90"];
-        }
-        Gtk.Label {
-            label: "100%";
-            css-classes: ["usage-100"];
+        Gtk.Box {
+            css-classes: ["gradient-bar"];
+            height-request: 30;
+            width-request: 300;
+            halign: center;
         }
     }
 
