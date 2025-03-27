@@ -67,7 +67,7 @@ class CLI:
                     return ExitCodes.PLATFORM_ERROR
 
             DatabaseManager.initialize_database(self.__db_path)
-            processor.trace_keys(self.__db_path)
+            processor.trace(self.__db_path)
         except PermissionError:
             logger.exception(
                 "\nPlease ensure you have sufficient permissions "
