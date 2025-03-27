@@ -8,15 +8,25 @@ template $Heatmap : Gtk.Box {
     Gtk.Box {
         css-classes: ["container", "legend-container"];
         orientation: horizontal;
-        spacing: 5;
+        spacing: 10;
         margin-bottom: 20;
         halign: center;
+
+        Gtk.Label {
+            label: "Min";
+            margin-end: 5;
+        }
 
         Gtk.Box {
             css-classes: ["gradient-bar"];
             height-request: 30;
             width-request: 300;
             halign: center;
+        }
+
+        Gtk.Label {
+            label: "Max";
+            margin-start: 5;
         }
     }
 

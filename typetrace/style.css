@@ -69,25 +69,14 @@
 .gradient-bar {
     background: linear-gradient(to right,
             #1a73e8 0%,
-            /* usage-10 */
             #4285f4 10%,
-            /* usage-20 */
             #82b1ff 20%,
-            /* usage-30 */
             #bbdefb 30%,
-            /* usage-40 */
             #fff176 40%,
-            /* usage-50 */
             #ffb300 50%,
-            /* usage-60 */
             #f57c00 60%,
-            /* usage-70 */
             #d32f2f 70%,
-            /* usage-80 */
             #c62828 80%,
-            /* usage-90 */
-            #b71c1c 90%
-            /* usage-100 */
-        );
+            #b71c1c 90%);
     border-radius: 4pt;
 }
