@@ -223,6 +223,11 @@ class LinuxEventProcessor(BaseEventProcessor):
             # disappears, but we should recover from this. Since we're already
             # using the time library, an option could be to call the
             # _select_keyboards every 5 seconds.
+
+            # INFO: Apparently if I add a device (e.g. keyboard) during
+            # runtime, it's getting recognized and I can unplug it withouth an
+            # error, so the issue described above only counts for devices that
+            # are initialized at startup.
             logger.exception("Error reading from device")
 
         return buffer, start_time
