@@ -51,6 +51,12 @@ class Heatmap(Gtk.Box):
         self._build_keyboard()
         self._update_colors()
 
+        self.keystroke_store.connect("refreshed", self._on_refresh)
+
+    def _on_refresh(self, _keystroke_store: KeystrokeStore) -> None:
+        """Handle refresh signal by updating colors."""
+        self._update_colors()
+
     def _get_keyboard_layout(self) -> str:
         """Determine the current keyboard layout of the system.
 

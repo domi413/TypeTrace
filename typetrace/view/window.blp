@@ -18,6 +18,12 @@ template $TypetraceWindow: Adw.ApplicationWindow {
         tooltip-text: "Main Menu";
         menu-model: primary_menu;
       }
+      [end]
+      Button refresh_button {
+        icon-name: "view-refresh-symbolic";
+        tooltip-text: "Refresh Data";
+        action-name: "win.refresh";
+      }
     }
 
     content: Adw.ViewStack stack {};

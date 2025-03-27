@@ -1,6 +1,6 @@
 """Window module for the Typetrace application."""
 
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, Gio, Gtk
 
 from typetrace.model.keystrokes import KeystrokeStore
 
@@ -30,6 +30,10 @@ class TypetraceWindow(Adw.ApplicationWindow):
         super().__init__(**kwargs)
         self.keystroke_store = KeystrokeStore()
 
+        refresh_action = Gio.SimpleAction.new("refresh", None)
+        refresh_action.connect("activate", self._on_refresh)
+        self.add_action(refresh_action)
+
         heatmap_page = self.stack.add_titled(
             Heatmap(keystroke_store=self.keystroke_store),
             "heatmap",
@@ -44,3 +48,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         verbose_page.set_icon_name("text-x-generic-symbolic")
 
         self.view_switcher.set_stack(self.stack)
+
+    def _on_refresh(self, _action: Gio.SimpleAction, _param: None) -> None:
+        """Handle refresh action by refreshing the keystroke store."""
+        self.keystroke_store.refresh()

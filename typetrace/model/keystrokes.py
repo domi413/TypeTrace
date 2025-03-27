@@ -25,12 +25,21 @@ class Keystroke(GObject.Object):
         self.key_name = key_name
 
 
-class KeystrokeStore:
+class KeystrokeStore(GObject.Object):
     """Model for interacting with the keystrokes table in the database."""
+
+    __gtype_name__ = "KeystrokeStore"
+
+    refreshed = GObject.Signal("refreshed", return_type=None, arg_types=())
 
     def __init__(self) -> None:
         """Initialize the model with the database path."""
+        super().__init__()
         self.db_path = CLI.resolve_db_path()
+
+    def refresh(self) -> None:
+        """Refresh the data from the database and emit the refreshed signal."""
+        self.refreshed.emit()
 
     def get_all_keystrokes(self) -> list[Keystroke]:
         """Retrieve all keystrokes with their counts and names."""
