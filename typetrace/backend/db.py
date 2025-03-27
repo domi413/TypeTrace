@@ -33,7 +33,7 @@ class DatabaseManager:
             cursor = conn.cursor()
             cursor.execute(SQLQueries.CREATE_KEYSTROKE_TABLE)
             cursor.execute(SQLQueries.CREATE_KEYSTROKE_LOGS_TABLE)
-            cursor.execute(SQLQueries.CREATE_KEYSTROKE_NAME_INDEX)
+            cursor.execute(SQLQueries.CREATE_KEYSTROKE_SCAN_CODE_INDEX)
             cursor.execute(SQLQueries.CREATE_KEYSTROKE_LOGS_COMPOSITE_INDEX)
             conn.commit()
 
@@ -92,9 +92,18 @@ class DatabaseManager:
                     else event["name"]
                 )
 
-                cursor.execute(SQLQueries.INSERT_KEYSTROKE, {"key_name": key_name})
+                cursor.execute(
+                    SQLQueries.INSERT_KEYSTROKE,
+                    {
+                        "scan_code": event["scan_code"],
+                        "key_name": key_name,
+                    },
+                )
 
-                cursor.execute(SQLQueries.GET_KEYSTROKE_ID, {"key_name": key_name})
+                cursor.execute(
+                    SQLQueries.GET_KEYSTROKE_ID,
+                    {"scan_code": event["scan_code"]},
+                )
                 keystroke_id = cursor.fetchone()[0]
 
                 cursor.execute(

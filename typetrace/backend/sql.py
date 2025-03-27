@@ -16,7 +16,8 @@ class SQLQueries:
     CREATE_KEYSTROKE_TABLE = """
     CREATE TABLE IF NOT EXISTS keystrokes (
         keystroke_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        key_name TEXT NOT NULL UNIQUE
+        scan_code INTEGER NOT NULL UNIQUE,
+        key_name TEXT NOT NULL
     );
     """
 
@@ -32,12 +33,12 @@ class SQLQueries:
     """
 
     INSERT_KEYSTROKE = """
-    INSERT OR IGNORE INTO keystrokes (key_name)
-    VALUES (:key_name)
+    INSERT OR IGNORE INTO keystrokes (scan_code, key_name)
+    VALUES (:scan_code, :key_name)
     """
 
     GET_KEYSTROKE_ID = """
-    SELECT keystroke_id FROM keystrokes WHERE key_name = :key_name
+    SELECT keystroke_id FROM keystrokes WHERE scan_code = :scan_code
     """
 
     INSERT_OR_UPDATE_KEYSTROKE_LOG = """
@@ -47,9 +48,9 @@ class SQLQueries:
         key_count = key_count + 1
     """
 
-    CREATE_KEYSTROKE_NAME_INDEX = """
-    CREATE INDEX IF NOT EXISTS idx_keystrokes_key_name 
-    ON keystrokes(key_name);
+    CREATE_KEYSTROKE_SCAN_CODE_INDEX = """
+    CREATE INDEX IF NOT EXISTS idx_keystrokes_scan_code 
+    ON keystrokes(scan_code);
     """
 
     CREATE_KEYSTROKE_LOGS_COMPOSITE_INDEX = """

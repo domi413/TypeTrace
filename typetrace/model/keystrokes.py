@@ -22,7 +22,7 @@ class Keystroke(GObject.Object):
         super().__init__()
         self.scan_code = scan_code
         self.count = count
-        self.key_name = key_name.replace("KEY_", "")
+        self.key_name = key_name
 
 
 class KeystrokeStore:
@@ -39,7 +39,7 @@ class KeystrokeStore:
                 cursor = conn.cursor()
                 cursor.execute("""
                 SELECT 
-                    k.keystroke_id, 
+                    k.scan_code, 
                     COALESCE(SUM(kl.key_count), 0) AS total_count, 
                     k.key_name 
                 FROM keystrokes k
