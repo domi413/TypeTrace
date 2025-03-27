@@ -1,3 +1,5 @@
+
+- Create index for tables (db)
 - Add type annotation
 - Better (correct?) layout reading
 - use rgba colors

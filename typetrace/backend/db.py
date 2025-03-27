@@ -31,7 +31,8 @@ class DatabaseManager:
         """
         with DatabaseManager._get_db_connection(db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(SQLQueries.CREATE_KEYSTROKES_TABLE)
+            cursor.execute(SQLQueries.CREATE_KEYSTROKE_TABLE)
+            cursor.execute(SQLQueries.CREATE_KEYSTROKE_LOGS_TABLE)
             conn.commit()
 
             logger.debug("Database initialized at %s", db_path)
@@ -77,19 +78,29 @@ class DatabaseManager:
         if not events:
             return
 
-        processed_events = [
-            {
-                "scan_code": event["scan_code"],
-                "key_name": ", ".join(event["name"])
-                if isinstance(event["name"], tuple)
-                else event["name"],
-            }
-            for event in events
-        ]
-
         with DatabaseManager._get_db_connection(db_path) as conn:
             cursor = conn.cursor()
-            cursor.executemany(SQLQueries.INSERT_OR_UPDATE_KEYSTROKE, processed_events)
-            conn.commit()
 
+            cursor.execute(SQLQueries.BEGIN_TRANSACTION)
+
+            for event in events:
+                key_name = (
+                    ", ".join(event["name"])
+                    if isinstance(event["name"], tuple)
+                    else event["name"]
+                )
+
+                cursor.execute(SQLQueries.INSERT_KEYSTROKE, {"key_name": key_name})
+
+                cursor.execute(SQLQueries.GET_KEYSTROKE_ID, {"key_name": key_name})
+                keystroke_id = cursor.fetchone()[0]
+
+                cursor.execute(
+                    SQLQueries.INSERT_OR_UPDATE_KEYSTROKE_LOG,
+                    {
+                        "keystroke_id": keystroke_id,
+                    },
+                )
+
+            conn.commit()
             logger.debug("Updated database with %d keystroke events", len(events))

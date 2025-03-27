@@ -37,7 +37,15 @@ class KeystrokeStore:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute("SELECT scan_code, count, key_name FROM keystrokes")
+                cursor.execute("""
+                SELECT 
+                    k.keystroke_id, 
+                    COALESCE(SUM(kl.key_count), 0) AS total_count, 
+                    k.key_name 
+                FROM keystrokes k
+                LEFT JOIN keystroke_logs kl ON k.keystroke_id = kl.keystroke_id
+                GROUP BY k.keystroke_id, k.key_name
+                """)
                 rows = cursor.fetchall()
 
                 # Convert rows to Keystroke objects
@@ -58,7 +66,7 @@ class KeystrokeStore:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute("SELECT SUM(count) FROM keystrokes")
+                cursor.execute("SELECT SUM(key_count) FROM keystroke_logs")
                 result = cursor.fetchone()[0]
                 return result if result is not None else 0
         except sqlite3.Error as e:
@@ -70,7 +78,7 @@ class KeystrokeStore:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute("SELECT MAX(count) FROM keystrokes")
+                cursor.execute("SELECT MAX(key_count) FROM keystroke_logs")
                 result = cursor.fetchone()[0]
                 return result if result is not None else 0
         except sqlite3.Error as e:
