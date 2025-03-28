@@ -1,9 +1,6 @@
 # TypeTrace
 This is the GitHub repository of the TypeTrace source code
 
-## Setup
-All you need to do is run the `setup.sh` script on your machine. If you're running on Windows you can use WSL to execute it or the git bash.
-
 ## Local Pipeline Run
 
 To run the pipeline locally, we use the tool [act](https://github.com/nektos/act). You can install the tool and then run `act` in a terminal.
