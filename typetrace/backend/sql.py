@@ -1,21 +1,38 @@
-"""SQL commands for TypeTrace database operations."""
+"""SQL queries for TypeTrace database operations."""
 
-from __future__ import annotations
+from typing import final
 
-CREATE_KEYSTROKES_TABLE = """
+
+@final
+class SQLQueries:
+    """SQL queries for TypeTrace database operations."""
+
+    def __init__(self) -> None:
+        """Private constructor to prevent instantiation."""
+        raise TypeError
+
+    BEGIN_TRANSACTION = "BEGIN TRANSACTION"
+
+    CREATE_KEYSTROKES_TABLE = """
     CREATE TABLE IF NOT EXISTS keystrokes (
         scan_code INTEGER PRIMARY KEY,
         count INTEGER DEFAULT 0,
         key_name TEXT
     )
-"""
+    """
 
-INSERT_OR_UPDATE_KEYSTROKE = """
+    CREATE_TABLE = """
+    CREATE TABLE IF NOT EXISTS keystrokes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        keycode TEXT NOT NULL,
+        timestamp REAL NOT NULL
+    )
+    """
+
+    INSERT_OR_UPDATE_KEYSTROKE = """
     INSERT INTO keystrokes (scan_code, count, key_name)
-    VALUES (?, 1, ?)
+    VALUES (:scan_code, 1, :key_name)
     ON CONFLICT(scan_code) DO UPDATE SET
         count = count + 1,
-        key_name = ?
-"""
-
-BEGIN_TRANSACTION = "BEGIN TRANSACTION"
+        key_name = :key_name
+    """
