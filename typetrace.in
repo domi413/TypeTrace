@@ -72,7 +72,7 @@ def main() -> int:
         print(VERSION)
         sys.exit()
     if args.backend:
-        from backend import cli
+        from typetrace.backend import cli
 
         cli = cli.CLI()
         sys.exit(cli.run(args))

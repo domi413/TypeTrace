@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import sqlite3
 
-from backend.cli import CLI
 from gi.repository import GObject
+
+from typetrace.backend.cli import CLI
 
 
 class Keystroke(GObject.Object):

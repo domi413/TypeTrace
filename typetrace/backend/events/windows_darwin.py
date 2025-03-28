@@ -5,12 +5,12 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, override
 
-from backend.events.base import BaseEventProcessor
+from typetrace.backend.events.base import BaseEventProcessor
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from backend.config import Event
+    from typetrace.config import Event
 
 logger = logging.getLogger(__name__)
 

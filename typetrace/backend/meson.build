@@ -6,7 +6,6 @@ backend_ipcdir = backenddir / 'ipc'
 backend_main_sources = [
   '__init__.py',
   'cli.py',
-  'config.py',
   'db.py',
   'logging_setup.py',
   'sql.py',
@@ -15,6 +14,12 @@ install_data(
   backend_main_sources,
   install_dir: backenddir,
 )
+
+# Config file
+
+config_source = [
+  '../config.py'
+]
 
 # Event files
 backend_events_sources = [

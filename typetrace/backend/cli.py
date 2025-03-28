@@ -5,13 +5,11 @@ import logging
 import os
 import platform
 import sqlite3
-from pathlib import Path
 from typing import final
 
-import appdirs
-from backend.config import Config, ExitCodes
-from backend.db import DatabaseManager
-from backend.logging_setup import LoggerSetup
+from typetrace.backend.db import DatabaseManager
+from typetrace.backend.logging_setup import LoggerSetup
+from typetrace.config import Config, ExitCodes
 
 logger = logging.getLogger(__name__)
 
@@ -22,15 +20,7 @@ class CLI:
 
     def __init__(self) -> None:
         """Initialize the CLI."""
-        self.__db_path = self.resolve_db_path()
-
-    @staticmethod
-    def resolve_db_path() -> Path:
-        """Determine the database path using appdirs for cross-platform support."""
-        data_dir = appdirs.user_data_dir(Config.APP_NAME)
-        db_path = Path(data_dir) / Config.DB_NAME
-        db_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
-        return db_path
+        self.__db_path = Config.resolve_db_path()
 
     def run(self, args: argparse.Namespace) -> int:
         """Run the main logic of the TypeTrace backend.
@@ -49,14 +39,14 @@ class CLI:
         try:
             match platform.system().lower():
                 case "linux":
-                    from backend.events.linux import LinuxEventProcessor
+                    from typetrace.backend.events.linux import LinuxEventProcessor
 
                     self._check_input_group()
 
                     processor = LinuxEventProcessor()
                     processor.check_device_accessibility()
                 case "darwin" | "windows":
-                    from backend.events.windows_darwin import (
+                    from typetrace.backend.events.windows_darwin import (
                         WindowsDarwinEventProcessor,
                     )
 

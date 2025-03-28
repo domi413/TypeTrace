@@ -7,7 +7,7 @@ import platform
 from enum import StrEnum
 from typing import final
 
-from backend.config import Config
+from typetrace.config import Config
 
 
 class LogColor(StrEnum):
