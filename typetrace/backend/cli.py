@@ -20,7 +20,7 @@ class CLI:
 
     def __init__(self) -> None:
         """Initialize the CLI."""
-        self.__db_path = Config.resolve_db_path()
+        self.__db_path = Config.DB_PATH
 
     def run(self, args: argparse.Namespace) -> int:
         """Run the main logic of the TypeTrace backend.

@@ -26,13 +26,16 @@ class Config:
     # Global settings
     DEBUG: bool = False
 
+    # DB path
     @staticmethod
-    def resolve_db_path() -> Path:
+    def _resolve_db_path() -> Path:
         """Determine the database path using appdirs for cross-platform support."""
         data_dir = appdirs.user_data_dir(Config.APP_NAME)
         db_path = Path(data_dir) / Config.DB_NAME
         db_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
         return db_path
+
+    DB_PATH: Final[Path] = _resolve_db_path()
 
 
 class ExitCodes(IntEnum):

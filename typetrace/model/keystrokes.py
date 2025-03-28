@@ -31,7 +31,7 @@ class KeystrokeStore:
 
     def __init__(self) -> None:
         """Initialize the model with the database path."""
-        self.db_path = Config.resolve_db_path()
+        self.db_path = Config.DB_PATH
 
     def get_all_keystrokes(self) -> list[Keystroke]:
         """Retrieve all keystrokes with their counts and names."""
