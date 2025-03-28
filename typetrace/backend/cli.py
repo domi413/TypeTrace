@@ -7,8 +7,9 @@ import platform
 import sqlite3
 from typing import final
 
-from typetrace.backend.db import DatabaseManager
-from typetrace.backend.logging_setup import LoggerSetup
+from backend.db import DatabaseManager
+from backend.logging_setup import LoggerSetup
+
 from typetrace.config import Config, ExitCodes
 
 logger = logging.getLogger(__name__)
@@ -39,14 +40,14 @@ class CLI:
         try:
             match platform.system().lower():
                 case "linux":
-                    from typetrace.backend.events.linux import LinuxEventProcessor
+                    from backend.events.linux import LinuxEventProcessor
 
                     self._check_input_group()
 
                     processor = LinuxEventProcessor()
                     processor.check_device_accessibility()
                 case "darwin" | "windows":
-                    from typetrace.backend.events.windows_darwin import (
+                    from backend.events.windows_darwin import (
                         WindowsDarwinEventProcessor,
                     )
 

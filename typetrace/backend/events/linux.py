@@ -16,7 +16,8 @@ if TYPE_CHECKING:
     from pathlib import Path
     from types import FrameType
 
-from typetrace.backend.events.base import BaseEventProcessor
+from backend.events.base import BaseEventProcessor
+
 from typetrace.config import Config, Event
 
 logger = logging.getLogger(__name__)

@@ -10,7 +10,8 @@ from typing import TYPE_CHECKING, Any, final
 if TYPE_CHECKING:
     from pathlib import Path
 
-from typetrace.backend.db import DatabaseManager
+from backend.db import DatabaseManager
+
 from typetrace.config import Config, Event
 
 logger = logging.getLogger(__name__)

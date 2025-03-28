@@ -30,9 +30,9 @@ class Config:
     @staticmethod
     def _resolve_db_path() -> Path:
         """Determine the database path using appdirs for cross-platform support."""
-        data_dir = appdirs.user_data_dir(Config.APP_NAME)
-        db_path = Path(data_dir) / Config.DB_NAME
-        db_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+        data_dir = appdirs.user_data_dir("typetrace")
+        db_path = Path(data_dir) / "TypeTrace.db"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
         return db_path
 
     DB_PATH: Final[Path] = _resolve_db_path()
