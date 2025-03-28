@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import final
 
-from backend.config import KeyEvent
+from backend.config import Event
 from backend.sql import SQLQueries
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class DatabaseManager:
             logger.debug("Database initialized at %s", db_path)
 
     @staticmethod
-    def write_to_database(db_path: Path, events: list[KeyEvent]) -> None:
+    def write_to_database(db_path: Path, events: list[Event]) -> None:
         """Write keystroke events to the database.
 
         Args:
@@ -69,7 +69,7 @@ class DatabaseManager:
             conn.close()
 
     @staticmethod
-    def _update_keystroke_counts(db_path: Path, events: list[KeyEvent]) -> None:
+    def _update_keystroke_counts(db_path: Path, events: list[Event]) -> None:
         """Update keystroke counts in the database.
 
         Args:
@@ -100,6 +100,7 @@ class DatabaseManager:
                     },
                 )
 
+                # TODO: Redundant and overhead, remove this query
                 cursor.execute(
                     SQLQueries.GET_KEYSTROKE_ID,
                     {"scan_code": event["scan_code"]},

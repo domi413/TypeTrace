@@ -34,8 +34,8 @@ class ExitCodes(IntEnum):
     PLATFORM_ERROR = 4
 
 
-class KeyEvent(TypedDict):
-    """Type definition for keyboard event data."""
+class Event(TypedDict):
+    """Type definition for event data."""
 
     scan_code: int
     name: str | tuple[str, ...]
