@@ -4,12 +4,13 @@ import argparse
 import logging
 import os
 import platform
-import appdirs
 import sqlite3
 from pathlib import Path
 from typing import final
 
-if platform.system() != 'Windows':
+import appdirs
+
+if platform.system() != "Windows":
     import grp
 
 from backend.config import Config, ExitCodes
@@ -88,18 +89,11 @@ class CLI:
     @staticmethod
     def _check_input_group() -> None:
         """Check if the user is in the 'input' group on Linux."""
-        username = get_username()
+        username = os.getlogin()
         input_group = grp.getgrnam("input")
         if username not in input_group.gr_mem:
             logger.error("The User %s is not in the 'input' group", username)
             raise PermissionError
-
-
-def get_username():
-    try:
-        return os.getlogin()
-    except OSError:
-        return os.getenv('USER') or os.getenv('USERNAME')
 
 
 def main(args: argparse.Namespace) -> int:
