@@ -106,3 +106,28 @@ def write_to_database(db_path: Path, events: list[KeyEvent]) -> None:
 
     """
     update_keystroke_counts(db_path, events)
+
+def update_keystroke_counts(db_path: Path, events: list) -> None:
+    """Update the keystroke counts in the database based on provided events.
+
+    Args:
+        db_path (Path): Path to the SQLite database file.
+        events (list): List of events containing scan_code and name.
+    """
+    if not events:
+        return
+
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("BEGIN TRANSACTION")
+        for event in events:
+            scan_code = event["scan_code"]
+            key_name = event["name"]
+            if isinstance(key_name, tuple):
+                key_name = ", ".join(key_name)  # Korrigierter Doppelpunkt
+            cursor.execute(
+                "INSERT OR REPLACE INTO keystrokes (scan_code, key_name, count) "
+                "VALUES (?, ?, ?)",
+                (scan_code, key_name, 1),
+            )
+        conn.commit()  # Korrigierte Einrückung
