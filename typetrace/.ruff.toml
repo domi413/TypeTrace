@@ -1,0 +1,2 @@
+[lint]
+ignore = ["S101"]  # Ignoriere S101 (assert in Tests)
