@@ -191,17 +191,6 @@ class LinuxEventProcessor(BaseEventProcessor):
                 if processed_event is not None:
                     buffer.append(processed_event)
         except OSError:
-            # FIXME: When unplugging devices during runtime, this exception is
-            # raised. I think we are good by raising an exception since it
-            # should be treated as an error when the keyboard suddenly
-            # disappears, but we should recover from this.
-
-            # INFO: Apparently if I add a device (e.g. keyboard) during
-            # runtime, it's getting recognized and I can unplug it without an
-            # error, so the issue described above only counts for devices that
-            # are initialized at startup. Maybe there is an option so we dont
-            # even receive this error. This would mean that we dont have to
-            # initialize the devices at startup.
             logger.exception("Error reading from device")
 
         return buffer

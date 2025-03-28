@@ -1,13 +1,16 @@
 """Windows and Darwin-specific event processing."""
 
-import logging
-import time
-from pathlib import Path
-from typing import Any, override
+from __future__ import annotations
 
-from backend.config import Config, Event
+import logging
+from typing import TYPE_CHECKING, Any, override
+
 from backend.events.base import BaseEventProcessor
-from pynput import keyboard
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from backend.config import Event
 
 logger = logging.getLogger(__name__)
 
@@ -20,13 +23,12 @@ class WindowsDarwinEventProcessor(BaseEventProcessor):
         """See base class."""
 
     @override
-    def _buffer(self, devices: list[Any]) -> None:  # TODO: Add correct type
+    def _buffer(self, devices: list[Any]) -> None:
         """See base class."""
-        buffer: list[Event] = []
-        start_time: float = time.time()
 
     @override
     def _process_single_event(
-        self, event: Any
-    ) -> Event | None:  # TODO: Add correct type
+        self,
+        event: Any,
+    ) -> Event | None:
         """See base class."""

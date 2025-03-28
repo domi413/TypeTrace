@@ -2,8 +2,8 @@
 
 
 class BaseIPC:
-    def send_message(self, message: str):
-        raise NotImplementedError(
-            "Method 'send_message' must be implemented in subclasses"
-        )
+    """Base class for IPC communication."""
 
+    def send_message(self, message: str) -> None:
+        """Send a message through the IPC channel."""
+        raise NotImplementedError
