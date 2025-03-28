@@ -6,7 +6,7 @@ import sqlite3
 
 from gi.repository import GObject
 
-from typetrace.backend.cli import CLI
+from typetrace.config import Config
 
 
 class Keystroke(GObject.Object):
@@ -31,7 +31,7 @@ class KeystrokeStore:
 
     def __init__(self) -> None:
         """Initialize the model with the database path."""
-        self.db_path = CLI.resolve_db_path()
+        self.db_path = Config.resolve_db_path()
 
     def get_all_keystrokes(self) -> list[Keystroke]:
         """Retrieve all keystrokes with their counts and names."""
@@ -46,8 +46,7 @@ class KeystrokeStore:
                     Keystroke(scan_code=row[0], count=row[1], key_name=row[2])
                     for row in rows
                 ]
-        except sqlite3.Error as e:
-            print(f"Database error: {e}")
+        except sqlite3.Error:
             return []
 
     def get_total_presses(self) -> int:
@@ -58,8 +57,7 @@ class KeystrokeStore:
                 cursor.execute("SELECT SUM(count) FROM keystrokes")
                 result = cursor.fetchone()[0]
                 return result if result is not None else 0
-        except sqlite3.Error as e:
-            print(f"Database error: {e}")
+        except sqlite3.Error:
             return 0
 
     def get_highest_count(self) -> int:
@@ -70,8 +68,7 @@ class KeystrokeStore:
                 cursor.execute("SELECT MAX(count) FROM keystrokes")
                 result = cursor.fetchone()[0]
                 return result if result is not None else 0
-        except sqlite3.Error as e:
-            print(f"Database error: {e}")
+        except sqlite3.Error:
             return 0
 
     def clear(self) -> bool:
@@ -81,8 +78,7 @@ class KeystrokeStore:
                 cursor = conn.cursor()
                 cursor.execute("DELETE FROM keystrokes")
                 conn.commit()
-        except sqlite3.Error as e:
-            print(f"Clear failed: {e}")
+        except sqlite3.Error:
             return False
         else:
             return True

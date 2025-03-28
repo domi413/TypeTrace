@@ -6,6 +6,8 @@ from enum import IntEnum
 from pathlib import Path
 from typing import Final, TypedDict, final
 
+import appdirs
+
 
 @final
 class Config:

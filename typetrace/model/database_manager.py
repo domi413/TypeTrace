@@ -17,8 +17,7 @@ class DatabaseManager:
         """Export the database to the specified destination path."""
         try:
             shutil.copy2(self.db_path, dest_path)
-        except OSError as e:
-            print(f"Export failed: {e}")
+        except OSError:
             return False
         else:
             return True
@@ -28,8 +27,7 @@ class DatabaseManager:
         try:
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src_path, self.db_path)
-        except OSError as e:
-            print(f"Import failed: {e}")
+        except OSError:
             return False
         else:
             return True
