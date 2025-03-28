@@ -9,10 +9,6 @@ from pathlib import Path
 from typing import final
 
 import appdirs
-
-if platform.system() != "Windows":
-    import grp
-
 from backend.config import Config, ExitCodes
 from backend.db import DatabaseManager
 from backend.logging_setup import LoggerSetup
@@ -89,7 +85,12 @@ class CLI:
     @staticmethod
     def _check_input_group() -> None:
         """Check if the user is in the 'input' group on Linux."""
-        username = os.getlogin()
+        import grp
+
+        try:
+            username = os.getlogin()
+        except OSError:
+            username = os.getenv("USER") or os.getenv("USERNAME")
         input_group = grp.getgrnam("input")
         if username not in input_group.gr_mem:
             logger.error("The User %s is not in the 'input' group", username)
