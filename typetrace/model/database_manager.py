@@ -3,7 +3,7 @@
 import shutil
 from pathlib import Path
 
-from typetrace.config import Config
+from typetrace.config import DatabasePath
 
 
 class DatabaseManager:
@@ -11,7 +11,7 @@ class DatabaseManager:
 
     def __init__(self) -> None:
         """Construct an instance of DatabaseManager."""
-        self.db_path = Path(Config.DB_PATH)
+        self.db_path = Path(DatabasePath.DB_PATH)
 
     def export_database(self, dest_path: Path) -> bool:
         """Export the database to the specified destination path."""

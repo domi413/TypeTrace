@@ -6,7 +6,7 @@ import sqlite3
 
 from gi.repository import GObject
 
-from typetrace.config import Config
+from typetrace.config import DatabasePath
 
 
 class Keystroke(GObject.Object):
@@ -31,7 +31,7 @@ class KeystrokeStore:
 
     def __init__(self) -> None:
         """Initialize the model with the database path."""
-        self.db_path = Config.DB_PATH
+        self.db_path = DatabasePath.DB_PATH
 
     def get_all_keystrokes(self) -> list[Keystroke]:
         """Retrieve all keystrokes with their counts and names."""

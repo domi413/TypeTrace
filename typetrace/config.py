@@ -27,15 +27,19 @@ class Config:
     DEBUG: bool = False
 
     # DB path
-    @staticmethod
-    def _resolve_db_path() -> Path:
+    @classmethod
+    def resolve_db_path(cls) -> Path:
         """Determine the database path using appdirs for cross-platform support."""
-        data_dir = appdirs.user_data_dir("typetrace")
-        db_path = Path(data_dir) / "TypeTrace.db"
+        data_dir = appdirs.user_data_dir(cls.APP_NAME)
+        db_path = Path(data_dir) / cls.DB_NAME
         db_path.parent.mkdir(parents=True, exist_ok=True)
         return db_path
 
-    DB_PATH: Final[Path] = _resolve_db_path()
+
+class DatabasePath:
+    """Constant for database path."""
+
+    DB_PATH: Final[Path] = Config.resolve_db_path()
 
 
 class ExitCodes(IntEnum):

@@ -10,7 +10,7 @@ from typing import final
 from backend.db import DatabaseManager
 from backend.logging_setup import LoggerSetup
 
-from typetrace.config import Config, ExitCodes
+from typetrace.config import Config, DatabasePath, ExitCodes
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class CLI:
 
     def __init__(self) -> None:
         """Initialize the CLI."""
-        self.__db_path = Config.DB_PATH
+        self.__db_path = DatabasePath.DB_PATH
 
     def run(self, args: argparse.Namespace) -> int:
         """Run the main logic of the TypeTrace backend.
