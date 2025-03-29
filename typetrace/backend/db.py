@@ -1,108 +1,96 @@
 """Database operations for TypeTrace."""
 
-from __future__ import annotations
-
 import logging
 import sqlite3
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import final
 
-from .config import DEBUG, KeyEvent
-from .sql import (
-    BEGIN_TRANSACTION,
-    CREATE_KEYSTROKES_TABLE,
-    INSERT_OR_UPDATE_KEYSTROKE,
-)
+from backend.sql import SQLQueries
 
-if TYPE_CHECKING:
-    from collections.abc import Generator
-    from pathlib import Path
+from typetrace.config import Event
 
 logger = logging.getLogger(__name__)
 
 
-@contextmanager
-def get_db_connection(db_path: Path) -> Generator[sqlite3.Connection, None, None]:
-    """Create and manage a database connection.
+@final
+class DatabaseManager:
+    """Database manager for handling TypeTrace database operations."""
 
-    Args:
-        db_path: Path to the SQLite database file.
+    def __init__(self) -> None:
+        """Private constructor to prevent instantiation."""
+        raise TypeError
 
-    Yields:
-        SQLite database connection.
+    @staticmethod
+    def initialize_database(db_path: Path) -> None:
+        """Initialize the database by creating necessary tables.
 
-    """
-    conn: sqlite3.Connection = sqlite3.connect(db_path)
-    try:
-        yield conn
-    finally:
-        conn.close()
+        Args:
+            db_path: Path to the SQLite database file.
 
+        """
+        with DatabaseManager._get_db_connection(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(SQLQueries.CREATE_KEYSTROKES_TABLE)
+            conn.commit()
 
-def initialize_database(db_path: Path) -> None:
-    """Initialize the SQLite database with required schema.
-
-    Args:
-        db_path: Path to the SQLite database file.
-
-    Raises:
-        sqlite3.Error: If database initialization fails.
-
-    """
-    with get_db_connection(db_path) as conn:
-        cursor: sqlite3.Cursor = conn.cursor()
-        cursor.execute(CREATE_KEYSTROKES_TABLE)
-        conn.commit()
-
-        if DEBUG:
             logger.debug("Database initialized at %s", db_path)
 
+    @staticmethod
+    def write_to_database(db_path: Path, events: list[Event]) -> None:
+        """Write keystroke events to the database.
 
-def update_keystroke_counts(
-    db_path: Path,
-    events: list[KeyEvent],
-) -> None:
-    """Update keystroke counts with new events in the database.
+        Args:
+            db_path: Path to the SQLite database file.
+            events: List of key events to write to the database.
 
-    Args:
-        db_path: Path to the SQLite database file.
-        events: List of key events to process.
+        """
+        DatabaseManager._update_keystroke_counts(db_path, events)
 
-    Raises:
-        sqlite3.Error: If database update fails.
+    @staticmethod
+    @contextmanager
+    def _get_db_connection(db_path: Path) -> Generator[sqlite3.Connection, None, None]:
+        """Get a database connection to the SQLite database.
 
-    """
-    if not events:
-        return
+        Args:
+            db_path: Path to the SQLite database file.
 
-    with get_db_connection(db_path) as conn:
-        cursor: sqlite3.Cursor = conn.cursor()
-        cursor.execute(BEGIN_TRANSACTION)
+        Yields:
+            SQLite database connection.
 
-        for event in events:
-            scan_code: int = event["scan_code"]
-            key_name: str | tuple[str, ...] = event["name"]
+        """
+        conn = sqlite3.connect(db_path)
+        try:
+            yield conn
+        finally:
+            conn.close()
 
-            if isinstance(key_name, tuple):
-                key_name = ", ".join(key_name)
+    @staticmethod
+    def _update_keystroke_counts(db_path: Path, events: list[Event]) -> None:
+        """Update keystroke counts in the database.
 
-            cursor.execute(
-                INSERT_OR_UPDATE_KEYSTROKE,
-                (scan_code, key_name, key_name),
-            )
+        Args:
+            db_path: Path to the SQLite database file.
+            events: List of key events to update in the database.
 
-        conn.commit()
+        """
+        if not events:
+            return
 
-        if DEBUG:
+        processed_events = [
+            {
+                "scan_code": event["scan_code"],
+                "key_name": ", ".join(event["name"])
+                if isinstance(event["name"], tuple)
+                else event["name"],
+            }
+            for event in events
+        ]
+
+        with DatabaseManager._get_db_connection(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.executemany(SQLQueries.INSERT_OR_UPDATE_KEYSTROKE, processed_events)
+            conn.commit()
+
             logger.debug("Updated database with %d keystroke events", len(events))
-
-
-def write_to_database(db_path: Path, events: list[KeyEvent]) -> None:
-    """Write keystroke events to the database.
-
-    Args:
-        db_path: Path to the SQLite database file.
-        events: List of dictionaries containing key details.
-
-    """
-    update_keystroke_counts(db_path, events)

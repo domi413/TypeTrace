@@ -1,0 +1,1 @@
+"""TypeTrace IPC communication package."""

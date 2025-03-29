@@ -6,11 +6,10 @@ from typing import Any, Callable
 
 from gi.repository import Adw, Gio
 
+from typetrace.controller.preferences import Preferences
+from typetrace.controller.window import TypetraceWindow
 from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
-
-from .controller.preferences import Preferences
-from .controller.window import TypetraceWindow
 
 
 class Application(Adw.Application):

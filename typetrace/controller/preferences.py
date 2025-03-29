@@ -4,7 +4,7 @@ from pathlib import Path
 
 from gi.repository import Adw, Gio, Gtk
 
-from typetrace.config import DB_NAME
+from typetrace.config import DatabasePath
 from typetrace.controller.utils.dialog_utils import (
     open_file_open_dialog,
     open_file_save_dialog,
@@ -50,7 +50,6 @@ class Preferences(Adw.PreferencesDialog):
         self.export_button.connect("clicked", self._on_export_clicked)
         self.delete_button.connect("clicked", self._on_delete_clicked)
 
-
     def _on_export_clicked(self, _button: Gtk.Button) -> None:
         """Handle the export button click event by opening a save dialog."""
 
@@ -63,7 +62,7 @@ class Preferences(Adw.PreferencesDialog):
         open_file_save_dialog(
             parent=self.parent_window,
             title="Export data",
-            initial_name=DB_NAME,
+            initial_name=str(DatabasePath.DB_PATH),
             callback=export_callback,
         )
 
@@ -105,6 +104,7 @@ class Preferences(Adw.PreferencesDialog):
 
     def _on_delete_clicked(self, _button: Gtk.Button) -> None:
         """Perform the database clear operation after user confirmation."""
+
         def delete_callback() -> None:
             if self.keystroke_store.clear():
                 show_toast(self, "Data Cleared Successfully")

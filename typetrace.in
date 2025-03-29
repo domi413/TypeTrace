@@ -10,15 +10,19 @@ PKGDATA_DIR = "@pkgdatadir@"
 
 sys.path.insert(1, PKGDATA_DIR)
 
+
 def set_resources() -> None:
     """Set application ressource file."""
     import gi
+
     gi.require_version("Adw", "1")
     gi.require_version("Gtk", "4.0")
     from gi.repository import Gio
+
     resource_path = Path(PKGDATA_DIR) / "typetrace.gresource"
     resource = Gio.Resource.load(resource_path.as_posix())
-    resource._register()  # noqa: SLF001
+    resource._register()
+
 
 def run_application() -> int:
     """Run TypeTrace application and returns its exit code."""
@@ -27,6 +31,23 @@ def run_application() -> int:
     app = Application(APPLICATION_ID, VERSION)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     return app.run(sys.argv)
+
+
+def print_help() -> None:
+    """Display help information."""
+    print("The backend of TypeTrace.")
+    print(f"Version: {VERSION}")
+    print("\nUsage: python -m typetrace [OPTION...]")
+    print("Options:")
+    print("\t-b, --backend\tRun the backend.")
+    print("\t-d, --debug\tEnable debug mode.")
+    print("\t-h, --help\tDisplay help then exit.")
+    print("\t-v, --version\tDisplay version then exit.")
+    print(
+        "\nWarning: This is the backend and is not designed to run by users.",
+        "\nYou should run the frontend of TypeTrace which will run this.",
+    )
+
 
 def main() -> int:
     """Run the TypeTrace application.
@@ -37,21 +58,24 @@ def main() -> int:
         int: The application exit code (0 for success, non-zero for errors).
 
     """
-    parser = argparse.ArgumentParser(
-        description="Run the TypeTrace application.",
-        add_help=True,
-    )
-    parser.add_argument("-b", "--backend", action="store_true", help="Run in backend mode")
-    parser.add_argument("-d", "--debug", action="store_true", help="Enable debug mode")
-    parser.add_argument("-v", "--version", action="store_true", help="Print version and exit")
-    args = parser.parse_args()
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("-b", "--backend", action="store_true")
+    parser.add_argument("-d", "--debug", action="store_true")
+    parser.add_argument("-h", "--help", action="store_true")
+    parser.add_argument("-v", "--version", action="store_true")
 
+    args = parser.parse_args()
+    if args.help:
+        print_help()
+        sys.exit()
     if args.version:
         print(VERSION)
         sys.exit()
     if args.backend:
         from backend import cli
-        sys.exit(cli.main(args))
+
+        cli = cli.CLI()
+        sys.exit(cli.run(args))
 
     set_resources()
     return run_application()
