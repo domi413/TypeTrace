@@ -75,6 +75,7 @@ def test_resolve_db_path_real_path(mocker):
     db_path = resolve_db_path()
     assert db_path == Path("~/.local/share/typetrace/TypeTrace.db")
 
+
     # Ensure mocks were called correctly
     mock_user_data_dir.assert_called_once_with("typetrace")
     mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
