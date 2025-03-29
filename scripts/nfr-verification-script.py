@@ -5,17 +5,18 @@ This script performs the verification of non-functional requirements for the Typ
 It includes tests for code quality, security, usability, reliability, performance, and scalability.
 
 Usage:
-    python3 verify_nfr.py [--nfr=<id>] [--source-dir=<path>] [--db-path=<path>]
+    python3 nfr-verification-script.py [--nfr=<id>] [--source-dir=<path>] [--db-path=<path>]
 
 Options:
     --nfr=<id>        NFR to verify (1-6) or 'all' for all NFRs (default: 'all')
     --source-dir=<path>  Path to the source code directory (default: './typetrace')
     --db-path=<path>     Path to the database file (default: '~/.local/share/typetrace/TypeTrace.db')
 
-    --cd /../scripts
-export PYTHONPATH=/.../TypeTrace:$PYTHONPATH
-python3 nfr-verification-script.py --nfr=1 --source-dir=/..../TypeTrace/typetrace --db-path=/.../.local/share/typetrace/TypeTrace.db
---python3 nfr-verification-script.py --nfr=all --source-dir=../typetrace
+    -- for example:to execute cd /../scripts
+    export PYTHONPATH=/.../TypeTrace:$PYTHONPATH
+    python3 nfr-verification-script.py --nfr=1 --source-dir=/..../TypeTrace/typetrace 
+    --db-path=/.../.local/share/typetrace/TypeTrace.db
+    --python3 nfr-verification-script.py --nfr=all --source-dir=../typetrace
 """
 
 import argparse
