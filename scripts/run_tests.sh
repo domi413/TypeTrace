@@ -1,22 +1,22 @@
 #!/bin/bash
 
-# Wechsel ins Hauptverzeichnis von TypeTrace
+# Change to the TypeTrace main directory
 cd "$(dirname "$0")/.." || exit 1
 
-# Installiere alle Python-Abhängigkeiten
+# Install all Python dependencies
 pip install -r requirements.txt
 
-# Code formatieren mit ruff (falls COM812 Fehler, deaktivieren)
+# Format code with ruff (disable COM812 if necessary)
 ruff format ./typetrace/
 
-# Code-Qualitätsprüfung mit pylint & flake8
+# Run code quality checks with pylint & flake8
 pylint ./typetrace/ --exit-zero
 flake8 ./typetrace/
 
-# Code-Statistiken mit cloc
+# Generate code statistics with cloc
 cloc ./typetrace/
 
-# Tests mit pytest + coverage-Report
+# Run tests with pytest and generate a coverage report
 pytest --cov=typetrace ./typetrace/tests/
 
 # to run ./scripts/run_tests.sh
