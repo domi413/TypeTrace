@@ -82,7 +82,7 @@ class Verbose(Gtk.Box):
 
     def _factory_setup(
         self,
-        factory: Gtk.SignalListItemFactory,
+        _: Gtk.SignalListItemFactory,
         list_item: Gtk.ListItem,
     ) -> None:
         """Set up a label widget for each list item."""
@@ -92,7 +92,7 @@ class Verbose(Gtk.Box):
 
     def _bind_scan_code(
         self,
-        factory: Gtk.SignalListItemFactory,
+        _: Gtk.SignalListItemFactory,
         list_item: Gtk.ListItem,
     ) -> None:
         """Bind scan_code property to the label."""
@@ -101,7 +101,7 @@ class Verbose(Gtk.Box):
 
     def _bind_count(
         self,
-        factory: Gtk.SignalListItemFactory,
+        _: Gtk.SignalListItemFactory,
         list_item: Gtk.ListItem,
     ) -> None:
         """Bind count property to the label."""
@@ -110,7 +110,7 @@ class Verbose(Gtk.Box):
 
     def _bind_key_name(
         self,
-        factory: Gtk.SignalListItemFactory,
+        _: Gtk.SignalListItemFactory,
         list_item: Gtk.ListItem,
     ) -> None:
         """Bind key_name property to the label."""

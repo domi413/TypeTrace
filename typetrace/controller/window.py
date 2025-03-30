@@ -2,10 +2,9 @@
 
 from gi.repository import Adw, Gtk
 
+from typetrace.controller.heatmap import Heatmap
+from typetrace.controller.verbose import Verbose
 from typetrace.model.keystrokes import KeystrokeStore
-
-from .heatmap import Heatmap
-from .verbose import Verbose
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/window.ui")
