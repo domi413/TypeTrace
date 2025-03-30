@@ -38,26 +38,27 @@ class CLI:
             LoggerSetup.setup_logging()
 
         try:
+            DatabaseManager.initialize_database(self.__db_path)
+
             match platform.system().lower():
                 case "linux":
                     from backend.events.linux import LinuxEventProcessor
 
                     self._check_input_group()
 
-                    processor = LinuxEventProcessor()
+                    processor = LinuxEventProcessor(self.__db_path)
                     processor.check_device_accessibility()
                 case "darwin" | "windows":
                     from backend.events.windows_darwin import (
                         WindowsDarwinEventProcessor,
                     )
 
-                    processor = WindowsDarwinEventProcessor()
+                    processor = WindowsDarwinEventProcessor(self.__db_path)
                 case _:
                     logger.error("Unsupported platform: %s", platform.system())
                     return ExitCodes.PLATFORM_ERROR
 
-            DatabaseManager.initialize_database(self.__db_path)
-            processor.trace(self.__db_path)
+            processor.trace()
         except PermissionError:
             logger.exception(
                 "\nPlease ensure you have sufficient permissions "
@@ -73,8 +74,7 @@ class CLI:
         else:
             return ExitCodes.SUCCESS
 
-    @staticmethod
-    def _check_input_group() -> None:
+    def _check_input_group(self) -> None:
         """Check if the user is in the 'input' group on Linux."""
         import grp
 
