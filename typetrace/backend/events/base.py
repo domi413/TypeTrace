@@ -20,8 +20,12 @@ logger = logging.getLogger(__name__)
 class BaseEventProcessor(ABC):
     """Abstract base class for event processing."""
 
+    def __init__(self, db_path: Path) -> None:
+        """Initialize the processor with a database path."""
+        self._db_path: Path = db_path
+
     @abstractmethod
-    def trace(self, db_path: Path) -> None:
+    def trace(self) -> None:
         """Start tracing events."""
 
     @final

@@ -18,8 +18,12 @@ logger = logging.getLogger(__name__)
 class WindowsDarwinEventProcessor(BaseEventProcessor):
     """Event processor for Windows and Darwin platforms."""
 
+    def __init__(self, db_path: Path) -> None:
+        """Initialize the Windows or Darwin event processor."""
+        super().__init__(db_path)
+
     @override
-    def trace(self, db_path: Path) -> None:
+    def trace(self) -> None:
         """See base class."""
 
     @override
