@@ -74,8 +74,7 @@ class CLI:
         else:
             return ExitCodes.SUCCESS
 
-    @staticmethod
-    def _check_input_group() -> None:
+    def _check_input_group(self) -> None:
         """Check if the user is in the 'input' group on Linux."""
         import grp
 
