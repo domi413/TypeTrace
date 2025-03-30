@@ -13,10 +13,12 @@ ruff format ./typetrace/
 pylint ./typetrace/ --exit-zero
 flake8 ./typetrace/
 
-# Generate code statistics with cloc
-cloc ./typetrace/
+# Check if cloc is installed, then generate code statistics
+if command -v cloc >/dev/null 2>&1; then
+    cloc ./typetrace/
+else
+    echo "Warning: cloc is not installed. Please install it separately (e.g., 'sudo apt install cloc' on Ubuntu)."
+fi
 
 # Run tests with pytest and generate a coverage report
 pytest --cov=typetrace ./typetrace/tests/
-
-# to run ./scripts/run_tests.sh
