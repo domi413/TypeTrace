@@ -1,3 +1,4 @@
+[lint]
 extend-select = [
   "ALL",
 ]
