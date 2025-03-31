@@ -73,14 +73,18 @@ sources_controller_utils = [
 ]
 install_data(sources_controller_utils, install_dir: moduledir / 'controller' / 'utils')
 
-test(
-  'unit-tests', 
-  find_program('pytest'), 
-  args: [
-    'typetrace' / 'tests',
-    '--cov',
-  ],
-  workdir: meson.source_root(),
-)
+pytest = find_program('pytest', required: false)
+
+if pytest.found()
+  test(
+    'unit-tests',
+    pytest,
+    args: [
+      'typetrace' / 'tests',
+      '--cov',
+    ],
+    workdir: meson.source_root(),
+  )
+endif
 
 subdir('backend')

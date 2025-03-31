@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Callable
 
+import dbus
 from gi.repository import Adw, Gio, GLib, Gtk
 
 
@@ -176,13 +178,27 @@ class DialogUtils:
             msg = f"Path '{path}' does not exist"
             raise ValueError(msg)
 
-        gfile = Gio.File.new_for_path(str(path))
-
-        try:
-            # Try to launch the default file manager using GIO
-            app_info = Gio.AppInfo.get_default_for_type("inode/directory", True)  # noqa: FBT003
-            if app_info:
-                app_info.launch([gfile], None)
-                return
-        except GLib.Error:
-            pass
+        if "FLATPAK_ID" in os.environ:
+            # Flatpak: Use org.freedesktop.FileManager1 DBus interface
+            try:
+                bus = dbus.SessionBus()
+                obj = bus.get_object(
+                    "org.freedesktop.FileManager1",
+                    "/org/freedesktop/FileManager1",
+                )
+                interface = dbus.Interface(obj, "org.freedesktop.FileManager1")
+                # Convert path to URI
+                uri = f"file://{path}"
+                # Call ShowFolders with the URI and an empty startup ID
+                interface.ShowFolders([uri], "")
+            except dbus.DBusException:
+                pass
+        else:
+            # Non-Flatpak: Use GIO
+            gfile = Gio.File.new_for_path(str(path))
+            try:
+                app_info = Gio.AppInfo.get_default_for_type("inode/directory", True)  # noqa: FBT003
+                if app_info:
+                    app_info.launch([gfile], None)
+            except GLib.Error:
+                pass

@@ -44,7 +44,8 @@ class CLI:
                 case "linux":
                     from backend.events.linux import LinuxEventProcessor
 
-                    self._check_input_group()
+                    if "FLATPAK_ID" not in os.environ:
+                        self._check_input_group()
 
                     processor = LinuxEventProcessor(self.__db_path)
                     processor.check_device_accessibility()
