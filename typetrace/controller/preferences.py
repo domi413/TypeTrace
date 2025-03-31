@@ -4,14 +4,8 @@ from pathlib import Path
 
 from gi.repository import Adw, Gio, Gtk
 
-from typetrace.config import DatabasePath
-from typetrace.controller.utils.dialog_utils import (
-    open_file_open_dialog,
-    open_file_save_dialog,
-    show_confirmation_dialog,
-    show_error_dialog,
-    show_toast,
-)
+from typetrace.config import Config, DatabasePath
+from typetrace.controller.utils.dialog_utils import DialogUtils
 from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
 
@@ -25,6 +19,7 @@ class Preferences(Adw.PreferencesDialog):
     import_button = Gtk.Template.Child()
     export_button = Gtk.Template.Child()
     delete_button = Gtk.Template.Child()
+    locate_button = Gtk.Template.Child()
 
     def __init__(
         self,
@@ -35,9 +30,9 @@ class Preferences(Adw.PreferencesDialog):
         """Initialize the preferences dialog with a parent window and database manager.
 
         Args:
-            parent_window (Gtk.Window): The parent window for the dialog.
-            db_manager (DatabaseManager): The database manager instance.
-            keystroke_store: (KeystrokeStore): Access to keystrokes database.
+            parent_window: The main application window, used as parent for dialogs.
+            db_manager: Manages database import/export operations.
+            keystroke_store: Manages access to and clearing of keystroke data.
 
         """
         super().__init__()
@@ -49,28 +44,29 @@ class Preferences(Adw.PreferencesDialog):
         self.import_button.connect("clicked", self._on_import_clicked)
         self.export_button.connect("clicked", self._on_export_clicked)
         self.delete_button.connect("clicked", self._on_delete_clicked)
+        self.locate_button.connect("clicked", self._on_locate_clicked)
 
     def _on_export_clicked(self, _button: Gtk.Button) -> None:
-        """Handle the export button click event by opening a save dialog."""
+        """Handle the export button click event, opens a save dialog for export."""
 
         def export_callback(path: Path) -> None:
             if self.db_manager.export_database(path):
-                show_toast(self, "Data Exported Successfully")
+                DialogUtils.show_toast(self, "Data Exported Successfully")
             else:
-                show_error_dialog(self.parent_window, "Export Failed")
+                DialogUtils.show_error_dialog(self.parent_window, "Export Failed")
 
-        open_file_save_dialog(
+        DialogUtils.open_file_save_dialog(
             parent=self.parent_window,
             title="Export data",
-            initial_name=str(DatabasePath.DB_PATH),
+            initial_name=Config.DB_NAME,
             callback=export_callback,
         )
 
     def _on_import_clicked(self, _button: Gtk.Button) -> None:
-        """Handle the import button click event by opening a file chooser dialog."""
+        """Handle the import button click event, opens a file chooser dialog."""
 
         def import_callback(path: Path) -> None:
-            show_confirmation_dialog(
+            DialogUtils.show_confirmation_dialog(
                 parent=self.parent_window,
                 text="Confirm Data Import",
                 secondary_text="This will override your current data, continue?",
@@ -83,7 +79,7 @@ class Preferences(Adw.PreferencesDialog):
         filters = Gio.ListStore.new(Gtk.FileFilter)
         filters.append(file_filter)
 
-        open_file_open_dialog(
+        DialogUtils.open_file_open_dialog(
             parent=self.parent_window,
             title="Import data",
             filters=filters,
@@ -94,26 +90,30 @@ class Preferences(Adw.PreferencesDialog):
         """Perform the database import operation after user confirmation.
 
         Args:
-            src_path (Path): The path to the database file to import.
+            src_path: The path to the database file for import.
 
         """
         if self.db_manager.import_database(src_path):
-            show_toast(self, "Data Imported Successfully")
+            DialogUtils.show_toast(self, "Data Imported Successfully")
         else:
-            show_error_dialog(self.parent_window, "Import Failed")
+            DialogUtils.show_error_dialog(self.parent_window, "Import Failed")
 
     def _on_delete_clicked(self, _button: Gtk.Button) -> None:
         """Perform the database clear operation after user confirmation."""
 
         def delete_callback() -> None:
             if self.keystroke_store.clear():
-                show_toast(self, "Data Cleared Successfully")
+                DialogUtils.show_toast(self, "Data Cleared Successfully")
             else:
-                show_error_dialog(self.parent_window, "Clear Failed")
+                DialogUtils.show_error_dialog(self.parent_window, "Clear Failed")
 
-        show_confirmation_dialog(
+        DialogUtils.show_confirmation_dialog(
             parent=self.parent_window,
             text="Confirm Database Clear",
-            secondary_text="This will remove your current data, continue?",
+            secondary_text="This permanently removes all recorded data, continue?",
             callback=lambda: delete_callback(),
         )
+
+    def _on_locate_clicked(self, _button: Gtk.Button) -> None:
+        """Open Filemanager where the data file is stored."""
+        DialogUtils.show_folder_in_filemanager(DatabasePath.DB_PATH.parent)
