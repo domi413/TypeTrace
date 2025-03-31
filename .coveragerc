@@ -1,0 +1,5 @@
+[run]
+source = typetrace
+omit =
+    typetrace/tests/*
+    typetrace/**/__init__.py

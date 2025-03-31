@@ -33,6 +33,9 @@ meson-install: meson-build
 meson-uninstall:
 	ninja uninstall -C $(BUILD_DIR)
 
+meson-test: meson-setup
+	meson test -C $(BUILD_DIR) --verbose
+
 # Clean targets
 clean:
 	rm -rf $(BUILD_DIR) $(INSTALL_DIR)

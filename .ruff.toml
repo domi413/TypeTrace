@@ -5,3 +5,4 @@ ignore = [
   "ANN003", # Ignore missing type annotation for **kwargs
   "ANN401", # Ignore `Any` type annotation for functions
 ]
+extend-exclude = ["tests"]
