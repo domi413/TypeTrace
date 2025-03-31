@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Callable
 
-from gi.repository import Adw, Gio, Gtk
+from gi.repository import Adw, Gio, GLib, Gtk
 
 
 class DialogUtils:
@@ -55,36 +55,36 @@ class DialogUtils:
         title: str,
         initial_name: str,
         callback: Callable[[Path], None],
+        initial_folder: str | Path | None = None,
     ) -> None:
-        """Open a native 'Save As...' file chooser dialog using Gtk.FileChooserNative.
+        """Open a 'Save As...' file chooser dialog using Gtk.FileDialog.
 
         Args:
             parent: The parent Gtk.Window for the dialog.
             title: The title displayed in the dialog window.
             initial_name: The suggested filename to save as.
             callback: A function to call with the chosen Path object if the user
-                      confirms the save action. Called only on acceptance.
+                    confirms the save action. Called only on acceptance.
+            initial_folder: Optional path to open the dialog at.
 
         """
-        dialog = Gtk.FileChooserNative.new(
-            title,
-            parent,
-            Gtk.FileChooserAction.SAVE,
-            "_Save",
-            "_Cancel",
-        )
-        dialog.set_current_name(initial_name)
+        dialog = Gtk.FileDialog()
+        dialog.set_title(title)
+        dialog.set_initial_name(initial_name)
 
-        def on_response(d: Gtk.FileChooserNative, response_id: str) -> None:
-            """Handle dialog response."""
-            if response_id == Gtk.ResponseType.ACCEPT:
-                file = d.get_file()
+        if initial_folder:
+            folder = Gio.File.new_for_path(str(initial_folder))
+            dialog.set_initial_folder(folder)
+
+        def on_response(dialog: Gtk.FileDialog, res: Gio.Task, _: Gtk.Window) -> None:
+            try:
+                file = dialog.save_finish(res)
                 if file:
                     callback(Path(file.get_path()))
-            d.destroy()
+            except GLib.Error:
+                pass  # Canceled or error occurred
 
-        dialog.connect("response", on_response)
-        dialog.show()
+        dialog.save(parent, None, on_response, parent)
 
     @staticmethod
     def open_file_open_dialog(
@@ -92,39 +92,37 @@ class DialogUtils:
         title: str,
         filters: Gio.ListStore[Gtk.FileFilter],
         callback: Callable[[Path], None],
+        initial_folder: str | Path | None = None,
     ) -> None:
-        """Open a native 'Open File...' file chooser dialog using Gtk.FileChooserNative.
+        """Open a file chooser dialog using Gtk.FileDialog.
 
         Args:
             parent: The parent Gtk.Window for the dialog.
             title: The title displayed in the dialog window.
             filters: A Gio.ListStore containing Gtk.FileFilter objects to apply.
-            callback: A function to call with the chosen Path object if the user
-                      selects a file and confirms. Called only on acceptance.
+            callback: A function to call with the chosen Path object if selected.
+            initial_folder: Optional path to open the dialog at.
 
         """
-        dialog = Gtk.FileChooserNative.new(
-            title,
-            parent,
-            Gtk.FileChooserAction.OPEN,
-            "_Open",
-            "_Cancel",
-        )
-        # Add filters from the ListStore
-        for file_filter in filters:
-            if isinstance(file_filter, Gtk.FileFilter):
-                 dialog.add_filter(file_filter)
+        dialog = Gtk.FileDialog()
+        dialog.set_title(title)
 
-        def on_response(d: Gtk.FileChooserNative, response_id: str) -> None:
-            """Handle dialog response."""
-            if response_id == Gtk.ResponseType.ACCEPT:
-                file = d.get_file()
+        if filters:
+            dialog.set_filters(filters)
+
+        if initial_folder:
+            folder = Gio.File.new_for_path(str(initial_folder))
+            dialog.set_initial_folder(folder)
+
+        def on_response(dialog: Gtk.FileDialog, res: Gio.Task, _: Gtk.Window) -> None:
+            try:
+                file = dialog.open_finish(res)
                 if file:
                     callback(Path(file.get_path()))
-            d.destroy()
+            except GLib.Error:
+                pass # Canceled or error occurred
 
-        dialog.connect("response", on_response)
-        dialog.show()
+        dialog.open(parent, None, on_response, parent)
 
     @staticmethod
     def show_confirmation_dialog(
