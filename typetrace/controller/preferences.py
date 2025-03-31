@@ -4,7 +4,7 @@ from pathlib import Path
 
 from gi.repository import Adw, Gio, Gtk
 
-from typetrace.config import Config
+from typetrace.config import Config, DatabasePath
 from typetrace.controller.utils.dialog_utils import DialogUtils
 from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
@@ -19,6 +19,7 @@ class Preferences(Adw.PreferencesDialog):
     import_button = Gtk.Template.Child()
     export_button = Gtk.Template.Child()
     delete_button = Gtk.Template.Child()
+    locate_button = Gtk.Template.Child()
 
     def __init__(
         self,
@@ -43,6 +44,7 @@ class Preferences(Adw.PreferencesDialog):
         self.import_button.connect("clicked", self._on_import_clicked)
         self.export_button.connect("clicked", self._on_export_clicked)
         self.delete_button.connect("clicked", self._on_delete_clicked)
+        self.locate_button.connect("clicked", self._on_locate_clicked)
 
     def _on_export_clicked(self, _button: Gtk.Button) -> None:
         """Handle the export button click event, opens a save dialog for export."""
@@ -103,7 +105,7 @@ class Preferences(Adw.PreferencesDialog):
             if self.keystroke_store.clear():
                 DialogUtils.show_toast(self, "Data Cleared Successfully")
             else:
-                DialogUtils.show_error_dialog(self.parent_window, "Clearing Data Failed")
+                DialogUtils.show_error_dialog(self.parent_window, "Clear Failed")
 
         DialogUtils.show_confirmation_dialog(
             parent=self.parent_window,
@@ -111,3 +113,7 @@ class Preferences(Adw.PreferencesDialog):
             secondary_text="This permanently removes all recorded data, continue?",
             callback=lambda: delete_callback(),
         )
+
+    def _on_locate_clicked(self, _button: Gtk.Button) -> None:
+        """Open Filemanager where the data file is stored."""
+        DialogUtils.show_folder_in_filemanager(DatabasePath.DB_PATH.parent)

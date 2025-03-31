@@ -160,3 +160,29 @@ class DialogUtils:
 
         dialog.connect("response", on_response)
         dialog.present(parent)
+
+    @staticmethod
+    def show_folder_in_filemanager(
+        folder_path: str | Path,
+    ) -> None:
+        """Open the system's default file manager at the specified folder path.
+
+        Args:
+            folder_path: The path to the folder to open in the file manager.
+
+        """
+        path = Path(folder_path).resolve()
+        if not path.is_dir():
+            msg = f"Path '{path}' does not exist"
+            raise ValueError(msg)
+
+        gfile = Gio.File.new_for_path(str(path))
+
+        try:
+            # Try to launch the default file manager using GIO
+            app_info = Gio.AppInfo.get_default_for_type("inode/directory", True)  # noqa: FBT003
+            if app_info:
+                app_info.launch([gfile], None)
+                return
+        except GLib.Error:
+            pass
