@@ -55,7 +55,7 @@
 
 .container label.usage-100 {
   color: white;
-    background-color: #b71c1c;
+  background-color: #b71c1c;
 }
 
 .gradient-bar {
@@ -71,3 +71,4 @@
       #c62828 80%,
       #b71c1c 90%);
   border-radius: 4pt;
+}
