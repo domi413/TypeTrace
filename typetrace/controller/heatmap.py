@@ -24,11 +24,6 @@ class Heatmap(Gtk.Box):
         "\\",
     ]
 
-    USAGE_THRESHOLDS: ClassVar[dict[str, float]] = {
-        "low": 0.33,
-        "mid": 0.66,
-    }
-
     keyboard_container = Gtk.Template.Child("keyboard_container")
 
     def __init__(
@@ -88,19 +83,15 @@ class Heatmap(Gtk.Box):
 
         for keystroke in keystrokes:
             if label := self.key_widgets.get(keystroke.scan_code):
-                usage_ratio = keystroke.count / most_pressed
-                self._get_key_color(label, usage_ratio)
+                percentile = round((keystroke.count / most_pressed) * 10) * 10
+                self._get_key_color(label, percentile)
                 label.set_tooltip_text(str(keystroke.count))
 
-    def _get_key_color(self, label: Gtk.Label, usage_ratio: float) -> None:
-        """Assign color class based on usage ratio."""
+    def _get_key_color(self, label: Gtk.Label, percentile: int) -> None:
+        """Assign color class based on percentile (rounded to 10s)."""
         style_context = label.get_style_context()
-        style_context.remove_class("low-usage mid-usage high-usage")
-        class_name = (
-            "low-usage"
-            if usage_ratio < self.USAGE_THRESHOLDS["low"]
-            else "mid-usage"
-            if usage_ratio < self.USAGE_THRESHOLDS["mid"]
-            else "high-usage"
-        )
+        for i in range(10, 101, 10):
+            style_context.remove_class(f"usage-{i}")
+
+        class_name = f"usage-{percentile}"
         style_context.add_class(class_name)
