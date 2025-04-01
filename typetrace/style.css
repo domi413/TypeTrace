@@ -66,3 +66,18 @@
   color: white;
   background-color: #b71c1c;
 }
+
+.gradient-bar {
+  background: linear-gradient(to right,
+      #1a73e8 0%,
+      #4285f4 10%,
+      #82b1ff 20%,
+      #bbdefb 30%,
+      #fff176 40%,
+      #ffb300 50%,
+      #f57c00 60%,
+      #d32f2f 70%,
+      #c62828 80%,
+      #b71c1c 90%);
+  border-radius: 4pt;
+}
