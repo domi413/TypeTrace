@@ -3,6 +3,7 @@ name: PR title rule
 on:
   pull_request:
     types:
+      - edit
       - opened
       - synchronize
       - ready_for_review
