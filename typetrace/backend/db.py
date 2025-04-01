@@ -32,7 +32,10 @@ class DatabaseManager:
         """
         with DatabaseManager._get_db_connection(db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(SQLQueries.CREATE_KEYSTROKES_TABLE)
+            cursor.execute(SQLQueries.CREATE_KEYSTROKE_TABLE)
+            cursor.execute(SQLQueries.CREATE_KEYSTROKE_LOGS_TABLE)
+            cursor.execute(SQLQueries.CREATE_KEYSTROKE_SCAN_CODE_INDEX)
+            cursor.execute(SQLQueries.CREATE_KEYSTROKE_LOGS_COMPOSITE_INDEX)
             conn.commit()
 
             logger.debug("Database initialized at %s", db_path)
@@ -49,19 +52,33 @@ class DatabaseManager:
         if not events:
             return
 
-        processed_events = [
-            {
-                "scan_code": event["scan_code"],
-                "key_name": ", ".join(event["name"])
-                if isinstance(event["name"], tuple)
-                else event["name"],
-            }
-            for event in events
-        ]
-
         with DatabaseManager._get_db_connection(db_path) as conn:
             cursor = conn.cursor()
-            cursor.executemany(SQLQueries.INSERT_OR_UPDATE_KEYSTROKE, processed_events)
+            cursor.execute(SQLQueries.BEGIN_TRANSACTION)
+
+            for event in events:
+                key_name = (
+                    ", ".join(event["name"])
+                    if isinstance(event["name"], tuple)
+                    else event["name"]
+                )
+
+                cursor.execute(
+                    SQLQueries.INSERT_KEYSTROKE,
+                    {
+                        "scan_code": event["scan_code"],
+                        "key_name": key_name,
+                    },
+                )
+                keystroke_id = cursor.lastrowid
+
+                cursor.execute(
+                    SQLQueries.INSERT_OR_UPDATE_KEYSTROKE_LOG,
+                    {
+                        "keystroke_id": keystroke_id,
+                    },
+                )
+
             conn.commit()
 
             logger.debug("Updated database with %d keystroke events", len(events))
