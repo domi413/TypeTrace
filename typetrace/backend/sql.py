@@ -38,10 +38,6 @@ class SQLQueries:
     VALUES (:scan_code, :key_name)
     """
 
-    GET_KEYSTROKE_ID = """
-    SELECT keystroke_id FROM keystrokes WHERE scan_code = :scan_code
-    """
-
     INSERT_OR_UPDATE_KEYSTROKE_LOG = """
     INSERT INTO keystroke_logs (keystroke_id, key_count, log_date)
     VALUES (:keystroke_id, 1, date('now'))
