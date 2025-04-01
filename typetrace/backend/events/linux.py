@@ -86,15 +86,14 @@ class LinuxEventProcessor(BaseEventProcessor):
                     self.__stored_devices = None
                     devices = self._select_devices()
         finally:
-            if buffer:
-                logger.debug("Flushing %d events to database before exit", len(buffer))
+            logger.debug("Flushing %d events to database before exit", len(buffer))
 
-                self._check_timeout_and_flush(
-                    buffer,
-                    start_time,
-                    self._db_path,
-                    flush=True,
-                )
+            self._check_timeout_and_flush(
+                buffer,
+                start_time,
+                self._db_path,
+                flush=True,
+            )
 
     @override
     def _process_single_event(self, event: evdev.events.InputEvent) -> Event | None:
