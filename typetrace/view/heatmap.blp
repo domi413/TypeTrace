@@ -5,31 +5,6 @@ template $Heatmap : Gtk.Box  {
     halign: center;
     valign: center;
 
-       Gtk.Box {
-        css-classes: ["legend-container"];
-        orientation: horizontal;
-        spacing: 10;
-        margin-bottom: 20;
-        halign: center;
-
-        Gtk.Label {
-            label: "Min";
-            margin-end: 5;
-        }
-
-        Gtk.Box {
-            css-classes: ["gradient-bar"];
-            height-request: 10;
-            width-request: 300;
-            halign: center;
-        }
-
-        Gtk.Label {
-            label: "Max";
-            margin-start: 5;
-        }
-    }
-
     Gtk.Box keyboard_container {
         css-classes: ["container"];
         orientation: vertical;
