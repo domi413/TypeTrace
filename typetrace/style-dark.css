@@ -8,17 +8,52 @@
   box-shadow: 0 1pt 2pt rgba(255, 255, 255, 0.3);
 }
 
-.container label.low-usage {
-  color: #fff;
-  background-color: rgba(60, 80, 255, 0.7);
+.container label.usage-10 {
+  color: white;
+  background-color: #1a73e8;
 }
 
-.container label.mid-usage {
-  color: #fff;
-  background-color: rgba(160, 60, 160, 0.7);
+.container label.usage-20 {
+  color: white;
+  background-color: #4285f4;
 }
 
-.container label.high-usage {
-  color: #fff;
-  background-color: rgba(255, 60, 60, 0.7);
+.container label.usage-30 {
+  color: black;
+  background-color: #82b1ff;
+}
+
+.container label.usage-40 {
+  color: black;
+  background-color: #bbdefb;
+}
+
+.container label.usage-50 {
+  color: black;
+  background-color: #fff176;
+}
+
+.container label.usage-60 {
+  color: black;
+  background-color: #ffb300;
+}
+
+.container label.usage-70 {
+  color: white;
+  background-color: #f57c00;
+}
+
+.container label.usage-80 {
+  color: white;
+  background-color: #d32f2f;
+}
+
+.container label.usage-90 {
+  color: white;
+  background-color: #c62828;
+}
+
+.container label.usage-100 {
+  color: white;
+  background-color: #b71c1c;
 }

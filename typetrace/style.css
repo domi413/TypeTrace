@@ -17,17 +17,52 @@
   box-shadow: 0 2pt 4pt rgba(0, 0, 0, 0.5);
 }
 
-.container label.low-usage {
+.container label.usage-10 {
   color: white;
-  background-color: rgba(0, 0, 255, 0.6);
+  background-color: #1a73e8;
 }
 
-.container label.mid-usage {
+.container label.usage-20 {
   color: white;
-  background-color: rgba(128, 0, 128, 0.6);
+  background-color: #4285f4;
 }
 
-.container label.high-usage {
+.container label.usage-30 {
+  color: black;
+  background-color: #82b1ff;
+}
+
+.container label.usage-40 {
+  color: black;
+  background-color: #bbdefb;
+}
+
+.container label.usage-50 {
+  color: black;
+  background-color: #fff176;
+}
+
+.container label.usage-60 {
+  color: black;
+  background-color: #ffb300;
+}
+
+.container label.usage-70 {
   color: white;
-  background-color: rgba(255, 0, 0, 0.6);
+  background-color: #f57c00;
+}
+
+.container label.usage-80 {
+  color: white;
+  background-color: #d32f2f;
+}
+
+.container label.usage-90 {
+  color: white;
+  background-color: #c62828;
+}
+
+.container label.usage-100 {
+  color: white;
+  background-color: #b71c1c;
 }
