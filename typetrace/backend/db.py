@@ -70,12 +70,7 @@ class DatabaseManager:
                         "key_name": key_name,
                     },
                 )
-
-                cursor.execute(
-                    SQLQueries.GET_KEYSTROKE_ID,
-                    {"scan_code": event["scan_code"]},
-                )
-                keystroke_id = cursor.fetchone()[0]
+                keystroke_id = cursor.lastrowid
 
                 cursor.execute(
                     SQLQueries.INSERT_OR_UPDATE_KEYSTROKE_LOG,
