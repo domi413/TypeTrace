@@ -27,7 +27,8 @@ class SQLQueries:
         keystroke_id INTEGER NOT NULL,
         key_count INTEGER NOT NULL DEFAULT 0,
         log_date DATE NOT NULL,
-        FOREIGN KEY (keystroke_id) REFERENCES keystrokes(keystroke_id) ON DELETE CASCADE,
+        FOREIGN KEY (keystroke_id)
+            REFERENCES keystrokes(keystroke_id) ON DELETE CASCADE,
         UNIQUE(keystroke_id, log_date)
     );
     """
