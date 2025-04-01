@@ -21,6 +21,7 @@ jobs:
         run: |
           pattern="^(fix|feat|pipeline|doc|wip)\(#TYP-[0-9]+\): .+"
           pr_title="${{ github.event.pull_request.title }}"
+
           if ! [[ "$pr_title" =~ $pattern ]]; then
               echo "❌ Pull Request title is invalid!"
               echo "Allowed format: fix|feat|pipeline|doc|wip(#TICKET-ID): Description"
