@@ -13,6 +13,7 @@ QWERTZ
 scancode
 scancodes
 vexpand
+lastrowid
 
 # Build
 bindir
