@@ -4,6 +4,15 @@ using Adw 1;
 template $Preferences: Adw.PreferencesDialog {
   Adw.PreferencesPage {
     Adw.PreferencesGroup {
+      title: "General";
+
+      Adw.SwitchRow autostart_row {
+        title: "Start backend on login";
+        subtitle: "Run the TypeTrace backend automatically at startup";
+      }
+    }
+
+    Adw.PreferencesGroup {
       title: "Appearance";
 
       Adw.ComboRow theme_row {

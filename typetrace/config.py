@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from enum import IntEnum
 from pathlib import Path
 from typing import Final, TypedDict, final
@@ -22,6 +23,16 @@ class Config:
 
     BUFFER_SIZE: Final[int] = 50
     BUFFER_TIMEOUT: Final[float] = 60.0
+
+    IS_FLATPAK: Final[bool] = "FLATPAK_ID" in os.environ
+
+    AUTOSTART_TARGET_DIR: Final[Path] = Path.home() / ".config" / "autostart"
+    AUTOSTART_TARGET_FILE: Final[Path] = (
+        AUTOSTART_TARGET_DIR / "typetrace-backend.desktop"
+    )
+    AUTOSTART_SOURCE: Final[Path] = Path.home() / ".local" / "share" / (
+        "flatpak/exports/share" if IS_FLATPAK else ""
+    ) / "applications" / "typetrace-backend.desktop"
 
     # Global settings
     DEBUG: bool = False
