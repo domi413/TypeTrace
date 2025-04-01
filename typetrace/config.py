@@ -26,6 +26,14 @@ class Config:
 
     IS_FLATPAK: Final[bool] = "FLATPAK_ID" in os.environ
 
+    AUTOSTART_TARGET_DIR: Final[Path] = Path.home() / ".config" / "autostart"
+    AUTOSTART_TARGET_FILE: Final[Path] = (
+        AUTOSTART_TARGET_DIR / "typetrace-backend.desktop"
+    )
+    AUTOSTART_SOURCE: Final[Path] = Path.home() / ".local" / "share" / (
+        "flatpak/exports/share" if IS_FLATPAK else ""
+    ) / "applications" / "typetrace-backend.desktop"
+
     # Global settings
     DEBUG: bool = False
 
@@ -43,18 +51,6 @@ class DatabasePath:
     """Constant for database path."""
 
     DB_PATH: Final[Path] = Config.resolve_db_path()
-
-
-class DesktopFilePath:
-    """Constants for desktop file paths."""
-
-    AUTOSTART_TARGET_DIR: Final[Path] = Path.home() / ".config" / "autostart"
-    AUTOSTART_TARGET_FILE: Final[Path] = (
-        AUTOSTART_TARGET_DIR / "typetrace-backend.desktop"
-    )
-    AUTOSTART_SOURCE: Final[Path] = Path.home() / ".local" / "share" / (
-        "flatpak/exports/share" if Config.IS_FLATPAK else ""
-    ) / "applications" / "typetrace-backend.desktop"
 
 
 class ExitCodes(IntEnum):
