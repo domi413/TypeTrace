@@ -11,3 +11,4 @@ pynput
 filemanager
 adwaita
 gfile
+dbus
