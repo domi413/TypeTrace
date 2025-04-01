@@ -51,7 +51,7 @@ class BaseEventProcessor(ABC):
         """
         current_time: float = time.time()
 
-        if (
+        if buffer and (
             flush
             or len(buffer) >= Config.BUFFER_SIZE
             or current_time - start_time >= Config.BUFFER_TIMEOUT
