@@ -1,6 +1,7 @@
 using Gtk 4.0;
 
 template $Heatmap : Gtk.Box  {
+    css-classes: ["container"];
     orientation: vertical;
     halign: center;
     valign: center;
@@ -8,7 +9,6 @@ template $Heatmap : Gtk.Box  {
     Gtk.Box {
         css-classes: ["legend-container"];
         orientation: horizontal;
-        spacing: 10;
         margin-bottom: 20;
         halign: center;
 
@@ -31,7 +31,7 @@ template $Heatmap : Gtk.Box  {
     }
 
     Gtk.Box keyboard_container {
-        css-classes: ["container"];
+        css-classes: ["keyboard-container"];
         orientation: vertical;
         spacing: 5;
     }

@@ -1,8 +1,8 @@
 .container {
-  padding: 5rem;
+  padding: 4rem;
 }
 
-.container label {
+.keyboard-container label {
   border: 1pt solid rgba(0, 0, 0, 0.2);
   border-radius: 4pt;
   padding: 1rem;
@@ -13,56 +13,56 @@
   transition: background-color 0.3s ease;
 }
 
-.container label:hover {
+.keyboard-container label:hover {
   box-shadow: 0 2pt 4pt rgba(0, 0, 0, 0.5);
 }
 
-.container label.usage-10 {
+.keyboard-container label.usage-10 {
   color: white;
   background-color: #1a73e8;
 }
 
-.container label.usage-20 {
+.keyboard-container label.usage-20 {
   color: white;
   background-color: #4285f4;
 }
 
-.container label.usage-30 {
+.keyboard-container label.usage-30 {
   color: black;
   background-color: #82b1ff;
 }
 
-.container label.usage-40 {
+.keyboard-container label.usage-40 {
   color: black;
   background-color: #bbdefb;
 }
 
-.container label.usage-50 {
+.keyboard-container label.usage-50 {
   color: black;
   background-color: #fff176;
 }
 
-.container label.usage-60 {
+.keyboard-container label.usage-60 {
   color: black;
   background-color: #ffb300;
 }
 
-.container label.usage-70 {
+.keyboard-container label.usage-70 {
   color: white;
   background-color: #f57c00;
 }
 
-.container label.usage-80 {
+.keyboard-container label.usage-80 {
   color: white;
   background-color: #d32f2f;
 }
 
-.container label.usage-90 {
+.keyboard-container label.usage-90 {
   color: white;
   background-color: #c62828;
 }
 
-.container label.usage-100 {
+.keyboard-container label.usage-100 {
   color: white;
   background-color: #b71c1c;
 }
