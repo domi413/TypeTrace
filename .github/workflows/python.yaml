@@ -11,19 +11,36 @@ on:
 jobs:
   lint:
     runs-on: Ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
+        id: setup-python
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-          cache: "pip"
 
-      - name: Install ruff dependencies
-        run: pip install ruff
+      - name: Get pip cache dir
+        id: pip-cache
+        run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.pip-cache.outputs.dir }}
+            ${{ steps.setup-python.outputs.python-path }}/lib/python*/site-packages
+          key: ${{ runner.os }}-pip-${{ steps.setup-python.outputs.python-version }}-ruff-${{ hashFiles('**/github/workflows/*.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ steps.setup-python.outputs.python-version }}-ruff-
+            ${{ runner.os }}-pip-${{ steps.setup-python.outputs.python-version }}-
+            ${{ runner.os }}-pip-
+
+      - name: Install ruff dependency
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
 
       - name: Run ruff
         run: ruff check typetrace/
