@@ -5,6 +5,7 @@ from pathlib import Path
 from gi.repository import Adw, Gio, Gtk
 
 from typetrace.config import Config, DatabasePath
+from typetrace.controller.utils.desktop_utils import DesktopUtils
 from typetrace.controller.utils.dialog_utils import DialogUtils
 from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
@@ -20,6 +21,7 @@ class Preferences(Adw.PreferencesDialog):
     export_button = Gtk.Template.Child()
     delete_button = Gtk.Template.Child()
     locate_button = Gtk.Template.Child()
+    autostart_row = Gtk.Template.Child()
 
     def __init__(
         self,
@@ -41,10 +43,36 @@ class Preferences(Adw.PreferencesDialog):
         self.db_manager = db_manager
         self.keystroke_store = keystroke_store
 
+        self.autostart_row.set_active(DesktopUtils.is_autostart_enabled())
+        self.autostart_row.connect("notify::active", self._on_autostart_toggled)
+
         self.import_button.connect("clicked", self._on_import_clicked)
         self.export_button.connect("clicked", self._on_export_clicked)
         self.delete_button.connect("clicked", self._on_delete_clicked)
         self.locate_button.connect("clicked", self._on_locate_clicked)
+
+    def _on_autostart_toggled(self, row: Adw.SwitchRow, *_: any) -> None:
+        """Handle the autostart toggle change."""
+        if row.get_active():
+            success, error_msg = DesktopUtils.enable_autostart()
+            if success:
+                DialogUtils.show_toast(self, "Backend autostart enabled")
+            else:
+                DialogUtils.show_error_dialog(
+                    self.parent_window, "Failed to enable autostart",
+                    secondary_text=error_msg,
+                )
+                row.set_active(False)
+        else:
+            success, error_msg = DesktopUtils.disable_autostart()
+            if success:
+                DialogUtils.show_toast(self, "Backend autostart disabled")
+            else:
+                DialogUtils.show_error_dialog(
+                    self.parent_window, "Failed to disable autostart",
+                    secondary_text=error_msg,
+                )
+                row.set_active(True)
 
     def _on_export_clicked(self, _button: Gtk.Button) -> None:
         """Handle the export button click event, opens a save dialog for export."""
