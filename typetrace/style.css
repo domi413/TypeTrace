@@ -17,12 +17,3 @@
 .keyboard-container label:hover {
   box-shadow: 0 2pt 4pt rgba(0, 0, 0, 0.5);
 }
-
-.gradient-bar {
-  background: linear-gradient(to right,
-    rgb(0, 0, 255) 0%,
-    rgb(255, 255, 255) 30%,
-    rgb(255, 255, 0) 50%,
-    rgb(255, 0, 0) 100%);
-  border-radius: 4pt;
-}
