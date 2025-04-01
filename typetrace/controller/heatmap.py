@@ -48,10 +48,6 @@ class Heatmap(Gtk.Box):
         self._build_keyboard()
         self._update_colors()
 
-    def color_keys(self) -> None:
-        """Public method to refresh the heatmap."""
-        self._update_colors()
-
     def _build_keyboard(self) -> None:
         """Build the keyboard layout dynamically using scancodes."""
         for row_count, row in enumerate(KEYBOARD_LAYOUTS[self.layout]):
@@ -84,14 +80,6 @@ class Heatmap(Gtk.Box):
         for keystroke in keystrokes:
             if label := self.key_widgets.get(keystroke.scan_code):
                 percentile = round((keystroke.count / most_pressed) * 10) * 10
-                self._get_key_color(label, percentile)
+                css_class = f"usage-{percentile}"
+                label.set_css_classes([css_class])
                 label.set_tooltip_text(str(keystroke.count))
-
-    def _get_key_color(self, label: Gtk.Label, percentile: int) -> None:
-        """Assign color class based on percentile (rounded to 10s)."""
-        style_context = label.get_style_context()
-        for i in range(10, 101, 10):
-            style_context.remove_class(f"usage-{i}")
-
-        class_name = f"usage-{percentile}"
-        style_context.add_class(class_name)
