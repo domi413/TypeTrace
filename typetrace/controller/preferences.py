@@ -5,8 +5,7 @@ from pathlib import Path
 from gi.repository import Adw, Gio, Gtk
 
 from typetrace.config import Config, DatabasePath
-from typetrace.controller.utils.desktop_utils import DesktopUtils
-from typetrace.controller.utils.dialog_utils import DialogUtils
+from typetrace.controller.utils import desktop_utils, dialog_utils
 from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
 
@@ -43,7 +42,7 @@ class Preferences(Adw.PreferencesDialog):
         self.db_manager = db_manager
         self.keystroke_store = keystroke_store
 
-        self.autostart_row.set_active(DesktopUtils.is_autostart_enabled())
+        self.autostart_row.set_active(desktop_utils.is_autostart_enabled())
         self.autostart_row.connect("notify::active", self._on_autostart_toggled)
 
         self.import_button.connect("clicked", self._on_import_clicked)
@@ -54,21 +53,21 @@ class Preferences(Adw.PreferencesDialog):
     def _on_autostart_toggled(self, row: Adw.SwitchRow, *_: any) -> None:
         """Handle the autostart toggle change."""
         if row.get_active():
-            success, error_msg = DesktopUtils.enable_autostart()
+            success, error_msg = desktop_utils.enable_autostart()
             if success:
-                DialogUtils.show_toast(self, "Backend autostart enabled")
+                dialog_utils.show_toast(self, "Backend autostart enabled")
             else:
-                DialogUtils.show_error_dialog(
+                dialog_utils.show_error_dialog(
                     self.parent_window, "Failed to enable autostart",
                     secondary_text=error_msg,
                 )
                 row.set_active(False)
         else:
-            success, error_msg = DesktopUtils.disable_autostart()
+            success, error_msg = desktop_utils.disable_autostart()
             if success:
-                DialogUtils.show_toast(self, "Backend autostart disabled")
+                dialog_utils.show_toast(self, "Backend autostart disabled")
             else:
-                DialogUtils.show_error_dialog(
+                dialog_utils.show_error_dialog(
                     self.parent_window, "Failed to disable autostart",
                     secondary_text=error_msg,
                 )
@@ -79,11 +78,11 @@ class Preferences(Adw.PreferencesDialog):
 
         def export_callback(path: Path) -> None:
             if self.db_manager.export_database(path):
-                DialogUtils.show_toast(self, "Data Exported Successfully")
+                dialog_utils.show_toast(self, "Data Exported Successfully")
             else:
-                DialogUtils.show_error_dialog(self.parent_window, "Export Failed")
+                dialog_utils.show_error_dialog(self.parent_window, "Export Failed")
 
-        DialogUtils.open_file_save_dialog(
+        dialog_utils.open_file_save_dialog(
             parent=self.parent_window,
             title="Export data",
             initial_name=Config.DB_NAME,
@@ -94,7 +93,7 @@ class Preferences(Adw.PreferencesDialog):
         """Handle the import button click event, opens a file chooser dialog."""
 
         def import_callback(path: Path) -> None:
-            DialogUtils.show_confirmation_dialog(
+            dialog_utils.show_confirmation_dialog(
                 parent=self.parent_window,
                 text="Confirm Data Import",
                 secondary_text="This will override your current data, continue?",
@@ -107,7 +106,7 @@ class Preferences(Adw.PreferencesDialog):
         filters = Gio.ListStore.new(Gtk.FileFilter)
         filters.append(file_filter)
 
-        DialogUtils.open_file_open_dialog(
+        dialog_utils.open_file_open_dialog(
             parent=self.parent_window,
             title="Import data",
             filters=filters,
@@ -122,20 +121,20 @@ class Preferences(Adw.PreferencesDialog):
 
         """
         if self.db_manager.import_database(src_path):
-            DialogUtils.show_toast(self, "Data Imported Successfully")
+            dialog_utils.show_toast(self, "Data Imported Successfully")
         else:
-            DialogUtils.show_error_dialog(self.parent_window, "Import Failed")
+            dialog_utils.show_error_dialog(self.parent_window, "Import Failed")
 
     def _on_delete_clicked(self, _button: Gtk.Button) -> None:
         """Perform the database clear operation after user confirmation."""
 
         def delete_callback() -> None:
             if self.keystroke_store.clear():
-                DialogUtils.show_toast(self, "Data Cleared Successfully")
+                dialog_utils.show_toast(self, "Data Cleared Successfully")
             else:
-                DialogUtils.show_error_dialog(self.parent_window, "Clear Failed")
+                dialog_utils.show_error_dialog(self.parent_window, "Clear Failed")
 
-        DialogUtils.show_confirmation_dialog(
+        dialog_utils.show_confirmation_dialog(
             parent=self.parent_window,
             text="Confirm Database Clear",
             secondary_text="This permanently removes all recorded data, continue?",
@@ -144,4 +143,4 @@ class Preferences(Adw.PreferencesDialog):
 
     def _on_locate_clicked(self, _button: Gtk.Button) -> None:
         """Open Filemanager where the data file is stored."""
-        DialogUtils.show_folder_in_filemanager(DatabasePath.DB_PATH.parent)
+        dialog_utils.show_folder_in_filemanager(DatabasePath.DB_PATH.parent)
