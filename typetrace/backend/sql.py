@@ -33,6 +33,10 @@ class SQLQueries:
     );
     """
 
+    GET_KEYSTROKE_ID = """
+    SELECT keystroke_id FROM keystrokes WHERE scan_code = :scan_code
+    """
+
     INSERT_KEYSTROKE = """
     INSERT OR IGNORE INTO keystrokes (scan_code, key_name)
     VALUES (:scan_code, :key_name)
