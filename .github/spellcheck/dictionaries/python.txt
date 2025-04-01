@@ -8,3 +8,6 @@ gresource
 gresources
 levelname
 pynput
+filemanager
+adwaita
+gfile

@@ -27,10 +27,10 @@ logger = logging.getLogger(__name__)
 class LinuxEventProcessor(BaseEventProcessor):
     """Event processor for Linux platform."""
 
-    def __init__(self) -> None:
-        """Initialize the processor."""
+    def __init__(self, db_path: Path) -> None:
+        """Initialize the Linux event processor."""
+        super().__init__(db_path)
         self.__stored_devices: list[evdev.device.InputDevice] | None = None
-        self.__db_path: Path
         self.__terminate: bool = False
 
     def check_device_accessibility(self) -> None:
@@ -47,10 +47,9 @@ class LinuxEventProcessor(BaseEventProcessor):
             logger.exception("Failed trying to access input devices")
 
     @override
-    def trace(self, db_path: Path) -> None:
+    def trace(self) -> None:
         """See base class."""
         self.__setup_signal_handlers()
-        self.__db_path = db_path
 
         with self._managed_devices() as devices:
             if not devices:
@@ -75,7 +74,7 @@ class LinuxEventProcessor(BaseEventProcessor):
                 buffer, start_time = self._check_timeout_and_flush(
                     buffer,
                     start_time,
-                    self.__db_path,
+                    self._db_path,
                 )
 
                 # Process events from ready devices
@@ -87,15 +86,14 @@ class LinuxEventProcessor(BaseEventProcessor):
                     self.__stored_devices = None
                     devices = self._select_devices()
         finally:
-            if buffer:
-                logger.debug("Flushing %d events to database before exit", len(buffer))
+            logger.debug("Flushing %d events to database before exit", len(buffer))
 
-                self._check_timeout_and_flush(
-                    buffer,
-                    start_time,
-                    self.__db_path,
-                    flush=True,
-                )
+            self._check_timeout_and_flush(
+                buffer,
+                start_time,
+                self._db_path,
+                flush=True,
+            )
 
     @override
     def _process_single_event(self, event: evdev.events.InputEvent) -> Event | None:

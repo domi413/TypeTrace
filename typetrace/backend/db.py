@@ -46,35 +46,6 @@ class DatabaseManager:
             events: List of key events to write to the database.
 
         """
-        DatabaseManager._update_keystroke_counts(db_path, events)
-
-    @staticmethod
-    @contextmanager
-    def _get_db_connection(db_path: Path) -> Generator[sqlite3.Connection, None, None]:
-        """Get a database connection to the SQLite database.
-
-        Args:
-            db_path: Path to the SQLite database file.
-
-        Yields:
-            SQLite database connection.
-
-        """
-        conn = sqlite3.connect(db_path)
-        try:
-            yield conn
-        finally:
-            conn.close()
-
-    @staticmethod
-    def _update_keystroke_counts(db_path: Path, events: list[Event]) -> None:
-        """Update keystroke counts in the database.
-
-        Args:
-            db_path: Path to the SQLite database file.
-            events: List of key events to update in the database.
-
-        """
         if not events:
             return
 
@@ -94,3 +65,21 @@ class DatabaseManager:
             conn.commit()
 
             logger.debug("Updated database with %d keystroke events", len(events))
+
+    @staticmethod
+    @contextmanager
+    def _get_db_connection(db_path: Path) -> Generator[sqlite3.Connection, None, None]:
+        """Get a database connection to the SQLite database.
+
+        Args:
+            db_path: Path to the SQLite database file.
+
+        Yields:
+            SQLite database connection.
+
+        """
+        conn = sqlite3.connect(db_path)
+        try:
+            yield conn
+        finally:
+            conn.close()
