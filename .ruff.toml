@@ -1,7 +1,10 @@
+[lint]
 extend-select = [
   "ALL",
 ]
 ignore = [
   "ANN003", # Ignore missing type annotation for **kwargs
   "ANN401", # Ignore `Any` type annotation for functions
+  "D203",   # In conflict with D211
+  "D213",   # In conflict with D212
 ]

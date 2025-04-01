@@ -12,7 +12,7 @@ sys.path.insert(1, PKGDATA_DIR)
 
 
 def set_resources() -> None:
-    """Set application ressource file."""
+    """Set application resource file."""
     import gi
 
     gi.require_version("Adw", "1")
