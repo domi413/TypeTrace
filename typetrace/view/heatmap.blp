@@ -28,6 +28,13 @@ template $Heatmap : Gtk.Box  {
             label: "Max";
             margin-start: 5;
         }
+
+        Gtk.Button refresh_button {
+            halign: end;
+          valign: center;
+          has-frame: false;
+          icon-name: "view-refresh-symbolic";
+        }
     }
 
     Gtk.Box keyboard_container {

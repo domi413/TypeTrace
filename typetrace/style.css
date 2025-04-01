@@ -3,6 +3,7 @@
 }
 
 .keyboard-container label {
+  font-weight: bold;
   border: 1pt solid rgba(0, 0, 0, 0.2);
   border-radius: 4pt;
   padding: 1rem;
@@ -17,67 +18,11 @@
   box-shadow: 0 2pt 4pt rgba(0, 0, 0, 0.5);
 }
 
-.keyboard-container label.usage-10 {
-  color: white;
-  background-color: #1a73e8;
-}
-
-.keyboard-container label.usage-20 {
-  color: white;
-  background-color: #4285f4;
-}
-
-.keyboard-container label.usage-30 {
-  color: black;
-  background-color: #82b1ff;
-}
-
-.keyboard-container label.usage-40 {
-  color: black;
-  background-color: #bbdefb;
-}
-
-.keyboard-container label.usage-50 {
-  color: black;
-  background-color: #fff176;
-}
-
-.keyboard-container label.usage-60 {
-  color: black;
-  background-color: #ffb300;
-}
-
-.keyboard-container label.usage-70 {
-  color: white;
-  background-color: #f57c00;
-}
-
-.keyboard-container label.usage-80 {
-  color: white;
-  background-color: #d32f2f;
-}
-
-.keyboard-container label.usage-90 {
-  color: white;
-  background-color: #c62828;
-}
-
-.keyboard-container label.usage-100 {
-  color: white;
-  background-color: #b71c1c;
-}
-
 .gradient-bar {
   background: linear-gradient(to right,
-      #1a73e8 0%,
-      #4285f4 10%,
-      #82b1ff 20%,
-      #bbdefb 30%,
-      #fff176 40%,
-      #ffb300 50%,
-      #f57c00 60%,
-      #d32f2f 70%,
-      #c62828 80%,
-      #b71c1c 90%);
+    rgb(0, 0, 255) 0%,
+    rgb(255, 255, 255) 30%,
+    rgb(255, 255, 0) 50%,
+    rgb(255, 0, 0) 100%);
   border-radius: 4pt;
 }
