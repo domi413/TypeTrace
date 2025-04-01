@@ -19,7 +19,6 @@ template $Heatmap : Gtk.Box  {
 
         Gtk.Box {
             css-classes: ["gradient-bar"];
-            height-request: 10;
             width-request: 300;
             halign: center;
         }
@@ -30,10 +29,10 @@ template $Heatmap : Gtk.Box  {
         }
 
         Gtk.Button refresh_button {
-            halign: end;
           valign: center;
           has-frame: false;
           icon-name: "view-refresh-symbolic";
+          margin-start: 5;
         }
     }
 
