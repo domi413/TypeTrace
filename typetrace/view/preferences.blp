@@ -4,6 +4,15 @@ using Adw 1;
 template $Preferences: Adw.PreferencesDialog {
   Adw.PreferencesPage {
     Adw.PreferencesGroup {
+      title: "General";
+
+      Adw.SwitchRow autostart_row {
+        title: "Start backend on login";
+        subtitle: "Run the TypeTrace backend automatically at startup";
+      }
+    }
+
+    Adw.PreferencesGroup {
       title: "Appearance";
 
       Adw.ComboRow theme_row {
@@ -22,7 +31,7 @@ template $Preferences: Adw.PreferencesDialog {
         Button import_button {
           valign: center;
           has-frame: false;
-          icon-name: "document-send-symbolic";
+          icon-name: "document-save-symbolic";
         }
       }
 
@@ -33,7 +42,7 @@ template $Preferences: Adw.PreferencesDialog {
         Button export_button {
           valign: center;
           has-frame: false;
-          icon-name: "document-save-symbolic";
+          icon-name: "document-send-symbolic";
         }
       }
 
@@ -44,7 +53,7 @@ template $Preferences: Adw.PreferencesDialog {
         Button locate_button {
           valign: center;
           has-frame: false;
-          icon-name: "document-save-symbolic";
+          icon-name: "folder-open-symbolic";
         }
       }
 

@@ -1,15 +1,17 @@
 id: edu.ost.typetrace
 runtime: org.gnome.Platform
-runtime-version: "47"
+runtime-version: "48"
 sdk: org.gnome.Sdk
 command: typetrace
 
 finish-args:
-  - --share=network
   - --share=ipc
   - --socket=fallback-x11
   - --device=dri
+  - --device=input
   - --socket=wayland
+  - --filesystem=home
+  - --talk-name=org.freedesktop.FileManager1
 
 cleanup:
   - /include
@@ -39,7 +41,7 @@ modules:
   - name: python-dependencies
     buildsystem: simple
     build-commands:
-      - pip3 install --prefix=/app appdirs
+      - pip3 install --prefix=/app appdirs evdev dbus-python
 
   - name: typetrace
     builddir: true
