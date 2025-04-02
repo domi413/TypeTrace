@@ -6,7 +6,7 @@
   font-weight: bold;
   border: 1pt solid rgba(0, 0, 0, 0.2);
   border-radius: 4pt;
-  padding: 1rem;
+  padding: 0.6rem;
   min-width: 2rem;
   background-color: rgba(245, 245, 245, 0.9);
   color: #333;
@@ -16,6 +16,7 @@
 
 .keyboard-container label:hover {
   box-shadow: 0 2pt 4pt rgba(0, 0, 0, 0.5);
+  filter: brightness(120%);
 }
 
 .gradient-bar {
