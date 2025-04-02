@@ -6,4 +6,5 @@
 
 .keyboard-container label:hover {
   box-shadow: 0 1pt 2pt rgba(255, 255, 255, 0.3);
+  filter: brightness(120%);
 }
