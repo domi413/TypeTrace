@@ -8,11 +8,9 @@ from pathlib import Path
 from typing import final
 
 from backend.sql import SQLQueries
-
 from typetrace.config import Event
 
 logger = logging.getLogger(__name__)
-
 
 @final
 class DatabaseManager:
@@ -28,13 +26,11 @@ class DatabaseManager:
 
         Args:
             db_path: Path to the SQLite database file.
-
         """
         with DatabaseManager._get_db_connection(db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(SQLQueries.CREATE_KEYSTROKES_TABLE)
             conn.commit()
-
             logger.debug("Database initialized at %s", db_path)
 
     @staticmethod
@@ -44,7 +40,6 @@ class DatabaseManager:
         Args:
             db_path: Path to the SQLite database file.
             events: List of key events to write to the database.
-
         """
         if not events:
             return
@@ -63,7 +58,6 @@ class DatabaseManager:
             cursor = conn.cursor()
             cursor.executemany(SQLQueries.INSERT_OR_UPDATE_KEYSTROKE, processed_events)
             conn.commit()
-
             logger.debug("Updated database with %d keystroke events", len(events))
 
     @staticmethod
@@ -76,10 +70,35 @@ class DatabaseManager:
 
         Yields:
             SQLite database connection.
-
         """
         conn = sqlite3.connect(db_path)
         try:
             yield conn
         finally:
             conn.close()
+
+    @staticmethod
+    def update_keystroke_counts(db_path: Path, events: list) -> None:
+        """Update the keystroke counts in the database based on provided events.
+
+        Args:
+            db_path (Path): Path to the SQLite database file.
+            events (list): List of events containing scan_code and name.
+        """
+        if not events:
+            return
+
+        with DatabaseManager._get_db_connection(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("BEGIN TRANSACTION")
+            for event in events:
+                scan_code = event["scan_code"]
+                key_name = event["name"]
+                if isinstance(key_name, tuple):
+                    key_name = ", ".join(key_name)
+                cursor.execute(
+                    "INSERT OR REPLACE INTO keystrokes (scan_code, key_name, count) "
+                    "VALUES (?, ?, ?)",
+                    (scan_code, key_name, 1),
+                )
+            conn.commit()
