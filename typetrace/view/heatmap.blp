@@ -1,12 +1,43 @@
 using Gtk 4.0;
 
 template $Heatmap : Gtk.Box  {
+    css-classes: ["container"];
     orientation: vertical;
     halign: center;
     valign: center;
 
+    Gtk.Box {
+        css-classes: ["legend-container"];
+        orientation: horizontal;
+        margin-bottom: 20;
+        halign: center;
+
+        Gtk.Label {
+            label: "Min";
+            margin-end: 5;
+        }
+
+        Gtk.Box {
+            css-classes: ["gradient-bar"];
+            width-request: 300;
+            halign: center;
+        }
+
+        Gtk.Label {
+            label: "Max";
+            margin-start: 5;
+        }
+
+        Gtk.Button refresh_button {
+          valign: center;
+          has-frame: false;
+          icon-name: "view-refresh-symbolic";
+          margin-start: 5;
+        }
+    }
+
     Gtk.Box keyboard_container {
-        css-classes: ["container"];
+        css-classes: ["keyboard-container"];
         orientation: vertical;
         spacing: 5;
     }

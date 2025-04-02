@@ -1,24 +1,9 @@
-.container label {
+.keyboard-container label {
   border: 1pt solid rgba(255, 255, 255, 0.1);
   background-color: rgba(50, 50, 50, 0.9);
   color: #ddd;
 }
 
-.container label:hover {
+.keyboard-container label:hover {
   box-shadow: 0 1pt 2pt rgba(255, 255, 255, 0.3);
-}
-
-.container label.low-usage {
-  color: #fff;
-  background-color: rgba(60, 80, 255, 0.7);
-}
-
-.container label.mid-usage {
-  color: #fff;
-  background-color: rgba(160, 60, 160, 0.7);
-}
-
-.container label.high-usage {
-  color: #fff;
-  background-color: rgba(255, 60, 60, 0.7);
 }

@@ -1,8 +1,9 @@
 .container {
-  padding: 5rem;
+  padding: 4rem;
 }
 
-.container label {
+.keyboard-container label {
+  font-weight: bold;
   border: 1pt solid rgba(0, 0, 0, 0.2);
   border-radius: 4pt;
   padding: 1rem;
@@ -13,21 +14,10 @@
   transition: background-color 0.3s ease;
 }
 
-.container label:hover {
+.keyboard-container label:hover {
   box-shadow: 0 2pt 4pt rgba(0, 0, 0, 0.5);
 }
 
-.container label.low-usage {
-  color: white;
-  background-color: rgba(0, 0, 255, 0.6);
-}
-
-.container label.mid-usage {
-  color: white;
-  background-color: rgba(128, 0, 128, 0.6);
-}
-
-.container label.high-usage {
-  color: white;
-  background-color: rgba(255, 0, 0, 0.6);
+.gradient-bar {
+  border-radius: 4pt;
 }
