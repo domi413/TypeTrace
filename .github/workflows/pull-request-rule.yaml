@@ -19,7 +19,7 @@ jobs:
       - name: Validate PR Title
         if: env.ACT != 'true'
         run: |
-          pattern="^(fix|feat|pipeline|doc|wip)\(#TYP-[0-9]+\): .+"
+          pattern="^(fix|feat|pipeline|doc|test|wip)\(#TYP-[0-9]+\): .+"
           pr_title="${{ github.event.pull_request.title }}"
           if ! [[ "$pr_title" =~ $pattern ]]; then
               echo "❌ Pull Request title is invalid!"
