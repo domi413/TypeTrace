@@ -4,7 +4,7 @@
 cd "$(dirname "$0")/.." || exit 1
 
 # Install all Python dependencies from the requirements file
-echo "📦 Installing dependencies..."
+echo " Installing dependencies..."
 pip install -r requirements.txt
 
 # Install optional dev tools if needed (ruff wird vorausgesetzt, ist aber in requirements.txt)
@@ -41,5 +41,5 @@ pytest --cov=typetrace ./typetrace/tests/
 
 # Optional: Run NFR verification script (falls gewünscht)
 echo " Running NFR verification..."
-ruff format "$HOME/TypeTrace/typetrace" && python3 /home/mustafa/TypeTrace/scripts/nfr-verification-script.py --nfr=all --source-dir="$HOME/TypeTrace/typetrace" --db-path="$HOME/.local/share/typetrace/TypeTrace.db"
+#ruff format "$HOME/TypeTrace/typetrace" && python3 /home/mustafa/TypeTrace/scripts/nfr-verification-script.py --nfr=all --source-dir="$HOME/TypeTrace/typetrace" --db-path="$HOME/.local/share/typetrace/TypeTrace.db"
 
