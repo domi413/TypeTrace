@@ -10,6 +10,7 @@ from typetrace.backend.db import (
     update_keystroke_counts,
 )
 
+
 @pytest.fixture
 def temp_db(tmp_path: Path) -> Path:
     """Create a temporary database file for testing.
@@ -20,6 +21,7 @@ def temp_db(tmp_path: Path) -> Path:
     """
     return tmp_path / "test.db"
 
+
 def test_get_db_connection(temp_db: Path) -> None:
     """Test that get_db_connection returns a valid SQLite connection."""
     with get_db_connection(temp_db) as conn:
@@ -27,6 +29,7 @@ def test_get_db_connection(temp_db: Path) -> None:
         cursor = conn.cursor()
         cursor.execute("SELECT sqlite_version();")
         assert cursor.fetchone()[0]
+
 
 def test_initialize_database(temp_db: Path) -> None:
     """Test that initialize_database creates the keystrokes table."""
@@ -37,6 +40,7 @@ def test_initialize_database(temp_db: Path) -> None:
             "SELECT name FROM sqlite_master WHERE type='table' AND name='keystrokes';"
         )
         assert cursor.fetchone() is not None
+
 
 def test_update_keystroke_counts(temp_db: Path) -> None:
     """Test that update_keystroke_counts adds a single key event correctly."""
@@ -50,6 +54,7 @@ def test_update_keystroke_counts(temp_db: Path) -> None:
         assert key_name == "a"
         assert count == 1
 
+
 def test_update_keystroke_counts_empty(temp_db: Path) -> None:
     """Test that update_keystroke_counts handles an empty event list."""
     initialize_database(temp_db)
@@ -58,6 +63,7 @@ def test_update_keystroke_counts_empty(temp_db: Path) -> None:
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM keystrokes")
         assert cursor.fetchone()[0] == 0
+
 
 def test_update_keystroke_counts_tuple(temp_db: Path) -> None:
     """Test that update_keystroke_counts handles tuple key names correctly."""

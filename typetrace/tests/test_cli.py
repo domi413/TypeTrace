@@ -1,7 +1,13 @@
-#Please check your path if the following path does not work:"~/.local/share/typetrace"
+# Please check your path if the following path does not work:
+# "~/.local/share/typetrace"
 import pytest
 from pathlib import Path
-from typetrace.backend.cli import resolve_db_path, check_input_group, main, ExitCodes
+from typetrace.backend.cli import (
+    resolve_db_path,
+    check_input_group,
+    main,
+    ExitCodes,
+)
 
 
 # Test for resolve_db_path (with mocked path)
@@ -12,7 +18,7 @@ def test_resolve_db_path(mocker):
     )
     # Mock mkdir to prevent actual directory creation
     mock_mkdir = mocker.patch("pathlib.Path.mkdir")
-    
+
     # Call the function and verify the expected database path
     db_path = resolve_db_path()
     assert db_path == Path("/mock/data/dir/TypeTrace.db")
@@ -42,7 +48,8 @@ def test_main_success(mocker):
     mocker.patch("typetrace.backend.cli.check_input_group")
     mocker.patch("typetrace.backend.devices.check_device_accessibility")
     mocker.patch("typetrace.backend.db.initialize_database")
-    mocker.patch("typetrace.backend.events.trace_keys")  # Should now work
+    # Should now work
+    mocker.patch("typetrace.backend.events.trace_keys")
 
     # Execute the main function and check the exit code
     exit_code = main(mock_args)
@@ -55,7 +62,10 @@ def test_main_permission_error(mocker):
     mock_args = mocker.Mock(debug=False)
 
     # Simulate a PermissionError during check_input_group
-    mocker.patch("typetrace.backend.cli.check_input_group", side_effect=PermissionError)
+    mocker.patch(
+        "typetrace.backend.cli.check_input_group",
+        side_effect=PermissionError,
+    )
 
     # Execute main and verify the exit code for permission error
     exit_code = main(mock_args)
@@ -74,7 +84,6 @@ def test_resolve_db_path_real_path(mocker):
     # Call the function and verify the expected database path
     db_path = resolve_db_path()
     assert db_path == Path("~/.local/share/typetrace/TypeTrace.db")
-
 
     # Ensure mocks were called correctly
     mock_user_data_dir.assert_called_once_with("typetrace")

@@ -91,9 +91,8 @@ def test_on_delete_clicked(mocker, mock_gi_and_utils):
         secondary_text="This will remove your current data, continue?",
         callback=mocker.ANY,
     )
-    delete_callback = mock_dialog_utils["show_confirmation_dialog"].call_args[1][
-        "callback"
-    ]
+    call_args = mock_dialog_utils["show_confirmation_dialog"].call_args[1]
+    delete_callback = call_args["callback"]
     mock_keystroke_store.clear.return_value = True
     delete_callback()
     mock_keystroke_store.clear.assert_called_once()

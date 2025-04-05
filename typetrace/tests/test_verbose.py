@@ -6,7 +6,8 @@ from unittest.mock import MagicMock, patch
 # Fixture to mock gi.repository for all tests
 @pytest.fixture(autouse=True)
 def mock_gi(mocker):
-    """Mock gi.repository to allow tests to run without PyGObject dependencies."""
+    """Mock gi.repository to allow tests to run
+    without PyGObject dependencies."""
     mock_repository = MagicMock()
     with patch.dict(sys.modules, {"gi.repository": mock_repository}):
 
@@ -76,18 +77,19 @@ def test_verbose_init(mocker, mock_gi):
     from typetrace.model.keystrokes import KeystrokeStore
     from typetrace.controller.verbose import Verbose
 
-    # Mock KeystrokeStore
     mock_store = mocker.Mock(spec=KeystrokeStore)
     mock_store.get_all_keystrokes.return_value = []
 
-    # Create Verbose instance
     verbose = Verbose(keystroke_store=mock_store)
 
-    # Verify attributes and setup
     assert verbose.keystroke_store == mock_store
-    assert isinstance(verbose.list_store, mock_gi.Gio.ListStore.return_value.__class__)
+    assert isinstance(
+        verbose.list_store,
+        mock_gi.Gio.ListStore.return_value.__class__,
+    )
     assert verbose.sort_model.model == verbose.list_store
     assert verbose.selection_model.model == verbose.sort_model
+
     verbose.column_view.set_model.assert_called_with(verbose.selection_model)
     verbose.sort_model.set_sorter.assert_called_with(
         verbose.column_view.get_sorter.return_value
@@ -99,25 +101,30 @@ def test_populate_list_store(mocker, mock_gi):
     from typetrace.model.keystrokes import Keystroke, KeystrokeStore
     from typetrace.controller.verbose import Verbose
 
-    # Mock KeystrokeStore with sample data
     mock_store = mocker.Mock(spec=KeystrokeStore)
+
     mock_keystroke1 = mocker.Mock(spec=Keystroke, scan_code=16, count=5, key_name="Q")
     mock_keystroke2 = mocker.Mock(spec=Keystroke, scan_code=17, count=10, key_name="W")
-    mock_store.get_all_keystrokes.return_value = [mock_keystroke1, mock_keystroke2]
 
-    # Create Verbose instance
+    mock_store.get_all_keystrokes.return_value = [
+        mock_keystroke1,
+        mock_keystroke2,
+    ]
+
     verbose = Verbose(keystroke_store=mock_store)
 
-    # Reset list_store to clear any initial calls from __init__
+    # Clear initial list_store created in __init__
     verbose.list_store = mocker.Mock()
+
     verbose._populate_list_store()
 
-    # Verify the list store is populated with keystrokes
     assert verbose.list_store.append.call_count == 2
+
     calls = verbose.list_store.append.call_args_list
     assert calls[0][0][0].scan_code == 16
     assert calls[0][0][0].count == 5
     assert calls[0][0][0].key_name == "Q"
+
     assert calls[1][0][0].scan_code == 17
     assert calls[1][0][0].count == 10
     assert calls[1][0][0].key_name == "W"

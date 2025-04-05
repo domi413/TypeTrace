@@ -6,7 +6,8 @@ from unittest.mock import MagicMock, patch
 # Fixture to mock gi.repository for all tests
 @pytest.fixture(autouse=True)
 def mock_gi(mocker):
-    """Mock gi.repository to allow tests to run without PyGObject dependencies."""
+    """Mock gi.repository to allow tests to run
+    without PyGObject dependencies."""
     mock_repository = MagicMock()
     with patch.dict(sys.modules, {"gi.repository": mock_repository}):
         mock_repository.GObject = MagicMock()
@@ -60,7 +61,10 @@ def test_get_all_keystrokes(mock_sqlite3, mocker, mock_gi):
 
     # Setup mock database response
     mock_conn, mock_cursor = mock_sqlite3
-    mock_cursor.fetchall.return_value = [(16, 5, "KEY_Q"), (17, 10, "KEY_W")]
+    mock_cursor.fetchall.return_value = [
+        (16, 5, "KEY_Q"),
+        (17, 10, "KEY_W"),
+    ]
 
     # Instantiate KeystrokeStore
     store = KeystrokeStore()

@@ -5,7 +5,8 @@ from unittest.mock import MagicMock, patch
 
 @pytest.fixture(autouse=True)
 def mock_gi(mocker):
-    """Mock gi.repository to allow tests to run without PyGObject dependencies."""
+    """Mock gi.repository to allow tests to run
+    without PyGObject dependencies."""
     mock_repository = MagicMock()
     with patch.dict(sys.modules, {"gi.repository": mock_repository}):
 

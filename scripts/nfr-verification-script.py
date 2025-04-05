@@ -1,22 +1,20 @@
 #!/usr/bin/env python3
 """TypeTrace NFR Verification Script
 
-This script performs the verification of non-functional requirements for the TypeTrace application.
-It includes tests for code quality, security, usability, reliability, performance, and scalability.
+This script performs the verification of non-functional requirements (NFRs) for the TypeTrace application.
+It includes checks for code quality, security, usability, reliability, performance, and scalability.
 
 Usage:
     python3 nfr-verification-script.py [--nfr=<id>] [--source-dir=<path>] [--db-path=<path>]
 
 Options:
-    --nfr=<id>        NFR to verify (1-6) or 'all' for all NFRs (default: 'all')
+    --nfr=<id>           NFR to verify (1-6) or 'all' for all NFRs (default: 'all')
     --source-dir=<path>  Path to the source code directory (default: './typetrace')
     --db-path=<path>     Path to the database file (default: '~/.local/share/typetrace/TypeTrace.db')
 
-    -- for example:to execute cd /../scripts
-    export PYTHONPATH=/.../TypeTrace:$PYTHONPATH
-    python3 nfr-verification-script.py --nfr=1 --source-dir=/..../TypeTrace/typetrace 
-    --db-path=/.../.local/share/typetrace/TypeTrace.db
-    --python3 nfr-verification-script.py --nfr=all --source-dir=../typetrace
+Example:
+    python3 nfr-verification-script.py --nfr=all --source-dir=../typetrace
+    python3 nfr-verification-script.py --nfr=1 --source-dir=/path/to/TypeTrace/typetrace --db-path=/path/to/TypeTrace.db
 """
 
 import argparse
@@ -29,22 +27,20 @@ from datetime import datetime
 
 import psutil
 
-# Konfiguration
-SOURCE_DIR = "../typetrace"  # Initialer Standardwert, wird in main() überschrieben
-DATABASE_PATH = os.path.expanduser(
-    "~/.local/share/typetrace/TypeTrace.db"
-)  # Initialer Standardwert
+# Configuration constants
+SOURCE_DIR_DEFAULT = "../typetrace"  # Default source directory
+DATABASE_PATH_DEFAULT = os.path.expanduser("~/.local/share/typetrace/TypeTrace.db")  # Default database path
 
-TEST_COVERAGE_THRESHOLD = 80  # Prozent
-MAX_PEP8_VIOLATIONS = 5  # Pro 500 Codezeilen
-RESOURCE_CHECK_INTERVAL = 900  # 15 Minuten in Sekunden
-STRESS_TEST_DURATION = 1800  # 30 Minuten in Sekunden
-KEYSTROKE_DELAY = 0.02  # 50 Tastenanschläge pro Sekunde für Stresstest
-LATENCY_THRESHOLD = 1.0  # Maximale akzeptable Latenz in Sekunden
-MAX_MEMORY_USAGE = 50 * 1024 * 1024  # 50MB
-MAX_CPU_USAGE = 1.0  # 1% CPU
+TEST_COVERAGE_THRESHOLD = 80  # Minimum test coverage percentage
+MAX_PEP8_VIOLATIONS = 5  # Maximum PEP8 violations per 500 lines of code
+RESOURCE_CHECK_INTERVAL = 900  # Resource check interval in seconds (15 minutes)
+STRESS_TEST_DURATION = 1800  # Stress test duration in seconds (30 minutes)
+KEYSTROKE_DELAY = 0.02  # Delay between keystrokes in stress test (50 keystrokes/sec)
+LATENCY_THRESHOLD = 1.0  # Maximum acceptable latency in seconds
+MAX_MEMORY_USAGE = 50 * 1024 * 1024  # Maximum memory usage in bytes (50 MB)
+MAX_CPU_USAGE = 1.0  # Maximum CPU usage percentage (1%)
 
-# Farben für Terminalausgabe
+# Terminal color codes
 GREEN = "\033[92m"
 YELLOW = "\033[93m"
 RED = "\033[91m"
@@ -52,24 +48,20 @@ RESET = "\033[0m"
 
 
 def print_header(message):
-    """Print a formatted header message."""
+    """Print a formatted header message to the terminal."""
     print(f"\n{'-' * 80}")
     print(f"{YELLOW}{message}{RESET}")
     print(f"{'-' * 80}\n")
 
 
 def print_result(test_name, passed, message=""):
-    """Print formatted test result."""
-    if passed:
-        status = f"{GREEN}PASSED{RESET}"
-    else:
-        status = f"{RED}FAILED{RESET}"
-
+    """Print the result of a test in a formatted way."""
+    status = f"{GREEN}PASSED{RESET}" if passed else f"{RED}FAILED{RESET}"
     print(f"{test_name}: {status} {message}")
 
 
-def run_commandx(command, shell=False):
-    """Run a command and return its output."""
+def run_command(command, shell=False):
+    """Execute a command and return its success status and output."""
     try:
         result = subprocess.run(
             command,
@@ -78,6 +70,7 @@ def run_commandx(command, shell=False):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            cwd=SOURCE_DIR,  # Set working directory to SOURCE_DIR
         )
         return True, result.stdout.strip()
     except subprocess.CalledProcessError as e:
@@ -85,19 +78,15 @@ def run_commandx(command, shell=False):
 
 
 def count_lines(directory, file_ext=".py"):
-    """Count lines of code in the given directory."""
+    """Count the total lines of code in Python files within the specified directory."""
     total_lines = 0
     for root, _, files in os.walk(directory):
         for file in files:
             if file.endswith(file_ext):
-                with open(os.path.join(root, file)) as f:
+                with open(os.path.join(root, file), encoding="utf-8") as f:
                     total_lines += len(f.readlines())
     return total_lines
 
-
-def run_command(command):
-    process = subprocess.run(command, capture_output=True, text=True, cwd=SOURCE_DIR)  # Setze cwd auf SOURCE_DIR
-    return process.returncode == 0, process.stdout + process.stderr
 
 def verify_nfr1():
     """Verify NFR-1: Code Quality & Maintainability."""
@@ -107,7 +96,7 @@ def verify_nfr1():
 
     if not os.path.exists(SOURCE_DIR):
         print_result("Source Directory Check", False, f"Directory {SOURCE_DIR} not found")
-        print(f"Please make sure the SOURCE_DIR variable is set correctly. Current value: {SOURCE_DIR}")
+        print(f"Please ensure the SOURCE_DIR variable is set correctly. Current value: {SOURCE_DIR}")
         return False
 
     total_lines = count_lines(SOURCE_DIR)
@@ -126,24 +115,22 @@ def verify_nfr1():
         print_result("PEP8 Compliance", pep8_passed, f"({violations} violations, {normalized_violations:.1f} per 500 lines)")
         all_passed = all_passed and pep8_passed
     except FileNotFoundError:
-        print_result("PEP8 Compliance", False, "ruff command not found. Please install ruff.")
+        print_result("PEP8 Compliance", False, "ruff not found. Please install ruff.")
         all_passed = False
 
     # Check code formatting
     try:
-        success, output = run_command(["ruff", "format", "--check", SOURCE_DIR])
+        success, _ = run_command(["ruff", "format", "--check", SOURCE_DIR])
         format_passed = success
         print_result("Code Formatting", format_passed)
         all_passed = all_passed and format_passed
     except FileNotFoundError:
-        print_result("Code Formatting", False, "ruff command not found. Please install ruff.")
+        print_result("Code Formatting", False, "ruff not found. Please install ruff.")
         all_passed = False
 
     # Check test coverage
     try:
-        # Debugging: Ausgabe des pytest-Befehls anzeigen
         success, output = run_command(["pytest", f"--cov={SOURCE_DIR}", "--cov-report=term"])
-        print("pytest output:", output)  # Debugging
         coverage = 0
         if success:
             for line in output.split("\n"):
@@ -171,6 +158,7 @@ def verify_nfr1():
 
     return all_passed
 
+
 def verify_nfr2():
     """Verify NFR-2: Security and Privacy."""
     print_header("Verifying NFR-2: Security and Privacy")
@@ -179,12 +167,8 @@ def verify_nfr2():
 
     # Check database schema for sensitive data
     if not os.path.exists(DATABASE_PATH):
-        print_result(
-            "Database Existence", False, f"Database file not found at {DATABASE_PATH}"
-        )
-        print(
-            "If the database is in a different location, please update the DATABASE_PATH variable."
-        )
+        print_result("Database Existence", False, f"Database file not found at {DATABASE_PATH}")
+        print("If the database is in a different location, please update the DATABASE_PATH variable.")
         print("Continuing with code analysis only...")
     else:
         try:
@@ -200,13 +184,7 @@ def verify_nfr2():
             else:
                 print(f"Found {len(tables)} tables in database")
 
-                sensitive_columns = [
-                    "text",
-                    "content",
-                    "sequence",
-                    "timestamp",
-                    "password",
-                ]
+                sensitive_columns = ["text", "content", "sequence", "timestamp", "password"]
                 has_sensitive_columns = False
 
                 for table in tables:
@@ -216,12 +194,8 @@ def verify_nfr2():
 
                     for column in columns:
                         column_name = column[1].lower()
-                        if any(
-                            sensitive in column_name for sensitive in sensitive_columns
-                        ):
-                            print(
-                                f"Potential sensitive column found: {table_name}.{column_name}"
-                            )
+                        if any(sensitive in column_name for sensitive in sensitive_columns):
+                            print(f"Potential sensitive column found: {table_name}.{column_name}")
                             has_sensitive_columns = True
 
                 privacy_passed = not has_sensitive_columns
@@ -235,9 +209,7 @@ def verify_nfr2():
                 keystroke_tables = cursor.fetchall()
 
                 if not keystroke_tables:
-                    print(
-                        "No keystroke-related tables found. Checking all tables for appropriate structure..."
-                    )
+                    print("No keystroke-related tables found. Checking all tables for appropriate structure...")
                     keystroke_tables = tables
 
                 for table in keystroke_tables:
@@ -246,23 +218,19 @@ def verify_nfr2():
                     columns = [col[1] for col in cursor.fetchall()]
 
                     # Check if structure is appropriate for keystroke counts
-                    appropriate_structure = any(
-                        "count" in col.lower() for col in columns
-                    ) or any("frequency" in col.lower() for col in columns)
-                    print_result(
-                        f"Table Structure ({table_name})", appropriate_structure
+                    appropriate_structure = any("count" in col.lower() for col in columns) or any(
+                        "frequency" in col.lower() for col in columns
                     )
+                    print_result(f"Table Structure ({table_name})", appropriate_structure)
                     all_passed = all_passed and appropriate_structure
 
             conn.close()
         except sqlite3.Error as e:
-            print_result("Database Analysis", False, f"Error: {e!s}")
+            print_result("Database Analysis", False, f"Error: {str(e)}")
 
     # Code review for privacy
     if not os.path.exists(SOURCE_DIR):
-        print_result(
-            "Source Directory Check", False, f"Directory {SOURCE_DIR} not found"
-        )
+        print_result("Source Directory Check", False, f"Directory {SOURCE_DIR} not found")
         return False
 
     privacy_keywords = ["sequence", "content", "keylog"]
@@ -272,22 +240,18 @@ def verify_nfr2():
         for file in files:
             if file.endswith(".py"):
                 try:
-                    with open(os.path.join(root, file)) as f:
+                    with open(os.path.join(root, file), encoding="utf-8") as f:
                         content = f.read().lower()
                         for keyword in privacy_keywords:
                             if keyword in content:
                                 line_number = 1
                                 for line in content.split("\n"):
-                                    if keyword in line.lower():
-                                        print(
-                                            f"Suspicious code in {file}:{line_number}: {line.strip()}"
-                                        )
+                                    if keyword in line:
+                                        print(f"Suspicious code in {file}:{line_number}: {line.strip()}")
                                         suspicious_code_found = True
                                     line_number += 1
                 except UnicodeDecodeError:
-                    print(
-                        f"Warning: Unable to read {os.path.join(root, file)}, might be a binary file"
-                    )
+                    print(f"Warning: Unable to read {os.path.join(root, file)}, might be a binary file")
 
     privacy_code_passed = not suspicious_code_found
     print_result("Code Privacy Check", privacy_code_passed)
@@ -327,30 +291,21 @@ def verify_nfr3():
 
     if not typetrace_running:
         print_result("TypeTrace Process Check", False, "TypeTrace is not running")
-        print(
-            "To accurately test latency, please start the TypeTrace application first."
-        )
-        user_input = input(
-            "Would you like to proceed with a simulated latency test? (y/n): "
-        )
+        print("To accurately test latency, please start the TypeTrace application first.")
+        user_input = input("Would you like to proceed with a simulated latency test? (y/n): ")
         if user_input.lower() != "y":
             return False
 
-    # Modify this based on actual implementation
+    # Placeholder latency test (replace with actual implementation if available)
     try:
-        # Placeholder latency test
-        latency_measurements = [0.5, 0.6, 0.4, 0.7, 0.5]
+        latency_measurements = [0.5, 0.6, 0.4, 0.7, 0.5]  # Simulated values
         avg_latency = sum(latency_measurements) / len(latency_measurements)
 
         latency_passed = avg_latency < LATENCY_THRESHOLD
-        print_result(
-            "Latency Test",
-            latency_passed,
-            f"Average latency: {avg_latency:.2f}s (simulated)",
-        )
+        print_result("Latency Test", latency_passed, f"Average latency: {avg_latency:.2f}s (simulated)")
         return latency_passed
     except Exception as e:
-        print_result("Latency Test", False, f"Error: {e!s}")
+        print_result("Latency Test", False, f"Error: {str(e)}")
         return False
 
 
@@ -362,9 +317,7 @@ def verify_nfr4():
 
     # Database transaction check
     if not os.path.exists(SOURCE_DIR):
-        print_result(
-            "Source Directory Check", False, f"Directory {SOURCE_DIR} not found"
-        )
+        print_result("Source Directory Check", False, f"Directory {SOURCE_DIR} not found")
         return False
 
     transaction_keywords = ["begin transaction", "commit", "rollback"]
@@ -374,18 +327,14 @@ def verify_nfr4():
         for file in files:
             if file.endswith(".py"):
                 try:
-                    with open(os.path.join(root, file)) as f:
+                    with open(os.path.join(root, file), encoding="utf-8") as f:
                         content = f.read().lower()
-                        if all(
-                            keyword in content for keyword in transaction_keywords[:2]
-                        ):
+                        if all(keyword in content for keyword in transaction_keywords[:2]):
                             has_transactions = True
                             print(f"Found database transaction handling in {file}")
                             break
                 except UnicodeDecodeError:
-                    print(
-                        f"Warning: Unable to read {os.path.join(root, file)}, might be a binary file"
-                    )
+                    print(f"Warning: Unable to read {os.path.join(root, file)}, might be a binary file")
 
     print_result("Database Transactions", has_transactions)
     all_passed = all_passed and has_transactions
@@ -399,12 +348,8 @@ def verify_nfr4():
     print("4. Restart TypeTrace")
     print("5. Verify database integrity and minimal data loss")
 
-    input(
-        "\nPress Enter after completing the crash simulation test (or press Enter to skip)..."
-    )
-    crash_result = input(
-        "Did the application recover correctly with minimal data loss? (y/n/skip): "
-    )
+    input("\nPress Enter after completing the crash simulation test (or press Enter to skip)...")
+    crash_result = input("Did the application recover correctly with minimal data loss? (y/n/skip): ")
     if crash_result.lower() == "skip":
         print("Skipping crash simulation test.")
     else:
@@ -452,9 +397,7 @@ def verify_nfr5():
 
                 memory_readings.append(memory_usage)
                 cpu_readings.append(cpu_usage)
-                print(
-                    f"Reading {i + 1}: Memory={memory_usage / 1024 / 1024:.2f}MB, CPU={cpu_usage:.2f}%"
-                )
+                print(f"Reading {i + 1}: Memory={memory_usage / 1024 / 1024:.2f}MB, CPU={cpu_usage:.2f}%")
                 time.sleep(2)
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             print("Error accessing process metrics. Using simulated data.")
@@ -464,9 +407,7 @@ def verify_nfr5():
         memory_readings = [30 * 1024 * 1024, 32 * 1024 * 1024, 31 * 1024 * 1024]
         cpu_readings = [0.5, 0.6, 0.4]
         for i, (mem, cpu) in enumerate(zip(memory_readings, cpu_readings)):
-            print(
-                f"Simulated Reading {i + 1}: Memory={mem / 1024 / 1024:.2f}MB, CPU={cpu:.2f}%"
-            )
+            print(f"Simulated Reading {i + 1}: Memory={mem / 1024 / 1024:.2f}MB, CPU={cpu:.2f}%")
 
     avg_memory = sum(memory_readings) / len(memory_readings)
     avg_cpu = sum(cpu_readings) / len(cpu_readings)
@@ -474,9 +415,7 @@ def verify_nfr5():
     memory_passed = avg_memory <= MAX_MEMORY_USAGE
     cpu_passed = avg_cpu <= MAX_CPU_USAGE
 
-    print_result(
-        "Memory Usage", memory_passed, f"Average: {avg_memory / 1024 / 1024:.2f}MB"
-    )
+    print_result("Memory Usage", memory_passed, f"Average: {avg_memory / 1024 / 1024:.2f}MB")
     print_result("CPU Usage", cpu_passed, f"Average: {avg_cpu:.2f}%")
 
     return memory_passed and cpu_passed
@@ -487,9 +426,7 @@ def verify_nfr6():
     print_header("Verifying NFR-6: Scalability & Cross-platform Support")
 
     if not os.path.exists(SOURCE_DIR):
-        print_result(
-            "Source Directory Check", False, f"Directory {SOURCE_DIR} not found"
-        )
+        print_result("Source Directory Check", False, f"Directory {SOURCE_DIR} not found")
         return False
 
     # Modularity check
@@ -504,7 +441,7 @@ def verify_nfr6():
         for file in files:
             if file.endswith(".py"):
                 try:
-                    with open(os.path.join(root, file)) as f:
+                    with open(os.path.join(root, file), encoding="utf-8") as f:
                         content = f.read().lower()
                         if "sqlite" in content or "database" in content:
                             found_components["database"] = True
@@ -532,23 +469,25 @@ def verify_nfr6():
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Verify TypeTrace Non-Functional Requirements"
-    )
+    """Main function to parse arguments and execute NFR verifications."""
+    parser = argparse.ArgumentParser(description="Verify TypeTrace Non-Functional Requirements")
     parser.add_argument(
-        "--nfr", type=str, default="all", help="NFR ID to verify (1-6) or 'all'"
+        "--nfr",
+        type=str,
+        default="all",
+        help="NFR ID to verify (1-6) or 'all' (default: 'all')",
     )
     parser.add_argument(
         "--source-dir",
         type=str,
-        default="./typetrace",
-        help="Pfad zum Quellcode-Verzeichnis",
+        default=SOURCE_DIR_DEFAULT,
+        help="Path to the source code directory",
     )
     parser.add_argument(
         "--db-path",
         type=str,
-        default=os.path.expanduser("~/.local/share/typetrace/TypeTrace.db"),
-        help="Pfad zur Datenbankdatei",
+        default=DATABASE_PATH_DEFAULT,
+        help="Path to the database file",
     )
     args = parser.parse_args()
 
@@ -557,7 +496,7 @@ def main():
     DATABASE_PATH = os.path.abspath(args.db_path)
 
     if not os.path.exists(SOURCE_DIR):
-        print(f"Quellcode-Verzeichnis {SOURCE_DIR} existiert nicht.")
+        print(f"Source directory {SOURCE_DIR} does not exist.")
         sys.exit(1)
 
     verification_functions = {
@@ -575,35 +514,33 @@ def main():
             try:
                 results[nfr_id] = verify_func()
             except Exception as e:
-                print(f"{RED}Fehler bei NFR-{nfr_id} Verifikation: {e!s}{RESET}")
+                print(f"{RED}Error during NFR-{nfr_id} verification: {str(e)}{RESET}")
                 results[nfr_id] = False
     elif args.nfr in verification_functions:
         try:
             results[args.nfr] = verification_functions[args.nfr]()
         except Exception as e:
-            print(f"{RED}Fehler bei NFR-{args.nfr} Verifikation: {e!s}{RESET}")
+            print(f"{RED}Error during NFR-{args.nfr} verification: {str(e)}{RESET}")
             results[args.nfr] = False
     else:
-        print(f"Ungültige NFR-ID: {args.nfr}")
+        print(f"Invalid NFR ID: {args.nfr}")
         sys.exit(1)
 
-    # Summary
-    print_header("VVerification Summary")
+    # Print summary
+    print_header("Verification Summary")
     for nfr_id, passed in results.items():
         print_result(f"NFR-{nfr_id}", passed)
 
-    # Bericht generieren
-    report_path = (
-        f"nfr_verification_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-    )
-    with open(report_path, "w") as f:
-        f.write("TTypeTrace NFR Verification Report\n")
-        f.write(f"ECreated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+    # Generate report
+    report_path = f"nfr_verification_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    with open(report_path, "w", encoding="utf-8") as f:
+        f.write("TypeTrace NFR Verification Report\n")
+        f.write(f"Created on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
         for nfr_id, passed in results.items():
             status = "PASSED" if passed else "FAILED"
             f.write(f"NFR-{nfr_id}: {status}\n")
 
-    print(f"\nVVerification report saved to: {report_path}")
+    print(f"\nVerification report saved to: {report_path}")
 
 
 if __name__ == "__main__":

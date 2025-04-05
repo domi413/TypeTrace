@@ -1,4 +1,4 @@
-import pytest
+import pytest  # noqa: F401
 from pathlib import Path
 import time
 import evdev
@@ -10,7 +10,7 @@ from typetrace.backend.events import (
     trace_keys,
     print_key,
 )
-from typetrace.backend.config import BUFFER_SIZE, BUFFER_TIMEOUT, KeyEvent
+from typetrace.backend.config import BUFFER_TIMEOUT, KeyEvent
 
 
 # Test for print_key function
@@ -26,6 +26,7 @@ def test_print_key(mocker):
 # Test for process_single_event (Keypress event)
 def test_process_single_event_keypress(mocker):
     mock_event = mocker.Mock(type=evdev.ecodes.EV_KEY, value=1, code=evdev.ecodes.KEY_A)
+
     mock_db_path = Path("/mock/db/path")
     mocker.patch("typetrace.backend.events.write_to_database")
     buffer = []
@@ -120,9 +121,13 @@ def test_check_timeout_and_flush_no_timeout(mocker):
 def test_buffer_keys(mocker):
     mock_device = mocker.Mock(spec=evdev.device.InputDevice)
     mock_select = mocker.patch("select.select")
-    mock_select.side_effect = [([mock_device], [], []), KeyboardInterrupt]
+    mock_select.side_effect = [
+        ([mock_device], [], []),
+        KeyboardInterrupt,
+    ]
     mocker.patch(
-        "typetrace.backend.events.read_device_events", return_value=([], time.time())
+        "typetrace.backend.events.read_device_events",
+        return_value=([], time.time()),
     )
     mocker.patch(
         "typetrace.backend.events.check_timeout_and_flush",
@@ -130,7 +135,8 @@ def test_buffer_keys(mocker):
     )
     mock_db_path = Path("/mock/db/path")
     mocker.patch(
-        "typetrace.backend.events.select_keyboards", return_value=[mock_device]
+        "typetrace.backend.events.select_keyboards",
+        return_value=[mock_device],
     )
 
     buffer_keys([mock_device], mock_db_path)
