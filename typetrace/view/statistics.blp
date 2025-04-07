@@ -4,13 +4,16 @@ template $Statistics : Gtk.Box {
     orientation: vertical;
     halign: baseline;
 
-    Gtk.Label {
-        label: "Statistics test text";
-        margin-start: 5;
-    }
+
 
     Gtk.DrawingArea drawing_area {
-        vexpand: true;
-        hexpand: true;
+        height-request: 300;
+        width-request: 400;
+        margin-top: 10;
+        margin-bottom: 10;
+        margin-start: 10;
+        margin-end: 10;
+        halign: center;
+        valign: center;
     }
 }
