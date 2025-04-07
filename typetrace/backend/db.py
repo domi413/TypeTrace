@@ -55,6 +55,7 @@ class DatabaseManager:
                 "key_name": ", ".join(event["name"])
                 if isinstance(event["name"], tuple)
                 else event["name"],
+                "date": event["date"],
             }
             for event in events
         ]
