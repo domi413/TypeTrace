@@ -1,11 +1,39 @@
 """The statistics page displays keystroke data in various graphs/diagrams."""
 
 import math
+from dataclasses import dataclass
 
 import cairo
 from gi.repository import Gtk
 
 from typetrace.model.keystrokes import Keystroke, KeystrokeStore
+
+
+@dataclass
+class BarConfig:
+    """Configuration for drawing a bar in the chart."""
+
+    cr: cairo.Context
+    index: int
+    keystroke: Keystroke
+    max_count: int
+    bar_width: float
+    max_height: float
+    base_y: float
+    width: int
+
+
+@dataclass
+class TextConfig:
+    """Configuration for drawing text."""
+
+    cr: cairo.Context
+    text: str
+    x: float
+    y: float
+    font_size: float
+    font_weight: cairo.FontWeight
+    center: bool = False
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/statistics.ui")
@@ -76,13 +104,15 @@ class Statistics(Gtk.Box):
             height: Height of the drawing area
 
         """
-        cr.set_source_rgb(1.0, 1.0, 1.0)
-        cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        cr.set_font_size(16)
-        message = "No keystroke data available"
-        text_width = cr.text_extents(message).width
-        cr.move_to((width - text_width) / 2, height / 2)
-        cr.show_text(message)
+        text_config = TextConfig(
+            cr=cr,
+            text="No keystroke data available",
+            x=(width - cr.text_extents("No keystroke data available").width) / 2,
+            y=height / 2,
+            font_size=16,
+            font_weight=cairo.FONT_WEIGHT_BOLD,
+        )
+        self._draw_text(text_config)
 
     def _draw_bar_chart(
         self,
@@ -111,75 +141,65 @@ class Statistics(Gtk.Box):
 
         # Draw bars
         for i, keystroke in enumerate(keystrokes):
-            self._draw_bar(
-                cr,
-                i,
-                keystroke,
-                max_count,
-                bar_width,
-                max_height,
-                base_y,
-                width,
+            config = BarConfig(
+                cr=cr,
+                index=i,
+                keystroke=keystroke,
+                max_count=max_count,
+                bar_width=bar_width,
+                max_height=max_height,
+                base_y=base_y,
+                width=width,
             )
+            self._draw_bar(config)
 
         # Draw chart elements
         self._draw_baseline(cr, width, base_y)
         self._draw_axis_labels(cr, width, height, base_y)
 
-    def _draw_bar(
-        self,
-        cr: cairo.Context,
-        index: int,
-        keystroke: Keystroke,
-        max_count: int,
-        bar_width: float,
-        max_height: float,
-        base_y: float,
-        width: int,
-    ) -> None:
+    def _draw_bar(self, config: BarConfig) -> None:
         """Draw a single bar with its labels.
 
         Args:
-            cr: Cairo context for drawing
-            index: Index of the bar
-            keystroke: Keystroke data for this bar
-            max_count: Maximum count for scaling
-            bar_width: Width of each bar
-            max_height: Maximum height of bars
-            base_y: Y-coordinate of the baseline
-            width: Width of the drawing area
+            config: Configuration for drawing the bar
 
         """
-        bar_height = (keystroke.count / max_count) * max_height
+        bar_height = (config.keystroke.count / config.max_count) * config.max_height
 
-        x = width * 0.1 + (index * bar_width * 2)  # Space bars evenly with left padding
-        y = base_y - bar_height
+        x = config.width * 0.1 + (
+            config.index * config.bar_width * 2
+        )  # Space bars evenly with left padding
+        y = config.base_y - bar_height
 
         # Draw the bar
-        cr.set_source_rgb(0.4, 0.6, 0.8)  # Blue bars
-        cr.rectangle(x, y, bar_width, bar_height)
-        cr.fill()
+        config.cr.set_source_rgb(0.4, 0.6, 0.8)  # Blue bars
+        config.cr.rectangle(x, y, config.bar_width, bar_height)
+        config.cr.fill()
 
         # Draw key name under bar
         self._draw_text(
-            cr,
-            keystroke.key_name,
-            x + (bar_width / 2),
-            base_y + 15,
-            10,
-            cairo.FONT_WEIGHT_NORMAL,
-            center=True,
+            TextConfig(
+                cr=config.cr,
+                text=config.keystroke.key_name,
+                x=x + (config.bar_width / 2),
+                y=config.base_y + 15,
+                font_size=10,
+                font_weight=cairo.FONT_WEIGHT_NORMAL,
+                center=True,
+            ),
         )
 
         # Draw count above bar
         self._draw_text(
-            cr,
-            str(keystroke.count),
-            x + (bar_width / 2),
-            y - 5,
-            10,
-            cairo.FONT_WEIGHT_NORMAL,
-            center=True,
+            TextConfig(
+                cr=config.cr,
+                text=str(config.keystroke.count),
+                x=x + (config.bar_width / 2),
+                y=y - 5,
+                font_size=10,
+                font_weight=cairo.FONT_WEIGHT_NORMAL,
+                center=True,
+            ),
         )
 
     def _draw_baseline(self, cr: cairo.Context, width: int, base_y: float) -> None:
@@ -215,13 +235,15 @@ class Statistics(Gtk.Box):
         """
         # X-axis label
         self._draw_text(
-            cr,
-            "Key Name",
-            width / 2,
-            base_y + 35,
-            12,
-            cairo.FONT_WEIGHT_BOLD,
-            center=True,
+            TextConfig(
+                cr=cr,
+                text="Key Name",
+                x=width / 2,
+                y=base_y + 35,
+                font_size=12,
+                font_weight=cairo.FONT_WEIGHT_BOLD,
+                center=True,
+            ),
         )
 
         # Y-axis label
@@ -236,36 +258,21 @@ class Statistics(Gtk.Box):
         cr.show_text("Count")
         cr.restore()
 
-    def _draw_text(
-        self,
-        cr: cairo.Context,
-        text: str,
-        x: float,
-        y: float,
-        font_size: float,
-        font_weight: cairo.FontWeight,
-        *,
-        center: bool = False,
-    ) -> None:
+    def _draw_text(self, config: TextConfig) -> None:
         """Draw text with the specified parameters.
 
         Args:
-            cr: Cairo context for drawing
-            text: Text to draw
-            x: X-coordinate
-            y: Y-coordinate
-            font_size: Font size
-            font_weight: Font weight
-            center: Whether to center the text horizontally
+            config: Configuration for drawing text
 
         """
-        cr.set_source_rgb(1.0, 1.0, 1.0)  # White text
-        cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, font_weight)
-        cr.set_font_size(font_size)
+        config.cr.set_source_rgb(1.0, 1.0, 1.0)  # White text
+        config.cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, config.font_weight)
+        config.cr.set_font_size(config.font_size)
 
-        if center:
-            text_width = cr.text_extents(text).width
+        x = config.x
+        if config.center:
+            text_width = config.cr.text_extents(config.text).width
             x = x - text_width / 2
 
-        cr.move_to(x, y)
-        cr.show_text(text)
+        config.cr.move_to(x, config.y)
+        config.cr.show_text(config.text)
