@@ -9,6 +9,7 @@ blueprints = custom_target(
     'view/window.blp',
     'view/heatmap.blp',
     'view/verbose.blp',
+    'view/statistics.blp',
   ),
   output: '.',
   command: [
@@ -63,6 +64,7 @@ sources_controller = [
   'controller/window.py',
   'controller/heatmap.py',
   'controller/verbose.py',
+  'controller/statistics.py',
   'controller/preferences.py',
 ]
 install_data(sources_controller, install_dir: moduledir / 'controller')

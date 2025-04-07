@@ -3,6 +3,7 @@
 from gi.repository import Adw, Gtk
 
 from typetrace.controller.heatmap import Heatmap
+from typetrace.controller.statistics import Statistics
 from typetrace.controller.verbose import Verbose
 from typetrace.model.keystrokes import KeystrokeStore
 
@@ -41,4 +42,10 @@ class TypetraceWindow(Adw.ApplicationWindow):
             "Verbose",
         )
         verbose_page.set_icon_name("text-x-generic-symbolic")
+        statistics_page = self.stack.add_titled(
+            Statistics(keystroke_store=self.keystroke_store),
+            "statistics",
+            "Statistics",
+        )
+        statistics_page.set_icon_name("text-x-generic-symbolic")
         self.view_switcher.set_stack(self.stack)
