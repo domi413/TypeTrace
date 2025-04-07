@@ -36,12 +36,16 @@ class KeystrokeStore:
         self.db_path = DatabasePath.DB_PATH
 
     def get_all_keystrokes(self) -> list[Keystroke]:
-        """Retrieve all keystrokes with their counts and names, aggregated across all dates."""
+        """Retrieve all keystrokes with their counts and names.
+
+        Returns aggregated data across all dates.
+        """
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    SELECT scan_code, SUM(count) as total_count, key_name, MAX(date) as latest_date
+                    SELECT scan_code, SUM(count) as total_count, key_name,
+                    MAX(date) as latest_date
                     FROM keystrokes
                     GROUP BY scan_code, key_name
                     ORDER BY total_count DESC
@@ -103,7 +107,8 @@ class KeystrokeStore:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    "SELECT scan_code, count, key_name, date FROM keystrokes WHERE date = ?",
+                    "SELECT scan_code, count, key_name, date FROM keystrokes "
+                    "WHERE date = ?",
                     (date,),
                 )
                 rows = cursor.fetchall()
