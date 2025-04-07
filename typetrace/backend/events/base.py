@@ -5,19 +5,20 @@ from __future__ import annotations
 import logging
 import time
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, final
+from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-from backend.db import DatabaseManager
-
+from typetrace.backend.db import DatabaseManager
 from typetrace.config import Config, Event
 
 logger = logging.getLogger(__name__)
 
+DeviceType = TypeVar("DeviceType")
 
-class BaseEventProcessor(ABC):
+
+class BaseEventProcessor(ABC, Generic[DeviceType]):
     """Abstract base class for event processing."""
 
     def __init__(self, db_path: Path) -> None:
@@ -77,7 +78,7 @@ class BaseEventProcessor(ABC):
         )
 
     @abstractmethod
-    def _buffer(self, devices: list[Any]) -> None:
+    def _buffer(self, devices: list[DeviceType]) -> None:
         """Buffer events.
 
         Args:
@@ -86,7 +87,7 @@ class BaseEventProcessor(ABC):
         """
 
     @abstractmethod
-    def _process_single_event(self, event: Any) -> Event | None:
+    def _process_single_event(self, event: DeviceType) -> Event | None:
         """Process a single input event.
 
         Args:
