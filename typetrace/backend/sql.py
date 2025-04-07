@@ -15,24 +15,26 @@ class SQLQueries:
 
     CREATE_KEYSTROKES_TABLE = """
     CREATE TABLE IF NOT EXISTS keystrokes (
-        scan_code INTEGER PRIMARY KEY,
-        count INTEGER DEFAULT 0,
-        key_name TEXT
-    )
-    """
-
-    CREATE_TABLE = """
-    CREATE TABLE IF NOT EXISTS keystrokes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        keycode TEXT NOT NULL,
-        timestamp REAL NOT NULL
+        scan_code INTEGER NOT NULL,
+        key_name TEXT NOT NULL,
+        date DATE NOT NULL,
+        count INTEGER DEFAULT 0,
+        UNIQUE(scan_code, date)
     )
     """
 
     INSERT_OR_UPDATE_KEYSTROKE = """
-    INSERT INTO keystrokes (scan_code, count, key_name)
-    VALUES (:scan_code, 1, :key_name)
-    ON CONFLICT(scan_code) DO UPDATE SET
+    INSERT INTO keystrokes (scan_code, key_name, date, count)
+    VALUES (:scan_code, :key_name, :date, 1)
+    ON CONFLICT(scan_code, date) DO UPDATE SET
         count = count + 1,
         key_name = :key_name
+    """
+
+    GET_KEYSTROKES_BY_DATE = """
+    SELECT key_name, count
+    FROM keystrokes
+    WHERE date = :date
+    ORDER BY count DESC
     """
