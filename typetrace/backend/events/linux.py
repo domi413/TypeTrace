@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 @final
 class LinuxEventProcessor(BaseEventProcessor):
-    """Event processor for Linux platform."""
+    """Event processor for the Linux platform."""
 
     def __init__(self, db_path: Path) -> None:
         """Initialize the Linux event processor."""
