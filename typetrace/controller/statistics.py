@@ -151,7 +151,13 @@ class Statistics(Gtk.Box):
 
         # Chart dimensions
         num_bars = len(keystrokes)
-        bar_width = width / (num_bars * 2)  # Padding between bars
+
+        left_margin = width * 0.1
+        right_margin = width * 0.1
+        available_width = width - left_margin - right_margin
+
+        bar_width = available_width / (num_bars * 1.2)
+
         max_height = height * 0.7  # Padding at top
         base_y = height * 0.85  # Padding bottom
 
@@ -182,9 +188,10 @@ class Statistics(Gtk.Box):
         """
         bar_height = (config.keystroke.count / config.max_count) * config.max_height
 
-        x = config.width * 0.1 + (
-            config.index * config.bar_width * 2
-        )  # Space bars evenly with left padding
+        left_margin = config.width * 0.1
+        spacing = config.bar_width * 0.2
+        x = left_margin + (config.index * (config.bar_width + spacing))
+
         y = config.base_y - bar_height
 
         # Draw the bar
