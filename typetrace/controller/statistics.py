@@ -43,6 +43,7 @@ class Statistics(Gtk.Box):
     __gtype_name__ = "Statistics"
 
     drawing_area = Gtk.Template.Child()
+    bar_count_spin = Gtk.Template.Child()
 
     def __init__(self, keystroke_store: KeystrokeStore, **kwargs) -> None:
         """Initialize the statistics page with keystroke data.
@@ -56,6 +57,20 @@ class Statistics(Gtk.Box):
         self.keystroke_store = keystroke_store
 
         self.drawing_area.set_draw_func(self.on_draw)
+
+        self.bar_count_spin.connect("value-changed", self.on_bar_count_changed)
+
+        self.bar_count_spin.set_range(1, 10)  # Range
+        self.bar_count_spin.set_value(5)  # Default 5 bars
+
+    def on_bar_count_changed(self, _widget: Gtk.SpinButton) -> None:
+        """Handle changes to the bar count spin button.
+
+        Args:
+            _widget: The spin button widget (unused)
+
+        """
+        self.drawing_area.queue_draw()
 
     def on_draw(
         self,
@@ -73,7 +88,8 @@ class Statistics(Gtk.Box):
             height: Height of the drawing area
 
         """
-        top_keystrokes = self._get_top_keystrokes(5)
+        bar_count = int(self.bar_count_spin.get_value())
+        top_keystrokes = self._get_top_keystrokes(bar_count)
 
         if not top_keystrokes:
             self._draw_no_data_message(cr, width, height)

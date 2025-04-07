@@ -6,12 +6,33 @@ template $Statistics : Gtk.Box {
 
     Gtk.DrawingArea drawing_area {
         height-request: 300;
-        width-request: 400;
+        width-request: 800;
         margin-top: 10;
         margin-bottom: 10;
         margin-start: 10;
         margin-end: 10;
         halign: center;
         valign: center;
+    }
+    
+    Gtk.Box controls_box {
+        orientation: horizontal;
+        halign: center;
+        margin-top: 30;
+        
+        Gtk.Label bar_count_label {
+            label: "Number of keystrokes:";
+            margin-end: 5;
+        }
+        
+        Gtk.SpinButton bar_count_spin {
+            adjustment: Gtk.Adjustment {
+                lower: 1;
+                upper: 10;
+                step-increment: 1; // increment with arrow keys
+            };
+            digits: 0; // only full integers
+            width-chars: 3;
+        }
     }
 }
