@@ -9,4 +9,4 @@ ignore = [
   "D213",   # In conflict with D212
 ]
 [per-file-ignores]
-"*/tests/*" = ["S101"] # Ignore `assert`
+"tests/*" = ["S101"] # Ignore `assert`
