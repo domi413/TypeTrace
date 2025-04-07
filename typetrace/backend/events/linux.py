@@ -7,7 +7,6 @@ import select
 import signal
 import time
 from contextlib import contextmanager, suppress
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING, final, override
 
 import evdev
@@ -116,7 +115,7 @@ class LinuxEventProcessor(BaseEventProcessor):
                 event_data: Event = {
                     "scan_code": event.code,
                     "name": event_map[event.code],
-                    "date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                    "date": self._current_date,
                 }
                 self._print_event(event_data)
 
