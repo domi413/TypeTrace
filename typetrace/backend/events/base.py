@@ -71,9 +71,10 @@ class BaseEventProcessor(ABC):
 
         """
         logger.debug(
-            '{"event_name": "%s", "key_code": %s}',
+            '{"event_name": "%s", "key_code": %s, "date": "%s"}',
             event["name"],
             event["scan_code"],
+            event["date"],
         )
 
     @abstractmethod
