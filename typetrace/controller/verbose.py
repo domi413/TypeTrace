@@ -46,6 +46,7 @@ class Verbose(Gtk.Box):
                     scan_code=keystroke.scan_code,
                     count=keystroke.count,
                     key_name=keystroke.key_name,
+                    date=keystroke.date,
                 ),
             )
 
