@@ -9,6 +9,7 @@ hdlr
 hexpand
 levelno
 OSIPC
+otheruser
 QWERTZ
 scancode
 scancodes
