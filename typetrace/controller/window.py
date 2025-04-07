@@ -41,11 +41,11 @@ class TypetraceWindow(Adw.ApplicationWindow):
             "verbose",
             "Verbose",
         )
-        verbose_page.set_icon_name("text-x-generic-symbolic")
+        verbose_page.set_icon_name("view-list-symbolic")
         statistics_page = self.stack.add_titled(
             Statistics(keystroke_store=self.keystroke_store),
             "statistics",
             "Statistics",
         )
-        statistics_page.set_icon_name("text-x-generic-symbolic")
+        statistics_page.set_icon_name("utilities-system-monitor-symbolic")
         self.view_switcher.set_stack(self.stack)
