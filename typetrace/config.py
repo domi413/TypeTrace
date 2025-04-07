@@ -30,9 +30,14 @@ class Config:
     AUTOSTART_TARGET_FILE: Final[Path] = (
         AUTOSTART_TARGET_DIR / "typetrace-backend.desktop"
     )
-    AUTOSTART_SOURCE: Final[Path] = Path.home() / ".local" / "share" / (
-        "flatpak/exports/share" if IS_FLATPAK else ""
-    ) / "applications" / "typetrace-backend.desktop"
+    AUTOSTART_SOURCE: Final[Path] = (
+        Path.home()
+        / ".local"
+        / "share"
+        / ("flatpak/exports/share" if IS_FLATPAK else "")
+        / "applications"
+        / "typetrace-backend.desktop"
+    )
 
     # Global settings
     DEBUG: bool = False

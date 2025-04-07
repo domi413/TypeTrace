@@ -23,6 +23,7 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
 
     def __init__(self, db_path: Path) -> None:
         """Initialize the processor with a database path."""
+        self._db_manager = DatabaseManager()
         self._db_path: Path = db_path
 
     @abstractmethod
@@ -57,7 +58,7 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
             or len(buffer) >= Config.BUFFER_SIZE
             or current_time - start_time >= Config.BUFFER_TIMEOUT
         ):
-            DatabaseManager.write_to_database(db_path, buffer)
+            self._db_manager.write_to_database(db_path, buffer)
             buffer.clear()
             start_time = current_time
 
