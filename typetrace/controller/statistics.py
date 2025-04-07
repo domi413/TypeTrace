@@ -39,26 +39,71 @@ class Statistics(Gtk.Box):
             height: Height of the drawing area
 
         """
-        num_bars = 5
+        # Get keystrokes and sort by count descending
+        keystrokes = self.keystroke_store.get_all_keystrokes()
+        keystrokes.sort(key=lambda k: k.count, reverse=True)
+
+        top_keystrokes = keystrokes[:5]
+
+        # If no keystrokes, display message
+        if not top_keystrokes:
+            cr.set_source_rgb(1.0, 1.0, 1.0)
+            cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+            cr.set_font_size(16)
+            message = "No keystroke data available"
+            text_width = cr.text_extents(message).width
+            cr.move_to((width - text_width) / 2, height / 2)
+            cr.show_text(message)
+            return
+
+        # Max count for scaling
+        max_count = top_keystrokes[0].count if top_keystrokes else 1
+
+        # Chart dimensions
+        num_bars = len(top_keystrokes)
         bar_width = width / (num_bars * 2)  # Padding between bars
-        max_height = height * 0.8  # Padding at top
-        base_y = height * 0.9  # Padding bottom
+        max_height = height * 0.7  # Padding at top
+        base_y = height * 0.85  # Padding bottom
 
         # Draw bars
-        cr.set_source_rgb(0.4, 0.6, 0.8)  # Blue bars
-        for i in range(num_bars):
-            bar_height = max_height  # 100% of max_height
+        for i, keystroke in enumerate(top_keystrokes):
+            bar_height = (keystroke.count / max_count) * max_height
+
             x = width * 0.1 + (i * bar_width * 2)  # Space bars evenly with left padding
             y = base_y - bar_height
 
-            cr.rectangle(x, y, bar_width, bar_height)  # Draw the bar
+            cr.set_source_rgb(0.4, 0.6, 0.8)  # Blue bars
+            cr.rectangle(x, y, bar_width, bar_height)
             cr.fill()
+
+            # Add key name under bar
+            cr.set_source_rgb(1.0, 1.0, 1.0)  # White text
+            cr.select_font_face(
+                "Sans",
+                cairo.FONT_SLANT_NORMAL,
+                cairo.FONT_WEIGHT_NORMAL,
+            )
+            cr.set_font_size(10)
+            key_name = keystroke.key_name
+            text_width = cr.text_extents(key_name).width
+            text_x = x + (bar_width - text_width) / 2
+            text_y = base_y + 15
+            cr.move_to(text_x, text_y)
+            cr.show_text(key_name)
+
+            # Add count above bar
+            count_text = str(keystroke.count)
+            text_width = cr.text_extents(count_text).width
+            text_x = x + (bar_width - text_width) / 2
+            text_y = y - 5
+            cr.move_to(text_x, text_y)
+            cr.show_text(count_text)
 
         # Add baseline
         cr.set_source_rgb(0.2, 0.2, 0.2)  # Dark gray
         cr.set_line_width(2)
-        cr.move_to(width * 0.05, base_y)
-        cr.line_to(width * 0.95, base_y)
+        cr.move_to(0, base_y)
+        cr.line_to(width, base_y)
         cr.stroke()
 
         # Add axis labels
@@ -70,7 +115,7 @@ class Statistics(Gtk.Box):
         x_label = "Key Name"
         x_label_width = cr.text_extents(x_label).width
         x_label_x = width / 2 - x_label_width / 2
-        x_label_y = base_y + 25
+        x_label_y = base_y + 35
         cr.move_to(x_label_x, x_label_y)
         cr.show_text(x_label)
 
