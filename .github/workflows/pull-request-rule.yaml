@@ -9,11 +9,12 @@ on:
       - ready_for_review
       - reopened
 
+if: ${{ !github.event.pull_request.draft }}
+
 jobs:
   pull-request-title:
     runs-on: ubuntu-latest
 
-    if: ${{ !github.event.pull_request.draft }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

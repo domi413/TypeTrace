@@ -8,11 +8,12 @@ on:
       - ready_for_review
       - reopened
 
+if: ${{ !github.event.pull_request.draft }}
+
 jobs:
   lint:
     runs-on: Ubuntu-latest
 
-    if: ${{ !github.event.pull_request.draft }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
