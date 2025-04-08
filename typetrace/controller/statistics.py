@@ -42,7 +42,9 @@ class Statistics(Gtk.Box):
 
     __gtype_name__ = "Statistics"
 
+    carousel = Gtk.Template.Child()
     drawing_area = Gtk.Template.Child()
+    line_drawing_area = Gtk.Template.Child()
     bar_count_spin = Gtk.Template.Child()
 
     def __init__(self, keystroke_store: KeystrokeStore, **kwargs) -> None:
@@ -56,12 +58,14 @@ class Statistics(Gtk.Box):
         super().__init__(**kwargs)
         self.keystroke_store = keystroke_store
 
-        self.drawing_area.set_draw_func(self.on_draw)
-
+        # Set up bar chart
+        self.drawing_area.set_draw_func(self.on_draw_bar_chart)
         self.bar_count_spin.connect("value-changed", self.on_bar_count_changed)
+        self.bar_count_spin.set_range(1, 10)
+        self.bar_count_spin.set_value(5)
 
-        self.bar_count_spin.set_range(1, 10)  # Range
-        self.bar_count_spin.set_value(5)  # Default 5 bars
+        # Set up line chart
+        # self.line_drawing_area.set_draw_func(self.on_draw_line_chart)
 
     def on_bar_count_changed(self, _widget: Gtk.SpinButton) -> None:
         """Handle changes to the bar count spin button.
@@ -72,14 +76,14 @@ class Statistics(Gtk.Box):
         """
         self.drawing_area.queue_draw()
 
-    def on_draw(
+    def on_draw_bar_chart(
         self,
         _area: Gtk.DrawingArea,
         cr: cairo.Context,
         width: int,
         height: int,
     ) -> None:
-        """Draw function for the DrawingArea.
+        """Draw function for the bar chart DrawingArea.
 
         Args:
             _area: The DrawingArea widget (unused)

@@ -1,38 +1,75 @@
 using Gtk 4.0;
+using Adw 1;
 
 template $Statistics : Gtk.Box {
     orientation: vertical;
     halign: baseline;
 
-    Gtk.DrawingArea drawing_area {
-        height-request: 300;
-        width-request: 800;
-        margin-top: 100;
-        margin-bottom: 10;
-        margin-start: 10;
-        margin-end: 10;
-        halign: center;
-        valign: center;
+    Adw.Carousel carousel {
+        vexpand: true;
+        halign: fill;
+        valign: fill;
+
+        Gtk.Box bar_chart_page {
+            orientation: vertical;
+            halign: fill;
+            valign: fill;
+
+            Gtk.DrawingArea drawing_area {
+                height-request: 300;
+                width-request: 800;
+                margin-top: 100;
+                margin-bottom: 10;
+                margin-start: 10;
+                margin-end: 10;
+                halign: center;
+                valign: center;
+            }
+            
+            Gtk.Box controls_box {
+                orientation: horizontal;
+                halign: center;
+                margin-top: 30;
+                
+                Gtk.Label bar_count_label {
+                    label: "Number of keystrokes:";
+                    margin-end: 5;
+                }
+                
+                Gtk.SpinButton bar_count_spin {
+                    adjustment: Gtk.Adjustment {
+                        lower: 1;
+                        upper: 10;
+                        step-increment: 1; // increment with arrow keys
+                    };
+                    digits: 0; // only full integers
+                    width-chars: 3;
+                }
+            }
+        }
+
+        Gtk.Box line_chart_page {
+            orientation: vertical;
+            halign: fill;
+            valign: fill;
+
+            Gtk.DrawingArea line_drawing_area {
+                height-request: 300;
+                width-request: 800;
+                margin-top: 100;
+                margin-bottom: 10;
+                margin-start: 10;
+                margin-end: 10;
+                halign: center;
+                valign: center;
+            }
+        }
     }
-    
-    Gtk.Box controls_box {
-        orientation: horizontal;
+
+    Adw.CarouselIndicatorDots carousel_indicators {
+        carousel: carousel;
         halign: center;
-        margin-top: 30;
-        
-        Gtk.Label bar_count_label {
-            label: "Number of keystrokes:";
-            margin-end: 5;
-        }
-        
-        Gtk.SpinButton bar_count_spin {
-            adjustment: Gtk.Adjustment {
-                lower: 1;
-                upper: 10;
-                step-increment: 1; // increment with arrow keys
-            };
-            digits: 0; // only full integers
-            width-chars: 3;
-        }
+        margin-top: 10;
+        margin-bottom: 10;
     }
 }
