@@ -47,5 +47,5 @@ class TypetraceWindow(Adw.ApplicationWindow):
             "statistics",
             "Statistics",
         )
-        statistics_page.set_icon_name("utilities-system-monitor-symbolic")
+        statistics_page.set_icon_name("image-filter-symbolic")
         self.view_switcher.set_stack(self.stack)

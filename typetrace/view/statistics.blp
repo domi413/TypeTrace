@@ -10,7 +10,7 @@ template $Statistics : Gtk.Box {
         halign: fill;
         valign: fill;
 
-        Gtk.Box bar_chart_page {
+        Gtk.Box keystrokes_over_time_page {
             orientation: vertical;
             halign: fill;
             valign: fill;
@@ -25,22 +25,39 @@ template $Statistics : Gtk.Box {
                 halign: center;
                 valign: center;
             }
-            
+        }
+
+        Gtk.Box pie_chart_page {
+            orientation: vertical;
+            halign: fill;
+            valign: fill;
+
+            Gtk.DrawingArea line_drawing_area {
+                height-request: 300;
+                width-request: 800;
+                margin-top: 10;
+                margin-bottom: 10;
+                margin-start: 10;
+                margin-end: 10;
+                halign: center;
+                valign: center;
+            }
+
             Gtk.Box controls_box {
                 orientation: vertical;
                 halign: center;
-                margin-top: 30;
+                margin-top: 10;
                 spacing: 20;
-                
+
                 Gtk.Box bar_count_box {
                     orientation: horizontal;
                     halign: center;
                     spacing: 5;
-                    
+
                     Gtk.Label bar_count_label {
                         label: "Number of keystrokes:";
                     }
-                    
+
                     Gtk.SpinButton bar_count_spin {
                         adjustment: Gtk.Adjustment {
                             lower: 1;
@@ -81,23 +98,6 @@ template $Statistics : Gtk.Box {
                         label: "Clear Date";
                     }
                 }
-            }
-        }
-
-        Gtk.Box line_chart_page {
-            orientation: vertical;
-            halign: fill;
-            valign: fill;
-
-            Gtk.DrawingArea line_drawing_area {
-                height-request: 300;
-                width-request: 800;
-                margin-top: 100;
-                margin-bottom: 10;
-                margin-start: 10;
-                margin-end: 10;
-                halign: center;
-                valign: center;
             }
         }
     }
