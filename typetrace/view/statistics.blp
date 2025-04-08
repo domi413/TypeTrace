@@ -3,10 +3,14 @@ using Adw 1;
 
 template $Statistics : Gtk.Box {
     orientation: vertical;
-    halign: baseline;
+    halign: fill;
+    valign: fill;
+    vexpand: true;
+    hexpand: true;
 
     Adw.Carousel carousel {
         vexpand: true;
+        hexpand: true;
         halign: fill;
         valign: fill;
 
@@ -14,16 +18,20 @@ template $Statistics : Gtk.Box {
             orientation: vertical;
             halign: fill;
             valign: fill;
+            vexpand: true;
+            hexpand: true;
+            margin-start: 10;
+            margin-end: 10;
+            margin-top: 10;
+            margin-bottom: 10;
 
             Gtk.DrawingArea drawing_area {
                 height-request: 300;
                 width-request: 800;
-                margin-top: 100;
-                margin-bottom: 10;
-                margin-start: 10;
-                margin-end: 10;
                 halign: center;
                 valign: center;
+                vexpand: true;
+                hexpand: true;
             }
         }
 
@@ -31,6 +39,12 @@ template $Statistics : Gtk.Box {
             orientation: vertical;
             halign: fill;
             valign: fill;
+            vexpand: true;
+            hexpand: true;
+            margin-start: 10;
+            margin-end: 10;
+            margin-top: 10;
+            margin-bottom: 10;
 
             Gtk.DrawingArea line_drawing_area {
                 height-request: 300;

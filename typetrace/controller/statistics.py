@@ -35,7 +35,6 @@ class Statistics(Gtk.Box):
     line_drawing_area = Gtk.Template.Child()
     bar_count_spin = Gtk.Template.Child()
     calendar = Gtk.Template.Child()
-    calendar_popover = Gtk.Template.Child()
     date_button = Gtk.Template.Child()
     clear_date_button = Gtk.Template.Child()
 
@@ -61,7 +60,7 @@ class Statistics(Gtk.Box):
         self.bar_count_spin.set_range(1, 10)
         self.bar_count_spin.set_value(5)
 
-        # Set up date filtering
+        # Set up date filtering with MenuButton and Popover
         self.clear_date_button.connect("clicked", self.on_clear_date_clicked)
         self.calendar.connect("day-selected", self.on_date_selected)
         self.clear_date_button.set_sensitive(False)
@@ -78,7 +77,6 @@ class Statistics(Gtk.Box):
     def on_clear_date_clicked(self, _button: Gtk.Button) -> None:
         """Clear the date filter and show aggregated data."""
         self.selected_date = None
-        self.calendar_popover.popdown()
         self.clear_date_button.set_sensitive(False)
         self.date_button.set_label("Select Date")
         self.line_drawing_area.queue_draw()
@@ -92,7 +90,12 @@ class Statistics(Gtk.Box):
         """
         date = calendar.get_date()
         self.selected_date = date.format("%Y-%m-%d")
-        self.calendar_popover.popdown()
+
+        # Close the popover after date selection
+        popover = self.date_button.get_popover()
+        if popover:
+            popover.popdown()
+
         self.clear_date_button.set_sensitive(True)
         self.date_button.set_label(self.selected_date)
         self.line_drawing_area.queue_draw()
@@ -227,14 +230,26 @@ class Statistics(Gtk.Box):
             self._draw_no_data_message(cr, width, height)
             return
 
-        # Pie chart dimensions
-        center_x = width / 2
+        # Calculate chart and legend layout
+        # Reserve 35% of width for legend
+        legend_width = width * 0.35
+        chart_area_width = width - legend_width
+
+        # Pie chart dimensions - centered in the chart area (not including legend)
+        center_x = chart_area_width / 2
         center_y = height / 2
-        radius = min(width, height) * 0.35  # Adjust radius to fit the chart
+        radius = (
+            min(chart_area_width, height) * 0.35
+        )  # Adjust radius to fit the chart area
 
         # Draw pie slices
         start_angle = -math.pi / 2  # Start from top (270 degrees)
-        legend_y = height * 0.15  # Starting Y position for legend
+
+        # Position legend in the right section of the screen
+        legend_x = (
+            chart_area_width + 40
+        )  # Start legend with more padding after chart area
+        legend_y = height * 0.25  # Start legend at 25% of height from top
 
         for i, keystroke in enumerate(keystrokes):
             # Calculate slice angle based on percentage
@@ -269,14 +284,11 @@ class Statistics(Gtk.Box):
                 cr.show_text(percentage_text)
 
             # Draw legend items
-            legend_x = width * 0.75
             legend_box_size = 15
 
             # Legend color box
             cr.set_source_rgb(*colors[i % len(colors)])
-            cr.rectangle(
-                legend_x - 100, legend_y + i * 25, legend_box_size, legend_box_size
-            )
+            cr.rectangle(legend_x, legend_y + i * 25, legend_box_size, legend_box_size)
             cr.fill()
 
             # Legend text
@@ -288,7 +300,7 @@ class Statistics(Gtk.Box):
             legend_text = (
                 f"{keystroke.key_name}: {keystroke.count} ({slice_percentage:.1%})"
             )
-            cr.move_to(legend_x - 80, legend_y + i * 25 + 12)
+            cr.move_to(legend_x + legend_box_size + 5, legend_y + i * 25 + 12)
             cr.show_text(legend_text)
 
             # Update angle for next slice
@@ -309,7 +321,6 @@ class Statistics(Gtk.Box):
 
         """
         # Get theme status
-        # TODO: can we clean up this method?
         is_dark = self.style_manager.get_dark()
         is_high_contrast = self.style_manager.get_high_contrast()
 
@@ -320,7 +331,6 @@ class Statistics(Gtk.Box):
         colors = self._determine_colors(is_dark, is_high_contrast, accent_color)
 
         # Calculate dimensions
-        # TODO: Doesnt seem to work?!
         padding = 40
         graph_width = width - padding * 2
         graph_height = height - padding * 2
@@ -360,7 +370,6 @@ class Statistics(Gtk.Box):
 
     def _get_accent_color(self, is_dark):
         """Get the accent color from GNOME settings or a fallback."""
-        # TODO: Rather use: https://gnome.pages.gitlab.gnome.org/libadwaita/doc/1-latest/method.StyleManager.get_accent_color.html
         try:
             settings = Gio.Settings.new("org.gnome.desktop.interface")
             accent_name = settings.get_string("accent-color")
