@@ -46,6 +46,9 @@ class Statistics(Gtk.Box):
     drawing_area = Gtk.Template.Child()
     line_drawing_area = Gtk.Template.Child()
     bar_count_spin = Gtk.Template.Child()
+    calendar = Gtk.Template.Child()
+    date_button = Gtk.Template.Child()
+    clear_date_button = Gtk.Template.Child()
 
     def __init__(self, keystroke_store: KeystrokeStore, **kwargs) -> None:
         """Initialize the statistics page with keystroke data.
@@ -57,6 +60,7 @@ class Statistics(Gtk.Box):
         """
         super().__init__(**kwargs)
         self.keystroke_store = keystroke_store
+        self.selected_date = None
 
         # Set up bar chart
         self.drawing_area.set_draw_func(self.on_draw_bar_chart)
@@ -64,7 +68,11 @@ class Statistics(Gtk.Box):
         self.bar_count_spin.set_range(1, 10)
         self.bar_count_spin.set_value(5)
 
-        # Set up line chart
+        # Set up date filtering
+        self.date_button.connect("clicked", self.on_date_button_clicked)
+        self.clear_date_button.connect("clicked", self.on_clear_date_clicked)
+        self.calendar.connect("day-selected", self.on_date_selected)
+        self.clear_date_button.set_sensitive(False)
 
     def on_bar_count_changed(self, _widget: Gtk.SpinButton) -> None:
         """Handle changes to the bar count spin button.
@@ -100,6 +108,32 @@ class Statistics(Gtk.Box):
 
         self._draw_bar_chart(cr, width, height, top_keystrokes)
 
+    def on_date_button_clicked(self, _button: Gtk.Button) -> None:
+        """Toggle calendar visibility when date button is clicked."""
+        self.calendar.set_visible(not self.calendar.get_visible())
+
+    def on_clear_date_clicked(self, _button: Gtk.Button) -> None:
+        """Clear the date filter and show aggregated data."""
+        self.selected_date = None
+        self.calendar.set_visible(False)
+        self.clear_date_button.set_sensitive(False)
+        self.date_button.set_label("Select Date")
+        self.drawing_area.queue_draw()
+
+    def on_date_selected(self, calendar: Gtk.Calendar) -> None:
+        """Handle date selection from calendar.
+
+        Args:
+            calendar: The calendar widget that triggered the event
+
+        """
+        date = calendar.get_date()
+        self.selected_date = date.format("%Y-%m-%d")
+        self.calendar.set_visible(False)
+        self.clear_date_button.set_sensitive(True)
+        self.date_button.set_label(self.selected_date)
+        self.drawing_area.queue_draw()
+
     def _get_top_keystrokes(self, count: int) -> list[Keystroke]:
         """Get the top N keystrokes by count.
 
@@ -110,7 +144,11 @@ class Statistics(Gtk.Box):
             List of top keystrokes sorted by count in descending order
 
         """
-        keystrokes = self.keystroke_store.get_all_keystrokes()
+        if self.selected_date:
+            keystrokes = self.keystroke_store.get_keystrokes_by_date(self.selected_date)
+        else:
+            keystrokes = self.keystroke_store.get_all_keystrokes()
+
         keystrokes.sort(key=lambda k: k.count, reverse=True)
         return keystrokes[:count]
 

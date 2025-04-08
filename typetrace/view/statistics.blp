@@ -27,23 +27,54 @@ template $Statistics : Gtk.Box {
             }
             
             Gtk.Box controls_box {
-                orientation: horizontal;
+                orientation: vertical;
                 halign: center;
                 margin-top: 30;
+                spacing: 20;
                 
-                Gtk.Label bar_count_label {
-                    label: "Number of keystrokes:";
-                    margin-end: 5;
+                Gtk.Box bar_count_box {
+                    orientation: horizontal;
+                    halign: center;
+                    spacing: 5;
+                    
+                    Gtk.Label bar_count_label {
+                        label: "Number of keystrokes:";
+                    }
+                    
+                    Gtk.SpinButton bar_count_spin {
+                        adjustment: Gtk.Adjustment {
+                            lower: 1;
+                            upper: 10;
+                            step-increment: 1;
+                        };
+                        digits: 0;
+                        width-chars: 3;
+                    }
                 }
-                
-                Gtk.SpinButton bar_count_spin {
-                    adjustment: Gtk.Adjustment {
-                        lower: 1;
-                        upper: 10;
-                        step-increment: 1; // increment with arrow keys
-                    };
-                    digits: 0; // only full integers
-                    width-chars: 3;
+
+                Gtk.Box date_filter_box {
+                    orientation: vertical;
+                    halign: center;
+                    spacing: 5;
+
+                    Gtk.Box date_buttons_box {
+                        orientation: horizontal;
+                        halign: center;
+                        spacing: 5;
+
+                        Gtk.Button date_button {
+                            label: "Select Date";
+                        }
+
+                        Gtk.Button clear_date_button {
+                            label: "Clear Date";
+                        }
+                    }
+
+                    Gtk.Calendar calendar {
+                        visible: false;
+                        halign: center;
+                    }
                 }
             }
         }
