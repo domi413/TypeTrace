@@ -1,23 +1,23 @@
 .container {
-  padding: 4rem;
+    padding: 2rem;
 }
 
 .keyboard-container label {
-  font-weight: bold;
-  border: 1pt solid rgba(0, 0, 0, 0.2);
-  border-radius: 4pt;
-  padding: 1rem;
-  min-width: 2rem;
-  background-color: rgba(245, 245, 245, 0.9);
-  color: #333;
-  box-shadow: 0 1pt 3pt rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease;
+    font-weight: bold;
+    border: 1pt solid rgba(0, 0, 0, 0.2);
+    border-radius: 3pt;
+    padding: 0.6rem;
+    min-width: 1.8rem;
+    background-color: rgba(245, 245, 245, 0.9);
+    color: #333;
+    box-shadow: 0 1pt 3pt rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
 }
 
 .keyboard-container label:hover {
-  box-shadow: 0 2pt 4pt rgba(0, 0, 0, 0.5);
+    filter: brightness(85%);
 }
 
 .gradient-bar {
-  border-radius: 4pt;
+    border-radius: 4pt;
 }

@@ -58,7 +58,8 @@ class Preferences(Adw.PreferencesDialog):
                 dialog_utils.show_toast(self, "Backend autostart enabled")
             else:
                 dialog_utils.show_error_dialog(
-                    self.parent_window, "Failed to enable autostart",
+                    self.parent_window,
+                    "Failed to enable autostart",
                     secondary_text=error_msg,
                 )
                 row.set_active(False)
@@ -68,7 +69,8 @@ class Preferences(Adw.PreferencesDialog):
                 dialog_utils.show_toast(self, "Backend autostart disabled")
             else:
                 dialog_utils.show_error_dialog(
-                    self.parent_window, "Failed to disable autostart",
+                    self.parent_window,
+                    "Failed to disable autostart",
                     secondary_text=error_msg,
                 )
                 row.set_active(True)

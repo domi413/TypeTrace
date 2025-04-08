@@ -80,6 +80,7 @@ KEYBOARD_LAYOUTS = {
         ],
         [
             (29, "Ctrl"),
+            (125, "⌘"),
             (56, "Alt"),
             (57, "Space"),
             (100, "Alt"),
@@ -170,6 +171,7 @@ KEYBOARD_LAYOUTS = {
         ],
         [
             (29, "Ctrl"),
+            (125, "⌘"),
             (56, "Alt"),
             (57, "Space"),
             (100, "AltGr"),

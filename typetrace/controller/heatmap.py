@@ -2,7 +2,7 @@
 
 from typing import ClassVar
 
-from gi.repository import Gdk, Gtk
+from gi.repository import Adw, Gdk, Gtk
 
 from typetrace.model.keystrokes import KeystrokeStore
 from typetrace.model.layouts import KEYBOARD_LAYOUTS
@@ -31,15 +31,15 @@ class Heatmap(Gtk.Box):
         self,
         keystroke_store: KeystrokeStore,
         layout: str = "en_US",
-        beg_color: tuple[float, float, float] = (0.0, 0.0, 1.0),
-        end_color: tuple[float, float, float] = (1.0, 0.0, 0.0),
+        beg_color: tuple[float, float, float] | None = None,
+        end_color: tuple[float, float, float] = (0.7, 0.3, 0.9),
     ) -> None:
         """Initialize the heatmap widget.
 
         Args:
             keystroke_store: Access to keystrokes.
             layout: Keyboard layout to use.
-            beg_color: RGB tuple (0.0 to 1.0) for the lowest frequency.
+            beg_color: RGB tuple (0.0 to 1.0) for the lowest frequency. If None, use theme color.
             end_color: RGB tuple (0.0 to 1.0) for the highest frequency.
 
         """
@@ -57,10 +57,27 @@ class Heatmap(Gtk.Box):
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
 
+        # Get the style manager and connect to theme change signal
+        self.style_manager = Adw.StyleManager.get_default()
+        self.style_manager.connect("notify::dark", self._on_theme_changed)
+
         self.refresh_button.connect("clicked", lambda *_: self._update_colors())
 
         self._build_keyboard()
         self._update_colors()
+
+    def _on_theme_changed(self, *args):
+        """Called when the theme changes between light and dark."""
+        # Reset beg_color to None to force it to be recalculated based on the new theme
+        self.beg_color = None
+        self._update_colors()
+
+    def _get_theme_background_color(self) -> tuple[float, float, float]:
+        """Get the appropriate background color based on the current theme."""
+        is_dark = self.style_manager.get_dark()
+        if is_dark:
+            return (0.2, 0.2, 0.2)  # Dark theme background (dark gray)
+        return (0.95, 0.95, 0.95)  # Light theme background (light gray)
 
     def _build_keyboard(self) -> None:
         """Build the keyboard layout dynamically using scancodes."""
@@ -90,6 +107,18 @@ class Heatmap(Gtk.Box):
         most_pressed = self.keystroke_store.get_highest_count()
         if not most_pressed:
             return
+
+        if self.beg_color is None:
+            # Get theme's background color using a CSS provider
+            style_manager = Adw.StyleManager.get_default()
+            is_dark = style_manager.get_dark()
+
+            if is_dark:
+                # Dark theme background color (approximate)
+                self.beg_color = (0.2, 0.2, 0.2)  # Dark gray
+            else:
+                # Light theme background color (approximate)
+                self.beg_color = (0.95, 0.95, 0.95)  # Light gray
 
         beg_r, beg_g, beg_b = [int(x * 255) for x in self.beg_color]
         end_r, end_g, end_b = [int(x * 255) for x in self.end_color]
