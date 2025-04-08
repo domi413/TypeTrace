@@ -65,7 +65,6 @@ class Statistics(Gtk.Box):
         self.bar_count_spin.set_value(5)
 
         # Set up line chart
-        # self.line_drawing_area.set_draw_func(self.on_draw_line_chart)
 
     def on_bar_count_changed(self, _widget: Gtk.SpinButton) -> None:
         """Handle changes to the bar count spin button.
