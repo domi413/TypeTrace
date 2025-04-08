@@ -47,6 +47,7 @@ class Statistics(Gtk.Box):
     line_drawing_area = Gtk.Template.Child()
     bar_count_spin = Gtk.Template.Child()
     calendar = Gtk.Template.Child()
+    calendar_popover = Gtk.Template.Child()
     date_button = Gtk.Template.Child()
     clear_date_button = Gtk.Template.Child()
 
@@ -69,7 +70,6 @@ class Statistics(Gtk.Box):
         self.bar_count_spin.set_value(5)
 
         # Set up date filtering
-        self.date_button.connect("clicked", self.on_date_button_clicked)
         self.clear_date_button.connect("clicked", self.on_clear_date_clicked)
         self.calendar.connect("day-selected", self.on_date_selected)
         self.clear_date_button.set_sensitive(False)
@@ -108,14 +108,10 @@ class Statistics(Gtk.Box):
 
         self._draw_bar_chart(cr, width, height, top_keystrokes)
 
-    def on_date_button_clicked(self, _button: Gtk.Button) -> None:
-        """Toggle calendar visibility when date button is clicked."""
-        self.calendar.set_visible(not self.calendar.get_visible())
-
     def on_clear_date_clicked(self, _button: Gtk.Button) -> None:
         """Clear the date filter and show aggregated data."""
         self.selected_date = None
-        self.calendar.set_visible(False)
+        self.calendar_popover.popdown()
         self.clear_date_button.set_sensitive(False)
         self.date_button.set_label("Select Date")
         self.drawing_area.queue_draw()
@@ -129,7 +125,7 @@ class Statistics(Gtk.Box):
         """
         date = calendar.get_date()
         self.selected_date = date.format("%Y-%m-%d")
-        self.calendar.set_visible(False)
+        self.calendar_popover.popdown()
         self.clear_date_button.set_sensitive(True)
         self.date_button.set_label(self.selected_date)
         self.drawing_area.queue_draw()

@@ -53,27 +53,32 @@ template $Statistics : Gtk.Box {
                 }
 
                 Gtk.Box date_filter_box {
-                    orientation: vertical;
+                    orientation: horizontal;
                     halign: center;
                     spacing: 5;
 
-                    Gtk.Box date_buttons_box {
-                        orientation: horizontal;
-                        halign: center;
-                        spacing: 5;
-
-                        Gtk.Button date_button {
+                    Gtk.Box {
+                        Gtk.MenuButton date_button {
                             label: "Select Date";
+                            popover: calendar_popover;
                         }
 
-                        Gtk.Button clear_date_button {
-                            label: "Clear Date";
+                        Gtk.Popover calendar_popover {
+                            autohide: true;
+                            has-arrow: true;
+                            position: top;
+
+                            child: Gtk.Calendar calendar {
+                                margin-start: 6;
+                                margin-end: 6;
+                                margin-top: 6;
+                                margin-bottom: 6;
+                            };
                         }
                     }
 
-                    Gtk.Calendar calendar {
-                        visible: false;
-                        halign: center;
+                    Gtk.Button clear_date_button {
+                        label: "Clear Date";
                     }
                 }
             }
