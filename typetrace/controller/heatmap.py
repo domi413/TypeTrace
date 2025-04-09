@@ -25,7 +25,6 @@ class Heatmap(Gtk.Box):
     ]
 
     keyboard_container = Gtk.Template.Child()
-    refresh_button = Gtk.Template.Child()
 
     def __init__(
         self,
@@ -57,9 +56,11 @@ class Heatmap(Gtk.Box):
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
 
-        self.refresh_button.connect("clicked", lambda *_: self._update_colors())
-
         self._build_keyboard()
+        self._update_colors()
+
+    def update(self) -> None:
+        """Update the heatmap to reflect current data."""
         self._update_colors()
 
     def _build_keyboard(self) -> None:
@@ -86,6 +87,7 @@ class Heatmap(Gtk.Box):
         return label
 
     def _update_colors(self) -> None:
+        """Assign each displayed key the appropriate color."""
         keystrokes = self.keystroke_store.get_all_keystrokes()
         most_pressed = self.keystroke_store.get_highest_count()
         if not most_pressed:

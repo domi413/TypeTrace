@@ -16,8 +16,9 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
     __gtype_name__ = "TypetraceWindow"
 
-    view_switcher = Gtk.Template.Child("view_switcher")
-    stack = Gtk.Template.Child("stack")
+    refresh_button = Gtk.Template.Child()
+    view_switcher = Gtk.Template.Child()
+    stack = Gtk.Template.Child()
 
     def __init__(self, keystroke_store: KeystrokeStore, **kwargs) -> None:
         """Initialize the application window.
@@ -29,16 +30,26 @@ class TypetraceWindow(Adw.ApplicationWindow):
         """
         super().__init__(**kwargs)
         self.keystroke_store = keystroke_store
+        self.heatmap = Heatmap(keystroke_store=self.keystroke_store)
+        self.verbose = Verbose(keystroke_store=self.keystroke_store)
+        self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
+
         heatmap_page = self.stack.add_titled(
-            Heatmap(keystroke_store=self.keystroke_store),
+            self.heatmap,
             "heatmap",
             "Heatmap",
         )
         heatmap_page.set_icon_name("input-keyboard-symbolic")
         verbose_page = self.stack.add_titled(
-            Verbose(keystroke_store=self.keystroke_store),
+            self.verbose,
             "verbose",
             "Verbose",
         )
         verbose_page.set_icon_name("text-x-generic-symbolic")
         self.view_switcher.set_stack(self.stack)
+
+    def _on_refresh_clicked(self) -> None:
+        """Handle refresh button click."""
+        print("clicked")
+        self.heatmap.update()
+        self.verbose.update()
