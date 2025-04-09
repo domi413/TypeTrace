@@ -34,6 +34,10 @@ class Verbose(Gtk.Box):
         # Set the sort_model's sorter to the column_view's sorter
         self.sort_model.set_sorter(self.column_view.get_sorter())
 
+    def update(self) -> None:
+        """Update the list to reflect current data."""
+        self._populate_list_store()
+
     def _populate_list_store(self) -> None:
         """Populate the list store with keystroke data."""
         for keystroke in self.keystroke_store.get_all_keystrokes():
