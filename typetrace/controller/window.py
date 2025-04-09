@@ -50,6 +50,5 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
     def _on_refresh_clicked(self) -> None:
         """Handle refresh button click."""
-        print("clicked")
         self.heatmap.update()
         self.verbose.update()
