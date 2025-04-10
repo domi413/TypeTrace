@@ -6,33 +6,45 @@ template $Heatmap : Gtk.Box  {
     halign: center;
     valign: center;
 
-    Gtk.Box {
+    Gtk.CenterBox {
         css-classes: ["legend-container"];
-        orientation: horizontal;
         margin-bottom: 20;
-        halign: center;
 
-        Gtk.Label {
-            label: "Min";
-            margin-end: 5;
-        }
-
+        [center]
         Gtk.Box {
-            css-classes: ["gradient-bar"];
-            width-request: 300;
-            halign: center;
+            Gtk.Label {
+                label: "Min";
+                margin-end: 5;
+            }
+
+            Gtk.Box {
+                css-classes: ["gradient-bar"];
+                width-request: 300;
+            }
+
+            Gtk.Label {
+                label: "Max";
+                margin-start: 5;
+            }
         }
 
-        Gtk.Label {
-            label: "Max";
-            margin-start: 5;
-        }
+        [end]
+        Gtk.Box {
+            Gtk.Button zoom_in_button {
+                css-classes: ["circular"];
+                valign: center;
+                has-frame: false;
+                icon-name: "list-add-symbolic";
+                tooltip-text: "Zoom in";
+            }
 
-        Gtk.Button refresh_button {
-          valign: center;
-          has-frame: false;
-          icon-name: "view-refresh-symbolic";
-          margin-start: 5;
+            Gtk.Button zoom_out_button {
+                css-classes: ["circular"];
+                valign: center;
+                has-frame: false;
+                icon-name: "list-remove-symbolic";
+                tooltip-text: "Zoom out";
+            }
         }
     }
 
