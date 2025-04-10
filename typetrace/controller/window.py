@@ -31,6 +31,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         Args:
             **kwargs: Keyword arguments passed to the parent constructor
             keystroke_store: Access to keystrokes
+            settings: GSettings used to persist preferences of a user
 
         """
         super().__init__(**kwargs)
