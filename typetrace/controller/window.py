@@ -1,6 +1,6 @@
 """Window module for the Typetrace application."""
 
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, Gio, Gtk
 
 from typetrace.controller.heatmap import Heatmap
 from typetrace.controller.verbose import Verbose
@@ -20,7 +20,12 @@ class TypetraceWindow(Adw.ApplicationWindow):
     view_switcher = Gtk.Template.Child()
     stack = Gtk.Template.Child()
 
-    def __init__(self, keystroke_store: KeystrokeStore, **kwargs) -> None:
+    def __init__(
+        self,
+        keystroke_store: KeystrokeStore,
+        settings: Gio.Settings,
+        **kwargs,
+    ) -> None:
         """Initialize the application window.
 
         Args:
@@ -29,9 +34,8 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         """
         super().__init__(**kwargs)
-        self.keystroke_store = keystroke_store
-        self.heatmap = Heatmap(keystroke_store=self.keystroke_store)
-        self.verbose = Verbose(keystroke_store=self.keystroke_store)
+        self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
+        self.verbose = Verbose(keystroke_store=keystroke_store)
         self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
 
         heatmap_page = self.stack.add_titled(

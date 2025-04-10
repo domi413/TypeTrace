@@ -2,7 +2,7 @@
 
 from typing import ClassVar
 
-from gi.repository import Gdk, Gtk
+from gi.repository import Gdk, Gio, Gtk
 
 from typetrace.model.keystrokes import KeystrokeStore
 from typetrace.model.layouts import KEYBOARD_LAYOUTS
@@ -26,8 +26,12 @@ class Heatmap(Gtk.Box):
 
     keyboard_container = Gtk.Template.Child()
 
+    zoom_in_button = Gtk.Template.Child()
+    zoom_out_button = Gtk.Template.Child()
+
     def __init__(
         self,
+        settings: Gio.Settings,
         keystroke_store: KeystrokeStore,
         layout: str = "en_US",
         beg_color: tuple[float, float, float] = (0.0, 0.0, 1.0),
@@ -36,6 +40,7 @@ class Heatmap(Gtk.Box):
         """Initialize the heatmap widget.
 
         Args:
+            settings: Gio settings used to persist and apply preferences.
             keystroke_store: Access to keystrokes.
             layout: Keyboard layout to use.
             beg_color: RGB tuple (0.0 to 1.0) for the lowest frequency.
@@ -43,6 +48,7 @@ class Heatmap(Gtk.Box):
 
         """
         super().__init__()
+        self.settings = settings
         self.keystroke_store: KeystrokeStore = keystroke_store
         self.layout = layout
         self.beg_color = beg_color
@@ -55,6 +61,9 @@ class Heatmap(Gtk.Box):
             self.css_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
+
+        self.zoom_in_button.connect("clicked", lambda *_: self._on_zoom_clicked(5))
+        self.zoom_out_button.connect("clicked", lambda *_: self._on_zoom_clicked(-5))
 
         self._build_keyboard()
         self._update_colors()
@@ -84,6 +93,8 @@ class Heatmap(Gtk.Box):
         """Create a single key widget with the appropriate properties."""
         label = Gtk.Label(label=key_label)
         label.set_hexpand(True) if key_label in self.EXPANDED_KEYS else None
+        size = self.settings.get_int("key-size")
+        label.set_size_request(size, size)
         return label
 
     def _update_colors(self) -> None:
@@ -141,3 +152,9 @@ class Heatmap(Gtk.Box):
         luminance = 0.3 * r + 0.6 * g + 0.1 * b  # Luminance formula provides brightness
         text_color = "white" if luminance < 0.5 else "black"  # noqa: PLR2004
         return bg_color, text_color
+
+    def _on_zoom_clicked(self, amount: int) -> None:
+        size = max(self.settings.get_int("key-size") + amount, 40)
+        self.settings.set_int("key-size", size)
+        for label in self.key_widgets.values():
+            label.set_size_request(size, size)
