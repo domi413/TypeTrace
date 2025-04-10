@@ -4,7 +4,7 @@ This is the GitHub repository of the TypeTrace source code
 
 ## Running the Project
 
-To test the project use the command `make`, refer to the Makefile for further options.
+To test the project use the command `make test`, refer to the Makefile for further options.
 
 ## Spellchecking errors
 
