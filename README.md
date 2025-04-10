@@ -2,6 +2,10 @@
 
 This is the GitHub repository of the TypeTrace source code
 
+## Running the Project
+
+To test the project use the command `make`, refer to the Makefile for further options.
+
 ## Spellchecking errors
 
 If the Spellchecker throws an error, but the misspelled word should be accepted, add it to the corresponding dictionary. You can find the dictionaries under `.github/spellcheck/dictionaries/`.
