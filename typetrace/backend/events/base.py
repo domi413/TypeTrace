@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import time
 from abc import ABC, abstractmethod
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 if TYPE_CHECKING:
@@ -25,6 +26,7 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
         """Initialize the processor with a database path."""
         self._db_manager = DatabaseManager()
         self._db_path: Path = db_path
+        self._current_date: str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
     @abstractmethod
     def trace(self) -> None:
@@ -40,6 +42,8 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
         flush: bool = False,
     ) -> tuple[list[Event], float]:
         """Check if buffer timeout has been reached and flush buffer if needed.
+
+        Additionally, update the current date if the buffer is flushed.
 
         Args:
             buffer: Current buffer of events
@@ -61,6 +65,7 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
             self._db_manager.write_to_database(db_path, buffer)
             buffer.clear()
             start_time = current_time
+            self._current_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         return buffer, start_time
 
@@ -73,9 +78,10 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
 
         """
         logger.debug(
-            '{"event_name": "%s", "key_code": %s}',
+            '{"event_name": "%s", "key_code": %s, "date": "%s"}',
             event["name"],
             event["scan_code"],
+            event["date"],
         )
 
     @abstractmethod

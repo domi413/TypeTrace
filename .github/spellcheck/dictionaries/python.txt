@@ -1,5 +1,5 @@
 # GTK
- qaccels
+qaccels
 adwaita
 dbus
 ecodes
@@ -12,3 +12,8 @@ gresource
 gresources
 levelname
 pynput
+filemanager
+adwaita
+gfile
+dbus
+gsettings

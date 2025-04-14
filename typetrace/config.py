@@ -73,3 +73,4 @@ class Event(TypedDict):
 
     scan_code: int
     name: str | tuple[str, ...]
+    date: str
