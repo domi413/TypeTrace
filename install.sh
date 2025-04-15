@@ -176,7 +176,7 @@ elif [[ "$INSTALL_METHOD" == "2" ]]; then
     print_info "Executable installed to: $USER_LOCAL_PREFIX/bin/typetrace"
     print_warning "IMPORTANT: To run 'typetrace' directly from your terminal, ensure '$USER_LOCAL_PREFIX/bin' is included in your PATH environment variable."
     print_warning "You may need to add 'export PATH=\"$HOME/.local/bin:\$PATH\"' to your shell configuration file (e.g., ~/.bashrc, ~/.zshrc) and restart your shell or log out and log back in."
-    print_warning("For icons and desktop files to be recognized, ensure your desktop environment checks '$USER_LOCAL_PREFIX/share' (this is often default). You may need to set/append to XDG_DATA_DIRS.")
+    print_warning "For icons and desktop files to be recognized, ensure your desktop environment checks '$USER_LOCAL_PREFIX/share' (this is often default). You may need to set/append to XDG_DATA_DIRS."
 
 fi
 
