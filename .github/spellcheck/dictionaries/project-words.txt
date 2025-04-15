@@ -16,6 +16,8 @@ vexpand
 
 # Build
 bindir
+libadwaita
+libevdev
 
 # Team Names
 Alali
