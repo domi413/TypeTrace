@@ -55,7 +55,7 @@ echo "How would you like to install $APP_NAME?"
 echo "1) Flatpak (Sandboxed, user-install, recommended)"
 echo "2) Meson (User-local install to $USER_LOCAL_PREFIX, requires build dependencies)"
 while [[ "$INSTALL_METHOD" != "1" && "$INSTALL_METHOD" != "2" ]]; do
-    read -p "Enter your choice (1 or 2): " INSTALL_METHOD
+    read -p "Enter your choice (1 or 2): " INSTALL_METHOD < /dev/tty
 done
 
 # --- Installation Logic ---
@@ -129,7 +129,7 @@ elif [[ "$INSTALL_METHOD" == "2" ]]; then
             INSTALL_CMD="$PIP_CMD install --user --upgrade ${PIP_PACKAGES[*]}" # Add --upgrade for good measure
             INSTALL_PY_DEPS=""
             while [[ "$INSTALL_PY_DEPS" != "y" && "$INSTALL_PY_DEPS" != "n" ]]; do
-                 read -p "Attempt to install them using '$INSTALL_CMD'? (y/N): " INSTALL_PY_DEPS
+                 read -p "Attempt to install them using '$INSTALL_CMD'? (y/N): " INSTALL_PY_DEPS  < /dev/tty
                  INSTALL_PY_DEPS=$(echo "$INSTALL_PY_DEPS" | tr '[:upper:]' '[:lower:]')
                  if [[ -z "$INSTALL_PY_DEPS" ]]; then INSTALL_PY_DEPS="n"; fi
             done
@@ -138,7 +138,6 @@ elif [[ "$INSTALL_METHOD" == "2" ]]; then
                 print_info "Running: $INSTALL_CMD"
                 if $INSTALL_CMD; then
                      print_info "Python dependencies installed successfully."
-                     # Optionally re-verify, though pip success is usually enough
                 else
                      print_error "Failed to install Python dependencies using pip. Please install them manually and re-run the script."
                 fi
@@ -160,9 +159,9 @@ elif [[ "$INSTALL_METHOD" == "2" ]]; then
     print_warning "Meson installation also requires development libraries for GTK4, Libadwaita, GLib, and Libevdev."
     print_warning "Example (Debian/Ubuntu): sudo apt install libgtk-4-dev libadwaita-1-dev libglib2.0-dev libevdev-dev meson ninja-build pkg-config"
     print_warning "Example (Fedora): sudo dnf install gtk4-devel libadwaita-devel glib2-devel libevdev-devel meson ninja-build pkgconfig"
-    read -p "Press Enter to continue if you have these installed, or Ctrl+C to abort..."
+    read -p "Press Enter to continue if you have these installed, or Ctrl+C to abort..."  < /dev/tty
 
-    BUILD_DIR="_build" # Matches Makefile convention
+    BUILD_DIR="_build"
 
     print_info "Configuring Meson build (prefix: $USER_LOCAL_PREFIX)..."
     meson setup "$BUILD_DIR" --prefix="$USER_LOCAL_PREFIX"
@@ -190,7 +189,7 @@ else
     print_warning "$APP_NAME needs access to input devices (/dev/input/event*) which usually requires membership in the 'input' or a similar group."
     ADD_TO_GROUP=""
     while [[ "$ADD_TO_GROUP" != "y" && "$ADD_TO_GROUP" != "n" ]]; do
-        read -p "Add user '$USER' to the 'input' group using sudo? (y/N): " ADD_TO_GROUP
+        read -p "Add user '$USER' to the 'input' group using sudo? (y/N): " ADD_TO_GROUP  < /dev/tty
         ADD_TO_GROUP=$(echo "$ADD_TO_GROUP" | tr '[:upper:]' '[:lower:]')
         if [[ -z "$ADD_TO_GROUP" ]]; then # Default to No if user just presses Enter
             ADD_TO_GROUP="n"

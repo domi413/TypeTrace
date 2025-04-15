@@ -5,7 +5,7 @@ This is the GitHub repository of the TypeTrace source code
 ## Installing the Project
 To install the project on any linux distro run the following command:
 ```
-curl -sSL https://raw.githubusercontent.com/domi413/TypeTrace/refs/heads/main/install.sh | sh
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/domi413/TypeTrace/refs/heads/main/install.sh | sh
 ```
 Note that:
 - Meson requires development libraries for GTK4, Libadwaita, GLib, and Libevdev.
