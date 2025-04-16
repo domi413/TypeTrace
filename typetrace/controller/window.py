@@ -91,4 +91,4 @@ class TypetraceWindow(Adw.ApplicationWindow):
         """Handle window close request."""
         # Tell the connector to clean up
         self._backend_connector.shutdown()
-        return super().do_close_request()
+        return Adw.ApplicationWindow.do_close_request(self)
