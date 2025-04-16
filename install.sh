@@ -272,7 +272,7 @@ main() {
     check_input_group "$@"
     local group_check_status=$?
 
-    # Ask for logout if check_input_group returnes 0
+    # Ask for logout if check_input_group returns 0
     if [[ "$group_check_status" -eq 0 ]]; then
         prompt_logout
     elif [[ "$group_check_status" -eq 2 ]]; then
