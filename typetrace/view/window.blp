@@ -6,33 +6,35 @@ template $TypetraceWindow: Adw.ApplicationWindow {
   default-width: 1000;
   default-height: 720;
 
-  content: Adw.ToolbarView {
-    [top]
-    Adw.HeaderBar {
-      title-widget: Adw.ViewSwitcher view_switcher {
-        policy: wide;
-        stack: stack;
-      };
+  content: Adw.ToastOverlay toast_overlay {
+    Adw.ToolbarView {
+      [top]
+      Adw.HeaderBar {
+        title-widget: Adw.ViewSwitcher view_switcher {
+          policy: wide;
+          stack: stack;
+        };
 
-      [start]
-      Gtk.Button refresh_button {
-        valign: center;
-        has-frame: false;
-        icon-name: "view-refresh-symbolic";
-        margin-start: 5;
-        tooltip-text: "Updates views";
+        [start]
+        Gtk.Button refresh_button {
+          valign: center;
+          has-frame: false;
+          icon-name: "view-refresh-symbolic";
+          margin-start: 5;
+          tooltip-text: "Updates views";
+        }
+
+        [end]
+        MenuButton {
+          primary: true;
+          icon-name: "open-menu-symbolic";
+          tooltip-text: "Main Menu";
+          menu-model: primary_menu;
+        }
       }
 
-      [end]
-      MenuButton {
-        primary: true;
-        icon-name: "open-menu-symbolic";
-        tooltip-text: "Main Menu";
-        menu-model: primary_menu;
-      }
+      content: Adw.ViewStack stack {};
     }
-
-    content: Adw.ViewStack stack {};
   };
 }
 

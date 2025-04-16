@@ -6,4 +6,4 @@ Type=Application
 Categories=Utility;
 Keywords=GTK;
 StartupNotify=true
-DBusActivatable=false
+DBusActivatable=true

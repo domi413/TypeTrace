@@ -49,8 +49,6 @@ class LinuxEventProcessor(BaseEventProcessor):
     @override
     def trace(self) -> None:
         """See base class."""
-        self.__setup_signal_handlers()
-
         with self._managed_devices() as devices:
             if not devices:
                 logger.warning("No devices found")
