@@ -1,0 +1,27 @@
+[project]
+name = "typetrace"
+version = "0.1.0" # TODO: Set this to release version
+
+# TODO: Check this and use the actual needed version
+requires-python = ">=3.8" 
+dependencies = [
+    "appdirs>=1.4.4",
+    "dbus-python>=1.2.18",
+    "evdev>=1.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+]
+
+[tool.ruff.lint]
+extend-select = [
+    "ALL",
+]
+ignore = [
+    "ANN003", # Ignore missing type annotation for **kwargs
+    "ANN401", # Ignore `Any` type annotation for functions
+    "D203",   # In conflict with D211
+    "D213",   # In conflict with D212
+]
