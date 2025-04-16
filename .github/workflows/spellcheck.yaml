@@ -16,11 +16,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Starting cspell
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v46
+        with:
+          separator: " "
+
+      - name: Starting cspell on changed files
+        if: steps.changed_files.outputs.all_changed_files != ''
         uses: streetsidesoftware/cspell-action@v6
         with:
-          files: ""
+          files: ${{ steps.changed_files.outputs.all_changed_files }}
           root: "."
           check_dot_files: false
           inline: error
