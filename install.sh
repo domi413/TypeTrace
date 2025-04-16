@@ -69,6 +69,7 @@ ensure_sudo() {
 
     exit $?
 }
+
 # Checks if a list of commands are available in PATH
 # Usage: check_commands "cmd1" "cmd2" "cmd3"
 check_commands() {
