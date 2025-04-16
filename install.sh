@@ -121,7 +121,6 @@ prompt_logout() {
     fi
 }
 
-# shellcheck disable=SC2120
 prompt_add_to_input_group() {
     print_warning "User '$USER' is NOT in the 'input' group (or check failed)."
     print_warning "$APP_NAME requires access to input devices (/dev/input/event*)."
