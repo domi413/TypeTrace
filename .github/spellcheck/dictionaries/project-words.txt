@@ -16,8 +16,16 @@ vexpand
 
 # Build
 bindir
+codesign
+datas
+datas
+hiddenimports
+hooksconfig
+hookspath
 libadwaita
 libevdev
+noarchive
+pathex
 
 # Team Names
 Alali

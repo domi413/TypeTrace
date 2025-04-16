@@ -24,7 +24,7 @@ jobs:
           cache-dependency-glob: "**/pyproject.toml"
 
       - name: Install ruff dependencies
-        run: uv pip install ruff
+        run: uv tool install ruff
 
       - name: Run ruff
-        run: uv run ruff check typetrace/
+        run: ruff check typetrace/
