@@ -1,216 +1,231 @@
-#!/bin/bash
-
-# Exit immediately if a command exits with a non-zero status.
-set -e
+#!/usr/bin/env bash
 
 # --- Configuration ---
-REPO_URL="https://github.com/domi413/TypeTrace.git"
-APP_NAME="TypeTrace"
-APP_ID="edu.ost.typetrace"
-USER_LOCAL_PREFIX="$HOME/.local" # Install into user's local directory
+readonly REPO_URL="https://github.com/domi413/TypeTrace.git"
+readonly APP_NAME="TypeTrace"
+readonly APP_ID="edu.ost.typetrace"
+readonly USER_LOCAL_PREFIX="$HOME/.local"
+
+# --- Colors ---
+readonly C_RESET='\033[0m'
+readonly C_BOLD='\033[1m'
+readonly C_RED='\033[0;31m'
+readonly C_GREEN='\033[0;32m'
+readonly C_YELLOW='\033[0;33m'
+readonly C_BLUE='\033[0;34m'
+readonly C_CYAN='\033[0;36m'
 
 # --- Helper Functions ---
+_print_message() {
+    local color="$1"
+    local prefix="$2"
+    local message="$3"
+
+    printf "${color}${C_BOLD}%s:${C_RESET}${color} %s${C_RESET}\n" "$prefix" "$message" >&2
+}
+
+print_step() {
+    printf "\n${C_CYAN}${C_BOLD}==>${C_RESET}${C_BOLD} %s${C_RESET}\n" "$1" >&2
+}
+
+print_success() {
+    _print_message "$C_GREEN" "SUCCESS:" "$1"
+}
+
 print_info() {
-    echo "INFO: $1"
+    _print_message "$C_BLUE" "INFO:" "$1"
 }
 
 print_warning() {
-    echo "WARN: $1" >&2
+    _print_message "$C_YELLOW" "WARNING:" "$1"
 }
 
 print_error() {
-    echo "ERROR: $1" >&2
+    _print_message "$C_RED" "ERROR:" "$1"
     exit 1
 }
 
-check_command() {
-    if ! command -v "$1" &> /dev/null; then
-        print_error "Required command '$1' not found. Please install it and try again."
+# Function to ensure script is running with root privileges
+# If not root, attempts to re-execute the script using sudo.
+# Usage: ensure_sudo "$@"
+ensure_sudo() {
+    # Check if already running as root
+    if [[ $EUID -eq 0 ]]; then
+        return 0
+    fi
+
+    # Not root, check if sudo command exists
+    if ! command -v sudo &>/dev/null; then
+        print_error "'sudo' command not found.\n
+            Cannot gain root privileges needed for this operation.\n
+            Please run the script using 'sudo'."
+    fi
+
+    print_warning "This operation requires root privileges."
+    print_info "Attempting to re-run script with sudo..."
+
+    # Execute sudo, passing all original arguments
+    sudo "$0" "$@"
+
+    exit $?
+}
+# Checks if a list of commands are available in PATH
+# Usage: check_commands "cmd1" "cmd2" "cmd3"
+check_commands() {
+    local missing_cmds=()
+    for cmd in "$@"; do
+        if ! command -v "$cmd" &>/dev/null; then
+            missing_cmds+=("$cmd")
+        fi
+    done
+
+    if [[ ${#missing_cmds[@]} -gt 0 ]]; then
+        print_error "Required command(s) not found: ${missing_cmds[*]}. Please install them and try again."
     fi
 }
 
-# --- Dependency Checks ---
-check_command "git"
-check_command "curl"
+# Checks if the current user is in the 'input' group and prompts to add if not
+# Usage: check_input_group
+check_input_group() {
+    print_step "Checking input group membership for user '$USER'"
 
-# --- Setup ---
-# Create a temporary directory for cloning and building
-WORK_DIR=$(mktemp -d)
-# Ensure cleanup happens on script exit or interruption
-trap 'cd / && rm -rf "$WORK_DIR"' EXIT # Go back to / before removing WORK_DIR
+    if id -Gn "$USER" | grep -qw input; then
+        print_success "User '$USER' is already in the 'input' group."
+    else
+        prompt_add_to_input_group
+    fi
+}
 
-print_info "Created temporary working directory: $WORK_DIR"
-cd "$WORK_DIR"
+# shellcheck disable=SC2120
+prompt_add_to_input_group() {
+    print_warning "User '$USER' is NOT in the 'input' group (or check failed)."
+    print_warning "$APP_NAME requires access to input devices (/dev/input/event*)."
+    print_info "Adding user '$USER' to the 'input' group requires elevated privileges."
 
-# --- Clone Repository ---
-print_info "Cloning $APP_NAME repository from $REPO_URL..."
-# Clone quietly to avoid cluttering output
-git clone --depth 1 "$REPO_URL" . > /dev/null 2>&1
-print_info "Repository cloned successfully."
+    ensure_sudo "$@"
 
-# --- Installation Method Prompt ---
-INSTALL_METHOD=""
-echo ""
-echo "How would you like to install $APP_NAME?"
-echo "1) Flatpak (Sandboxed, user-install, recommended)"
-echo "2) Meson (User-local install to $USER_LOCAL_PREFIX, requires build dependencies)"
-while [[ "$INSTALL_METHOD" != "1" && "$INSTALL_METHOD" != "2" ]]; do
-    read -p "Enter your choice (1 or 2): " INSTALL_METHOD < /dev/tty
-done
+    print_info "Attempting 'usermod -aG input $USER' (as root)..."
 
-# --- Installation Logic ---
-if [[ "$INSTALL_METHOD" == "1" ]]; then
-    # --- Flatpak Installation ---
-    print_info "Starting Flatpak installation..."
-    check_command "flatpak"
-    check_command "flatpak-builder"
+    if usermod -aG input "$USER"; then
+        print_success "Successfully added user '$USER' to the 'input' group."
+        print_warning "${C_BOLD}User '$USER' MUST log out and log back in for the group change to take effect!${C_RESET}"
+    else
+        print_error "Failed to add user '$USER' to the 'input' group even with root privileges.\n
+            Check system logs. Manual step: 'sudo usermod -aG input $USER'"
+    fi
+}
 
-    MANIFEST_FILE="${APP_ID}.yaml"
-    if [[ ! -f "$MANIFEST_FILE" ]]; then
-        print_error "Flatpak manifest file '$MANIFEST_FILE' not found in repository."
+# Function to create and manage temporary working directory
+create_temp_workdir() {
+    WORK_DIR=$(mktemp -d)
+    if [[ $? -ne 0 || -z "$WORK_DIR" || ! -d "$WORK_DIR" ]]; then
+        print_error "Failed to create temporary directory."
+    fi
+    print_info "Created temporary working directory: $WORK_DIR"
+}
+
+# Function to handle cleanup on exit
+cleanup() {
+    local exit_status=$?
+    if [[ -n "$WORK_DIR" && -d "$WORK_DIR" ]]; then
+        print_info "Cleaning up temporary directory: $WORK_DIR"
+        cd /
+        rm -rf "$WORK_DIR"
+    fi
+
+    printf "${C_RESET}\nScript finished with exit status %d.\n" "$exit_status" >&2
+    exit "$exit_status"
+}
+
+# Set up trap to call cleanup function on exit signals
+trap cleanup EXIT SIGINT SIGTERM
+
+# --- Installation Functions ---
+install_flatpak() {
+    print_step "Starting Flatpak installation"
+
+    local flatpak_commands=(
+        "flatpak"
+        "flatpak-builder"
+    )
+    check_commands "${flatpak_commands[@]}" # Exits on error
+
+    local manifest_file="${APP_ID}.yaml"
+    if [[ ! -f "$manifest_file" ]]; then
+        print_error "Flatpak manifest file '$manifest_file' not found in repository."
     fi
 
     print_info "Building and installing $APP_NAME as a Flatpak (user)..."
-    # Use the command from the Makefile, ensuring it's user install
-    flatpak-builder --user --install --force-clean _build "$MANIFEST_FILE"
 
-    print_info "$APP_NAME Flatpak installation complete."
-    print_info "You can run it using: flatpak run $APP_ID"
-
-elif [[ "$INSTALL_METHOD" == "2" ]]; then
-    # --- Meson User-Local Installation ---
-    print_info "Starting Meson (user-local) installation..."
-    check_command "meson"
-    check_command "ninja"
-    check_command "pkg-config"
-    # Check for a C compiler
-    if ! command -v gcc &> /dev/null && ! command -v clang &> /dev/null; then
-        print_error "No C compiler (gcc or clang) found. Please install one."
-    fi
-
-    # --- Python Dependency Check ---
-    PYTHON_CMD=""
-    if command -v python3 &> /dev/null; then
-        PYTHON_CMD="python3"
-    elif command -v python &> /dev/null; then
-        PYTHON_CMD="python"
+    if flatpak-builder --user --install --force-clean _build "$manifest_file"; then
+        print_success "$APP_NAME Flatpak installation complete."
+        print_info "You can run it using: ${C_BOLD}flatpak run $APP_ID${C_RESET}"
     else
-        print_error "Python (python3 or python) command not found. It is required for runtime dependencies."
+        print_error "Flatpak build or installation failed."
     fi
-    print_info "Using '$PYTHON_CMD' for Python checks."
+}
 
-    # List required Python modules and their corresponding pip package names
-    declare -A PYTHON_DEPS
-    PYTHON_DEPS=( ["appdirs"]="appdirs" ["evdev"]="python-evdev" ["dbus"]="dbus-python" )
-    MISSING_DEPS=()
-    PIP_PACKAGES=()
+install_local() {
+    # TODO: Implement local install
+    true # placeholder
+}
 
-    print_info "Checking for required Python modules: ${!PYTHON_DEPS[*]}..."
-    for module in "${!PYTHON_DEPS[@]}"; do
-        if ! $PYTHON_CMD -c "import $module" &> /dev/null; then
-            print_warning "Python module '$module' not found."
-            MISSING_DEPS+=("$module")
-            PIP_PACKAGES+=("${PYTHON_DEPS[$module]}")
+# --- Main Execution Function ---
+main() {
+    print_step "Starting $APP_NAME Installation Script"
+
+    readonly BASE_COMMANDS=(
+        "git"
+        "curl"
+    )
+    check_commands "${BASE_COMMANDS[@]}" # Exits on error
+
+    create_temp_workdir
+
+    # Change to working directory
+    if ! cd "$WORK_DIR"; then
+        print_error "Failed to change directory to $WORK_DIR"
+    fi
+
+    print_step "Cloning $APP_NAME repository"
+    print_info "Source: $REPO_URL"
+    if git clone --quiet --depth 1 "$REPO_URL" .; then
+        print_success "Repository cloned successfully."
+    else
+        print_error "Failed to clone repository from $REPO_URL"
+    fi
+
+    local INSTALL_METHOD=""
+    printf '\n%sHow would you like to install %s?%s\n' "$C_BOLD" "$APP_NAME" "$C_RESET" >&2
+    printf '  %s1)%s Flatpak (Sandboxed, user-local install)\n' "$C_YELLOW" "$C_RESET" >&2
+    printf '  %s2)%s Local   (local install to %s%s%s, requires GTK dependencies)\n' "$C_YELLOW" "$C_RESET" "$C_BOLD" "$USER_LOCAL_PREFIX" "$C_RESET" >&2
+
+    while [[ "$INSTALL_METHOD" != "1" && "$INSTALL_METHOD" != "2" ]]; do
+        if [[ -t 0 ]]; then
+            read -rp "Enter your choice (1 or 2): " INSTALL_METHOD </dev/tty
+        else
+            print_warning "Invalid input. Please enter '1' or '2'."
         fi
     done
 
-    if [[ ${#MISSING_DEPS[@]} -gt 0 ]]; then
-        print_warning "The application requires the following missing Python modules: ${MISSING_DEPS[*]}"
-        # Check for pip
-        PIP_CMD=""
-        if command -v pip3 &> /dev/null; then
-             PIP_CMD="pip3"
-        elif command -v pip &> /dev/null; then
-             PIP_CMD="pip"
-        fi
+    case "$INSTALL_METHOD" in
+    1)
+        install_flatpak
+        ;;
+    2)
+        install_local "$@"
+        ;;
+    *)
+        print_error "How tf did you get here?"
+        ;;
+    esac
 
-        if [[ -n "$PIP_CMD" ]]; then
-            print_info "Found pip command: '$PIP_CMD'"
-            INSTALL_CMD="$PIP_CMD install --user --upgrade ${PIP_PACKAGES[*]}" # Add --upgrade for good measure
-            INSTALL_PY_DEPS=""
-            while [[ "$INSTALL_PY_DEPS" != "y" && "$INSTALL_PY_DEPS" != "n" ]]; do
-                 read -p "Attempt to install them using '$INSTALL_CMD'? (y/N): " INSTALL_PY_DEPS  < /dev/tty
-                 INSTALL_PY_DEPS=$(echo "$INSTALL_PY_DEPS" | tr '[:upper:]' '[:lower:]')
-                 if [[ -z "$INSTALL_PY_DEPS" ]]; then INSTALL_PY_DEPS="n"; fi
-            done
+    check_input_group "$@"
 
-            if [[ "$INSTALL_PY_DEPS" == "y" ]]; then
-                print_info "Running: $INSTALL_CMD"
-                if $INSTALL_CMD; then
-                     print_info "Python dependencies installed successfully."
-                else
-                     print_error "Failed to install Python dependencies using pip. Please install them manually and re-run the script."
-                fi
-            else
-                print_error "Python dependencies are missing. Please install them manually (e.g., '$INSTALL_CMD') and re-run the script."
-                exit 1
-            fi
-        else
-            # pip not found
-            print_error "Python dependencies (${MISSING_DEPS[*]}) are missing, and 'pip' command was not found."
-            print_error "Please install pip and the required packages (e.g., using your system package manager for pip, then 'pip install --user ${PIP_PACKAGES[*]}') and re-run the script."
-            exit 1
-        fi
-    else
-        print_info "All required Python modules are present."
-    fi
-    # --- End Python Dependency Check ---
+    print_step "$APP_NAME installation script finished successfully"
 
-    print_warning "Meson installation also requires development libraries for GTK4, Libadwaita, GLib, and Libevdev."
-    print_warning "Example (Debian/Ubuntu): sudo apt install libgtk-4-dev libadwaita-1-dev libglib2.0-dev libevdev-dev meson ninja-build pkg-config"
-    print_warning "Example (Fedora): sudo dnf install gtk4-devel libadwaita-devel glib2-devel libevdev-devel meson ninja-build pkgconfig"
-    read -p "Press Enter to continue if you have these installed, or Ctrl+C to abort..."  < /dev/tty
+    # trap will handle cleanup and exit
+}
 
-    BUILD_DIR="_build"
-
-    print_info "Configuring Meson build (prefix: $USER_LOCAL_PREFIX)..."
-    meson setup "$BUILD_DIR" --prefix="$USER_LOCAL_PREFIX"
-
-    print_info "Compiling $APP_NAME..."
-    meson compile -C "$BUILD_DIR"
-
-    print_info "Installing $APP_NAME to $USER_LOCAL_PREFIX..."
-    meson install -C "$BUILD_DIR"
-
-    print_info "$APP_NAME Meson installation complete."
-    print_info "Executable installed to: $USER_LOCAL_PREFIX/bin/typetrace"
-    print_warning "IMPORTANT: To run 'typetrace' directly from your terminal, ensure '$USER_LOCAL_PREFIX/bin' is included in your PATH environment variable."
-    print_warning "You may need to add 'export PATH=\"$HOME/.local/bin:\$PATH\"' to your shell configuration file (e.g., ~/.bashrc, ~/.zshrc) and restart your shell or log out and log back in."
-    print_warning "For icons and desktop files to be recognized, ensure your desktop environment checks '$USER_LOCAL_PREFIX/share' (this is often default). You may need to set/append to XDG_DATA_DIRS."
-
-fi
-
-# --- Input Group Check (Requires sudo if modification is needed) ---
-print_info "Checking if user '$USER' belongs to the 'input' group..."
-if id -Gn "$USER" | grep -qw input; then
-    print_info "User '$USER' is already in the 'input' group. No action needed."
-else
-    print_warning "User '$USER' is NOT in the 'input' group."
-    print_warning "$APP_NAME needs access to input devices (/dev/input/event*) which usually requires membership in the 'input' or a similar group."
-    ADD_TO_GROUP=""
-    while [[ "$ADD_TO_GROUP" != "y" && "$ADD_TO_GROUP" != "n" ]]; do
-        read -p "Add user '$USER' to the 'input' group using sudo? (y/N): " ADD_TO_GROUP  < /dev/tty
-        ADD_TO_GROUP=$(echo "$ADD_TO_GROUP" | tr '[:upper:]' '[:lower:]')
-        if [[ -z "$ADD_TO_GROUP" ]]; then # Default to No if user just presses Enter
-            ADD_TO_GROUP="n"
-        fi
-    done
-
-    if [[ "$ADD_TO_GROUP" == "y" ]]; then
-        print_info "Attempting to add user '$USER' to 'input' group using sudo..."
-        if sudo usermod -aG input "$USER"; then
-            print_info "Successfully added user '$USER' to the 'input' group."
-            print_warning "IMPORTANT: You MUST log out and log back in for the group change to take effect!"
-        else
-            print_error "Failed to add user to the 'input' group. Please do it manually (e.g., sudo usermod -aG input $USER) and then log out and back in."
-        fi
-    else
-        print_warning "Skipping adding user to 'input' group. $APP_NAME might not function correctly without input device access."
-    fi
-fi
-
-echo ""
-print_info "$APP_NAME installation script finished."
-# Traps
-
-exit 0
+# --- Script Entry Point ---
+main "$@"
