@@ -85,15 +85,39 @@ check_commands() {
     fi
 }
 
-# Checks if the current user is in the 'input' group and prompts to add if not
-# Usage: check_input_group
-check_input_group() {
-    print_step "Checking input group membership for user '$USER'"
+# Function to prompt the user to log out and optionally attempt it
+prompt_logout() {
+    local choice=""
+    while true; do
+        read -rp "Do you want to log out now? (y/N): " choice </dev/tty
+        choice=${choice,,}
 
-    if id -Gn "$USER" | grep -qw input; then
-        print_success "User '$USER' is already in the 'input' group."
+        if [[ "$choice" == "y" || "$choice" == "n" || -z "$choice" ]]; then
+            break
+        else
+            print_warning "Invalid input. Please enter 'y' or 'n'."
+        fi
+    done
+
+    if [[ "$choice" == "y" ]]; then
+        print_info "Attempting to initiate logout..."
+        if command -v loginctl &>/dev/null && [[ -n "$XDG_SESSION_ID" ]]; then
+            if loginctl terminate-session "$XDG_SESSION_ID"; then
+                print_success "Logout command sent successfully via loginctl."
+                print_info "Your session should terminate shortly."
+
+                exit 0
+            else
+                print_info "loginctl command failed to terminate session $XDG_SESSION_ID."
+                print_info "Please log out manually using your desktop environment's menu."
+            fi
+        else
+            print_warning "Could not find 'loginctl' command or \$XDG_SESSION_ID."
+            print_info "Cannot attempt automatic logout."
+            print_info "Please log out manually."
+        fi
     else
-        prompt_add_to_input_group
+        print_info "Okay, please remember to log out manually soon."
     fi
 }
 
@@ -109,10 +133,29 @@ prompt_add_to_input_group() {
 
     if usermod -aG input "$USER"; then
         print_success "Successfully added user '$USER' to the 'input' group."
-        print_warning "${C_BOLD}User '$USER' MUST log out and log back in for the group change to take effect!${C_RESET}"
+        print_warning "${C_BOLD}User '$USER' MUST log out for the group change to take effect!${C_RESET}"
+
+        return 0
     else
         print_error "Failed to add user '$USER' to the 'input' group even with root privileges.\n
-            Check system logs. Manual step: 'sudo usermod -aG input $USER'"
+                     Check system logs. Manual step: 'sudo usermod -aG input $USER'"
+    fi
+}
+
+# Checks if the current user is in the 'input' group and prompts to add if not
+# Usage: check_input_group
+check_input_group() {
+    print_step "Checking input group membership for user '$USER'"
+
+    if id -Gn "$USER" | grep -qw input; then
+        print_success "User '$USER' is already in the 'input' group."
+        return 1
+    else
+        if prompt_add_to_input_group "$@"; then
+            return 0
+        else
+            return 2
+        fi
     fi
 }
 
@@ -196,16 +239,21 @@ main() {
         print_error "Failed to clone repository from $REPO_URL"
     fi
 
-    local INSTALL_METHOD=""
     printf '\n%sHow would you like to install %s?%s\n' "$C_BOLD" "$APP_NAME" "$C_RESET" >&2
     printf '  %s1)%s Flatpak (Sandboxed, user-local install)\n' "$C_YELLOW" "$C_RESET" >&2
     printf '  %s2)%s Local   (local install to %s%s%s, requires GTK dependencies)\n' "$C_YELLOW" "$C_RESET" "$C_BOLD" "$USER_LOCAL_PREFIX" "$C_RESET" >&2
 
+    local INSTALL_METHOD=""
     while [[ "$INSTALL_METHOD" != "1" && "$INSTALL_METHOD" != "2" ]]; do
         if [[ -t 0 ]]; then
             read -rp "Enter your choice (1 or 2): " INSTALL_METHOD </dev/tty
+
+            if [[ "$INSTALL_METHOD" != "1" && "$INSTALL_METHOD" != "2" ]]; then
+                print_warning "Invalid input. Please enter '1' or '2'."
+            fi
         else
-            print_warning "Invalid input. Please enter '1' or '2'."
+            print_error "Cannot determine installation method non-interactively.\n
+                         Please run in a terminal."
         fi
     done
 
@@ -222,6 +270,14 @@ main() {
     esac
 
     check_input_group "$@"
+    local group_check_status=$?
+
+    # Ask for logout if check_input_group returnes 0
+    if [[ "$group_check_status" -eq 0 ]]; then
+        prompt_logout
+    elif [[ "$group_check_status" -eq 2 ]]; then
+        print_error "Failed to handle group membership. Aborting further steps."
+    fi
 
     print_step "$APP_NAME installation script finished successfully"
 
