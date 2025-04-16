@@ -91,7 +91,8 @@ class BackendConnector(GObject.Object):
         handler_id = self._proxy.connect("g-signal", self._on_backend_signal)
         self._proxy_signal_handlers.append(handler_id)
         handler_id = self._proxy.connect(
-            "notify::g-name-owner", self._on_backend_owner_changed,
+            "notify::g-name-owner",
+            self._on_backend_owner_changed,
         )
         self._proxy_signal_handlers.append(handler_id)
 
