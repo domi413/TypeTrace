@@ -77,7 +77,7 @@ class DbusServiceManager:
         logger.info(f"D-Bus connection acquired for '{name}'")
         self._connection = connection
         interface_info = Gio.DBusNodeInfo.new_for_xml(
-            self._dbus_interface_xml
+            self._dbus_interface_xml,
         ).interfaces[0]
 
         # Map D-Bus methods to Python methods
@@ -89,7 +89,7 @@ class DbusServiceManager:
         }
 
         def method_call_handler(
-            conn, sender, obj_path, iface_name, method_name, params, inv
+            conn, sender, obj_path, iface_name, method_name, params, inv,
         ):
             if method_name in method_map:
                 method_map[method_name](inv)
@@ -179,10 +179,10 @@ class DbusServiceManager:
         # Handle signals gracefully
         # GLib can integrate signal handling into the main loop
         GLib.unix_signal_add(
-            GLib.PRIORITY_HIGH, signal.SIGINT, self._handle_signal, signal.SIGINT
+            GLib.PRIORITY_HIGH, signal.SIGINT, self._handle_signal, signal.SIGINT,
         )
         GLib.unix_signal_add(
-            GLib.PRIORITY_HIGH, signal.SIGTERM, self._handle_signal, signal.SIGTERM
+            GLib.PRIORITY_HIGH, signal.SIGTERM, self._handle_signal, signal.SIGTERM,
         )
 
         logger.info("Starting GLib MainLoop for D-Bus service...")

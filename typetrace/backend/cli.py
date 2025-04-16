@@ -71,7 +71,7 @@ class CLI:
         # This callback signals the D-Bus loop should stop.
         # The daemon processor thread will exit when the main thread finishes.
         logger.info(
-            "D-Bus service loop stopping callback triggered (backend will exit)."
+            "D-Bus service loop stopping callback triggered (backend will exit).",
         )
 
     def run(self, args: argparse.Namespace) -> int:
@@ -115,7 +115,7 @@ class CLI:
             # --- Start D-Bus Service ---
             logger.info("Initializing D-Bus service manager...")
             self._dbus_manager = DbusServiceManager(
-                stop_callback=self._initiate_shutdown_callback
+                stop_callback=self._initiate_shutdown_callback,
             )
 
             # Blocks main thread until D-Bus loop stops
@@ -127,12 +127,12 @@ class CLI:
         # --- Handle Setup Errors ---
         except PermissionError as e:
             logger.exception(
-                "Permission error during setup: %s", e, exc_info=Config.DEBUG
+                "Permission error during setup: %s", e, exc_info=Config.DEBUG,
             )
             exit_code = ExitCodes.PERMISSION_ERROR
         except sqlite3.Error as e:
             logger.exception(
-                "Database error during setup: %s", e, exc_info=Config.DEBUG
+                "Database error during setup: %s", e, exc_info=Config.DEBUG,
             )
             exit_code = ExitCodes.DATABASE_ERROR
         except Exception as e:
