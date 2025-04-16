@@ -3,12 +3,16 @@
 This is the GitHub repository of the TypeTrace source code
 
 ## Installing the Project
-To install the project on any linux distro run the following command:
+
+You can install TypeTrace on any linux distro by pasting the following command into the terminal:
+
 ```
 curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/domi413/TypeTrace/refs/heads/main/install.sh | sh
 ```
+
 Note that:
-- Meson requires development libraries for GTK4, Libadwaita, GLib, and Libevdev.
+
+- The local install requires GTK4 to be installed.
 - Flatpak simply requires flatpak to be installed.
 
 ## Running the Project
@@ -37,4 +41,3 @@ The act client needs a GitHub Token to work as intended.
    ```
 
 You should now be able to run the pipelines through the act client.
-
