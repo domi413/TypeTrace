@@ -5,7 +5,7 @@ setlocal enabledelayedexpansion
 :: CONFIGURATION
 :: -----------------------------
 set ZIPFILE=typetrace.zip
-set INSTALLDIR=C:\ProgramFiles\typetrace
+set INSTALLDIR=C:\Program Files\typetrace
 set MSYS2_ROOT=C:\tools\msys64
 set SHORTCUT_NAME=TypeTrace.lnk
 set ICON_PATH=%INSTALLDIR%\icon.ico
@@ -68,27 +68,9 @@ if not exist "%MSYS2_ROOT%\msys2_shell.cmd" (
 :: UNZIP APPLICATION
 :: -----------------------------
 echo [INFO] Extracting %ZIPFILE% to %INSTALLDIR%...
+pushd "%~dp0"
 set CLEANUP_NEEDED=1
 powershell -Command "Expand-Archive -LiteralPath '%ZIPFILE%' -DestinationPath '%INSTALLDIR%' -Force"
-if %errorlevel% NEQ 0 (
-    call :cleanup 1
-)
-
-:: -----------------------------
-:: INSTALL REQUIRED PACKAGES IN MSYS
-:: -----------------------------
-"%MSYS2_ROOT%\usr\bin\bash.exe" -lc ^
-"pacman -Syuu --noconfirm && \
- pacman -Sy --noconfirm \
-  mingw-w64-x86_64-toolchain \
-  mingw-w64-x86_64-gtk4 \
-  mingw-w64-x86_64-libadwaita \
-  mingw-w64-x86_64-python \
-  mingw-w64-x86_64-python-pip \
-  mingw-w64-x86_64-python-gobject \
-  mingw-w64-x86_64-meson \
-  mingw-w64-x86_64-glib2 \
-  mingw-w64-x86_64-desktop-file-utils"
 if %errorlevel% NEQ 0 (
     call :cleanup 1
 )
@@ -112,5 +94,14 @@ if %errorlevel% NEQ 0 (
     call :cleanup 1
 )
 
+echo "[INFO] Dependencies will be installed shortly
 echo [SUCCESS] TypeTrace installed. You can launch it from the Start Menu.
+
+:: -----------------------------
+:: INSTALL REQUIRED PACKAGES IN MSYS
+:: -----------------------------
+"%MSYS2_ROOT%\msys2_shell.cmd" -defterm -here -no-start -mingw64 -c "pacman -Syuu --noconfirm && pacman -Sy --noconfirm --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-gtk4 mingw-w64-x86_64-libadwaita mingw-w64-x86_64-python mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-gobject mingw-w64-x86_64-meson mingw-w64-x86_64-glib2 mingw-w64-x86_64-make mingw-w64-x86_64-desktop-file-utils"
+if %errorlevel% NEQ 0 (
+    echo [WARNING] Some packages failed to install. You may need to install them manually.
+)
 pause
