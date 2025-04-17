@@ -13,3 +13,4 @@ adwaita
 gfile
 dbus
 autohide
+gsettings

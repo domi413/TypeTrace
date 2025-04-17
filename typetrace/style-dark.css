@@ -1,9 +1,9 @@
 .keyboard-container label {
   border: 1pt solid rgba(255, 255, 255, 0.1);
-  background-color: rgba(50, 50, 50, 0.9);
   color: #ddd;
 }
 
 .keyboard-container label:hover {
   box-shadow: 0 1pt 2pt rgba(255, 255, 255, 0.3);
+  filter: brightness(120%);
 }

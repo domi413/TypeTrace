@@ -3,19 +3,19 @@
 }
 
 .keyboard-container label {
+  color: #333;
   font-weight: bold;
   border: 1pt solid rgba(0, 0, 0, 0.2);
+  background-color: rgba(140, 140, 140, 0.1);
   border-radius: 4pt;
-  padding: 1rem;
-  min-width: 2rem;
-  background-color: rgba(245, 245, 245, 0.9);
-  color: #333;
+  padding: 0 0.5rem;
   box-shadow: 0 1pt 3pt rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease;
 }
 
 .keyboard-container label:hover {
   box-shadow: 0 2pt 4pt rgba(0, 0, 0, 0.5);
+  filter: brightness(120%);
 }
 
 .gradient-bar {

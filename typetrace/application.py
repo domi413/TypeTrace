@@ -23,6 +23,7 @@ class Application(Adw.Application):
         )
 
         self.version = version
+        self.settings = Gio.Settings.new("edu.ost.typetrace")
 
         self.keystroke_store = KeystrokeStore()
         self.db_manager = DatabaseManager()
@@ -36,7 +37,7 @@ class Application(Adw.Application):
         """
         win = self.props.active_window
         if not win:
-            win = TypetraceWindow(self.keystroke_store, application=self)
+            win = TypetraceWindow(self.keystroke_store, self.settings, application=self)
         win.present()
 
     def _setup_actions(self) -> None:

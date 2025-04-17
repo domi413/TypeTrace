@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="typetrace">
 	<schema id="edu.ost.typetrace" path="/edu/ost/typetrace/">
+		<key name="key-size" type="i">
+			<default>40</default>
+			<summary>Padding for keyboard key widgets</summary>
+			<description>Sets the padding around key labels in the heatmap widget.</description>
+    	</key>
 	</schema>
 </schemalist>

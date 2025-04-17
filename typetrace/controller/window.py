@@ -1,6 +1,6 @@
 """Window module for the Typetrace application."""
 
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, Gio, Gtk
 
 from typetrace.controller.heatmap import Heatmap
 from typetrace.controller.statistics import Statistics
@@ -17,27 +17,37 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
     __gtype_name__ = "TypetraceWindow"
 
-    view_switcher = Gtk.Template.Child("view_switcher")
-    stack = Gtk.Template.Child("stack")
+    refresh_button = Gtk.Template.Child()
+    view_switcher = Gtk.Template.Child()
+    stack = Gtk.Template.Child()
 
-    def __init__(self, keystroke_store: KeystrokeStore, **kwargs) -> None:
+    def __init__(
+        self,
+        keystroke_store: KeystrokeStore,
+        settings: Gio.Settings,
+        **kwargs,
+    ) -> None:
         """Initialize the application window.
 
         Args:
             **kwargs: Keyword arguments passed to the parent constructor
             keystroke_store: Access to keystrokes
+            settings: GSettings used to persist preferences of a user
 
         """
         super().__init__(**kwargs)
-        self.keystroke_store = keystroke_store
+        self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
+        self.verbose = Verbose(keystroke_store=keystroke_store)
+        self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
+
         heatmap_page = self.stack.add_titled(
-            Heatmap(keystroke_store=self.keystroke_store),
+            self.heatmap,
             "heatmap",
             "Heatmap",
         )
         heatmap_page.set_icon_name("input-keyboard-symbolic")
         verbose_page = self.stack.add_titled(
-            Verbose(keystroke_store=self.keystroke_store),
+            self.verbose,
             "verbose",
             "Verbose",
         )
@@ -49,3 +59,8 @@ class TypetraceWindow(Adw.ApplicationWindow):
         )
         statistics_page.set_icon_name("image-filter-symbolic")
         self.view_switcher.set_stack(self.stack)
+
+    def _on_refresh_clicked(self) -> None:
+        """Handle refresh button click."""
+        self.heatmap.update()
+        self.verbose.update()
