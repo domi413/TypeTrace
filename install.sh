@@ -230,7 +230,12 @@ install_flatpak() {
 }
 
 install_local() {
-    # TODO: Implement local install
+    # TODO:
+    # - Fetch binary from GitHub release
+    # - Move binary to the correct location (curl already can do this, no need for mv)
+    # - You may need to fetch de .desktop file as well and move it to the correct location
+    # - Update the desktop icons cache
+    # - Something else?
     true # placeholder
 }
 
