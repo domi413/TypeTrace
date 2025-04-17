@@ -229,26 +229,34 @@ class Statistics(Gtk.Box):
             self._draw_no_data(cr, width, height, colors["text"])
             return
 
-        max_value = max(d["count"] for d in data) * 1.1 or 10
-        step = math.ceil(max_value / 5 / 100) * 100
+        max_value = max(d["count"] for d in data)
 
-        # Draw grid and axes
-        for i in range(6):
-            y = padding + graph_height - (i * graph_height / 5)
+        if max_value == 0:
+            max_value = 10
+        else:
+            power = 10 ** math.floor(math.log10(max_value))
+            max_value = math.ceil(max_value / power) * power
+
+        num_steps = 5
+        step = max_value / num_steps
+
+        for i in range(num_steps + 1):
+            y = padding + graph_height - (i * graph_height / num_steps)
             cr.set_source_rgba(*colors["grid"], 0.5)
             cr.set_line_width(0.5)
             cr.move_to(padding, y)
             cr.line_to(width - padding, y)
             cr.stroke()
-            value = i * step
+            value = int(i * step)
             self._draw_text(
                 TextConfig(
                     cr=cr,
                     text=str(value),
-                    x=padding - 40,
+                    x=padding - 25,
                     y=y + 5,
-                    font_size=15,
+                    font_size=12,
                     font_weight=cairo.FONT_WEIGHT_NORMAL,
+                    center=True,
                 ),
                 colors["text"],
             )
@@ -295,18 +303,22 @@ class Statistics(Gtk.Box):
             cr.fill()
 
         # Draw points and labels
-        for (x, y), d in zip(points, data):
+        for i, ((x, y), d) in enumerate(zip(points, data)):
             cr.set_source_rgba(*colors["line"], 1)
             cr.arc(x, y, 3, 0, 2 * math.pi)
             cr.fill()
             if d["count"] > 0:
+                # First data point, increase offset so it's not overlapping with Y-axis
+                x_offset = 0
+                if i == 0:
+                    x_offset = 20
                 self._draw_text(
                     TextConfig(
                         cr=cr,
                         text=str(d["count"]),
-                        x=x,
+                        x=x + x_offset,
                         y=y - 10,
-                        font_size=15,
+                        font_size=12,
                         font_weight=cairo.FONT_WEIGHT_NORMAL,
                         center=True,
                     ),
@@ -318,7 +330,7 @@ class Statistics(Gtk.Box):
                     text=d["date"],
                     x=x,
                     y=height - padding + 15,
-                    font_size=15,
+                    font_size=12,
                     font_weight=cairo.FONT_WEIGHT_NORMAL,
                     center=True,
                 ),
@@ -357,31 +369,29 @@ class Statistics(Gtk.Box):
             return (0.3, 0.6, 1.0) if is_dark else (0.2, 0.5, 0.9)
 
     def _get_keystroke_data(self) -> list[dict]:
-        keystrokes = self.keystroke_store.get_all_keystrokes()
-        if not keystrokes:
+        """Get daily keystroke data for the line chart using SQL queries."""
+        data_points = self.keystroke_store.get_daily_keystroke_counts()
+
+        if not data_points:
             return []
 
-        valid_dates = [
-            (datetime.fromisoformat(k.date).date(), k.date)
-            for k in keystrokes
-            if k.date
-        ]
-        if not valid_dates:
-            return []
+        latest_date = (
+            datetime.fromisoformat(data_points[-1]["date"]).date()
+            if data_points
+            else datetime.now().date()
+        )
 
-        latest_date = max(d[0] for d in valid_dates)
-        data = {
+        all_days = {
             (latest_date - timedelta(days=6 - i)).isoformat(): {
                 "date": (latest_date - timedelta(days=6 - i)).strftime("%b %d"),
                 "count": 0,
             }
             for i in range(7)
         }
-        date_map = {orig: parsed.isoformat() for parsed, orig in valid_dates}
 
-        for k in keystrokes:
-            date = date_map.get(k.date, k.date)
-            if date in data:
-                data[date]["count"] += k.count
+        for point in data_points:
+            date = point["date"]
+            if date in all_days:
+                all_days[date]["count"] = point["count"]
 
-        return [data[key] for key in sorted(data)]
+        return [all_days[key] for key in sorted(all_days)]

@@ -124,3 +124,27 @@ class KeystrokeStore:
             return False
         else:
             return True
+
+    # TODO: refactor 'with' queries to only use one connection
+    def get_daily_keystroke_counts(self) -> list[dict]:
+        """Get daily keystroke counts for the past 7 days.
+
+        Returns:
+            List of dictionaries with date and count for each day
+
+        """
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(SQLStatistics.GET_DAILY_KEYSTROKE_COUNTS)
+                rows = cursor.fetchall()
+
+                return [
+                    {
+                        "date": row[0],
+                        "count": row[1],
+                    }
+                    for row in rows
+                ]
+        except sqlite3.Error:
+            return []

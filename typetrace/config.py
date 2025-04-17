@@ -89,6 +89,14 @@ class SQLStatistics:
         WHERE date = ?
     """
 
+    GET_DAILY_KEYSTROKE_COUNTS = """
+        SELECT date, SUM(count) as total_count
+        FROM keystrokes
+        WHERE date >= date('now', '-6 days')
+        GROUP BY date
+        ORDER BY date
+    """
+
     CLEAR_KEYSTROKES = "DELETE FROM keystrokes"
 
 
