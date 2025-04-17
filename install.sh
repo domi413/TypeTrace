@@ -193,6 +193,7 @@ trap cleanup EXIT SIGINT SIGTERM
 install_flatpak() {
     print_step "Starting Flatpak installation"
 
+    # TODO: Prebuild flatpak, remove builder and you may remove the flatpak_commands
     local flatpak_commands=(
         "flatpak"
         "flatpak-builder"
