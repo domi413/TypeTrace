@@ -1,11 +1,15 @@
 """The heatmap widget that displays a keyboard."""
 
-from typing import ClassVar
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, ClassVar
 
 from gi.repository import Gdk, Gio, Gtk
 
-from typetrace.model.keystrokes import KeystrokeStore
 from typetrace.model.layouts import KEYBOARD_LAYOUTS
+
+if TYPE_CHECKING:
+    from typetrace.model.keystrokes import KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/heatmap.ui")
