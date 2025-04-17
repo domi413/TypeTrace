@@ -230,6 +230,7 @@ class Statistics(Gtk.Box):
             return
 
         max_value = max(d["count"] for d in data) * 1.1 or 10
+        step = math.ceil(max_value / 5 / 100) * 100
 
         # Draw grid and axes
         for i in range(6):
@@ -239,7 +240,7 @@ class Statistics(Gtk.Box):
             cr.move_to(padding, y)
             cr.line_to(width - padding, y)
             cr.stroke()
-            value = int(max_value * i / 5)
+            value = i * step
             self._draw_text(
                 TextConfig(
                     cr=cr,
