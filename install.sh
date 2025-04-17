@@ -266,15 +266,10 @@ main() {
 
     local INSTALL_METHOD=""
     while [[ "$INSTALL_METHOD" != "1" && "$INSTALL_METHOD" != "2" ]]; do
-        if [[ -t 0 ]]; then
-            read -rp "Enter your choice (1 or 2): " INSTALL_METHOD </dev/tty
+        read -rp "Enter your choice (1 or 2): " INSTALL_METHOD </dev/tty
 
-            if [[ "$INSTALL_METHOD" != "1" && "$INSTALL_METHOD" != "2" ]]; then
-                print_warning "Invalid input. Please enter '1' or '2'."
-            fi
-        else
-            print_error "Cannot determine installation method non-interactively.
-            Please run in a terminal."
+        if [[ "$INSTALL_METHOD" != "1" && "$INSTALL_METHOD" != "2" ]]; then
+            print_warning "Invalid input. Please enter '1' or '2'."
         fi
     done
 
