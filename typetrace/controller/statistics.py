@@ -82,7 +82,11 @@ class Statistics(Gtk.Box):
         )
         return sorted(keystrokes, key=lambda k: k.count, reverse=True)[:count]
 
-    def _draw_text(self, config: TextConfig, color=(1.0, 1.0, 1.0)) -> None:
+    def _draw_text(
+        self,
+        config: TextConfig,
+        color: tuple[float, float, float] = (1.0, 1.0, 1.0),
+    ) -> None:
         config.cr.set_source_rgb(*color)
         config.cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, config.font_weight)
         config.cr.set_font_size(config.font_size)
@@ -97,7 +101,7 @@ class Statistics(Gtk.Box):
         cr: cairo.Context,
         width: int,
         height: int,
-        color=(1.0, 1.0, 1.0),
+        color: tuple[float, float, float] = (1.0, 1.0, 1.0),
     ) -> None:
         self._draw_text(
             TextConfig(
@@ -347,7 +351,7 @@ class Statistics(Gtk.Box):
                 "brown": (0.7, 0.5, 0.4),
                 "gray": (0.5, 0.5, 0.5),
             }.get(accent, (0.3, 0.6, 1.0) if is_dark else (0.2, 0.5, 0.9))
-        except:
+        except Gio.Error:
             return (0.3, 0.6, 1.0) if is_dark else (0.2, 0.5, 0.9)
 
     def _get_keystroke_data(self) -> list[dict]:
