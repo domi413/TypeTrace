@@ -266,7 +266,8 @@ main() {
 
     local INSTALL_METHOD=""
     while [[ "$INSTALL_METHOD" != "1" && "$INSTALL_METHOD" != "2" ]]; do
-        read -rp $'\nEnter your choice (1 or 2): ' INSTALL_METHOD </dev/tty
+        printf '\n'
+        read -rp "Enter your choice (1 or 2): " INSTALL_METHOD </dev/tty
 
         if [[ "$INSTALL_METHOD" != "1" && "$INSTALL_METHOD" != "2" ]]; then
             print_warning "Invalid input. Please enter '1' or '2'."
