@@ -199,6 +199,21 @@ install_flatpak() {
     )
     check_commands "${flatpak_commands[@]}" # Exits on error
 
+    local required_flatpaks=(
+        "org.gnome.Sdk//48"
+        "org.gnome.Platform//48"
+    )
+
+    # Check and install missing Flatpak packages
+    for pkg in "${required_flatpaks[@]}"; do
+        if ! flatpak list | grep -q "${pkg%%//*}"; then
+            print_info "Installing $pkg..."
+            flatpak install -y flathub "$pkg" || print_error "Failed to install $pkg"
+        else
+            print_info "$pkg is already installed."
+        fi
+    done
+
     local manifest_file="${APP_ID}.yaml"
     if [[ ! -f "$manifest_file" ]]; then
         print_error "Flatpak manifest file '$manifest_file' not found in repository."
