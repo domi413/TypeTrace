@@ -37,7 +37,7 @@ def print_help() -> None:
     """Display help information."""
     print("The backend of TypeTrace.")
     print(f"Version: {VERSION}")
-    print("\nUsage: python -m typetrace [OPTION...]")
+    print("\nUsage: typetrace [OPTION...]")
     print("Options:")
     print("\t-b, --backend\tRun the backend.")
     print("\t-d, --debug\tEnable debug mode.")
