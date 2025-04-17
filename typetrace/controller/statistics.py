@@ -239,11 +239,12 @@ class Statistics(Gtk.Box):
             cr.move_to(padding, y)
             cr.line_to(width - padding, y)
             cr.stroke()
+            value = int(max_value * i / 5)
             self._draw_text(
                 TextConfig(
                     cr=cr,
-                    text=str(int(max_value * i / 5 / 100) * 100),
-                    x=padding - 5,
+                    text=str(value),
+                    x=padding - 40,
                     y=y + 5,
                     font_size=15,
                     font_weight=cairo.FONT_WEIGHT_NORMAL,
