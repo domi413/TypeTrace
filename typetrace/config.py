@@ -58,6 +58,40 @@ class DatabasePath:
     DB_PATH: Final[Path] = Config.resolve_db_path()
 
 
+@final
+class SQLStatistics:
+    """SQL queries for frontend database operations."""
+
+    def __init__(self) -> None:
+        """Private constructor to prevent instantiation."""
+        raise TypeError
+
+    GET_ALL_KEYSTROKES = """
+        SELECT scan_code, SUM(count) as total_count, key_name,
+        MAX(date) as latest_date
+        FROM keystrokes
+        GROUP BY scan_code, key_name
+        ORDER BY total_count DESC
+    """
+
+    GET_TOTAL_PRESSES = "SELECT SUM(count) FROM keystrokes"
+
+    GET_HIGHEST_COUNT = """
+        SELECT MAX(total_count) FROM (
+            SELECT SUM(count) as total_count
+            FROM keystrokes
+            GROUP BY scan_code, key_name
+        )
+    """
+
+    GET_KEYSTROKES_BY_DATE = """
+        SELECT scan_code, count, key_name, date FROM keystrokes 
+        WHERE date = ?
+    """
+
+    CLEAR_KEYSTROKES = "DELETE FROM keystrokes"
+
+
 class ExitCodes(IntEnum):
     """Standard exit codes for the application."""
 

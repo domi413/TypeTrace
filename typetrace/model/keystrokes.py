@@ -6,7 +6,7 @@ import sqlite3
 
 from gi.repository import GObject
 
-from typetrace.config import DatabasePath
+from typetrace.config import DatabasePath, SQLStatistics
 
 
 class Keystroke(GObject.Object):
@@ -43,13 +43,7 @@ class KeystrokeStore:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT scan_code, SUM(count) as total_count, key_name,
-                    MAX(date) as latest_date
-                    FROM keystrokes
-                    GROUP BY scan_code, key_name
-                    ORDER BY total_count DESC
-                """)
+                cursor.execute(SQLStatistics.GET_ALL_KEYSTROKES)
                 rows = cursor.fetchall()
 
                 # Convert rows to Keystroke objects
@@ -70,7 +64,7 @@ class KeystrokeStore:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute("SELECT SUM(count) FROM keystrokes")
+                cursor.execute(SQLStatistics.GET_TOTAL_PRESSES)
                 result = cursor.fetchone()[0]
                 return result if result is not None else 0
         except sqlite3.Error:
@@ -81,13 +75,7 @@ class KeystrokeStore:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT MAX(total_count) FROM (
-                        SELECT SUM(count) as total_count
-                        FROM keystrokes
-                        GROUP BY scan_code, key_name
-                    )
-                """)
+                cursor.execute(SQLStatistics.GET_HIGHEST_COUNT)
                 result = cursor.fetchone()[0]
                 return result if result is not None else 0
         except sqlite3.Error:
@@ -107,8 +95,7 @@ class KeystrokeStore:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    "SELECT scan_code, count, key_name, date FROM keystrokes "
-                    "WHERE date = ?",
+                    SQLStatistics.GET_KEYSTROKES_BY_DATE,
                     (date,),
                 )
                 rows = cursor.fetchall()
@@ -131,7 +118,7 @@ class KeystrokeStore:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute("DELETE FROM keystrokes")
+                cursor.execute(SQLStatistics.CLEAR_KEYSTROKES)
                 conn.commit()
         except sqlite3.Error:
             return False
