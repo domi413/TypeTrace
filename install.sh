@@ -21,7 +21,7 @@ _print_message() {
     local prefix="$2"
     local message="$3"
 
-    printf "${color}${C_BOLD}%s:${C_RESET}${color} %s${C_RESET}\n" "$prefix" "$message" >&2
+    printf "${color}${C_BOLD}%s:${C_RESET}${color} %b${C_RESET}\n" "$prefix" "$message" >&2
 }
 
 print_step() {
@@ -56,9 +56,9 @@ ensure_sudo() {
 
     # Not root, check if sudo command exists
     if ! command -v sudo &>/dev/null; then
-        print_error "'sudo' command not found.\n
-            Cannot gain root privileges needed for this operation.\n
-            Please run the script using 'sudo'."
+        print_error "'sudo' command not found.
+        Cannot gain root privileges needed for this operation
+        Please run the script using 'sudo'."
     fi
 
     print_warning "This operation requires root privileges."
@@ -81,7 +81,8 @@ check_commands() {
     done
 
     if [[ ${#missing_cmds[@]} -gt 0 ]]; then
-        print_error "Required command(s) not found: ${missing_cmds[*]}. Please install them and try again."
+        print_error "Required command(s) not found: ${missing_cmds[*]}.
+        Please install them and try again."
     fi
 }
 
@@ -136,8 +137,8 @@ prompt_add_to_input_group() {
 
         return 0
     else
-        print_error "Failed to add user '$USER' to the 'input' group even with root privileges.\n
-                     Check system logs. Manual step: 'sudo usermod -aG input $USER'"
+        print_error "Failed to add user '$USER' to the 'input' group even with root privileges.
+        Check system logs. Manual step: 'sudo usermod -aG input $USER'"
     fi
 }
 
@@ -174,9 +175,14 @@ cleanup() {
         print_info "Cleaning up temporary directory: $WORK_DIR"
         cd /
         rm -rf "$WORK_DIR"
+
+        print_success "Temporary directory cleaned up."
     fi
 
-    printf "${C_RESET}\nScript finished with exit status %d.\n" "$exit_status" >&2
+    if [[ "$exit_status" -ne 0 ]]; then
+        printf "${C_RESET}\nScript finished with exit status %d.\n" "$exit_status" >&2
+    fi
+
     exit "$exit_status"
 }
 
@@ -238,9 +244,10 @@ main() {
         print_error "Failed to clone repository from $REPO_URL"
     fi
 
-    printf '\n%sHow would you like to install %s?%s\n' "$C_BOLD" "$APP_NAME" "$C_RESET" >&2
-    printf '  %s1)%s Flatpak (Sandboxed, user-local install)\n' "$C_YELLOW" "$C_RESET" >&2
-    printf '  %s2)%s Local   (local install to %s%s%s, requires GTK dependencies)\n' "$C_YELLOW" "$C_RESET" "$C_BOLD" "$USER_LOCAL_PREFIX" "$C_RESET" >&2
+    print_step "Select installation method"
+    print_info "How would you like to install $APP_NAME?
+        1) Flatpak (Sandboxed, user-local install)
+        2) Local   (local install to $USER_LOCAL_PREFIX, requires GTK dependencies)"
 
     local INSTALL_METHOD=""
     while [[ "$INSTALL_METHOD" != "1" && "$INSTALL_METHOD" != "2" ]]; do
@@ -251,8 +258,8 @@ main() {
                 print_warning "Invalid input. Please enter '1' or '2'."
             fi
         else
-            print_error "Cannot determine installation method non-interactively.\n
-                         Please run in a terminal."
+            print_error "Cannot determine installation method non-interactively.
+            Please run in a terminal."
         fi
     done
 
@@ -278,8 +285,10 @@ main() {
         print_error "Failed to handle group membership. Aborting further steps."
     fi
 
-    print_step "$APP_NAME installation script finished successfully"
+    print_step "Installation finished"
+    print_success "$APP_NAME installation script finished successfully"
 
+    print_step "Cleanup"
     # trap will handle cleanup and exit
 }
 
