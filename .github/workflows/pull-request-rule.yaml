@@ -4,7 +4,6 @@ on:
   pull_request:
     types:
       - edited
-      - opened
 
 jobs:
   pull-request-title:
