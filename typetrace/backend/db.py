@@ -1,15 +1,20 @@
 """Database operations for TypeTrace."""
 
+from __future__ import annotations
+
 import logging
 import sqlite3
 from collections.abc import Generator
 from contextlib import contextmanager
-from pathlib import Path
-from typing import final
+from typing import TYPE_CHECKING, final
 
 from backend.sql import SQLQueries
 
-from typetrace.config import Event
+if TYPE_CHECKING:
+    from collections.abc import Generator
+    from pathlib import Path
+
+    from typetrace.config import Event
 
 logger = logging.getLogger(__name__)
 
