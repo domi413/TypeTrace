@@ -12,3 +12,4 @@ filemanager
 adwaita
 gfile
 dbus
+autohide

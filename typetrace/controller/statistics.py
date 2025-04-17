@@ -2,7 +2,7 @@
 
 import math
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import cairo
 from gi.repository import Adw, Gio, Gtk
@@ -378,7 +378,7 @@ class Statistics(Gtk.Box):
         latest_date = (
             datetime.fromisoformat(data_points[-1]["date"]).date()
             if data_points
-            else datetime.now().date()
+            else datetime.now(timezone.utc).date()
         )
 
         all_days = {

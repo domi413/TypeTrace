@@ -85,7 +85,7 @@ class SQLStatistics:
     """
 
     GET_KEYSTROKES_BY_DATE = """
-        SELECT scan_code, count, key_name, date FROM keystrokes 
+        SELECT scan_code, count, key_name, date FROM keystrokes
         WHERE date = ?
     """
 

@@ -125,7 +125,7 @@ class KeystrokeStore:
         else:
             return True
 
-    # TODO: refactor 'with' queries to only use one connection
+    # Note: refactor every 'with' in this file to only use one connection
     def get_daily_keystroke_counts(self) -> list[dict]:
         """Get daily keystroke counts for the past 7 days.
 
