@@ -7,7 +7,7 @@ This is the GitHub repository of the TypeTrace source code
 You can install TypeTrace on any linux distro by pasting the following command into the terminal:
 
 ```
-curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/domi413/TypeTrace/main/install.sh?$(date +%s) | bash
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/domi413/TypeTrace/main/install.sh | bash
 ```
 
 Note that:
