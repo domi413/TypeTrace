@@ -49,10 +49,10 @@ template $Statistics : Gtk.Box {
             Gtk.DrawingArea line_drawing_area {
                 height-request: 300;
                 width-request: 800;
-                margin-top: 10;
-                margin-bottom: 10;
                 margin-start: 10;
                 margin-end: 10;
+                margin-top: 10;
+                margin-bottom: 10;
                 halign: center;
                 valign: center;
             }
@@ -88,24 +88,22 @@ template $Statistics : Gtk.Box {
                     halign: center;
                     spacing: 5;
 
-                    Gtk.Box {
-                        Gtk.MenuButton date_button {
-                            label: "Select Date";
-                            popover: calendar_popover;
-                        }
+                    Gtk.MenuButton date_button {
+                        label: "Select Date";
+                        popover: calendar_popover;
+                    }
 
-                        Gtk.Popover calendar_popover {
-                            autohide: true;
-                            has-arrow: true;
-                            position: top;
+                    Gtk.Popover calendar_popover {
+                        autohide: true;
+                        has-arrow: true;
+                        position: top;
 
-                            child: Gtk.Calendar calendar {
-                                margin-start: 6;
-                                margin-end: 6;
-                                margin-top: 6;
-                                margin-bottom: 6;
-                            };
-                        }
+                        child: Gtk.Calendar calendar {
+                            margin-start: 6;
+                            margin-end: 6;
+                            margin-top: 6;
+                            margin-bottom: 6;
+                        };
                     }
 
                     Gtk.Button clear_date_button {
