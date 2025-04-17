@@ -296,7 +296,7 @@ main() {
     fi
 
     print_step "Installation finished"
-    print_success "$APP_NAME installation script finished successfully"
+    print_success "$APP_NAME installation finished successfully"
 
     print_step "Cleanup"
     # trap will handle cleanup and exit
