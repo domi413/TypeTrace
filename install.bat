@@ -11,6 +11,26 @@ set SHORTCUT_NAME=TypeTrace.lnk
 set ICON_PATH=%INSTALLDIR%\icon.ico
 
 :: -----------------------------
+:: ERROR HANDLING SETUP
+:: -----------------------------
+set CLEANUP_NEEDED=0
+
+goto :main
+
+:cleanup
+if %CLEANUP_NEEDED% EQU 1 (
+    echo [ERROR] Installation failed. Cleaning up...
+    if exist "%INSTALLDIR%" (
+        rmdir /s /q "%INSTALLDIR%"
+    )
+    if exist "%USERPROFILE%\Desktop\%SHORTCUT_NAME%" (
+        del "%USERPROFILE%\Desktop\%SHORTCUT_NAME%"
+    )
+)
+exit /b %1
+
+:main
+:: -----------------------------
 :: CHECK FOR ADMIN RIGHTS
 :: -----------------------------
 openfiles >nul 2>&1
@@ -35,7 +55,11 @@ if %errorlevel% NEQ 0 (
 :: -----------------------------
 if not exist "%MSYS2_ROOT%\msys2_shell.cmd" (
     echo [INFO] MSYS2 not found. Installing via Chocolatey...
+    set CLEANUP_NEEDED=1
     choco install -y msys2
+    if %errorlevel% NEQ 0 (
+        call :cleanup 1
+    )
 ) else (
     echo [INFO] MSYS2 already installed.
 )
@@ -44,10 +68,14 @@ if not exist "%MSYS2_ROOT%\msys2_shell.cmd" (
 :: UNZIP APPLICATION
 :: -----------------------------
 echo [INFO] Extracting %ZIPFILE% to %INSTALLDIR%...
+set CLEANUP_NEEDED=1
 powershell -Command "Expand-Archive -LiteralPath '%ZIPFILE%' -DestinationPath '%INSTALLDIR%' -Force"
+if %errorlevel% NEQ 0 (
+    call :cleanup 1
+)
 
 :: -----------------------------
-:: INSTALL REQUIRED PACKAGES
+:: INSTALL REQUIRED PACKAGES IN MSYS
 :: -----------------------------
 "%MSYS2_ROOT%\usr\bin\bash.exe" -lc ^
 "pacman -Syuu --noconfirm && \
@@ -61,6 +89,9 @@ powershell -Command "Expand-Archive -LiteralPath '%ZIPFILE%' -DestinationPath '%
   mingw-w64-x86_64-meson \
   mingw-w64-x86_64-glib2 \
   mingw-w64-x86_64-desktop-file-utils"
+if %errorlevel% NEQ 0 (
+    call :cleanup 1
+)
 
 :: -----------------------------
 :: CREATE START MENU SHORTCUT
@@ -71,12 +102,15 @@ set VBS_CREATE=%TEMP%\create_shortcut.vbs
     echo sLinkFile = oWS.SpecialFolders("Programs") ^& "\%SHORTCUT_NAME%"
     echo Set oLink = oWS.CreateShortcut(sLinkFile)
     echo oLink.TargetPath = "%MSYS2_ROOT%\\usr\\bin\\bash.exe"
-    echo oLink.Arguments = "-lc \"cd '%INSTALLDIR%' && /mingw64/bin/python dummtrace.py\""
+    echo oLink.Arguments = "-lc \"cd '%INSTALLDIR%' && /mingw64/bin/python typetrace.py\""
     echo oLink.IconLocation = "%ICON_PATH%"
     echo oLink.Save
 ) > "%VBS_CREATE%"
 cscript //nologo "%VBS_CREATE%"
 del "%VBS_CREATE%"
+if %errorlevel% NEQ 0 (
+    call :cleanup 1
+)
 
 echo [SUCCESS] TypeTrace installed. You can launch it from the Start Menu.
 pause
