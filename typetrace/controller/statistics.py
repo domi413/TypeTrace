@@ -212,7 +212,7 @@ class Statistics(Gtk.Box):
         height: int,
     ) -> None:
         is_dark = self.style_manager.get_dark()
-        accent = self._get_accent_color(is_dark)
+        accent = self._get_accent_color(is_dark=is_dark)
         colors = {
             "line": accent,
             "fill": (*accent, 0.4 if self.style_manager.get_high_contrast() else 0.2),
@@ -336,7 +336,7 @@ class Statistics(Gtk.Box):
             colors["text"],
         )
 
-    def _get_accent_color(self, is_dark: bool) -> tuple:
+    def _get_accent_color(self, *, is_dark: bool) -> tuple:
         try:
             settings = Gio.Settings.new("org.gnome.desktop.interface")
             accent = settings.get_string("accent-color")
