@@ -236,6 +236,7 @@ install_local() {
     # - You may need to fetch de .desktop file as well and move it to the correct location
     # - Update the desktop icons cache
     # - Something else?
+
     true # placeholder
 }
 
