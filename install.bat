@@ -8,7 +8,7 @@ set ZIPFILE=typetrace.zip
 set INSTALLDIR=C:\Program Files\typetrace
 set MSYS2_ROOT=C:\tools\msys64
 set SHORTCUT_NAME=TypeTrace.lnk
-set ICON_PATH=%INSTALLDIR%\icon.ico
+set ICON_PATH=%INSTALLDIR%\data\icons\hicolor\symbolic\apps\typetrace.ico
 
 :: -----------------------------
 :: ERROR HANDLING SETUP
@@ -80,21 +80,22 @@ if %errorlevel% NEQ 0 (
 :: -----------------------------
 set VBS_CREATE=%TEMP%\create_shortcut.vbs
 (
-    echo Set oWS = WScript.CreateObject("WScript.Shell")
-    echo sLinkFile = oWS.SpecialFolders("Programs") ^& "\%SHORTCUT_NAME%"
-    echo Set oLink = oWS.CreateShortcut(sLinkFile)
-    echo oLink.TargetPath = "%MSYS2_ROOT%\\usr\\bin\\bash.exe"
-    echo oLink.Arguments = "-lc \"cd '%INSTALLDIR%' && /mingw64/bin/python typetrace.py\""
+    echo Set oWS = WScript.CreateObject^("WScript.Shell"^)
+    echo sLinkFile = oWS.SpecialFolders^("Programs"^) ^& "\%SHORTCUT_NAME%"
+    echo Set oLink = oWS.CreateShortcut^(sLinkFile^)
+    echo oLink.TargetPath = "%INSTALLDIR%\typetrace.bat"
+    echo oLink.WorkingDirectory = "%INSTALLDIR%"
     echo oLink.IconLocation = "%ICON_PATH%"
     echo oLink.Save
 ) > "%VBS_CREATE%"
+
 cscript //nologo "%VBS_CREATE%"
 del "%VBS_CREATE%"
 if %errorlevel% NEQ 0 (
     call :cleanup 1
 )
 
-echo "[INFO] Dependencies will be installed shortly
+echo [INFO] Dependencies will be installed shortly
 echo [SUCCESS] TypeTrace installed. You can launch it from the Start Menu.
 
 :: -----------------------------
