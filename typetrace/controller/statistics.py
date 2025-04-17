@@ -162,7 +162,7 @@ class Statistics(Gtk.Box):
         center_x, center_y = chart_width / 2, height / 2
         radius = min(chart_width, height) * 0.35
         start_angle = -math.pi / 2
-        legend_x, legend_y = chart_width + 40, height * 0.25
+        legend_x, legend_y = chart_width + 40, height * 0.15
 
         for i, k in enumerate(keystrokes):
             percent = k.count / total_count
