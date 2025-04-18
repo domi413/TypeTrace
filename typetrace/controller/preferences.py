@@ -28,12 +28,17 @@ class Preferences(Adw.PreferencesDialog):
     delete_button = Gtk.Template.Child()
     locate_button = Gtk.Template.Child()
     autostart_row = Gtk.Template.Child()
-    heatmap_begin_color_button = Gtk.Template.Child()
-    heatmap_end_color_button = Gtk.Template.Child()
+    theme_row = Gtk.Template.Child()
     single_color_switch = Gtk.Template.Child()
+    single_color_expander = Gtk.Template.Child()
+    reverse_gradient_switch = Gtk.Template.Child()
+    single_color_button = Gtk.Template.Child()
+    multi_color_row = Gtk.Template.Child()
+    multi_begin_color_button = Gtk.Template.Child()
+    multi_end_color_button = Gtk.Template.Child()
     end_color_box = Gtk.Template.Child()
     begin_color_label = Gtk.Template.Child()
-    reverse_gradient_switch = Gtk.Template.Child()
+    keyboard_row = Gtk.Template.Child()
 
     def __init__(
         self,
@@ -61,8 +66,9 @@ class Preferences(Adw.PreferencesDialog):
         begin_dialog = Gtk.ColorDialog(title="Select Begin Color", modal=True)
         end_dialog = Gtk.ColorDialog(title="Select End Color", modal=True)
 
-        self.heatmap_begin_color_button.set_dialog(begin_dialog)
-        self.heatmap_end_color_button.set_dialog(end_dialog)
+        self.single_color_button.set_dialog(begin_dialog)
+        self.multi_begin_color_button.set_dialog(begin_dialog)
+        self.multi_end_color_button.set_dialog(end_dialog)
 
         self.autostart_row.set_active(desktop_utils.is_autostart_enabled())
         self.autostart_row.connect("notify::active", self._on_autostart_toggled)
@@ -84,14 +90,21 @@ class Preferences(Adw.PreferencesDialog):
             self._on_reverse_gradient_toggled,
         )
 
-        self.heatmap_begin_color_button.connect(
+        self.single_color_button.connect(
             "notify::rgba",
             lambda button, _param: self._handle_color_change(
                 button,
                 "heatmap-begin-color",
             ),
         )
-        self.heatmap_end_color_button.connect(
+        self.multi_begin_color_button.connect(
+            "notify::rgba",
+            lambda button, _param: self._handle_color_change(
+                button,
+                "heatmap-begin-color",
+            ),
+        )
+        self.multi_end_color_button.connect(
             "notify::rgba",
             lambda button, _param: self._handle_color_change(
                 button,
@@ -100,8 +113,8 @@ class Preferences(Adw.PreferencesDialog):
         )
 
         is_single_color = self.settings.get_boolean("use-single-color-heatmap")
-        self.end_color_box.set_visible(not is_single_color)
-        self.reverse_gradient_switch.set_visible(is_single_color)
+        self.single_color_expander.set_visible(is_single_color)
+        self.multi_color_row.set_visible(not is_single_color)
         self.begin_color_label.set_label("Color" if is_single_color else "Begin")
 
     def _init_color_buttons(self) -> None:
@@ -113,8 +126,9 @@ class Preferences(Adw.PreferencesDialog):
             self.settings.get_string("heatmap-end-color"),
         )
 
-        self.heatmap_begin_color_button.set_rgba(begin_color)
-        self.heatmap_end_color_button.set_rgba(end_color)
+        self.single_color_button.set_rgba(begin_color)
+        self.multi_begin_color_button.set_rgba(begin_color)
+        self.multi_end_color_button.set_rgba(end_color)
 
     def _setup_switch(
         self,
@@ -144,8 +158,8 @@ class Preferences(Adw.PreferencesDialog):
     def _on_single_color_toggled(self, switch: Adw.SwitchRow, _: any) -> None:
         """Handle the single color switch toggle."""
         is_single_color = switch.get_active()
-        self.end_color_box.set_visible(not is_single_color)
-        self.reverse_gradient_switch.set_visible(is_single_color)
+        self.single_color_expander.set_visible(is_single_color)
+        self.multi_color_row.set_visible(not is_single_color)
         self.begin_color_label.set_label("Color" if is_single_color else "Begin")
 
         if not is_single_color:
@@ -178,6 +192,13 @@ class Preferences(Adw.PreferencesDialog):
         )
         self.settings.set_string(setting_key, color_str)
         dialog_utils.show_toast(self, "Heatmap color updated")
+
+        # share the same color for both buttons
+        # note: make single button storage separate from the multi-mode btns
+        if button == self.single_color_button:
+            self.multi_begin_color_button.set_rgba(rgba)
+        elif button == self.multi_begin_color_button:
+            self.single_color_button.set_rgba(rgba)
 
     def _on_autostart_toggled(self, row: Adw.SwitchRow, *_: any) -> None:
         """Handle the autostart toggle change."""

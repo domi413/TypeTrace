@@ -25,14 +25,37 @@ template $Preferences: Adw.PreferencesDialog {
         subtitle: "Generate heatmap from a single base color";
       }
 
-      Adw.SwitchRow reverse_gradient_switch {
-        title: "Reverse Gradient Direction";
-        subtitle: "Invert the gradient direction (Light to Dark / Dark to Light)";
+      Adw.ExpanderRow single_color_expander {
+        title: "Single Color Settings";
+        subtitle: "Configure single color mode settings";
+        visible: false;
+
+        Adw.SwitchRow reverse_gradient_switch {
+          title: "Reverse Gradient Direction";
+          subtitle: "Invert the gradient direction (Light to Dark / Dark to Light)";
+        }
+
+        Adw.ActionRow {
+          title: "Color";
+          subtitle: "Set the base color for the heatmap";
+
+          Box {
+            orientation: horizontal;
+            spacing: 10;
+            valign: center;
+
+            ColorDialogButton single_color_button {
+              tooltip-text: "Base color for the heatmap";
+              valign: center;
+              margin-top: 6;
+            }
+          }
+        }
       }
 
-      Adw.ActionRow {
-        title: "Heatmap";
-        subtitle: "Set the color(s) for the heatmap gradient";
+      Adw.ActionRow multi_color_row {
+        title: "Multi-Color Settings";
+        subtitle: "Set the colors for the heatmap gradient";
 
         Box {
           orientation: horizontal;
@@ -43,7 +66,7 @@ template $Preferences: Adw.PreferencesDialog {
             orientation: vertical;
             spacing: 5;
 
-            ColorDialogButton heatmap_begin_color_button {
+            ColorDialogButton multi_begin_color_button {
               tooltip-text: "Color for lowest frequency keys";
               valign: center;
               margin-top: 6;
@@ -61,7 +84,7 @@ template $Preferences: Adw.PreferencesDialog {
             orientation: vertical;
             spacing: 5;
 
-            ColorDialogButton heatmap_end_color_button {
+            ColorDialogButton multi_end_color_button {
               tooltip-text: "Color for highest frequency keys";
               valign: center;
               margin-top: 6;
