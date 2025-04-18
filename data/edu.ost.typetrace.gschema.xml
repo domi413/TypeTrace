@@ -6,5 +6,15 @@
 			<summary>Padding for keyboard key widgets</summary>
 			<description>Sets the padding around key labels in the heatmap widget.</description>
     	</key>
+		<key name="heatmap-begin-color" type="s">
+			<default>"rgb(0,0,255)"</default>
+			<summary>Heatmap begin color</summary>
+			<description>The starting color for the heatmap gradient (lowest frequency).</description>
+		</key>
+		<key name="heatmap-end-color" type="s">
+			<default>"rgb(255,0,0)"</default>
+			<summary>Heatmap end color</summary>
+			<description>The ending color for the heatmap gradient (highest frequency).</description>
+		</key>
 	</schema>
 </schemalist>

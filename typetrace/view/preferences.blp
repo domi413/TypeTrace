@@ -19,6 +19,47 @@ template $Preferences: Adw.PreferencesDialog {
         title: "Theme";
         subtitle: "Application color scheme preference";
       }
+
+      Adw.ActionRow {
+        title: "Heatmap Color";
+        subtitle: "Set the color gradient for the heatmap";
+
+        Box {
+          orientation: horizontal;
+          spacing: 10;
+          valign: center;
+
+          Box {
+            orientation: vertical;
+            spacing: 5;
+            
+            Label {
+              label: "Begin";
+              halign: start;
+            }
+            
+            ColorDialogButton heatmap_begin_color_button {
+              tooltip-text: "Color for lowest frequency keys";
+              valign: center;
+            }
+          }
+
+          Box {
+            orientation: vertical;
+            spacing: 5;
+            
+            Label {
+              label: "End";
+              halign: start;
+            }
+            
+            ColorDialogButton heatmap_end_color_button {
+              tooltip-text: "Color for highest frequency keys";
+              valign: center;
+            }
+          }
+        }
+      }
     }
 
     Adw.PreferencesGroup {

@@ -38,8 +38,6 @@ class Heatmap(Gtk.Box):
         settings: Gio.Settings,
         keystroke_store: KeystrokeStore,
         layout: str = "en_US",
-        beg_color: tuple[float, float, float] = (0.0, 0.0, 1.0),
-        end_color: tuple[float, float, float] = (1.0, 0.0, 0.0),
     ) -> None:
         """Initialize the heatmap widget.
 
@@ -47,16 +45,12 @@ class Heatmap(Gtk.Box):
             settings: Gio settings used to persist and apply preferences.
             keystroke_store: Access to keystrokes.
             layout: Keyboard layout to use.
-            beg_color: RGB tuple (0.0 to 1.0) for the lowest frequency.
-            end_color: RGB tuple (0.0 to 1.0) for the highest frequency.
 
         """
         super().__init__()
         self.settings = settings
         self.keystroke_store: KeystrokeStore = keystroke_store
         self.layout = layout
-        self.beg_color = beg_color
-        self.end_color = end_color
         self.key_widgets: dict[int, Gtk.Label] = {}  # Keyed by scancode
 
         self.css_provider = Gtk.CssProvider()
@@ -68,6 +62,15 @@ class Heatmap(Gtk.Box):
 
         self.zoom_in_button.connect("clicked", lambda *_: self._on_zoom_clicked(5))
         self.zoom_out_button.connect("clicked", lambda *_: self._on_zoom_clicked(-5))
+
+        self.settings.connect(
+            "changed::heatmap-begin-color",
+            lambda *_: self._update_colors(),
+        )
+        self.settings.connect(
+            "changed::heatmap-end-color",
+            lambda *_: self._update_colors(),
+        )
 
         self._build_keyboard()
         self._update_colors()
@@ -101,6 +104,24 @@ class Heatmap(Gtk.Box):
         label.set_size_request(size, size)
         return label
 
+    def _get_color_tuple_from_settings(self, key: str) -> tuple[float, float, float]:
+        """Get RGB color tuple from settings.
+
+        Args:
+            key: The settings key to get color from.
+
+        Returns:
+            A tuple of RGB values with each value between 0.0 and 1.0.
+
+        """
+        color_str = self.settings.get_string(key)
+
+        if color_str.startswith("rgb("):
+            r, g, b = map(int, color_str[4:-1].split(","))
+            return (r / 255.0, g / 255.0, b / 255.0)
+
+        return (0.0, 0.0, 1.0) if key == "heatmap-begin-color" else (1.0, 0.0, 0.0)
+
     def _update_colors(self) -> None:
         """Assign each displayed key the appropriate color."""
         keystrokes = self.keystroke_store.get_all_keystrokes()
@@ -108,8 +129,12 @@ class Heatmap(Gtk.Box):
         if not most_pressed:
             return
 
-        beg_r, beg_g, beg_b = [int(x * 255) for x in self.beg_color]
-        end_r, end_g, end_b = [int(x * 255) for x in self.end_color]
+        beg_color = self._get_color_tuple_from_settings("heatmap-begin-color")
+        end_color = self._get_color_tuple_from_settings("heatmap-end-color")
+
+        beg_r, beg_g, beg_b = [int(x * 255) for x in beg_color]
+        end_r, end_g, end_b = [int(x * 255) for x in end_color]
+
         gradient_css = f"""
         .gradient-bar {{
             background: linear-gradient(to right,
@@ -123,7 +148,11 @@ class Heatmap(Gtk.Box):
             if label := self.key_widgets.get(keystroke.scan_code):
                 css_class = f"scancode-{keystroke.scan_code}"
                 normalized_count = keystroke.count / most_pressed
-                bg_color, text_color = self._calculate_color(normalized_count)
+                bg_color, text_color = self._calculate_color(
+                    normalized_count,
+                    beg_color,
+                    end_color,
+                )
                 css_rules.append(f"""
                 .{css_class} {{
                     background-color: {bg_color};
@@ -134,11 +163,18 @@ class Heatmap(Gtk.Box):
 
         self.css_provider.load_from_string("\n".join(css_rules))
 
-    def _calculate_color(self, normalized: float) -> tuple[str, str]:
+    def _calculate_color(
+        self,
+        normalized: float,
+        beg_color: tuple[float, float, float],
+        end_color: tuple[float, float, float],
+    ) -> tuple[str, str]:
         """Calculate heatmap color and contrast text color based on normalized count.
 
         Args:
             normalized: A float between 0.0 and 1.0.
+            beg_color: RGB tuple for the lowest frequency color.
+            end_color: RGB tuple for the highest frequency color.
 
         Returns:
             A tuple containing:
@@ -146,9 +182,9 @@ class Heatmap(Gtk.Box):
                 - str: The calculated text color ('white' or 'black') for contrast.
 
         """
-        r = self.beg_color[0] + normalized * (self.end_color[0] - self.beg_color[0])
-        g = self.beg_color[1] + normalized * (self.end_color[1] - self.beg_color[1])
-        b = self.beg_color[2] + normalized * (self.end_color[2] - self.beg_color[2])
+        r = beg_color[0] + normalized * (end_color[0] - beg_color[0])
+        g = beg_color[1] + normalized * (end_color[1] - beg_color[1])
+        b = beg_color[2] + normalized * (end_color[2] - beg_color[2])
         r_int = int(r * 255)
         g_int = int(g * 255)
         b_int = int(b * 255)
