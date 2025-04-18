@@ -65,6 +65,11 @@ class Statistics(Gtk.Box):
         self.calendar.connect("day-selected", self._date_selected)
         self.clear_date_button.set_sensitive(False)
 
+    def update(self) -> None:
+        """Queue a redraw of the statistics drawing areas."""
+        self.drawing_area.queue_draw()
+        self.line_drawing_area.queue_draw()
+
     def _clear_date(self, _button: Gtk.Button) -> None:
         self.selected_date = None
         self.clear_date_button.set_sensitive(False)

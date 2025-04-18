@@ -38,6 +38,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         super().__init__(**kwargs)
         self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
         self.verbose = Verbose(keystroke_store=keystroke_store)
+        self.statistics = Statistics(keystroke_store=keystroke_store)
         self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
 
         heatmap_page = self.stack.add_titled(
@@ -53,7 +54,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         )
         verbose_page.set_icon_name("view-list-symbolic")
         statistics_page = self.stack.add_titled(
-            Statistics(keystroke_store=keystroke_store),
+            self.statistics,
             "statistics",
             "Statistics",
         )
@@ -64,3 +65,4 @@ class TypetraceWindow(Adw.ApplicationWindow):
         """Handle refresh button click."""
         self.heatmap.update()
         self.verbose.update()
+        self.statistics.update()
