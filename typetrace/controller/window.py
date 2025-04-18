@@ -53,7 +53,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         )
         verbose_page.set_icon_name("view-list-symbolic")
         statistics_page = self.stack.add_titled(
-            Statistics(keystroke_store=self.keystroke_store),
+            Statistics(keystroke_store=keystroke_store),
             "statistics",
             "Statistics",
         )
