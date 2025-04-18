@@ -148,6 +148,9 @@ class Preferences(Adw.PreferencesDialog):
         self.reverse_gradient_switch.set_visible(is_single_color)
         self.begin_color_label.set_label("Color" if is_single_color else "Begin")
 
+        if not is_single_color:
+            self.reverse_gradient_switch.set_active(False)
+
         mode = "Single color" if is_single_color else "Multi-color"
         dialog_utils.show_toast(self, f"Heatmap mode set to: {mode}")
 
