@@ -1,14 +1,20 @@
 """A preferences dialog that handles various settings and preferences."""
 
-from pathlib import Path
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Callable
 
 from gi.repository import Adw, Gio, Gtk
 
 from typetrace.config import Config, DatabasePath
 from typetrace.controller.utils import desktop_utils, dialog_utils
 from typetrace.controller.utils.color_utils import parse_color_string
-from typetrace.model.database_manager import DatabaseManager
-from typetrace.model.keystrokes import KeystrokeStore
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from typetrace.model.database_manager import DatabaseManager
+    from typetrace.model.keystrokes import KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/preferences.ui")
@@ -114,7 +120,7 @@ class Preferences(Adw.PreferencesDialog):
         self,
         switch: Adw.SwitchRow,
         setting_key: str,
-        handler,
+        handler: Callable[[Adw.SwitchRow, Any], None],
     ) -> None:
         """Set up a switch and bind it to a setting.
 
