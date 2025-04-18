@@ -4,10 +4,6 @@ on:
   pull_request:
     types:
       - edited
-      - opened
-      - synchronize
-      - ready_for_review
-      - reopened
 
 if: ${{ !github.event.pull_request.draft }}
 

@@ -12,19 +12,21 @@ if: ${{ !github.event.pull_request.draft }}
 
 jobs:
   lint:
-    runs-on: Ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
 
       - name: Install ruff dependencies
-        run: pip install ruff
+        run: uv tool install ruff
 
       - name: Run ruff
         run: ruff check

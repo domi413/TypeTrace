@@ -36,7 +36,7 @@ class Config:
         / "share"
         / ("flatpak/exports/share" if IS_FLATPAK else "")
         / "applications"
-        / "typetrace-backend.desktop"
+        / "edu.ost.typetrace-backend.desktop"
     )
 
     # Global settings

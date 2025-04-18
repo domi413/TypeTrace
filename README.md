@@ -2,6 +2,19 @@
 
 This is the GitHub repository of the TypeTrace source code
 
+## Installing the Project
+
+You can install TypeTrace on any linux distro by pasting the following command into the terminal:
+
+```
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/domi413/TypeTrace/main/install.sh | bash
+```
+
+Note that:
+
+- The local install requires GTK4 to be installed.
+- Flatpak simply requires flatpak to be installed.
+
 ## Running the Project
 
 To test the project use the command `make test`, refer to the Makefile for further options.
@@ -28,4 +41,3 @@ The act client needs a GitHub Token to work as intended.
    ```
 
 You should now be able to run the pipelines through the act client.
-
