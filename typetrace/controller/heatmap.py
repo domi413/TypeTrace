@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, ClassVar
 
 from gi.repository import Gdk, Gio, Gtk
 
+from typetrace.controller.utils.color_utils import parse_color_string
 from typetrace.model.layouts import KEYBOARD_LAYOUTS
 
 if TYPE_CHECKING:
@@ -104,24 +105,6 @@ class Heatmap(Gtk.Box):
         label.set_size_request(size, size)
         return label
 
-    def _get_color_tuple_from_settings(self, key: str) -> tuple[float, float, float]:
-        """Get RGB color tuple from settings.
-
-        Args:
-            key: The settings key to get color from.
-
-        Returns:
-            A tuple of RGB values with each value between 0.0 and 1.0.
-
-        """
-        color_str = self.settings.get_string(key)
-
-        if color_str.startswith("rgb("):
-            r, g, b = map(int, color_str[4:-1].split(","))
-            return (r / 255.0, g / 255.0, b / 255.0)
-
-        return (0.0, 0.0, 1.0) if key == "heatmap-begin-color" else (1.0, 0.0, 0.0)
-
     def _update_colors(self) -> None:
         """Assign each displayed key the appropriate color."""
         keystrokes = self.keystroke_store.get_all_keystrokes()
@@ -129,11 +112,15 @@ class Heatmap(Gtk.Box):
         if not most_pressed:
             return
 
-        beg_color = self._get_color_tuple_from_settings("heatmap-begin-color")
-        end_color = self._get_color_tuple_from_settings("heatmap-end-color")
+        beg_rgba = parse_color_string(self.settings.get_string("heatmap-begin-color"))
+        end_rgba = parse_color_string(self.settings.get_string("heatmap-end-color"))
 
-        beg_r, beg_g, beg_b = [int(x * 255) for x in beg_color]
-        end_r, end_g, end_b = [int(x * 255) for x in end_color]
+        beg_color_tuple = (beg_rgba.red, beg_rgba.green, beg_rgba.blue)
+        end_color_tuple = (end_rgba.red, end_rgba.green, end_rgba.blue)
+
+        beg_r, beg_g, beg_b = [int(x * 255) for x in beg_color_tuple]
+        end_r, end_g, end_b = [int(x * 255) for x in end_color_tuple]
+
         gradient_css = f"""
         .gradient-bar {{
             background: linear-gradient(to right,
@@ -149,8 +136,8 @@ class Heatmap(Gtk.Box):
                 normalized_count = keystroke.count / most_pressed
                 bg_color, text_color = self._calculate_color(
                     normalized_count,
-                    beg_color,
-                    end_color,
+                    beg_color_tuple,
+                    end_color_tuple,
                 )
                 css_rules.append(f"""
                 .{css_class} {{
