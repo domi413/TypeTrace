@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=TypeTrace
-Exec=typetrace
+Exec=@bindir@/typetrace
 Icon=edu.ost.typetrace
 Type=Application
 Categories=Utility;
