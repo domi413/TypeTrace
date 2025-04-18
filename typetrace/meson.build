@@ -48,6 +48,7 @@ sources = [
   '__init__.py',
   'application.py',
   'config.py',
+  'sql.py',
 ]
 install_data(sources, install_dir: moduledir)
 
