@@ -155,18 +155,6 @@ class Statistics(Gtk.Box):
             self._draw_no_data(cr, width, height)
             return
 
-        self._draw_text(
-            TextConfig(
-                cr=cr,
-                text="Top Keystrokes",
-                x=width / 2,
-                y=30,
-                font_size=16,
-                font_weight=cairo.FONT_WEIGHT_BOLD,
-                center=True,
-            ),
-        )
-
         chart_width = width * 0.65
         center_x, center_y = chart_width / 2, height / 2
         radius = min(chart_width, height) * 0.35
@@ -345,19 +333,6 @@ class Statistics(Gtk.Box):
                 ),
                 colors["text"],
             )
-
-        self._draw_text(
-            TextConfig(
-                cr=cr,
-                text="Daily Keystrokes",
-                x=width / 2,
-                y=padding - 20,
-                font_size=14,
-                font_weight=cairo.FONT_WEIGHT_BOLD,
-                center=True,
-            ),
-            colors["text"],
-        )
 
     def _get_accent_color(self, *, is_dark: bool) -> tuple:
         try:
