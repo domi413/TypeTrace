@@ -16,5 +16,15 @@
 			<summary>Heatmap end color</summary>
 			<description>The ending color for the heatmap gradient (highest frequency).</description>
 		</key>
+		<key name="use-single-color-heatmap" type="b">
+			<default>true</default>
+			<summary>Use single color for heatmap</summary>
+			<description>If enabled, only the 'begin' color is used to generate a monochromatic gradient.</description>
+		</key>
+		<key name="reverse-heatmap-gradient" type="b">
+			<default>false</default>
+			<summary>Reverse heatmap gradient</summary>
+			<description>If enabled, the gradient direction is reversed (dark-to-light instead of light-to-dark).</description>
+		</key>
 	</schema>
 </schemalist>

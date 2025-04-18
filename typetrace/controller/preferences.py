@@ -24,6 +24,10 @@ class Preferences(Adw.PreferencesDialog):
     autostart_row = Gtk.Template.Child()
     heatmap_begin_color_button = Gtk.Template.Child()
     heatmap_end_color_button = Gtk.Template.Child()
+    single_color_switch = Gtk.Template.Child()
+    end_color_box = Gtk.Template.Child()
+    begin_color_label = Gtk.Template.Child()
+    reverse_gradient_switch = Gtk.Template.Child()
 
     def __init__(
         self,
@@ -63,6 +67,16 @@ class Preferences(Adw.PreferencesDialog):
         self.locate_button.connect("clicked", self._on_locate_clicked)
 
         self._init_color_buttons()
+        self._setup_switch(
+            self.single_color_switch,
+            "use-single-color-heatmap",
+            self._on_single_color_toggled,
+        )
+        self._setup_switch(
+            self.reverse_gradient_switch,
+            "reverse-heatmap-gradient",
+            self._on_reverse_gradient_toggled,
+        )
 
         self.heatmap_begin_color_button.connect(
             "notify::rgba",
@@ -79,6 +93,11 @@ class Preferences(Adw.PreferencesDialog):
             ),
         )
 
+        is_single_color = self.settings.get_boolean("use-single-color-heatmap")
+        self.end_color_box.set_visible(not is_single_color)
+        self.reverse_gradient_switch.set_visible(is_single_color)
+        self.begin_color_label.set_label("Color" if is_single_color else "Begin")
+
     def _init_color_buttons(self) -> None:
         """Initialize color buttons with current settings."""
         begin_color = parse_color_string(
@@ -90,6 +109,47 @@ class Preferences(Adw.PreferencesDialog):
 
         self.heatmap_begin_color_button.set_rgba(begin_color)
         self.heatmap_end_color_button.set_rgba(end_color)
+
+    def _setup_switch(
+        self,
+        switch: Adw.SwitchRow,
+        setting_key: str,
+        handler,
+    ) -> None:
+        """Set up a switch and bind it to a setting.
+
+        Args:
+            switch: The switch widget to set up
+            setting_key: The setting key to bind to
+            handler: The callback function for notify::active signal
+
+        """
+        self.settings.bind(
+            setting_key,
+            switch,
+            "active",
+            Gio.SettingsBindFlags.DEFAULT,
+        )
+        switch.connect(
+            "notify::active",
+            handler,
+        )
+
+    def _on_single_color_toggled(self, switch: Adw.SwitchRow, _: any) -> None:
+        """Handle the single color switch toggle."""
+        is_single_color = switch.get_active()
+        self.end_color_box.set_visible(not is_single_color)
+        self.reverse_gradient_switch.set_visible(is_single_color)
+        self.begin_color_label.set_label("Color" if is_single_color else "Begin")
+
+        mode = "Single color" if is_single_color else "Multi-color"
+        dialog_utils.show_toast(self, f"Heatmap mode set to: {mode}")
+
+    def _on_reverse_gradient_toggled(self, switch: Adw.SwitchRow, _: any) -> None:
+        """Handle the reverse gradient switch toggle."""
+        is_reversed = switch.get_active()
+        direction = "Dark → Light" if is_reversed else "Light → Dark"
+        dialog_utils.show_toast(self, f"Gradient direction: {direction}")
 
     def _handle_color_change(
         self,

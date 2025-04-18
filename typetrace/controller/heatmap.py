@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import colorsys
 from typing import TYPE_CHECKING, ClassVar
 
 from gi.repository import Gdk, Gio, Gtk
@@ -72,6 +73,14 @@ class Heatmap(Gtk.Box):
             "changed::heatmap-end-color",
             lambda *_: self._update_colors(),
         )
+        self.settings.connect(
+            "changed::use-single-color-heatmap",
+            lambda *_: self._update_colors(),
+        )
+        self.settings.connect(
+            "changed::reverse-heatmap-gradient",
+            lambda *_: self._update_colors(),
+        )
 
         self._build_keyboard()
         self._update_colors()
@@ -113,10 +122,29 @@ class Heatmap(Gtk.Box):
             return
 
         beg_rgba = parse_color_string(self.settings.get_string("heatmap-begin-color"))
-        end_rgba = parse_color_string(self.settings.get_string("heatmap-end-color"))
 
-        beg_color_tuple = (beg_rgba.red, beg_rgba.green, beg_rgba.blue)
-        end_color_tuple = (end_rgba.red, end_rgba.green, end_rgba.blue)
+        is_single_color = self.settings.get_boolean("use-single-color-heatmap")
+        if is_single_color:
+            r, g, b = beg_rgba.red, beg_rgba.green, beg_rgba.blue
+            h, s, v = colorsys.rgb_to_hsv(r, g, b)  # Looks better this way tbh
+
+            light_s = max(0.2, s * 0.6)
+            light_v = min(1.0, v * 1.5)
+            beg_r, beg_g, beg_b = colorsys.hsv_to_rgb(h, light_s, light_v)
+            beg_color_tuple = (beg_r, beg_g, beg_b)
+
+            dark_s = min(1.0, s * 1.5)
+            dark_v = max(0.15, v * 0.45)
+            end_r, end_g, end_b = colorsys.hsv_to_rgb(h, dark_s, dark_v)
+            end_color_tuple = (end_r, end_g, end_b)
+
+        else:
+            end_rgba = parse_color_string(self.settings.get_string("heatmap-end-color"))
+            beg_color_tuple = (beg_rgba.red, beg_rgba.green, beg_rgba.blue)
+            end_color_tuple = (end_rgba.red, end_rgba.green, end_rgba.blue)
+
+        if self.settings.get_boolean("reverse-heatmap-gradient"):
+            beg_color_tuple, end_color_tuple = end_color_tuple, beg_color_tuple
 
         beg_r, beg_g, beg_b = [int(x * 255) for x in beg_color_tuple]
         end_r, end_g, end_b = [int(x * 255) for x in end_color_tuple]

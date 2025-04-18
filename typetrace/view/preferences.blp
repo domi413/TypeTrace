@@ -20,10 +20,19 @@ template $Preferences: Adw.PreferencesDialog {
         subtitle: "Application color scheme preference";
       }
 
+      Adw.SwitchRow single_color_switch {
+        title: "Use Single Color Gradient";
+        subtitle: "Generate heatmap from a single base color";
+      }
+
+      Adw.SwitchRow reverse_gradient_switch {
+        title: "Reverse Gradient Direction";
+        subtitle: "Toggle between light-to-dark and dark-to-light";
+      }
 
       Adw.ActionRow {
         title: "Heatmap Color";
-        subtitle: "Set the color gradient for the heatmap";
+        subtitle: "Set the color(s) for the heatmap gradient";
 
         Box {
           orientation: horizontal;
@@ -40,7 +49,7 @@ template $Preferences: Adw.PreferencesDialog {
               margin-top: 6;
             }
 
-            Label {
+            Label begin_color_label {
               label: "Begin";
               halign: center;
               css-classes: [ "dim-label" ];
@@ -48,7 +57,7 @@ template $Preferences: Adw.PreferencesDialog {
             }
           }
 
-          Box {
+          Box end_color_box {
             orientation: vertical;
             spacing: 5;
 
