@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import colorsys
 from abc import ABC, abstractmethod
+from typing import Final, override
 
 from gi.repository import Gdk, Gio
 
@@ -40,11 +41,26 @@ def parse_color_string(color_str: str) -> Gdk.RGBA:
     return rgba
 
 
+def get_color_scheme(settings: Gio.Settings) -> HeatmapColorScheme:
+    """Get the appropriate color scheme based on settings.
+
+    Args:
+        settings: Application settings.
+
+    Returns:
+        HeatmapColorScheme instance.
+
+    """
+    if settings.get_boolean("use-single-color-heatmap"):
+        return SingleColorHeatmap(settings)
+    return MultiColorHeatmap(settings)
+
+
 class HeatmapColorScheme(ABC):
     """Base class for heatmap coloring systems."""
 
     # Decide when to use white vs black text
-    LUMINANCE_THRESHOLD = 0.5
+    LUMINANCE_THRESHOLD: Final[float] = 0.5
 
     def __init__(self, settings: Gio.Settings) -> None:
         """Initialize with settings.
@@ -67,7 +83,6 @@ class HeatmapColorScheme(ABC):
                 - end_color: RGB tuple (float values 0-1)
 
         """
-        ...
 
     def calculate_color_for_key(
         self,
@@ -124,6 +139,7 @@ class HeatmapColorScheme(ABC):
 class SingleColorHeatmap(HeatmapColorScheme):
     """Single color heatmap with auto-generated light/dark gradient."""
 
+    @override
     def get_color_gradient(
         self,
     ) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
@@ -157,6 +173,7 @@ class SingleColorHeatmap(HeatmapColorScheme):
 class MultiColorHeatmap(HeatmapColorScheme):
     """Multi-color heatmap with user-defined begin and end colors."""
 
+    @override
     def get_color_gradient(
         self,
     ) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
@@ -175,18 +192,3 @@ class MultiColorHeatmap(HeatmapColorScheme):
         if self.settings.get_boolean("reverse-heatmap-gradient"):
             return end_color, beg_color
         return beg_color, end_color
-
-
-def get_color_scheme(settings: Gio.Settings) -> HeatmapColorScheme:
-    """Get the appropriate color scheme based on settings.
-
-    Args:
-        settings: Application settings.
-
-    Returns:
-        HeatmapColorScheme instance.
-
-    """
-    if settings.get_boolean("use-single-color-heatmap"):
-        return SingleColorHeatmap(settings)
-    return MultiColorHeatmap(settings)
