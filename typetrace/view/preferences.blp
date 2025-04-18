@@ -34,14 +34,17 @@ template $Preferences: Adw.PreferencesDialog {
             orientation: vertical;
             spacing: 5;
 
-            Label {
-              label: "Begin";
-              halign: start;
-            }
-
             ColorDialogButton heatmap_begin_color_button {
               tooltip-text: "Color for lowest frequency keys";
               valign: center;
+              margin-top: 6;
+            }
+
+            Label {
+              label: "Begin";
+              halign: center;
+              css-classes: [ "dim-label" ];
+              margin-bottom: 6;
             }
           }
 
@@ -49,14 +52,17 @@ template $Preferences: Adw.PreferencesDialog {
             orientation: vertical;
             spacing: 5;
 
-            Label {
-              label: "End";
-              halign: start;
-            }
-
             ColorDialogButton heatmap_end_color_button {
               tooltip-text: "Color for highest frequency keys";
               valign: center;
+              margin-top: 6;
+            }
+
+            Label {
+              label: "End";
+              halign: center;
+              css-classes: [ "dim-label" ];
+              margin-bottom: 6;
             }
           }
         }
