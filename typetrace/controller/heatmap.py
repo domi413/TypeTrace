@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import colorsys
 from typing import TYPE_CHECKING, ClassVar
 
 from gi.repository import Gdk, Gio, Gtk
 
-from typetrace.controller.utils.color_utils import parse_color_string
+from typetrace.controller.utils.color_utils import get_color_scheme
 from typetrace.model.layouts import KEYBOARD_LAYOUTS
 
 if TYPE_CHECKING:
@@ -65,22 +64,16 @@ class Heatmap(Gtk.Box):
         self.zoom_in_button.connect("clicked", lambda *_: self._on_zoom_clicked(5))
         self.zoom_out_button.connect("clicked", lambda *_: self._on_zoom_clicked(-5))
 
-        self.settings.connect(
-            "changed::heatmap-begin-color",
-            lambda *_: self._update_colors(),
-        )
-        self.settings.connect(
-            "changed::heatmap-end-color",
-            lambda *_: self._update_colors(),
-        )
-        self.settings.connect(
-            "changed::use-single-color-heatmap",
-            lambda *_: self._update_colors(),
-        )
-        self.settings.connect(
-            "changed::reverse-heatmap-gradient",
-            lambda *_: self._update_colors(),
-        )
+        for setting in [
+            "heatmap-begin-color",
+            "heatmap-end-color",
+            "use-single-color-heatmap",
+            "reverse-heatmap-gradient",
+        ]:
+            self.settings.connect(
+                f"changed::{setting}",
+                lambda *_: self._update_colors(),
+            )
 
         self._build_keyboard()
         self._update_colors()
@@ -121,52 +114,19 @@ class Heatmap(Gtk.Box):
         if not most_pressed:
             return
 
-        beg_rgba = parse_color_string(self.settings.get_string("heatmap-begin-color"))
+        color_scheme = get_color_scheme(self.settings)
 
-        is_single_color = self.settings.get_boolean("use-single-color-heatmap")
-        if is_single_color:
-            r, g, b = beg_rgba.red, beg_rgba.green, beg_rgba.blue
-            h, s, v = colorsys.rgb_to_hsv(r, g, b)  # Looks better this way tbh
-
-            light_s = max(0.2, s * 0.6)
-            light_v = min(1.0, v * 1.5)
-            beg_r, beg_g, beg_b = colorsys.hsv_to_rgb(h, light_s, light_v)
-            beg_color_tuple = (beg_r, beg_g, beg_b)
-
-            dark_s = min(1.0, s * 1.5)
-            dark_v = max(0.15, v * 0.45)
-            end_r, end_g, end_b = colorsys.hsv_to_rgb(h, dark_s, dark_v)
-            end_color_tuple = (end_r, end_g, end_b)
-
-        else:
-            end_rgba = parse_color_string(self.settings.get_string("heatmap-end-color"))
-            beg_color_tuple = (beg_rgba.red, beg_rgba.green, beg_rgba.blue)
-            end_color_tuple = (end_rgba.red, end_rgba.green, end_rgba.blue)
-
-        if self.settings.get_boolean("reverse-heatmap-gradient"):
-            beg_color_tuple, end_color_tuple = end_color_tuple, beg_color_tuple
-
-        beg_r, beg_g, beg_b = [int(x * 255) for x in beg_color_tuple]
-        end_r, end_g, end_b = [int(x * 255) for x in end_color_tuple]
-
-        gradient_css = f"""
-        .gradient-bar {{
-            background: linear-gradient(to right,
-                rgb({beg_r}, {beg_g}, {beg_b}),
-                rgb({end_r}, {end_g}, {end_b}));
-        }}
-        """
+        gradient_css = color_scheme.get_gradient_css()
 
         css_rules = [gradient_css]
         for keystroke in keystrokes:
             if label := self.key_widgets.get(keystroke.scan_code):
                 css_class = f"scancode-{keystroke.scan_code}"
                 normalized_count = keystroke.count / most_pressed
-                bg_color, text_color = self._calculate_color(
+                bg_color, text_color = color_scheme.calculate_color_for_key(
                     normalized_count,
-                    beg_color_tuple,
-                    end_color_tuple,
                 )
+
                 css_rules.append(f"""
                 .{css_class} {{
                     background-color: {bg_color};
@@ -176,36 +136,6 @@ class Heatmap(Gtk.Box):
                 label.set_tooltip_text(str(keystroke.count))
 
         self.css_provider.load_from_string("\n".join(css_rules))
-
-    def _calculate_color(
-        self,
-        normalized: float,
-        beg_color: tuple[float, float, float],
-        end_color: tuple[float, float, float],
-    ) -> tuple[str, str]:
-        """Calculate heatmap color and contrast text color based on normalized count.
-
-        Args:
-            normalized: A float between 0.0 and 1.0.
-            beg_color: RGB tuple for the lowest frequency color.
-            end_color: RGB tuple for the highest frequency color.
-
-        Returns:
-            A tuple containing:
-                - str: The calculated background color (Blue -> Yellow -> Red).
-                - str: The calculated text color ('white' or 'black') for contrast.
-
-        """
-        r = beg_color[0] + normalized * (end_color[0] - beg_color[0])
-        g = beg_color[1] + normalized * (end_color[1] - beg_color[1])
-        b = beg_color[2] + normalized * (end_color[2] - beg_color[2])
-        r_int = int(r * 255)
-        g_int = int(g * 255)
-        b_int = int(b * 255)
-        bg_color = f"rgb({r_int}, {g_int}, {b_int})"
-        luminance = 0.3 * r + 0.6 * g + 0.1 * b  # Luminance formula provides brightness
-        text_color = "white" if luminance < 0.5 else "black"  # noqa: PLR2004
-        return bg_color, text_color
 
     def _on_zoom_clicked(self, amount: int) -> None:
         size = max(self.settings.get_int("key-size") + amount, 40)
