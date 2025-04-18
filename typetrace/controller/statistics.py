@@ -1,13 +1,17 @@
 """The statistics page displays keystroke data in various graphs/diagrams."""
 
+from __future__ import annotations
+
 import math
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from typing import TYPE_CHECKING
 
 import cairo
 from gi.repository import Adw, Gio, Gtk
 
-from typetrace.model.keystrokes import Keystroke, KeystrokeStore
+if TYPE_CHECKING:
+    from typetrace.model.keystrokes import Keystroke, KeystrokeStore
 
 
 @dataclass
