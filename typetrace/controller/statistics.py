@@ -208,7 +208,7 @@ class Statistics(Gtk.Box):
             )
             start_angle += angle
 
-    def _draw_line_chart(
+    def _draw_line_chart(  # noqa: PLR0915, else it gets to messy
         self,
         _area: Gtk.DrawingArea,
         cr: cairo.Context,
