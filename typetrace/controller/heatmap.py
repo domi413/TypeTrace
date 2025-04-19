@@ -110,15 +110,18 @@ class Heatmap(Gtk.Box):
     def _update_colors(self) -> None:
         """Assign each displayed key the appropriate color."""
         keystrokes = self.keystroke_store.get_all_keystrokes()
-        most_pressed = self.keystroke_store.get_highest_count()
-        if not most_pressed:
-            return
+        most_pressed = self.keystroke_store.get_highest_count() or 1
 
         color_scheme = get_color_scheme(self.settings)
 
         gradient_css = color_scheme.get_gradient_css()
 
         css_rules = [gradient_css]
+
+        # Clear all tooltips
+        for label in self.key_widgets.values():
+            label.set_tooltip_text(None)
+
         for keystroke in keystrokes:
             if label := self.key_widgets.get(keystroke.scan_code):
                 css_class = f"scancode-{keystroke.scan_code}"
@@ -127,11 +130,13 @@ class Heatmap(Gtk.Box):
                     normalized_count,
                 )
 
-                css_rules.append(f"""
+                css_rules.append(
+                    f"""
                 .{css_class} {{
                     background-color: {bg_color};
                     color: {text_color};
-                }}""")
+                }}""",
+                )
                 label.set_css_classes([css_class])
                 label.set_tooltip_text(str(keystroke.count))
 
