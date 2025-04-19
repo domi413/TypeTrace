@@ -72,10 +72,12 @@ def get_color_scheme(settings: Gio.Settings) -> HeatmapColorScheme:
         HeatmapColorScheme instance.
 
     """
-    # Very clean logic 10/10
-    if settings.get_boolean("use-single-color-heatmap"):
-        if settings.get_boolean("use-accent-color"):
-            return AccentColorHeatmap(settings)
+    use_single_color = settings.get_boolean("use-single-color-heatmap")
+    use_accent_color = settings.get_boolean("use-accent-color")
+
+    if use_single_color and use_accent_color:
+        return AccentColorHeatmap(settings)
+    if use_single_color:
         return SingleColorHeatmap(settings)
     return MultiColorHeatmap(settings)
 
