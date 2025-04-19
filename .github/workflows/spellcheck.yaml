@@ -8,9 +8,9 @@ on:
       - ready_for_review
       - reopened
 
-if: ${{ !github.event.pull_request.draft }}
-
 jobs:
+  if: ${{ !github.event.pull_request.draft }}
+
   spellcheck:
     runs-on: ubuntu-latest
     name: Checks the documents for spelling
