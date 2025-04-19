@@ -3,7 +3,9 @@ name: Check Python Code
 on:
   pull_request:
     types:
+      - opened
       - ready_for_review
+      - reopened
 
 jobs:
   lint:
