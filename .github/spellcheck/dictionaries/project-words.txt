@@ -2,24 +2,35 @@
 typetrace
 
 # Words
-getlogin
 getgrnam
-levelno
+getlogin
+halign
 hdlr
+hexpand
+levelno
+OSIPC
+QWERTZ
 scancode
 scancodes
-hexpand
-halign
-QWERTZ
 vexpand
 
 # Build
 bindir
+codesign
+datas
+datas
+hiddenimports
+hooksconfig
+hookspath
+libadwaita
+libevdev
+noarchive
+pathex
 
 # Team Names
-Dominik
-Bühler
-Gioele
-Petrillo
-Knöfler
 Alali
+Bühler
+Dominik
+Gioele
+Knöfler
+Petrillo

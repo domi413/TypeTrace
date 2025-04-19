@@ -5,6 +5,7 @@ blueprints = custom_target(
   'blueprints',
   input: files(
     'gtk/help-overlay.blp',
+    'view/preferences.blp',
     'view/window.blp',
     'view/heatmap.blp',
     'view/verbose.blp',
@@ -45,11 +46,13 @@ configure_file(
 sources = [
   '__init__.py',
   'application.py',
+  'config.py',
 ]
 install_data(sources, install_dir: moduledir)
 
 sources_model = [
   'model/__init__.py',
+  'model/database_manager.py',
   'model/keystrokes.py',
   'model/layouts.py',
 ]
@@ -60,7 +63,15 @@ sources_controller = [
   'controller/window.py',
   'controller/heatmap.py',
   'controller/verbose.py',
+  'controller/preferences.py',
 ]
 install_data(sources_controller, install_dir: moduledir / 'controller')
+
+sources_controller_utils = [
+  'controller/utils/__init__.py',
+  'controller/utils/dialog_utils.py',
+  'controller/utils/desktop_utils.py'
+]
+install_data(sources_controller_utils, install_dir: moduledir / 'controller' / 'utils')
 
 subdir('backend')

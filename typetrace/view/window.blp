@@ -3,6 +3,8 @@ using Adw 1;
 
 template $TypetraceWindow: Adw.ApplicationWindow {
   title: "TypeTrace";
+  default-width: 1000;
+  default-height: 720;
 
   content: Adw.ToolbarView {
     [top]
@@ -11,6 +13,16 @@ template $TypetraceWindow: Adw.ApplicationWindow {
         policy: wide;
         stack: stack;
       };
+
+      [start]
+      Gtk.Button refresh_button {
+        valign: center;
+        has-frame: false;
+        icon-name: "view-refresh-symbolic";
+        margin-start: 5;
+        tooltip-text: "Updates views";
+      }
+
       [end]
       MenuButton {
         primary: true;

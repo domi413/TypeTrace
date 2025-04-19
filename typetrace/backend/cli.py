@@ -1,83 +1,89 @@
 """Command-line interface for TypeTrace."""
 
-from __future__ import annotations
-
-import grp
+import argparse
 import logging
 import os
+import platform
 import sqlite3
-from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import final
 
-import appdirs
+from backend.db import DatabaseManager
+from backend.logging_setup import LoggerSetup
 
-from .config import DB_NAME, PROJECT_NAME, ExitCodes
-
-if TYPE_CHECKING:
-    import argparse
+from typetrace.config import Config, DatabasePath, ExitCodes
 
 logger = logging.getLogger(__name__)
 
 
-def resolve_db_path() -> Path:
-    """Determine the database path using appdirs for cross-platform support."""
-    app_name = PROJECT_NAME.lower()
-    data_dir = appdirs.user_data_dir(app_name)
-    db_path = Path(data_dir) / DB_NAME
-    db_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
-    return db_path
+@final
+class CLI:
+    """Command-line interface for TypeTrace."""
 
+    def __init__(self) -> None:
+        """Initialize the CLI."""
+        self.__db_path = DatabasePath.DB_PATH
 
-def check_input_group() -> None:
-    """Check if the current user is in the 'input' group."""
-    username = os.getlogin()
-    input_group = grp.getgrnam("input")
-    if username not in input_group.gr_mem:
-        logger.error("The User %s is not in the 'input' group", username)
-        raise PermissionError
+    def run(self, args: argparse.Namespace) -> int:
+        """Run the main logic of the TypeTrace backend.
 
+        Args:
+            args: Command-line arguments.
 
-def main(args: argparse.Namespace) -> int:
-    """Run the main logic of the TypeTrace backend.
+        Returns:
+            Exit code for the application.
 
-    Returns:
-        Exit code for the application.
+        """
+        if args.debug:
+            Config.DEBUG = True
+            LoggerSetup.setup_logging()
 
-    """
-    if args.debug:
-        # Update the global DEBUG variable
-        from . import config
+        try:
+            DatabaseManager.initialize_database(self.__db_path)
 
-        config.DEBUG = True
-        from .logging_setup import setup_logging
+            match platform.system().lower():
+                case "linux":
+                    from backend.events.linux import LinuxEventProcessor
 
-        setup_logging()
+                    if not Config.IS_FLATPAK:
+                        self._check_input_group()
 
-    try:
-        check_input_group()
+                    processor = LinuxEventProcessor(self.__db_path)
+                    processor.check_device_accessibility()
+                case "darwin" | "windows":
+                    from backend.events.windows_darwin import (
+                        WindowsDarwinEventProcessor,
+                    )
 
-        from .devices import check_device_accessibility
+                    processor = WindowsDarwinEventProcessor(self.__db_path)
+                case _:
+                    logger.error("Unsupported platform: %s", platform.system())
+                    return ExitCodes.PLATFORM_ERROR
 
-        check_device_accessibility()
-        db_path: Path = resolve_db_path()
+            processor.trace()
+        except PermissionError:
+            logger.exception(
+                "\nPlease ensure you have sufficient permissions "
+                "(e.g., 'input' group).",
+            )
+            return ExitCodes.PERMISSION_ERROR
+        except sqlite3.Error:
+            logger.exception("Database error")
+            return ExitCodes.DATABASE_ERROR
+        except (OSError, ValueError, RuntimeError):
+            logger.exception("Unexpected error")
+            return ExitCodes.RUNTIME_ERROR
+        else:
+            return ExitCodes.SUCCESS
 
-        from .db import initialize_database
+    def _check_input_group(self) -> None:
+        """Check if the user is in the 'input' group on Linux."""
+        import grp
 
-        initialize_database(db_path)
-
-        from .events import trace_keys
-
-        trace_keys(db_path)
-    except PermissionError:
-        logger.exception(
-            "\nPlease ensure you have sufficient permissions (e.g., 'input' group).",
-        )
-        return ExitCodes.PERMISSION_ERROR
-    except sqlite3.Error:
-        logger.exception("Database error")
-        return ExitCodes.DATABASE_ERROR
-    except (OSError, ValueError, RuntimeError):
-        logger.exception("Unexpected error")
-        return ExitCodes.RUNTIME_ERROR
-    else:
-        return ExitCodes.SUCCESS
+        try:
+            username = os.getlogin()
+        except OSError:
+            username = os.getenv("USER") or os.getenv("USERNAME")
+        input_group = grp.getgrnam("input")
+        if username not in input_group.gr_mem:
+            logger.error("The User %s is not in the 'input' group", username)
+            raise PermissionError

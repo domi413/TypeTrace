@@ -1,9 +1,0 @@
-[Unit]
-Description=TypeTrace Backend Service
-
-[Service]
-ExecStart=@bindir@/typetrace -b
-Restart=on-failure
-
-[Install]
-WantedBy=default.target

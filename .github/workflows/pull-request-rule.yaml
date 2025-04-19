@@ -1,0 +1,24 @@
+name: PR title rule
+
+on:
+  pull_request:
+    types:
+      - edited
+
+jobs:
+  pull-request-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Validate PR Title
+        if: env.ACT != 'true'
+        run: |
+          pattern="^(fix|feat|pipeline|doc|test|wip)\(#TYP-[0-9]+\): .+"
+          pr_title="${{ github.event.pull_request.title }}"
+          if ! [[ "$pr_title" =~ $pattern ]]; then
+              echo "❌ Pull Request title is invalid!"
+              echo "Allowed format: fix|feat|pipeline|doc|wip(#TICKET-ID): Description"
+              exit 1
+          fi

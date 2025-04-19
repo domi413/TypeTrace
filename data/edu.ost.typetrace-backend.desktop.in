@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=TypeTrace Backend Service
+Exec=typetrace -b
+Icon=edu.ost.typetrace
+Type=Application
+NoDisplay=true
+StartupNotify=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Hidden=true

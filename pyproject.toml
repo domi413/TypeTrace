@@ -1,13 +1,27 @@
-[tool.ruff.lint]
-extend-select = [
-  "ALL",
-]
-ignore = [
-  "ANN003", # Ignore missing type annotation for **kwargs
-  "ANN401", # Ignore missing type annotation for functions
-  "ARG002", # Ignore unused argument
-  "T201",   # Ignore print statements
+[project]
+name = "typetrace"
+version = "0.1.0" # TODO: Set this to release version
+
+# TODO: Add needed dependency versions e.g. "appdirs>=1.4.4",
+requires-python = ">=3.8" 
+dependencies = [
+    "appdirs",
+    "dbus-python",
+    "evdev",
 ]
 
-[tool.mypy]
-ignore_missing_imports = true
+[project.optional-dependencies]
+dev = [
+    "ruff",
+]
+
+[tool.ruff.lint]
+extend-select = [
+    "ALL",
+]
+ignore = [
+    "ANN003", # Ignore missing type annotation for **kwargs
+    "ANN401", # Ignore `Any` type annotation for functions
+    "D203",   # In conflict with D211
+    "D213",   # In conflict with D212
+]

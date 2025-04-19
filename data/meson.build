@@ -8,6 +8,13 @@ desktop_file = fs.copyfile(
   install_dir: get_option('datadir') / 'applications',
 )
 
+desktop_file_backend = fs.copyfile(
+  'edu.ost.typetrace-backend.desktop.in',
+  'edu.ost.typetrace-backend.desktop',
+  install: true,
+  install_dir: get_option('datadir') / 'applications',
+)
+
 desktop_utils = find_program('desktop-file-validate', required: false)
 if desktop_utils.found()
   test('Validate desktop file', desktop_utils, args: [desktop_file])
@@ -49,14 +56,6 @@ configure_file(
   output: 'edu.ost.typetrace.service',
   configuration: conf,
   install_dir: get_option('datadir') / 'dbus-1' / 'services',
-)
-
-# Backend Service
-configure_file(
-  input: 'edu.ost.typetrace-backend.service.in',
-  output: 'edu.ost.typetrace-backend.service',
-  configuration: conf,
-  install_dir: get_option('libdir') / 'systemd' / 'user',
 )
 
 subdir('icons')
