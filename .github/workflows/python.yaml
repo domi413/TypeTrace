@@ -8,11 +8,11 @@ on:
       - ready_for_review
       - reopened
 
-if: ${{ !github.event.pull_request.draft }}
-
 jobs:
   lint:
     runs-on: ubuntu-latest
+
+    if: ${{ !github.event.pull_request.draft }}
 
     steps:
       - name: Checkout code
