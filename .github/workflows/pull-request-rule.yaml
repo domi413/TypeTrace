@@ -4,10 +4,14 @@ on:
   pull_request:
     types:
       - edited
+      - opened
+
+if: ${{ !github.event.pull_request.draft }}
 
 jobs:
   pull-request-title:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
