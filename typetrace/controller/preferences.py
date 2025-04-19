@@ -105,7 +105,7 @@ class Preferences(Adw.PreferencesDialog):
             "notify::rgba",
             lambda button, _param: self._handle_color_change(
                 button,
-                "heatmap-begin-color",
+                "heatmap-single-color",
             ),
         )
         self.multi_begin_color_button.connect(
@@ -133,36 +133,45 @@ class Preferences(Adw.PreferencesDialog):
 
     def _init_color_buttons(self) -> None:
         """Initialize color buttons with current settings."""
-        begin_color = self._get_begin_color()
+        if self.settings.get_boolean("use-accent-color"):
+            accent_color = self._get_accent_color()
+            single_color = accent_color
+            begin_color = accent_color
+        else:
+            single_color = parse_color_string(
+                self.settings.get_string("heatmap-single-color"),
+            )
+            begin_color = parse_color_string(
+                self.settings.get_string("heatmap-begin-color"),
+            )
+
         end_color = parse_color_string(self.settings.get_string("heatmap-end-color"))
+        self._update_color_buttons(single_color, begin_color, end_color)
 
-        self._update_color_buttons(begin_color, end_color)
-
-    def _get_begin_color(self) -> Gdk.RGBA:
-        """Get the appropriate begin color based on settings.
+    def _get_accent_color(self) -> Gdk.RGBA:
+        """Get the system accent color.
 
         Returns:
-            Gdk.RGBA: The color to use for the begin color buttons.
+            Gdk.RGBA: The accent color.
 
         """
-        if self.settings.get_boolean("use-accent-color"):
-            accent_color = get_system_accent_color()
-            self.settings.set_string(
-                "heatmap-begin-color",
-                rgba_to_rgb_string(accent_color),
-            )
-            return accent_color
-        return parse_color_string(self.settings.get_string("heatmap-begin-color"))
+        return get_system_accent_color()
 
-    def _update_color_buttons(self, begin_color: Gdk.RGBA, end_color: Gdk.RGBA) -> None:
+    def _update_color_buttons(
+        self,
+        single_color: Gdk.RGBA,
+        begin_color: Gdk.RGBA,
+        end_color: Gdk.RGBA,
+    ) -> None:
         """Update all color buttons with the given colors.
 
         Args:
-            begin_color: The color to set for begin color buttons.
+            single_color: The color to set for single color mode.
+            begin_color: The color to set for multi-color begin.
             end_color: The color to set for the end color button.
 
         """
-        self.single_color_button.set_rgba(begin_color)
+        self.single_color_button.set_rgba(single_color)
         self.multi_begin_color_button.set_rgba(begin_color)
         self.multi_end_color_button.set_rgba(end_color)
 
@@ -216,20 +225,15 @@ class Preferences(Adw.PreferencesDialog):
         self.color_row.set_sensitive(not use_accent)
 
         if use_accent:
-            accent_color = get_system_accent_color()
+            accent_color = self._get_accent_color()
             if accent_color is not None:
                 self.single_color_button.set_rgba(accent_color)
-                self.multi_begin_color_button.set_rgba(
-                    accent_color,
-                )  # shares the same color for singe-/multi mode for now
-
-                self.settings.set_string(
-                    "heatmap-begin-color",
-                    rgba_to_rgb_string(accent_color),
-                )
-
             dialog_utils.show_toast(self, "Using system accent color")
         else:
+            stored_color = parse_color_string(
+                self.settings.get_string("heatmap-single-color"),
+            )
+            self.single_color_button.set_rgba(stored_color)
             dialog_utils.show_toast(self, "Using custom color")
 
     def _handle_color_change(
@@ -244,23 +248,15 @@ class Preferences(Adw.PreferencesDialog):
             setting_key: The settings key to update.
 
         """
-        # if system color dont allow manual color change
         if (
             self.settings.get_boolean("use-accent-color")
-            and setting_key == "heatmap-begin-color"
+            and setting_key == "heatmap-single-color"
         ):
             return
 
         rgba = button.get_rgba()
         self.settings.set_string(setting_key, rgba_to_rgb_string(rgba))
         dialog_utils.show_toast(self, "Heatmap color updated")
-
-        # share the same color for both buttons
-        # note: make single button storage separate from the multi-mode btns
-        if button == self.single_color_button:
-            self.multi_begin_color_button.set_rgba(rgba)
-        elif button == self.multi_begin_color_button:
-            self.single_color_button.set_rgba(rgba)
 
     def _on_autostart_toggled(self, row: Adw.SwitchRow, *_: any) -> None:
         """Handle the autostart toggle change."""

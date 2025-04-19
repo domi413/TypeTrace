@@ -230,7 +230,7 @@ class SingleColorHeatmap(HeatmapColorScheme):
             Tuple of (begin_color, end_color) as RGB tuples.
 
         """
-        beg_rgba = parse_color_string(self.settings.get_string("heatmap-begin-color"))
+        beg_rgba = parse_color_string(self.settings.get_string("heatmap-single-color"))
         return self._generate_gradient_from_color(beg_rgba)
 
 
@@ -249,7 +249,6 @@ class AccentColorHeatmap(SingleColorHeatmap):
         """
         accent_rgba = get_system_accent_color()
 
-        self.settings.set_string("heatmap-begin-color", rgba_to_rgb_string(accent_rgba))
         return self._generate_gradient_from_color(accent_rgba)
 
 

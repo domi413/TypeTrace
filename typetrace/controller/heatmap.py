@@ -67,8 +67,10 @@ class Heatmap(Gtk.Box):
         for setting in [
             "heatmap-begin-color",
             "heatmap-end-color",
+            "heatmap-single-color",
             "use-single-color-heatmap",
             "reverse-heatmap-gradient",
+            "use-accent-color",
         ]:
             self.settings.connect(
                 f"changed::{setting}",
