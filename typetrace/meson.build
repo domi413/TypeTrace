@@ -74,4 +74,10 @@ sources_controller_utils = [
 ]
 install_data(sources_controller_utils, install_dir: moduledir / 'controller' / 'utils')
 
+sources_service = [
+  'service/__init__.py',
+  'service/backend_connector.py',
+]
+install_data(sources_service, install_dir: moduledir / 'service')
+
 subdir('backend')

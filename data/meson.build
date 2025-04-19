@@ -58,4 +58,11 @@ configure_file(
   install_dir: get_option('datadir') / 'dbus-1' / 'services',
 )
 
+configure_file(
+  input: 'edu.ost.typetrace.backend.service.in',
+  output: 'edu.ost.typetrace.backend.service',
+  configuration: conf,
+  install_dir: get_option('datadir') / 'dbus-1' / 'services',
+)
+
 subdir('icons')

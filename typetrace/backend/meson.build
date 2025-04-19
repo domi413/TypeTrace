@@ -7,6 +7,7 @@ backend_main_sources = [
   '__init__.py',
   'cli.py',
   'db.py',
+  'dbus_service.py',
   'logging_setup.py',
   'sql.py',
 ]
