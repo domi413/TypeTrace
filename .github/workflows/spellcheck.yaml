@@ -5,8 +5,6 @@ on:
     types:
       - ready_for_review
 
-if: ${{ !github.event.pull_request.draft }}
-
 jobs:
   spellcheck:
     runs-on: ubuntu-latest
