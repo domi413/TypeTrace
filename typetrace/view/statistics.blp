@@ -1,0 +1,139 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $Statistics : Gtk.Box {
+    orientation: vertical;
+    halign: fill;
+    valign: fill;
+    vexpand: true;
+    hexpand: true;
+
+    Adw.Carousel carousel {
+        vexpand: true;
+        hexpand: true;
+        halign: fill;
+        valign: fill;
+
+        Gtk.Box keystrokes_over_time_page {
+            orientation: vertical;
+            halign: fill;
+            valign: center;
+            vexpand: true;
+            hexpand: true;
+            margin-start: 10;
+            margin-end: 10;
+            margin-top: 10;
+            margin-bottom: 10;
+
+            Gtk.Label line_chart_title {
+                label: "Daily Keystrokes";
+                halign: center;
+                margin-bottom: 20;
+                css-classes: ["title-2"];
+            }
+
+            Gtk.DrawingArea drawing_area {
+                height-request: 300;
+                width-request: 800;
+                margin-start: 10;
+                margin-end: 10;
+                margin-top: 10;
+                margin-bottom: 10;
+                halign: center;
+                valign: center;
+            }
+        }
+
+        Gtk.Box pie_chart_page {
+            orientation: vertical;
+            halign: fill;
+            valign: center;
+            vexpand: true;
+            hexpand: true;
+            margin-start: 10;
+            margin-end: 10;
+            margin-top: 10;
+            margin-bottom: 10;
+
+            Gtk.Label pie_chart_title {
+                label: "Top Keystrokes";
+                halign: center;
+                margin-bottom: 20;
+                css-classes: ["title-2"];
+            }
+
+            Gtk.DrawingArea line_drawing_area {
+                height-request: 300;
+                width-request: 800;
+                margin-start: 10;
+                margin-end: 10;
+                margin-top: 10;
+                margin-bottom: 10;
+                halign: center;
+                valign: center;
+            }
+
+            Gtk.Box controls_box {
+                orientation: vertical;
+                halign: center;
+                margin-top: 10;
+                spacing: 20;
+
+                Gtk.Box bar_count_box {
+                    orientation: horizontal;
+                    halign: center;
+                    spacing: 5;
+
+                    Gtk.Label bar_count_label {
+                        label: "Number of keystrokes:";
+                    }
+
+                    Gtk.SpinButton bar_count_spin {
+                        adjustment: Gtk.Adjustment {
+                            lower: 1;
+                            upper: 10;
+                            step-increment: 1;
+                        };
+                        digits: 0;
+                        width-chars: 3;
+                    }
+                }
+
+                Gtk.Box date_filter_box {
+                    orientation: horizontal;
+                    halign: center;
+                    spacing: 5;
+
+                    Gtk.MenuButton date_button {
+                        label: "Select Date";
+                        popover: calendar_popover;
+                    }
+
+                    Gtk.Popover calendar_popover {
+                        autohide: true;
+                        has-arrow: true;
+                        position: top;
+
+                        child: Gtk.Calendar calendar {
+                            margin-start: 6;
+                            margin-end: 6;
+                            margin-top: 6;
+                            margin-bottom: 6;
+                        };
+                    }
+
+                    Gtk.Button clear_date_button {
+                        label: "Clear Date";
+                    }
+                }
+            }
+        }
+    }
+
+    Adw.CarouselIndicatorDots carousel_indicators {
+        carousel: carousel;
+        halign: center;
+        margin-top: 10;
+        margin-bottom: 10;
+    }
+}

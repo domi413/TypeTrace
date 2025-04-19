@@ -3,6 +3,7 @@
 from gi.repository import Adw, Gio, Gtk
 
 from typetrace.controller.heatmap import Heatmap
+from typetrace.controller.statistics import Statistics
 from typetrace.controller.verbose import Verbose
 from typetrace.model.keystrokes import KeystrokeStore
 
@@ -37,6 +38,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         super().__init__(**kwargs)
         self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
         self.verbose = Verbose(keystroke_store=keystroke_store)
+        self.statistics = Statistics(keystroke_store=keystroke_store)
         self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
 
         heatmap_page = self.stack.add_titled(
@@ -50,10 +52,17 @@ class TypetraceWindow(Adw.ApplicationWindow):
             "verbose",
             "Verbose",
         )
-        verbose_page.set_icon_name("text-x-generic-symbolic")
+        verbose_page.set_icon_name("view-list-symbolic")
+        statistics_page = self.stack.add_titled(
+            self.statistics,
+            "statistics",
+            "Statistics",
+        )
+        statistics_page.set_icon_name("image-filter-symbolic")
         self.view_switcher.set_stack(self.stack)
 
     def _on_refresh_clicked(self) -> None:
         """Handle refresh button click."""
         self.heatmap.update()
         self.verbose.update()
+        self.statistics.update()
