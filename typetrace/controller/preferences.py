@@ -4,11 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable
 
-from gi.repository import Adw, Gio, Gtk
+from gi.repository import Adw, Gdk, Gio, Gtk
 
 from typetrace.config import Config, DatabasePath
 from typetrace.controller.utils import desktop_utils, dialog_utils
-from typetrace.controller.utils.color_utils import parse_color_string
+from typetrace.controller.utils.color_utils import (
+    get_system_accent_color,
+    parse_color_string,
+    rgba_to_rgb_string,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -32,6 +36,8 @@ class Preferences(Adw.PreferencesDialog):
     single_color_switch = Gtk.Template.Child()
     single_color_expander = Gtk.Template.Child()
     reverse_gradient_switch = Gtk.Template.Child()
+    use_accent_color_switch = Gtk.Template.Child()
+    color_row = Gtk.Template.Child()
     single_color_button = Gtk.Template.Child()
     multi_color_row = Gtk.Template.Child()
     multi_begin_color_button = Gtk.Template.Child()
@@ -89,6 +95,11 @@ class Preferences(Adw.PreferencesDialog):
             "reverse-heatmap-gradient",
             self._on_reverse_gradient_toggled,
         )
+        self._setup_switch(
+            self.use_accent_color_switch,
+            "use-accent-color",
+            self._on_accent_color_toggled,
+        )
 
         self.single_color_button.connect(
             "notify::rgba",
@@ -117,15 +128,40 @@ class Preferences(Adw.PreferencesDialog):
         self.multi_color_row.set_visible(not is_single_color)
         self.begin_color_label.set_label("Color" if is_single_color else "Begin")
 
+        is_accent_enabled = self.settings.get_boolean("use-accent-color")
+        self.color_row.set_sensitive(not is_accent_enabled)
+
     def _init_color_buttons(self) -> None:
         """Initialize color buttons with current settings."""
-        begin_color = parse_color_string(
-            self.settings.get_string("heatmap-begin-color"),
-        )
-        end_color = parse_color_string(
-            self.settings.get_string("heatmap-end-color"),
-        )
+        begin_color = self._get_begin_color()
+        end_color = parse_color_string(self.settings.get_string("heatmap-end-color"))
 
+        self._update_color_buttons(begin_color, end_color)
+
+    def _get_begin_color(self) -> Gdk.RGBA:
+        """Get the appropriate begin color based on settings.
+
+        Returns:
+            Gdk.RGBA: The color to use for the begin color buttons.
+
+        """
+        if self.settings.get_boolean("use-accent-color"):
+            accent_color = get_system_accent_color()
+            self.settings.set_string(
+                "heatmap-begin-color",
+                rgba_to_rgb_string(accent_color),
+            )
+            return accent_color
+        return parse_color_string(self.settings.get_string("heatmap-begin-color"))
+
+    def _update_color_buttons(self, begin_color: Gdk.RGBA, end_color: Gdk.RGBA) -> None:
+        """Update all color buttons with the given colors.
+
+        Args:
+            begin_color: The color to set for begin color buttons.
+            end_color: The color to set for the end color button.
+
+        """
         self.single_color_button.set_rgba(begin_color)
         self.multi_begin_color_button.set_rgba(begin_color)
         self.multi_end_color_button.set_rgba(end_color)
@@ -174,6 +210,28 @@ class Preferences(Adw.PreferencesDialog):
         direction = "Dark → Light" if is_reversed else "Light → Dark"
         dialog_utils.show_toast(self, f"Gradient direction: {direction}")
 
+    def _on_accent_color_toggled(self, switch: Adw.SwitchRow, _: any) -> None:
+        """Handle the accent color switch toggle."""
+        use_accent = switch.get_active()
+        self.color_row.set_sensitive(not use_accent)
+
+        if use_accent:
+            accent_color = get_system_accent_color()
+            if accent_color is not None:
+                self.single_color_button.set_rgba(accent_color)
+                self.multi_begin_color_button.set_rgba(
+                    accent_color,
+                )  # shares the same color for singe-/multi mode for now
+
+                self.settings.set_string(
+                    "heatmap-begin-color",
+                    rgba_to_rgb_string(accent_color),
+                )
+
+            dialog_utils.show_toast(self, "Using system accent color")
+        else:
+            dialog_utils.show_toast(self, "Using custom color")
+
     def _handle_color_change(
         self,
         button: Gtk.ColorDialogButton,
@@ -186,11 +244,15 @@ class Preferences(Adw.PreferencesDialog):
             setting_key: The settings key to update.
 
         """
+        # if system color dont allow manual color change
+        if (
+            self.settings.get_boolean("use-accent-color")
+            and setting_key == "heatmap-begin-color"
+        ):
+            return
+
         rgba = button.get_rgba()
-        color_str = (
-            f"rgb({int(rgba.red * 255)},{int(rgba.green * 255)},{int(rgba.blue * 255)})"
-        )
-        self.settings.set_string(setting_key, color_str)
+        self.settings.set_string(setting_key, rgba_to_rgb_string(rgba))
         dialog_utils.show_toast(self, "Heatmap color updated")
 
         # share the same color for both buttons

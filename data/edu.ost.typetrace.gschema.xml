@@ -26,5 +26,10 @@
 			<summary>Reverse heatmap gradient</summary>
 			<description>If enabled, the gradient direction is reversed (dark-to-light instead of light-to-dark).</description>
 		</key>
+		<key name="use-accent-color" type="b">
+			<default>false</default>
+			<summary>Use system accent color</summary>
+			<description>If enabled, the system accent color will be used as the base color for the heatmap.</description>
+		</key>
 	</schema>
 </schemalist>

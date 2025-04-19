@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import colorsys
+import logging
 from abc import ABC, abstractmethod
 from typing import Final, override
 
-from gi.repository import Gdk, Gio
+from gi.repository import Adw, Gdk, Gio
+
+logger = logging.getLogger(__name__)
 
 
 def parse_color_string(color_str: str) -> Gdk.RGBA:
@@ -41,6 +44,24 @@ def parse_color_string(color_str: str) -> Gdk.RGBA:
     return rgba
 
 
+def rgba_to_rgb_string(rgba: Gdk.RGBA) -> str:
+    """Convert Gdk.RGBA to rgb(r,g,b) string format.
+
+    Args:
+        rgba: The RGBA color object.
+
+    Returns:
+        String in the format "rgb(r,g,b)" with integer values 0-255.
+
+    """
+    r_int, g_int, b_int = (
+        int(rgba.red * 255),
+        int(rgba.green * 255),
+        int(rgba.blue * 255),
+    )
+    return f"rgb({r_int},{g_int},{b_int})"
+
+
 def get_color_scheme(settings: Gio.Settings) -> HeatmapColorScheme:
     """Get the appropriate color scheme based on settings.
 
@@ -51,9 +72,35 @@ def get_color_scheme(settings: Gio.Settings) -> HeatmapColorScheme:
         HeatmapColorScheme instance.
 
     """
+    # Very clean logic 10/10
     if settings.get_boolean("use-single-color-heatmap"):
+        if settings.get_boolean("use-accent-color"):
+            return AccentColorHeatmap(settings)
         return SingleColorHeatmap(settings)
     return MultiColorHeatmap(settings)
+
+
+def get_system_accent_color() -> Gdk.RGBA:
+    """Get the system accent color from Adwaita.
+
+    Returns:
+        RGBA color object.
+
+    """
+    style_manager = Adw.StyleManager.get_default()
+
+    # default to red if not supported
+    default_color = Gdk.RGBA()
+    default_color.parse("#ff0000")
+
+    if style_manager is not None and style_manager.get_system_supports_accent_colors():
+        accent_color = style_manager.get_accent_color()
+        try:
+            return Adw.accent_color_to_rgba(accent_color)
+        except (ValueError, TypeError) as e:
+            logger.warning("Failed to convert accent color: %s", e)
+
+    return default_color
 
 
 class HeatmapColorScheme(ABC):
@@ -139,18 +186,20 @@ class HeatmapColorScheme(ABC):
 class SingleColorHeatmap(HeatmapColorScheme):
     """Single color heatmap with auto-generated light/dark gradient."""
 
-    @override
-    def get_color_gradient(
+    def _generate_gradient_from_color(
         self,
+        color_rgba: Gdk.RGBA,
     ) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
-        """Get begin and end colors derived from a single color.
+        """Generate a gradient pair from a single color.
+
+        Args:
+            color_rgba: The base color to generate gradient from.
 
         Returns:
             Tuple of (begin_color, end_color) as RGB tuples.
 
         """
-        beg_rgba = parse_color_string(self.settings.get_string("heatmap-begin-color"))
-        r, g, b = beg_rgba.red, beg_rgba.green, beg_rgba.blue
+        r, g, b = color_rgba.red, color_rgba.green, color_rgba.blue
         h, s, v = colorsys.rgb_to_hsv(r, g, b)
 
         # Lighter version
@@ -168,6 +217,38 @@ class SingleColorHeatmap(HeatmapColorScheme):
         if self.settings.get_boolean("reverse-heatmap-gradient"):
             return end_color, beg_color
         return beg_color, end_color
+
+    @override
+    def get_color_gradient(
+        self,
+    ) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+        """Get begin and end colors derived from a single color.
+
+        Returns:
+            Tuple of (begin_color, end_color) as RGB tuples.
+
+        """
+        beg_rgba = parse_color_string(self.settings.get_string("heatmap-begin-color"))
+        return self._generate_gradient_from_color(beg_rgba)
+
+
+class AccentColorHeatmap(SingleColorHeatmap):
+    """Heatmap using system accent color."""
+
+    @override
+    def get_color_gradient(
+        self,
+    ) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+        """Get begin and end colors derived from the system accent color.
+
+        Returns:
+            Tuple of (begin_color, end_color) as RGB tuples.
+
+        """
+        accent_rgba = get_system_accent_color()
+
+        self.settings.set_string("heatmap-begin-color", rgba_to_rgb_string(accent_rgba))
+        return self._generate_gradient_from_color(accent_rgba)
 
 
 class MultiColorHeatmap(HeatmapColorScheme):

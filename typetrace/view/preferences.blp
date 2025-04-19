@@ -35,7 +35,12 @@ template $Preferences: Adw.PreferencesDialog {
           subtitle: "Invert the gradient direction (Light to Dark / Dark to Light)";
         }
 
-        Adw.ActionRow {
+        Adw.SwitchRow use_accent_color_switch {
+          title: "Use System Accent Color";
+          subtitle: "Use the GNOME system accent color for the heatmap";
+        }
+
+        Adw.ActionRow color_row {
           title: "Color";
           subtitle: "Set the base color for the heatmap";
 
