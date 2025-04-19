@@ -1,13 +1,19 @@
 """A preferences dialog that handles various settings and preferences."""
 
-from pathlib import Path
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from gi.repository import Adw, Gio, Gtk
 
 from typetrace.config import Config, DatabasePath
 from typetrace.controller.utils import desktop_utils, dialog_utils
-from typetrace.model.database_manager import DatabaseManager
-from typetrace.model.keystrokes import KeystrokeStore
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from typetrace.model.database_manager import DatabaseManager
+    from typetrace.model.keystrokes import KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/preferences.ui")
@@ -52,26 +58,28 @@ class Preferences(Adw.PreferencesDialog):
 
     def _on_autostart_toggled(self, row: Adw.SwitchRow, *_: any) -> None:
         """Handle the autostart toggle change."""
-        if row.get_active():
-            success, error_msg = desktop_utils.enable_autostart()
+
+        def on_autostart_result(success: bool, error_msg: str | None) -> None:  # noqa: FBT001
+            """Use callback to handle autostart enable/disable result."""
             if success:
-                dialog_utils.show_toast(self, "Backend autostart enabled")
+                dialog_utils.show_toast(
+                    self,
+                    f"Autostart {'enabled' if row.get_active() else 'disabled'}",
+                )
             else:
                 dialog_utils.show_error_dialog(
-                    self.parent_window, "Failed to enable autostart",
+                    self.parent_window,
+                    f"Couldn't {'enable' if row.get_active() else 'disable'} autostart",
                     secondary_text=error_msg,
                 )
-                row.set_active(False)
+                # Revert the toggle state if the operation failed
+                row.set_active(not row.get_active())
+
+        if row.get_active():
+            desktop_utils.enable_autostart(callback=on_autostart_result)
         else:
             success, error_msg = desktop_utils.disable_autostart()
-            if success:
-                dialog_utils.show_toast(self, "Backend autostart disabled")
-            else:
-                dialog_utils.show_error_dialog(
-                    self.parent_window, "Failed to disable autostart",
-                    secondary_text=error_msg,
-                )
-                row.set_active(True)
+            on_autostart_result(success, error_msg)
 
     def _on_export_clicked(self, _button: Gtk.Button) -> None:
         """Handle the export button click event, opens a save dialog for export."""
