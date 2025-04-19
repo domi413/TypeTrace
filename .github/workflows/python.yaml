@@ -3,12 +3,7 @@ name: Check Python Code
 on:
   pull_request:
     types:
-      - opened
-      - synchronize
       - ready_for_review
-      - reopened
-
-# if: ${{ !github.event.pull_request.draft }}
 
 jobs:
   lint:
