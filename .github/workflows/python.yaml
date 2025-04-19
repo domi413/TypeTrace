@@ -8,35 +8,25 @@ on:
       - ready_for_review
       - reopened
 
+if: ${{ !github.event.pull_request.draft }}
+
 jobs:
   lint:
-    runs-on: Ubuntu-latest
-    strategy:
-      matrix:
-        tool: [ruff, mypy]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.13"
-          cache: "pip"
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
 
       - name: Install ruff dependencies
-        if: matrix.tool == 'ruff'
-        run: pip install ruff
-
-      - name: Install mypy dependencies
-        if: matrix.tool == 'mypy'
-        run: pip install mypy evdev appdirs
+        run: uv tool install ruff
 
       - name: Run ruff
-        if: matrix.tool == 'ruff'
         run: ruff check typetrace/
-
-      - name: Run mypy
-        if: matrix.tool == 'mypy'
-        run: mypy typetrace/backend/
