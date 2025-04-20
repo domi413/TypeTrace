@@ -8,7 +8,8 @@ set ZIPFILE=typetrace.zip
 set INSTALLDIR=C:\Program Files\typetrace
 set MSYS2_ROOT=C:\tools\msys64
 set SHORTCUT_NAME=TypeTrace.lnk
-set ICON_PATH=%INSTALLDIR%\data\icons\hicolor\symbolic\apps\typetrace.ico
+set ICON_PATH=%INSTALLDIR%\data\icons\hicolor\scalable\apps\edu.ost.typetrace.ico
+set RELEASELINK=https://github.com/domi413/TypeTrace/archive/refs/tags/R4.zip
 
 :: -----------------------------
 :: ERROR HANDLING SETUP
