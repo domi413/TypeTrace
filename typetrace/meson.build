@@ -75,6 +75,7 @@ sources_controller_utils = [
   'controller/utils/dialog_utils.py',
   'controller/utils/desktop_utils.py',
   'controller/utils/chart_utils.py'
+  'controller/utils/color_utils.py'
 ]
 install_data(sources_controller_utils, install_dir: moduledir / 'controller' / 'utils')
 
