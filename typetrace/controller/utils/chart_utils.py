@@ -5,10 +5,26 @@ from __future__ import annotations
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Any, final, override
 
 import cairo
 from gi.repository import Adw, Gtk
+
+
+class ChartColor(StrEnum):
+    """Color definitions for chart elements."""
+
+    BLUE = "0.4,0.6,0.8"  # Blue
+    RED = "0.8,0.4,0.4"  # Red
+    GREEN = "0.4,0.8,0.4"  # Green
+    YELLOW = "0.8,0.8,0.4"  # Yellow
+    PURPLE = "0.6,0.4,0.8"  # Purple
+    ORANGE = "0.8,0.6,0.4"  # Orange
+    CYAN = "0.4,0.8,0.8"  # Cyan
+    MAGENTA = "0.8,0.4,0.8"  # Magenta
+    GRAY = "0.5,0.5,0.5"  # Gray
+    LIGHT_PURPLE = "0.7,0.7,0.9"  # Light purple
 
 
 @dataclass
@@ -437,18 +453,20 @@ class PieChart(Chart):
 
     def _get_pie_colors(self) -> list[tuple[float, float, float]]:
         """Return a list of colors for pie slices."""
-        # NOTE: Consider making this dynamic or configurable
         return [
-            (0.4, 0.6, 0.8),  # Blue
-            (0.8, 0.4, 0.4),  # Red
-            (0.4, 0.8, 0.4),  # Green
-            (0.8, 0.8, 0.4),  # Yellow
-            (0.6, 0.4, 0.8),  # Purple
-            (0.8, 0.6, 0.4),  # Orange
-            (0.4, 0.8, 0.8),  # Cyan
-            (0.8, 0.4, 0.8),  # Magenta
-            (0.5, 0.5, 0.5),  # Gray
-            (0.7, 0.7, 0.9),  # Light purple
+            tuple(float(x) for x in color.value.split(","))
+            for color in [
+                ChartColor.BLUE,
+                ChartColor.RED,
+                ChartColor.GREEN,
+                ChartColor.YELLOW,
+                ChartColor.PURPLE,
+                ChartColor.ORANGE,
+                ChartColor.CYAN,
+                ChartColor.MAGENTA,
+                ChartColor.GRAY,
+                ChartColor.LIGHT_PURPLE,
+            ]
         ]
 
     def _calculate_geometry(
