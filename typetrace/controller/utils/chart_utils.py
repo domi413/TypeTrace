@@ -202,6 +202,7 @@ class Chart(ABC):
         }
 
 
+@final
 class LineChart(Chart):
     """Line chart implementation."""
 
