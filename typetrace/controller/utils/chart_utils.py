@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Any, Dict
 
 import cairo
-from gi.repository import Adw, Gio, Gtk
+from gi.repository import Adw, Gtk
 
 
 @dataclass
@@ -120,22 +120,13 @@ class Chart(abc.ABC):
             The accent color as RGB tuple
 
         """
-        try:
-            settings = Gio.Settings.new("org.gnome.desktop.interface")
-            accent = settings.get_string("accent-color")
-            return {
-                "blue": (0.2, 0.5, 0.9),
-                "green": (0.3, 0.8, 0.2),
-                "yellow": (0.9, 0.8, 0.2),
-                "orange": (0.9, 0.6, 0.2),
-                "red": (0.9, 0.2, 0.2),
-                "magenta": (0.9, 0.2, 0.9),
-                "purple": (0.7, 0.3, 0.9),
-                "brown": (0.7, 0.5, 0.4),
-                "gray": (0.5, 0.5, 0.5),
-            }.get(accent, (0.3, 0.6, 1.0) if is_dark else (0.2, 0.5, 0.9))
-        except Gio.Error:
-            return (0.3, 0.6, 1.0) if is_dark else (0.2, 0.5, 0.9)
+        if hasattr(self.style_manager, "get_accent_color_rgba"):
+            rgba = self.style_manager.get_accent_color_rgba()
+            if rgba:
+                return (rgba.red, rgba.green, rgba.blue)
+
+        # Default accent color if no accent color
+        return (0.3, 0.6, 1.0) if is_dark else (0.2, 0.5, 0.9)
 
     def get_colors(self) -> Dict[str, Any]:
         """Get the color scheme for the chart.
