@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, final
 
 import cairo
 from gi.repository import Adw, Gtk
@@ -108,10 +108,12 @@ class Chart(ABC):
 
         """
 
+    @final
     def update(self) -> None:
         """Queue a redraw of the chart."""
         self.drawing_area.queue_draw()
 
+    @final
     def _draw_text(
         self,
         config: TextConfig,
@@ -133,6 +135,7 @@ class Chart(ABC):
         config.cr.move_to(x, config.y)
         config.cr.show_text(config.text)
 
+    @final
     def _draw_no_data(
         self,
         cr: cairo.Context,
@@ -162,6 +165,7 @@ class Chart(ABC):
             color,
         )
 
+    @final
     def _get_accent_color(self, *, is_dark: bool) -> tuple:
         """Get the system accent color.
 
@@ -180,6 +184,7 @@ class Chart(ABC):
         # Default accent color if no accent color
         return (0.3, 0.6, 1.0) if is_dark else (0.2, 0.5, 0.9)
 
+    @final
     def get_colors(self) -> dict[str, Any]:
         """Get the color scheme for the chart.
 
