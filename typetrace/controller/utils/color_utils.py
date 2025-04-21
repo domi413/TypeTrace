@@ -5,7 +5,7 @@ from __future__ import annotations
 import colorsys
 import logging
 from abc import ABC, abstractmethod
-from typing import Final, override
+from typing import Final, final, override
 
 from gi.repository import Adw, Gdk, Gio
 
@@ -133,6 +133,7 @@ class HeatmapColorScheme(ABC):
 
         """
 
+    @final
     def calculate_color_for_key(
         self,
         normalized_count: float,
@@ -164,6 +165,7 @@ class HeatmapColorScheme(ABC):
 
         return bg_color, text_color
 
+    @final
     def get_gradient_css(self) -> str:
         """Generate CSS for a gradient bar.
 
