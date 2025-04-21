@@ -134,7 +134,7 @@ class Preferences(Adw.PreferencesDialog):
     def _init_color_buttons(self) -> None:
         """Initialize color buttons with current settings."""
         if self.settings.get_boolean("use-accent-color"):
-            accent_color = self._get_accent_color()
+            accent_color = get_system_accent_color()
             single_color = accent_color
             begin_color = accent_color
         else:
@@ -147,15 +147,6 @@ class Preferences(Adw.PreferencesDialog):
 
         end_color = parse_color_string(self.settings.get_string("heatmap-end-color"))
         self._update_color_buttons(single_color, begin_color, end_color)
-
-    def _get_accent_color(self) -> Gdk.RGBA:
-        """Get the system accent color.
-
-        Returns:
-            Gdk.RGBA: The accent color.
-
-        """
-        return get_system_accent_color()
 
     def _update_color_buttons(
         self,
@@ -225,7 +216,7 @@ class Preferences(Adw.PreferencesDialog):
         self.color_row.set_sensitive(not use_accent)
 
         if use_accent:
-            accent_color = self._get_accent_color()
+            accent_color = get_system_accent_color()
             if accent_color is not None:
                 self.single_color_button.set_rgba(accent_color)
             dialog_utils.show_toast(self, "Using system accent color")
