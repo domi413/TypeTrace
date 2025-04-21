@@ -11,6 +11,8 @@ from typing import Any, final, override
 import cairo
 from gi.repository import Adw, Gtk
 
+from typetrace.controller.utils import color_utils
+
 
 class ChartColor(StrEnum):
     """Color definitions for chart elements."""
@@ -197,23 +199,15 @@ class Chart(ABC):
         )
 
     @final
-    def _get_accent_color(self, *, is_dark: bool) -> tuple:
+    def _get_accent_color(self) -> tuple:
         """Get the system accent color.
-
-        Args:
-            is_dark: Whether the system is using dark mode
 
         Returns:
             The accent color as RGB tuple
 
         """
-        if hasattr(self.style_manager, "get_accent_color_rgba"):
-            rgba = self.style_manager.get_accent_color_rgba()
-            if rgba:
-                return (rgba.red, rgba.green, rgba.blue)
-
-        # Default accent color if no accent color
-        return (0.3, 0.6, 1.0) if is_dark else (0.2, 0.5, 0.9)
+        rgba = color_utils.get_system_accent_color()
+        return (rgba.red, rgba.green, rgba.blue)
 
     @final
     def get_colors(self) -> dict[str, Any]:
@@ -224,7 +218,7 @@ class Chart(ABC):
 
         """
         is_dark = self.style_manager.get_dark()
-        accent = self._get_accent_color(is_dark=is_dark)
+        accent = self._get_accent_color()
         return {
             "line": accent,
             "fill": (*accent, 0.4 if self.style_manager.get_high_contrast() else 0.2),
