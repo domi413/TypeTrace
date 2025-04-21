@@ -91,7 +91,7 @@ def get_system_accent_color() -> Gdk.RGBA:
     """
     style_manager = Adw.StyleManager.get_default()
 
-    # default to red if not supported
+    # Default to red for non GNOME desktop
     default_color = Gdk.RGBA()
     default_color.parse("#ff0000")
 
