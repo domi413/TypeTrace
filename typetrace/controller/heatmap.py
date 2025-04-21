@@ -134,10 +134,11 @@ class Heatmap(Gtk.Box):
 
                 css_rules.append(
                     f"""
-                .{css_class} {{
-                    background-color: {bg_color};
-                    color: {text_color};
-                }}""",
+                   .{css_class} {{
+                        background-color: {bg_color};
+                        color: {text_color};
+                    }}
+                    """,
                 )
                 label.set_css_classes([css_class])
                 label.set_tooltip_text(str(keystroke.count))
