@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import abc
 import math
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
@@ -76,7 +76,7 @@ class LegendConfig:
     text_color: tuple
 
 
-class Chart(abc.ABC):
+class Chart(ABC):
     """Abstract base class for charts."""
 
     def __init__(self, drawing_area: Gtk.DrawingArea) -> None:
@@ -90,7 +90,7 @@ class Chart(abc.ABC):
         self.style_manager = Adw.StyleManager.get_default()
         self.drawing_area.set_draw_func(self.draw)
 
-    @abc.abstractmethod
+    @abstractmethod
     def draw(
         self,
         area: Gtk.DrawingArea,
