@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 import math
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 
 import cairo
 from gi.repository import Adw, Gtk
@@ -22,6 +22,58 @@ class TextConfig:
     font_size: float
     font_weight: cairo.FontWeight
     center: bool = False
+
+
+@dataclass
+class GridAndAxesConfig:
+    """Configuration for drawing grid and axes."""
+
+    cr: cairo.Context
+    width: int
+    height: int
+    padding: float
+    graph_height: float
+    max_value: float
+    colors: dict
+
+
+@dataclass
+class DataLabelsConfig:
+    """Configuration for drawing data labels."""
+
+    cr: cairo.Context
+    data: list[dict]
+    points: list[tuple[float, float]]
+    height: int
+    padding: float
+    colors: dict
+
+
+@dataclass
+class PieSliceConfig:
+    """Configuration for drawing pie slices and labels."""
+
+    cr: cairo.Context
+    data: list[Any]
+    total_count: int
+    center_x: float
+    center_y: float
+    radius: float
+    pie_colors: list
+    text_color: tuple
+
+
+@dataclass
+class LegendConfig:
+    """Configuration for drawing legend."""
+
+    cr: cairo.Context
+    data: list[Any]
+    total_count: int
+    width: int
+    height: int
+    pie_colors: list
+    text_color: tuple
 
 
 class Chart(abc.ABC):
@@ -128,7 +180,7 @@ class Chart(abc.ABC):
         # Default accent color if no accent color
         return (0.3, 0.6, 1.0) if is_dark else (0.2, 0.5, 0.9)
 
-    def get_colors(self) -> Dict[str, Any]:
+    def get_colors(self) -> dict[str, Any]:
         """Get the color scheme for the chart.
 
         Returns:
@@ -163,83 +215,78 @@ class LineChart(Chart):
         super().__init__(drawing_area)
         self.data_provider = data_provider
 
-    def draw(
+    def _setup_chart(
         self,
-        _area: Gtk.DrawingArea,
-        cr: cairo.Context,
         width: int,
         height: int,
-    ) -> None:
-        """Draw the line chart.
-
-        Args:
-            _area: The drawing area
-            cr: The Cairo context
-            width: The width of the drawing area
-            height: The height of the drawing area
-
-        """
+    ) -> tuple[dict, float, float, float]:
+        """Set up chart parameters."""
         colors = self.get_colors()
         padding = 40
         graph_width = width - 2 * padding
         graph_height = height - 2 * padding
-        data = self.data_provider()
+        return colors, padding, graph_width, graph_height
 
-        if not data:
-            self._draw_no_data(cr, width, height, colors["text"])
-            return
+    def _calculate_max_value(self, data: list[dict]) -> float:
+        """Calculate the maximum value for the Y-axis."""
+        max_val = max(d["count"] for d in data) if data else 0
+        if max_val == 0:
+            return 10.0
+        power = 10 ** math.floor(math.log10(max_val))
+        return math.ceil(max_val / power) * power
 
-        max_value = max(d["count"] for d in data)
-
-        if max_value == 0:
-            max_value = 10
-        else:
-            power = 10 ** math.floor(math.log10(max_value))
-            max_value = math.ceil(max_value / power) * power
-
+    def _draw_grid_and_axes(self, config: GridAndAxesConfig) -> None:
+        """Draw the grid lines and axes for the chart."""
         num_steps = 5
-        step = max_value / num_steps
+        step = config.max_value / num_steps
 
-        # Draw grid lines and y-axis labels
+        # Draw horizontal grid lines and y-axis labels
         for i in range(num_steps + 1):
-            y = padding + graph_height - (i * graph_height / num_steps)
-            cr.set_source_rgba(*colors["grid"], 0.5)
-            cr.set_line_width(0.5)
-            cr.move_to(padding, y)
-            cr.line_to(width - padding, y)
-            cr.stroke()
+            y = (
+                config.padding
+                + config.graph_height
+                - (i * config.graph_height / num_steps)
+            )
+            config.cr.set_source_rgba(*config.colors["grid"], 0.5)
+            config.cr.set_line_width(0.5)
+            config.cr.move_to(config.padding, y)
+            config.cr.line_to(config.width - config.padding, y)
+            config.cr.stroke()
             value = int(i * step)
             self._draw_text(
                 TextConfig(
-                    cr=cr,
+                    cr=config.cr,
                     text=str(value),
-                    x=padding - 25,
+                    x=config.padding - 25,
                     y=y + 5,
                     font_size=12,
                     font_weight=cairo.FONT_WEIGHT_NORMAL,
                     center=True,
                 ),
-                colors["text"],
+                config.colors["text"],
             )
 
-        # Draw vertical grid lines
-        for i in range(len(data)):
-            x = padding + (i * graph_width / (len(data) - 1) if len(data) > 1 else 0)
-            cr.set_source_rgba(*colors["grid"], 0.5)
-            cr.move_to(x, padding)
-            cr.line_to(x, height - padding)
-            cr.stroke()
-
         # Draw axes
-        cr.set_source_rgba(*colors["text"], 1)
-        cr.set_line_width(2)
-        cr.move_to(padding, padding)
-        cr.line_to(padding, height - padding)
-        cr.line_to(width - padding, height - padding)
-        cr.stroke()
+        config.cr.set_source_rgba(*config.colors["text"], 1)
+        config.cr.set_line_width(2)
+        config.cr.move_to(config.padding, config.padding)
+        config.cr.line_to(config.padding, config.height - config.padding)
+        config.cr.line_to(config.width - config.padding, config.height - config.padding)
+        config.cr.stroke()
 
-        # Draw line and fill
-        points = [
+    def _calculate_points(
+        self,
+        data: list[dict],
+        padding: float,
+        graph_width: float,
+        graph_height: float,
+        max_value: float,
+    ) -> list[tuple[float, float]]:
+        """Calculate the coordinates for data points."""
+        if not data:
+            return []
+
+        return [
             (
                 padding + (i * graph_width / (len(data) - 1) if len(data) > 1 else 0),
                 padding
@@ -249,35 +296,47 @@ class LineChart(Chart):
             for i, d in enumerate(data)
         ]
 
-        if points:
-            cr.set_line_width(2)
-            cr.set_source_rgba(*colors["line"], 1)
-            cr.move_to(*points[0])
-            for i in range(1, len(points)):
-                x0, y0 = points[i - 1]
-                x1, y1 = points[i]
-                cp_dist_x = (x1 - x0) * 0.4
-                cr.curve_to(x0 + cp_dist_x, y0, x1 - cp_dist_x, y1, x1, y1)
-            cr.stroke_preserve()
-            cr.line_to(points[-1][0], padding + graph_height)
-            cr.line_to(padding, padding + graph_height)
-            cr.close_path()
-            cr.set_source_rgba(*colors["fill"])
-            cr.fill()
+    def _draw_line_and_fill(
+        self,
+        cr: cairo.Context,
+        points: list[tuple[float, float]],
+        padding: float,
+        graph_height: float,
+        colors: dict,
+    ) -> None:
+        """Draw the line graph and the filled area underneath."""
+        if not points:
+            return
 
-        # Draw points and labels
-        for i, ((x, y), d) in enumerate(zip(points, data)):
-            cr.set_source_rgba(*colors["line"], 1)
-            cr.arc(x, y, 3, 0, 2 * math.pi)
-            cr.fill()
+        cr.set_line_width(2)
+        cr.set_source_rgba(*colors["line"], 1)
+        cr.move_to(*points[0])
+        for i in range(1, len(points)):
+            x0, y0 = points[i - 1]
+            x1, y1 = points[i]
+            cp_dist_x = (x1 - x0) * 0.4
+            cr.curve_to(x0 + cp_dist_x, y0, x1 - cp_dist_x, y1, x1, y1)
+        cr.stroke_preserve()
+        cr.line_to(points[-1][0], padding + graph_height)
+        cr.line_to(padding, padding + graph_height)
+        cr.close_path()
+        cr.set_source_rgba(*colors["fill"])
+        cr.fill()
+
+    def _draw_data_labels(self, config: DataLabelsConfig) -> None:
+        """Draw data points and labels on the chart."""
+        for i, ((x, y), d) in enumerate(zip(config.points, config.data)):
+            # Draw points
+            config.cr.set_source_rgba(*config.colors["line"], 1)
+            config.cr.arc(x, y, 3, 0, 2 * math.pi)
+            config.cr.fill()
+
+            # Draw count labels
             if d["count"] > 0:
-                # First data point, increase offset so it's not overlapping with Y-axis
-                x_offset = 0
-                if i == 0:
-                    x_offset = 20
+                x_offset = 20 if i == 0 else 0  # Offset first label from Y-axis
                 self._draw_text(
                     TextConfig(
-                        cr=cr,
+                        cr=config.cr,
                         text=str(d["count"]),
                         x=x + x_offset,
                         y=y - 10,
@@ -285,20 +344,67 @@ class LineChart(Chart):
                         font_weight=cairo.FONT_WEIGHT_NORMAL,
                         center=True,
                     ),
-                    colors["text"],
+                    config.colors["text"],
                 )
+
             self._draw_text(
                 TextConfig(
-                    cr=cr,
+                    cr=config.cr,
                     text=d["date"],
                     x=x,
-                    y=height - padding + 15,
+                    y=config.height - config.padding + 15,
                     font_size=12,
                     font_weight=cairo.FONT_WEIGHT_NORMAL,
                     center=True,
                 ),
-                colors["text"],
+                config.colors["text"],
             )
+
+    def draw(
+        self,
+        _area: Gtk.DrawingArea,
+        cr: cairo.Context,
+        width: int,
+        height: int,
+    ) -> None:
+        """Draw the line chart."""
+        data = self.data_provider()
+        colors, padding, graph_width, graph_height = self._setup_chart(width, height)
+
+        if not data:
+            self._draw_no_data(cr, width, height, colors["text"])
+            return
+
+        max_value = self._calculate_max_value(data)
+        self._draw_grid_and_axes(
+            GridAndAxesConfig(
+                cr=cr,
+                width=width,
+                height=height,
+                padding=padding,
+                graph_height=graph_height,
+                max_value=max_value,
+                colors=colors,
+            ),
+        )
+        points = self._calculate_points(
+            data,
+            padding,
+            graph_width,
+            graph_height,
+            max_value,
+        )
+        self._draw_line_and_fill(cr, points, padding, graph_height, colors)
+        self._draw_data_labels(
+            DataLabelsConfig(
+                cr=cr,
+                data=data,
+                points=points,
+                height=height,
+                padding=padding,
+                colors=colors,
+            ),
+        )
 
 
 class PieChart(Chart):
@@ -321,31 +427,10 @@ class PieChart(Chart):
         super().__init__(drawing_area)
         self.data_provider = data_provider
 
-    def draw(
-        self,
-        _area: Gtk.DrawingArea,
-        cr: cairo.Context,
-        width: int,
-        height: int,
-    ) -> None:
-        """Draw the pie chart.
-
-        Args:
-            _area: The drawing area
-            cr: The Cairo context
-            width: The width of the drawing area
-            height: The height of the drawing area
-
-        """
-        colors = self.get_colors()
-        data = self.data_provider()
-
-        if not data:
-            self._draw_no_data(cr, width, height, colors["text"])
-            return
-
-        # Colors for the pie slices
-        pie_colors = [
+    def _get_pie_colors(self) -> list[tuple[float, float, float]]:
+        """Return a list of colors for pie slices."""
+        # NOTE: Consider making this dynamic or configurable
+        return [
             (0.4, 0.6, 0.8),  # Blue
             (0.8, 0.4, 0.4),  # Red
             (0.4, 0.8, 0.4),  # Green
@@ -358,33 +443,45 @@ class PieChart(Chart):
             (0.7, 0.7, 0.9),  # Light purple
         ]
 
-        total_count = sum(item.count for item in data)
-        if total_count == 0:
-            self._draw_no_data(cr, width, height, colors["text"])
-            return
-
+    def _calculate_geometry(
+        self,
+        width: int,
+        height: int,
+    ) -> tuple[float, float, float]:
+        """Calculate center coordinates and radius for the pie chart."""
         chart_width = width * 0.65
-        center_x, center_y = width / 2, height / 2
+        center_x = width / 2
+        center_y = height / 2
         radius = min(chart_width, height) * 0.35
-        start_angle = -math.pi / 2
-        legend_x, legend_y = width * 0.75, height * 0.15
+        return center_x, center_y, radius
 
-        for i, item in enumerate(data):
-            percent = item.count / total_count
+    def _draw_slices_and_labels(self, config: PieSliceConfig) -> float:
+        """Draw pie slices and their percentage labels."""
+        start_angle = -math.pi / 2
+        for i, item in enumerate(config.data):
+            percent = 0 if config.total_count == 0 else item.count / config.total_count
             angle = 2 * math.pi * percent
-            cr.set_source_rgb(*pie_colors[i % len(pie_colors)])
-            cr.move_to(center_x, center_y)
-            cr.arc(center_x, center_y, radius, start_angle, start_angle + angle)
-            cr.close_path()
-            cr.fill()
+            color = config.pie_colors[i % len(config.pie_colors)]
+
+            config.cr.set_source_rgb(*color)
+            config.cr.move_to(config.center_x, config.center_y)
+            config.cr.arc(
+                config.center_x,
+                config.center_y,
+                config.radius,
+                start_angle,
+                start_angle + angle,
+            )
+            config.cr.close_path()
+            config.cr.fill()
 
             if percent > self.MIN_PERCENTAGE_THRESHOLD:
                 label_angle = start_angle + angle / 2
-                label_x = center_x + math.cos(label_angle) * radius * 0.7
-                label_y = center_y + math.sin(label_angle) * radius * 0.7
+                label_x = config.center_x + math.cos(label_angle) * config.radius * 0.7
+                label_y = config.center_y + math.sin(label_angle) * config.radius * 0.7
                 self._draw_text(
                     TextConfig(
-                        cr=cr,
+                        cr=config.cr,
                         text=f"{percent:.1%}",
                         x=label_x,
                         y=label_y,
@@ -392,21 +489,85 @@ class PieChart(Chart):
                         font_weight=cairo.FONT_WEIGHT_BOLD,
                         center=True,
                     ),
-                    colors["text"],
+                    config.text_color,
                 )
 
-            cr.set_source_rgb(*pie_colors[i % len(pie_colors)])
-            cr.rectangle(legend_x, legend_y + i * 25, 15, 15)
-            cr.fill()
+            start_angle += angle
+        return start_angle
+
+    def _draw_legend(self, config: LegendConfig) -> None:
+        """Draw the legend for the pie chart."""
+        legend_x = config.width * 0.75
+        legend_y = config.height * 0.15
+        legend_item_height = 25
+
+        for i, item in enumerate(config.data):
+            percent = 0 if config.total_count == 0 else item.count / config.total_count
+
+            color = config.pie_colors[i % len(config.pie_colors)]
+            current_legend_y = legend_y + i * legend_item_height
+
+            # Draw color box
+            config.cr.set_source_rgb(*color)
+            config.cr.rectangle(legend_x, current_legend_y, 15, 15)
+            config.cr.fill()
+
+            # Draw legend text
             self._draw_text(
                 TextConfig(
-                    cr=cr,
+                    cr=config.cr,
                     text=f"{item.key_name}: {item.count} ({percent:.1%})",
                     x=legend_x + 20,
-                    y=legend_y + i * 25 + 12,
+                    y=current_legend_y + 12,
                     font_size=12,
                     font_weight=cairo.FONT_WEIGHT_NORMAL,
                 ),
-                colors["text"],
+                config.text_color,
             )
-            start_angle += angle
+
+    def draw(
+        self,
+        _area: Gtk.DrawingArea,
+        cr: cairo.Context,
+        width: int,
+        height: int,
+    ) -> None:
+        """Draw the pie chart."""
+        colors = self.get_colors()
+        data = self.data_provider()
+
+        if not data:
+            self._draw_no_data(cr, width, height, colors["text"])
+            return
+
+        total_count = sum(item.count for item in data)
+        if total_count == 0:
+            self._draw_no_data(cr, width, height, colors["text"])
+            return
+
+        pie_colors = self._get_pie_colors()
+        center_x, center_y, radius = self._calculate_geometry(width, height)
+
+        self._draw_slices_and_labels(
+            PieSliceConfig(
+                cr=cr,
+                data=data,
+                total_count=total_count,
+                center_x=center_x,
+                center_y=center_y,
+                radius=radius,
+                pie_colors=pie_colors,
+                text_color=colors["text"],
+            ),
+        )
+        self._draw_legend(
+            LegendConfig(
+                cr=cr,
+                data=data,
+                total_count=total_count,
+                width=width,
+                height=height,
+                pie_colors=pie_colors,
+                text_color=colors["text"],
+            ),
+        )
