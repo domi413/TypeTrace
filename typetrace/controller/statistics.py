@@ -40,7 +40,11 @@ class Statistics(Gtk.Box):
 
         # Initialize charts
         self.line_chart = LineChart(self.drawing_area, self._get_keystroke_data)
-        self.pie_chart = PieChart(self.line_drawing_area, self._get_top_keystrokes)
+        self.pie_chart = PieChart(
+            self.line_drawing_area,
+            self._get_top_keystrokes,
+            self._get_total_keystroke_count,
+        )
 
         # Setup UI controls
         self.bar_count_spin.set_range(1, 10)
@@ -86,6 +90,20 @@ class Statistics(Gtk.Box):
         return sorted(keystrokes, key=lambda k: k.count, reverse=True)[
             : int(self.bar_count_spin.get_value())
         ]
+
+    def _get_total_keystroke_count(self) -> int:
+        """Get the total count of all keystrokes.
+
+        Returns:
+            Total count of all keystrokes for the selected date or all time
+
+        """
+        keystrokes = (
+            self.keystroke_store.get_keystrokes_by_date(self.selected_date)
+            if self.selected_date
+            else self.keystroke_store.get_all_keystrokes()
+        )
+        return sum(k.count for k in keystrokes)
 
     def _get_keystroke_data(self) -> list[dict]:
         """Get daily keystroke data for the line chart using SQL queries.

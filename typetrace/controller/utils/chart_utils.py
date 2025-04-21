@@ -80,6 +80,21 @@ class PieSliceConfig:
 
 
 @dataclass
+class PieSliceDrawConfig:
+    """Configuration for drawing a single pie slice."""
+
+    cr: cairo.Context
+    center_x: float
+    center_y: float
+    radius: float
+    start_angle: float
+    percent: float
+    color: tuple[float, float, float]
+    text_color: tuple[float, float, float]
+    label: str | None = None
+
+
+@dataclass
 class LegendConfig:
     """Configuration for drawing legend."""
 
@@ -440,16 +455,19 @@ class PieChart(Chart):
         self,
         drawing_area: Gtk.DrawingArea,
         data_provider: callable,
+        total_count_provider: callable | None = None,
     ) -> None:
         """Initialize the pie chart.
 
         Args:
             drawing_area: The GTK drawing area to draw on
             data_provider: A function that returns the data for the chart
+            total_count_provider: A function that returns the total count of all data
 
         """
         super().__init__(drawing_area)
         self.data_provider = data_provider
+        self.total_count_provider = total_count_provider
 
     def _get_pie_colors(self) -> list[tuple[float, float, float]]:
         """Return a list of colors for pie slices."""
@@ -481,53 +499,136 @@ class PieChart(Chart):
         radius = min(chart_width, height) * 0.35
         return center_x, center_y, radius
 
+    def _calculate_data_with_others(
+        self,
+        data: list[Any],
+        total_count: int,
+    ) -> tuple[list[Any], int, tuple[float, float, float]]:
+        """Calculate others count and return data with others info.
+
+        Args:
+            data: List of data items
+            total_count: Total count of all items
+
+        Returns:
+            Tuple containing (data items, others count, others color)
+
+        """
+        # Calculate sum of selected keystrokes
+        selected_count = sum(item.count for item in data)
+
+        # Calculate count for "Others" category
+        others_count = max(0, total_count - selected_count)
+
+        # Get color for "Others" category
+        others_color = tuple(float(x) for x in ChartColor.GRAY.value.split(","))
+
+        return data, others_count, others_color
+
+    def _draw_pie_slice(
+        self,
+        config: PieSliceDrawConfig,
+    ) -> float:
+        """Draw a single pie slice with optional label.
+
+        Returns:
+            The end angle of the slice
+
+        """
+        angle = 2 * math.pi * config.percent
+
+        config.cr.set_source_rgb(*config.color)
+        config.cr.move_to(config.center_x, config.center_y)
+        config.cr.arc(
+            config.center_x,
+            config.center_y,
+            config.radius,
+            config.start_angle,
+            config.start_angle + angle,
+        )
+        config.cr.close_path()
+        config.cr.fill()
+
+        if config.percent > self.MIN_PERCENTAGE_THRESHOLD and config.label is not None:
+            label_angle = config.start_angle + angle / 2
+            label_x = config.center_x + math.cos(label_angle) * config.radius * 0.7
+            label_y = config.center_y + math.sin(label_angle) * config.radius * 0.7
+            self._draw_text(
+                TextConfig(
+                    cr=config.cr,
+                    text=config.label,
+                    x=label_x,
+                    y=label_y,
+                    font_size=12,
+                    font_weight=cairo.FONT_WEIGHT_BOLD,
+                    center=True,
+                ),
+                config.text_color,
+            )
+
+        return config.start_angle + angle
+
     def _draw_slices_and_labels(self, config: PieSliceConfig) -> float:
         """Draw pie slices and their percentage labels."""
         start_angle = -math.pi / 2
-        for i, item in enumerate(config.data):
+
+        data, others_count, others_color = self._calculate_data_with_others(
+            config.data,
+            config.total_count,
+        )
+
+        # Draw slices for main data items
+        for i, item in enumerate(data):
             percent = 0 if config.total_count == 0 else item.count / config.total_count
-            angle = 2 * math.pi * percent
             color = config.pie_colors[i % len(config.pie_colors)]
 
-            config.cr.set_source_rgb(*color)
-            config.cr.move_to(config.center_x, config.center_y)
-            config.cr.arc(
-                config.center_x,
-                config.center_y,
-                config.radius,
-                start_angle,
-                start_angle + angle,
+            start_angle = self._draw_pie_slice(
+                PieSliceDrawConfig(
+                    cr=config.cr,
+                    center_x=config.center_x,
+                    center_y=config.center_y,
+                    radius=config.radius,
+                    start_angle=start_angle,
+                    percent=percent,
+                    color=color,
+                    text_color=config.text_color,
+                    label=f"{percent:.1%}",
+                ),
             )
-            config.cr.close_path()
-            config.cr.fill()
 
-            if percent > self.MIN_PERCENTAGE_THRESHOLD:
-                label_angle = start_angle + angle / 2
-                label_x = config.center_x + math.cos(label_angle) * config.radius * 0.7
-                label_y = config.center_y + math.sin(label_angle) * config.radius * 0.7
-                self._draw_text(
-                    TextConfig(
-                        cr=config.cr,
-                        text=f"{percent:.1%}",
-                        x=label_x,
-                        y=label_y,
-                        font_size=12,
-                        font_weight=cairo.FONT_WEIGHT_BOLD,
-                        center=True,
-                    ),
-                    config.text_color,
-                )
+        # Draw "Others" slice
+        if others_count > 0 and config.total_count > 0:
+            percent = others_count / config.total_count
 
-            start_angle += angle
+            start_angle = self._draw_pie_slice(
+                PieSliceDrawConfig(
+                    cr=config.cr,
+                    center_x=config.center_x,
+                    center_y=config.center_y,
+                    radius=config.radius,
+                    start_angle=start_angle,
+                    percent=percent,
+                    color=others_color,
+                    text_color=config.text_color,
+                    label=f"{percent:.1%}",
+                ),
+            )
+
         return start_angle
 
     def _draw_legend(self, config: LegendConfig) -> None:
         """Draw the legend for the pie chart."""
         legend_x = config.width * 0.75
         legend_y = config.height * 0.15
-        legend_item_height = 25
+        legend_item_height = 20
 
-        for i, item in enumerate(config.data):
+        data, others_count, others_color = self._calculate_data_with_others(
+            config.data,
+            config.total_count,
+        )
+
+        # Draw legends for selected items
+        for i, item in enumerate(data):
             percent = 0 if config.total_count == 0 else item.count / config.total_count
 
             color = config.pie_colors[i % len(config.pie_colors)]
@@ -543,6 +644,28 @@ class PieChart(Chart):
                 TextConfig(
                     cr=config.cr,
                     text=f"{item.key_name}: {item.count} ({percent:.1%})",
+                    x=legend_x + 20,
+                    y=current_legend_y + 12,
+                    font_size=12,
+                    font_weight=cairo.FONT_WEIGHT_NORMAL,
+                ),
+                config.text_color,
+            )
+
+        if others_count > 0 and config.total_count > 0:
+            percent = others_count / config.total_count
+            current_legend_y = legend_y + len(data) * legend_item_height
+
+            # Draw color box for "Others"
+            config.cr.set_source_rgb(*others_color)
+            config.cr.rectangle(legend_x, current_legend_y, 15, 15)
+            config.cr.fill()
+
+            # Draw legend text for "Others"
+            self._draw_text(
+                TextConfig(
+                    cr=config.cr,
+                    text=f"Others: {others_count} ({percent:.1%})",
                     x=legend_x + 20,
                     y=current_legend_y + 12,
                     font_size=12,
@@ -567,7 +690,13 @@ class PieChart(Chart):
             self._draw_no_data(cr, width, height, colors["text"])
             return
 
-        total_count = sum(item.count for item in data)
+        # Get total count of ALL keystrokes (not just selected ones)
+        total_count = (
+            self.total_count_provider()
+            if self.total_count_provider
+            else sum(item.count for item in data)
+        )
+
         if total_count == 0:
             self._draw_no_data(cr, width, height, colors["text"])
             return
