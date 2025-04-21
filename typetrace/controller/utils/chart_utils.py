@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, final
+from typing import Any, final, override
 
 import cairo
 from gi.repository import Adw, Gtk
@@ -366,6 +366,7 @@ class LineChart(Chart):
                 config.colors["text"],
             )
 
+    @override
     def draw(
         self,
         _area: Gtk.DrawingArea,
@@ -413,6 +414,7 @@ class LineChart(Chart):
         )
 
 
+@final
 class PieChart(Chart):
     """Pie chart implementation."""
 
@@ -531,6 +533,7 @@ class PieChart(Chart):
                 config.text_color,
             )
 
+    @override
     def draw(
         self,
         _area: Gtk.DrawingArea,
