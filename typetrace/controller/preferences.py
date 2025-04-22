@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Callable
 from gi.repository import Adw, Gdk, Gio, Gtk
 
 from typetrace.config import Config, DatabasePath
-from typetrace.controller.utils import desktop_utils, dialog_utils
+from typetrace.controller.utils import desktop_utils, dialog_utils, import_export
 from typetrace.controller.utils.color_utils import (
     get_system_accent_color,
     parse_color_string,
@@ -17,7 +17,6 @@ from typetrace.controller.utils.color_utils import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from typetrace.model.database_manager import DatabaseManager
     from typetrace.model.keystrokes import KeystrokeStore
 
 
@@ -49,7 +48,6 @@ class Preferences(Adw.PreferencesDialog):
     def __init__(
         self,
         parent_window: Gtk.Window,
-        db_manager: DatabaseManager,
         keystroke_store: KeystrokeStore,
         settings: Gio.Settings,
     ) -> None:
@@ -66,7 +64,6 @@ class Preferences(Adw.PreferencesDialog):
         self.parent_window = parent_window
 
         self.settings = settings
-        self.db_manager = db_manager
         self.keystroke_store = keystroke_store
 
         begin_dialog = Gtk.ColorDialog(title="Select Begin Color", modal=True)
@@ -278,7 +275,7 @@ class Preferences(Adw.PreferencesDialog):
         """Handle the export button click event, opens a save dialog for export."""
 
         def export_callback(path: Path) -> None:
-            if self.db_manager.export_database(path):
+            if import_export.export_database(path):
                 dialog_utils.show_toast(self, "Data Exported Successfully")
             else:
                 dialog_utils.show_error_dialog(self.parent_window, "Export Failed")
@@ -321,7 +318,7 @@ class Preferences(Adw.PreferencesDialog):
             src_path: The path to the database file for import.
 
         """
-        if self.db_manager.import_database(src_path):
+        if import_export.import_database(src_path):
             dialog_utils.show_toast(self, "Data Imported Successfully")
         else:
             dialog_utils.show_error_dialog(self.parent_window, "Import Failed")

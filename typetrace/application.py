@@ -10,7 +10,6 @@ from gi.repository import Adw, Gio
 from typetrace.config import DatabasePath
 from typetrace.controller.preferences import Preferences
 from typetrace.controller.window import TypetraceWindow
-from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
 
 
@@ -29,7 +28,6 @@ class Application(Adw.Application):
 
         self.db_conn = sqlite3.connect(DatabasePath.DB_PATH)
         self.keystroke_store = KeystrokeStore(self.db_conn)
-        self.db_manager = DatabaseManager()
 
         self._setup_actions()
 
@@ -79,7 +77,6 @@ class Application(Adw.Application):
         """Show the application preferences dialog."""
         pref_dialog = Preferences(
             parent_window=self.props.active_window,
-            db_manager=self.db_manager,
             keystroke_store=self.keystroke_store,
             settings=self.settings,
         )
