@@ -6,8 +6,6 @@ on:
       - edited
       - opened
 
-if: ${{ !github.event.pull_request.draft }}
-
 jobs:
   pull-request-title:
     runs-on: ubuntu-latest

@@ -19,6 +19,91 @@ template $Preferences: Adw.PreferencesDialog {
         title: "Theme";
         subtitle: "Application color scheme preference";
       }
+
+      Adw.SwitchRow single_color_switch {
+        title: "Use Single Color Gradient";
+        subtitle: "Generate heatmap from a single base color";
+      }
+
+      Adw.ExpanderRow single_color_expander {
+        title: "Single Color Settings";
+        subtitle: "Configure single color mode settings";
+        visible: false;
+
+        Adw.SwitchRow reverse_gradient_switch {
+          title: "Reverse Gradient Direction";
+          subtitle: "Invert the gradient direction (Light to Dark / Dark to Light)";
+        }
+
+        Adw.SwitchRow use_accent_color_switch {
+          title: "Use System Accent Color";
+          subtitle: "Use the GNOME system accent color for the heatmap";
+        }
+
+        Adw.ActionRow color_row {
+          title: "Color";
+          subtitle: "Set the base color for the heatmap";
+
+          Box {
+            orientation: horizontal;
+            spacing: 10;
+            valign: center;
+
+            ColorDialogButton single_color_button {
+              tooltip-text: "Base color for the heatmap";
+              valign: center;
+              margin-top: 6;
+            }
+          }
+        }
+      }
+
+      Adw.ActionRow multi_color_row {
+        title: "Multi-Color Settings";
+        subtitle: "Set the colors for the heatmap gradient";
+
+        Box {
+          orientation: horizontal;
+          spacing: 10;
+          valign: center;
+
+          Box {
+            orientation: vertical;
+            spacing: 5;
+
+            ColorDialogButton multi_begin_color_button {
+              tooltip-text: "Color for lowest frequency keys";
+              valign: center;
+              margin-top: 6;
+            }
+
+            Label begin_color_label {
+              label: "Begin";
+              halign: center;
+              css-classes: [ "dim-label" ];
+              margin-bottom: 6;
+            }
+          }
+
+          Box end_color_box {
+            orientation: vertical;
+            spacing: 5;
+
+            ColorDialogButton multi_end_color_button {
+              tooltip-text: "Color for highest frequency keys";
+              valign: center;
+              margin-top: 6;
+            }
+
+            Label {
+              label: "End";
+              halign: center;
+              css-classes: [ "dim-label" ];
+              margin-bottom: 6;
+            }
+          }
+        }
+      }
     }
 
     Adw.PreferencesGroup {
