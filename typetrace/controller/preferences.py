@@ -17,7 +17,7 @@ from typetrace.controller.utils.color_utils import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from typetrace.model.keystrokes import KeystrokeStore
+    from typetrace.model.keystroke_store import KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/preferences.ui")

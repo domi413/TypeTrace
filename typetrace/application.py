@@ -10,7 +10,7 @@ from gi.repository import Adw, Gio
 from typetrace.config import DatabasePath
 from typetrace.controller.preferences import Preferences
 from typetrace.controller.window import TypetraceWindow
-from typetrace.model.keystrokes import KeystrokeStore
+from typetrace.model.keystroke_store import KeystrokeStore
 
 
 class Application(Adw.Application):

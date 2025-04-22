@@ -4,7 +4,7 @@ from gi.repository import Adw, Gio, Gtk
 
 from typetrace.controller.heatmap import Heatmap
 from typetrace.controller.verbose import Verbose
-from typetrace.model.keystrokes import KeystrokeStore
+from typetrace.model.keystroke_store import KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/window.ui")

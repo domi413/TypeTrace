@@ -10,9 +10,8 @@ from typetrace.controller.utils.color_utils import get_color_scheme
 from typetrace.model.layouts import KEYBOARD_LAYOUTS
 
 if TYPE_CHECKING:
-    from model.keystrokes import Keystroke
-
-    from typetrace.model.keystrokes import KeystrokeStore
+    from typetrace.model.keystroke import Keystroke
+    from typetrace.model.keystroke_store import KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/heatmap.ui")

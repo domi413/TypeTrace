@@ -4,29 +4,8 @@ from __future__ import annotations
 
 import sqlite3
 
-from gi.repository import GObject
-
 from typetrace.config import DatabasePath
-
-
-class Keystroke(GObject.Object):
-    """Class to model keystrokes."""
-
-    __gtype_name__ = "Keystroke"
-
-    scan_code: int = GObject.Property(type=int, default=0)
-    count: int = GObject.Property(type=int, default=0)
-    key_name: str = GObject.Property(type=str, default="")
-    date: str = GObject.Property(type=str, default="")
-
-    def __init__(self, scan_code: int, count: int, key_name: str, date: str) -> None:
-        """Initialize the Keystroke object."""
-        super().__init__()
-        self.scan_code = scan_code
-        self.count = count
-        self.key_name = key_name.replace("KEY_", "")
-        self.date = date
-
+from typetrace.model.keystroke import Keystroke
 
 GET_ALL_KEYSTROKES = """
 SELECT scan_code, SUM(count) as total_count, key_name, MAX(date) as latest_date
@@ -56,7 +35,6 @@ WHERE date = ?
 CLEAR_KEYSTROKES = """
 DELETE FROM keystrokes
 """
-
 
 class KeystrokeStore:
     """Model for interacting with the keystrokes table in the database."""
