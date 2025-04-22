@@ -318,7 +318,7 @@ class Preferences(Adw.PreferencesDialog):
             src_path: The path to the database file for import.
 
         """
-        if desktop_utils.import_export.import_database(src_path):
+        if desktop_utils.import_database(src_path):
             dialog_utils.show_toast(self, "Data Imported Successfully")
         else:
             dialog_utils.show_error_dialog(self.parent_window, "Import Failed")
