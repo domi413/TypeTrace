@@ -1,4 +1,5 @@
 """The verbose widget that displays keystroke data in text."""
+from __future__ import annotations
 
 from gi.repository import Gio, Gtk
 
@@ -34,14 +35,16 @@ class Verbose(Gtk.Box):
         # Set the sort_model's sorter to the column_view's sorter
         self.sort_model.set_sorter(self.column_view.get_sorter())
 
-    def update(self) -> None:
+    def update(self, keystrokes: list[Keystroke] | None = None) -> None:
         """Update the list to reflect current data."""
-        self._populate_list_store()
+        self._populate_list_store(keystrokes)
 
-    def _populate_list_store(self) -> None:
+    def _populate_list_store(self, keystrokes: list[Keystroke] | None = None) -> None:
         """Populate the list store with keystroke data."""
+        if keystrokes is None:
+            keystrokes = self.keystroke_store.get_all_keystrokes()
         self.list_store.remove_all()
-        for keystroke in self.keystroke_store.get_all_keystrokes():
+        for keystroke in keystrokes:
             self.list_store.append(
                 Keystroke(
                     scan_code=keystroke.scan_code,

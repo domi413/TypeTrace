@@ -10,6 +10,8 @@ from typetrace.controller.utils.color_utils import get_color_scheme
 from typetrace.model.layouts import KEYBOARD_LAYOUTS
 
 if TYPE_CHECKING:
+    from model.keystrokes import Keystroke
+
     from typetrace.model.keystrokes import KeystrokeStore
 
 
@@ -80,9 +82,9 @@ class Heatmap(Gtk.Box):
         self._build_keyboard()
         self._update_colors()
 
-    def update(self) -> None:
+    def update(self, keystrokes: list[Keystroke] | None = None) -> None:
         """Update the heatmap to reflect current data."""
-        self._update_colors()
+        self._update_colors(keystrokes)
 
     def _build_keyboard(self) -> None:
         """Build the keyboard layout dynamically using scancodes."""
@@ -109,9 +111,10 @@ class Heatmap(Gtk.Box):
         label.set_size_request(size, size)
         return label
 
-    def _update_colors(self) -> None:
+    def _update_colors(self, keystrokes: list[Keystroke] | None = None) -> None:
         """Assign each displayed key the appropriate color."""
-        keystrokes = self.keystroke_store.get_all_keystrokes()
+        if keystrokes is None:
+            keystrokes = self.keystroke_store.get_all_keystrokes()
         most_pressed = self.keystroke_store.get_highest_count() or 1
 
         color_scheme = get_color_scheme(self.settings)

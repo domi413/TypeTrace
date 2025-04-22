@@ -35,6 +35,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         """
         super().__init__(**kwargs)
+        self.keystroke_store = keystroke_store
         self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
         self.verbose = Verbose(keystroke_store=keystroke_store)
         self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
@@ -55,5 +56,6 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
     def _on_refresh_clicked(self) -> None:
         """Handle refresh button click."""
-        self.heatmap.update()
-        self.verbose.update()
+        keystrokes = self.keystroke_store.get_all_keystrokes()
+        self.heatmap.update(keystrokes)
+        self.verbose.update(keystrokes)
