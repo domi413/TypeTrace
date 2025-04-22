@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Callable
 from gi.repository import Adw, Gdk, Gio, Gtk
 
 from typetrace.config import Config, DatabasePath
-from typetrace.controller.utils import desktop_utils, dialog_utils, import_export
+from typetrace.controller.utils import desktop_utils, dialog_utils
 from typetrace.controller.utils.color_utils import (
     get_system_accent_color,
     parse_color_string,
@@ -275,7 +275,7 @@ class Preferences(Adw.PreferencesDialog):
         """Handle the export button click event, opens a save dialog for export."""
 
         def export_callback(path: Path) -> None:
-            if import_export.export_database(path):
+            if desktop_utils.export_database(path):
                 dialog_utils.show_toast(self, "Data Exported Successfully")
             else:
                 dialog_utils.show_error_dialog(self.parent_window, "Export Failed")
@@ -318,7 +318,7 @@ class Preferences(Adw.PreferencesDialog):
             src_path: The path to the database file for import.
 
         """
-        if import_export.import_database(src_path):
+        if desktop_utils.import_export.import_database(src_path):
             dialog_utils.show_toast(self, "Data Imported Successfully")
         else:
             dialog_utils.show_error_dialog(self.parent_window, "Import Failed")

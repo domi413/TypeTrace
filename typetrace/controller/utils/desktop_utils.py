@@ -1,7 +1,13 @@
 """Class used to manipulate the database file."""
 from __future__ import annotations
 
-from typetrace.config import Config
+import shutil
+from typing import TYPE_CHECKING
+
+from typetrace.config import Config, DatabasePath
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def is_autostart_enabled() -> bool:
@@ -32,3 +38,22 @@ def disable_autostart() -> tuple[bool, str | None]:
         return False, "Permission denied when trying to remove autostart symlink."
     else:
         return True, None
+
+def export_database(dest_path: Path) -> bool:
+    """Export the database to the specified destination path."""
+    try:
+        shutil.copy2(DatabasePath.DB_PATH, dest_path)
+    except OSError:
+        return False
+    else:
+        return True
+
+def import_database(src_path: Path) -> bool:
+    """Import database from the source path, overwriting the current one."""
+    try:
+        DatabasePath.DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src_path, DatabasePath.DB_PATH)
+    except OSError:
+        return False
+    else:
+        return True
