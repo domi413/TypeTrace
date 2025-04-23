@@ -37,10 +37,13 @@ jobs:
           description="${BASH_REMATCH[2]}"
 
           echo "TEST---------------------------------------"
-          echo "$description" | cspell stdin --config .cspell.yaml --verbose > cspell_output.txt
+          echo "$description" | cspell stdin --config .cspell.yaml --verbose --show-context > cspell_output.txt 2>&1
           if [ $? -ne 0 ]; then
             echo "⚠️ Spelling issues found in PR title description:"
+            echo "Description: $description"
+            echo "Details:"
             cat cspell_output.txt
-            echo "$description" | cspell stdin --config .cspell.yaml --show-suggestions
+            echo "Suggestions:"
+            echo "$description" | cspell stdin --config .cspell.yaml --show-suggestions --show-context
             exit 1
           fi
