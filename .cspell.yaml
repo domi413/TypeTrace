@@ -1,17 +1,19 @@
 $schema: https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
 version: "0.2"
-language: en
-globRoot: ./
+
 dictionaryDefinitions:
   - name: project-words
     path: .github/spellcheck/dictionaries/project-words.txt
+
   - name: custom-python
     path: .github/spellcheck/dictionaries/python.txt
+
 dictionaries:
+  - custom-python
+  - en_US
   - project-words
   - python
-  - en-gb
-  - custom-python
+
 ignorePaths:
   - "**/.github/spellcheck/dictionaries/**"
   - "**/*.xml*"
@@ -19,4 +21,3 @@ ignorePaths:
   - "**/*.sh"
   - "**/data/icons/**"
   - "**/meson.build"
-
