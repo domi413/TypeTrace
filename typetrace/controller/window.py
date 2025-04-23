@@ -35,7 +35,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         """
         super().__init__(**kwargs)
-        self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
+        self.heatmap = Heatmap(settings=settings, keystroke_store=keystroke_store)
         self.verbose = Verbose(keystroke_store=keystroke_store)
         self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
 

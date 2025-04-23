@@ -38,21 +38,23 @@ class Heatmap(Gtk.Box):
         self,
         settings: Gio.Settings,
         keystroke_store: KeystrokeStore,
-        layout: str = "en_US",
     ) -> None:
         """Initialize the heatmap widget.
 
         Args:
             settings: Gio settings used to persist and apply preferences.
             keystroke_store: Access to keystrokes.
-            layout: Keyboard layout to use.
 
         """
         super().__init__()
         self.settings = settings
         self.keystroke_store: KeystrokeStore = keystroke_store
-        self.layout = layout
-        self.key_widgets: dict[int, Gtk.Label] = {}  # Keyed by scancode
+
+        self.layout = self.settings.get_string("keyboard-layout")
+        if not self.layout or self.layout not in KEYBOARD_LAYOUTS:
+            self.layout = "en_US"
+
+        self.key_widgets: dict[int, Gtk.Label] = {}
 
         self.css_provider = Gtk.CssProvider()
         Gtk.StyleContext.add_provider_for_display(
@@ -77,12 +79,39 @@ class Heatmap(Gtk.Box):
                 lambda *_: self._update_colors(),
             )
 
+        self.settings.connect(
+            "changed::keyboard-layout",
+            self._on_keyboard_layout_changed,
+        )
+
         self._build_keyboard()
         self._update_colors()
 
     def update(self) -> None:
         """Update the heatmap to reflect current data."""
         self._update_colors()
+
+    def _on_keyboard_layout_changed(self, settings: Gio.Settings, key: str) -> None:
+        """Handle keyboard layout setting changes.
+
+        Args:
+            settings: The settings object.
+            key: The key that changed.
+
+        """
+        new_layout = settings.get_string(key)
+        if new_layout != self.layout and new_layout in KEYBOARD_LAYOUTS:
+            self.layout = new_layout
+
+            # Clear keyboard
+            child = self.keyboard_container.get_first_child()
+            while child:
+                self.keyboard_container.remove(child)
+                child = self.keyboard_container.get_first_child()
+            self.key_widgets.clear()
+
+            self._build_keyboard()
+            self._update_colors()
 
     def _build_keyboard(self) -> None:
         """Build the keyboard layout dynamically using scancodes."""
