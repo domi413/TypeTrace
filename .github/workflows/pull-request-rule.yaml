@@ -14,13 +14,30 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Validate PR Title
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install cspell
+        run: npm install -g cspell
+
+      - name: Validate PR Title and Spellcheck
         if: env.ACT != 'true'
         run: |
-          pattern="^(fix|feat|pipeline|doc|test|wip)\(#TYP-[0-9]+\): .+"
+          pattern="^(fix|feat|pipeline|doc|test|wip)\(#TYP-[0-9]+\): (.+)"
           pr_title="${{ github.event.pull_request.title }}"
+
           if ! [[ "$pr_title" =~ $pattern ]]; then
               echo "❌ Pull Request title is invalid!"
               echo "Allowed format: fix|feat|pipeline|doc|wip(#TICKET-ID): Description"
               exit 1
           fi
+
+          description="${BASH_REMATCH[2]}"
+
+          echo "$description" | cspell stdin --config .github/spellcheck/cspell.json --no-exit-code || {
+            echo "⚠️ Spelling issues found in PR title description:"
+            echo "$description" | cspell stdin --config .github/spellcheck/cspell.json --show-suggestions
+            exit 1
+          }
