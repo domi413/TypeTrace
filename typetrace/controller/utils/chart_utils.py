@@ -463,24 +463,6 @@ class PieChart(Chart):
         self.data_provider = data_provider
         self.total_count_provider = total_count_provider
 
-    def _get_pie_colors(self) -> list[tuple[float, float, float]]:
-        """Return a list of colors for pie slices."""
-        return [
-            tuple(float(x) for x in color.value.split(","))
-            for color in [
-                ChartColor.BLUE,
-                ChartColor.RED,
-                ChartColor.GREEN,
-                ChartColor.YELLOW,
-                ChartColor.PURPLE,
-                ChartColor.ORANGE,
-                ChartColor.CYAN,
-                ChartColor.MAGENTA,
-                ChartColor.GRAY,
-                ChartColor.LIGHT_PURPLE,
-            ]
-        ]
-
     def _calculate_geometry(
         self,
         width: int,
@@ -695,7 +677,9 @@ class PieChart(Chart):
             self._draw_no_data(cr, width, height, colors["text"])
             return
 
-        pie_colors = self._get_pie_colors()
+        pie_colors = [
+            tuple(float(x) for x in color.value.split(",")) for color in ChartColor
+        ]
         center_x, center_y, radius = self._calculate_geometry(width, height)
 
         self._draw_slices_and_labels(
