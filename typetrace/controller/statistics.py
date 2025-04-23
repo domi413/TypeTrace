@@ -65,14 +65,13 @@ class Statistics(Gtk.Box):
     def _clear_date(self, _button: Gtk.Button) -> None:
         self.selected_date = None
         self.clear_date_button.set_sensitive(False)
-        self.date_button.set_label("Select Date")
+        self.date_button.get_child().set_label("Select Date")
         self.pie_chart.update()
 
     def _date_selected(self, calendar: Gtk.Calendar) -> None:
         self.selected_date = calendar.get_date().format("%Y-%m-%d")
-        self.date_button.get_popover().popdown()
         self.clear_date_button.set_sensitive(True)
-        self.date_button.set_label(self.selected_date)
+        self.date_button.get_child().set_label(self.selected_date)
         self.pie_chart.update()
 
     def _get_top_keystrokes(self) -> list:

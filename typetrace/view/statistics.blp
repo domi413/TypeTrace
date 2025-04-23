@@ -1,7 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $Statistics : Gtk.Box {
+template $Statistics: Gtk.Box {
     orientation: vertical;
     halign: fill;
     valign: fill;
@@ -29,7 +29,10 @@ template $Statistics : Gtk.Box {
                 label: "Daily Keystrokes";
                 halign: center;
                 margin-bottom: 20;
-                css-classes: ["title-2"];
+
+                css-classes: [
+                    "title-2",
+                ];
             }
 
             Gtk.DrawingArea drawing_area {
@@ -59,7 +62,10 @@ template $Statistics : Gtk.Box {
                 label: "Top Keystrokes";
                 halign: center;
                 margin-bottom: 20;
-                css-classes: ["title-2"];
+
+                css-classes: [
+                    "title-2",
+                ];
             }
 
             Gtk.DrawingArea line_drawing_area {
@@ -94,6 +100,7 @@ template $Statistics : Gtk.Box {
                             upper: 10;
                             step-increment: 1;
                         };
+
                         digits: 0;
                         width-chars: 3;
                     }
@@ -105,20 +112,15 @@ template $Statistics : Gtk.Box {
                     spacing: 5;
 
                     Gtk.MenuButton date_button {
-                        label: "Select Date";
-                        popover: calendar_popover;
-                    }
+                        popover: Gtk.Popover calendar_popover {
+                            autohide: true;
 
-                    Gtk.Popover calendar_popover {
-                        autohide: true;
-                        has-arrow: true;
-                        position: top;
+                            child: Gtk.Calendar calendar {};
+                        };
 
-                        child: Gtk.Calendar calendar {
-                            margin-start: 6;
-                            margin-end: 6;
-                            margin-top: 6;
-                            margin-bottom: 6;
+                        child: Adw.ButtonContent {
+                            icon-name: "x-office-calendar-symbolic";
+                            label: "Select Date";
                         };
                     }
 
