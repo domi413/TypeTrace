@@ -36,8 +36,8 @@ jobs:
 
           description="${BASH_REMATCH[2]}"
 
-          echo "$description" | cspell stdin --config .github/spellcheck/cspell.json --no-exit-code || {
+          echo "$description" | cspell stdin --config .cspell.yaml --no-exit-code || {
             echo "⚠️ Spelling issues found in PR title description:"
-            echo "$description" | cspell stdin --config .github/spellcheck/cspell.json --show-suggestions
+            echo "$description" | cspell stdin --config .cspell.yaml --show-suggestions
             exit 1
           }
