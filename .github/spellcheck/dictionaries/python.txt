@@ -1,15 +1,16 @@
 # GTK
 accels
+adwaita
+dbus
 ecodes
 evdev
 executemany
+filemanager
 gapplication
+gfile
 gresource
 gresources
+gsettings
 levelname
 pynput
-filemanager
-adwaita
-gfile
-dbus
-gsettings
+signum
