@@ -37,6 +37,8 @@ jobs:
             echo -e "${BOLD_RED}❌ Pull Request title is invalid!${RESET}"
             echo -e "${BOLD_YELLOW}⚠️ Allowed format: fix|feat|pipeline|doc|wip(#TICKET-ID): Description${RESET}"
             exit 1
+          else
+            echo -e "${BOLD_GREEN}✅ Pull Request title is valid!${RESET}"
           fi
 
           description="${BASH_REMATCH[2]}"
