@@ -15,8 +15,12 @@ dependency('gtk4', version: '>= 4.0')
 dependency('libadwaita-1', version: '>= 1.0')
 find_program('blueprint-compiler', required: true)
 
+# Subdirectories
 subdir('data')
 subdir('typetrace')
+
+# Install backend files explicitly
+install_subdir('typetrace/backend', install_dir: join_paths(get_option('prefix'), 'share', 'typetrace', 'typetrace'))
 
 gnome.post_install(
   glib_compile_schemas: true,
