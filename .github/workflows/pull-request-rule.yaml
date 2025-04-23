@@ -39,9 +39,8 @@ jobs:
           echo "TEST---------------------------------------"
           echo "$description" | cspell stdin --config .cspell.yaml --verbose > cspell_output.txt
           if [ $? -ne 0 ]; then
-          echo "TEST1---------------------------------------"
             echo "⚠️ Spelling issues found in PR title description:"
             cat cspell_output.txt
             echo "$description" | cspell stdin --config .cspell.yaml --show-suggestions
             exit 1
-          }
+          fi
