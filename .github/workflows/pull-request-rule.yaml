@@ -25,20 +25,29 @@ jobs:
       - name: Validate PR Title and Spellcheck
         if: env.ACT != 'true'
         run: |
+          BOLD_GREEN="\033[1;32m"
+          BOLD_YELLOW="\033[1;33m"
+          BOLD_RED="\033[1;31m"
+          RESET="\033[0m"
+
           pattern="^(fix|feat|pipeline|doc|test|wip)\(#TYP-[0-9]+\): (.+)"
           pr_title="${{ github.event.pull_request.title }}"
 
           if ! [[ "$pr_title" =~ $pattern ]]; then
-            echo "⚠️ Pull Request title is invalid!"
-            echo "Allowed format: fix|feat|pipeline|doc|wip(#TICKET-ID): Description"
+            echo "🚫${BOLD_RED}Pull Request title is invalid!${RESET}"
+            echo "${BOLD_YELLOW}Allowed format: fix|feat|pipeline|doc|wip(#TICKET-ID): Description${RESET}"
             exit 1
           fi
 
           description="${BASH_REMATCH[2]}"
 
-          echo "DESCRIPTION: $description"
           echo "$description" | cspell stdin --config .cspell.yaml --verbose --show-context
           if [ $? -ne 0 ]; then
+            echo -e "${BOLD_YELLOW}⚠️ Spelling issues found in description: $description${RESET}"
+            echo "Suggestions:"
             echo "$description" | cspell stdin --config .cspell.yaml --show-suggestions --show-context
             exit 1
+          else
+            echo -e "${BOLD_GREEN}✅ No spelling issues found in description: $description${RESET}"
           fi
+        shell: bash
