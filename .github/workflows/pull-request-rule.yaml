@@ -29,21 +29,16 @@ jobs:
           pr_title="${{ github.event.pull_request.title }}"
 
           if ! [[ "$pr_title" =~ $pattern ]]; then
-            echo "❌ Pull Request title is invalid!"
+            echo "⚠️ Pull Request title is invalid!"
             echo "Allowed format: fix|feat|pipeline|doc|wip(#TICKET-ID): Description"
             exit 1
           fi
 
           description="${BASH_REMATCH[2]}"
 
-          echo "TEST---------------------------------------"
-          echo "$description" | cspell stdin --config .cspell.yaml --verbose --show-context > cspell_output.txt 2>&1
+          echo "DESCRIPTION: $description"
+          echo "$description" | cspell stdin --config .cspell.yaml --verbose --show-context
           if [ $? -ne 0 ]; then
-            echo "⚠️ Spelling issues found in PR title description:"
-            echo "Description: $description"
-            echo "Details:"
-            cat cspell_output.txt
-            echo "Suggestions:"
             echo "$description" | cspell stdin --config .cspell.yaml --show-suggestions --show-context
             exit 1
           fi
