@@ -25,8 +25,9 @@ class ChartColor(StrEnum):
     ORANGE = "0.8,0.6,0.4"  # Orange
     CYAN = "0.4,0.8,0.8"  # Cyan
     MAGENTA = "0.8,0.4,0.8"  # Magenta
-    GRAY = "0.5,0.5,0.5"  # Gray
+    PINK = "1.0,0.75,0.8"  # Pink
     LIGHT_PURPLE = "0.7,0.7,0.9"  # Light purple
+    GRAY = "0.5,0.5,0.5"  # Gray
 
 
 @dataclass
