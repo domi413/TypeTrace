@@ -62,9 +62,9 @@ class Verbose(Gtk.Box):
     def _setup_column_view(self) -> None:
         """Set up the ColumnView with columns, data binding, and sorting."""
         columns = [
-            ("Scan Code", self._bind_scan_code, "scan_code", "numeric"),
             ("Count", self._bind_count, "count", "numeric"),
             ("Key Name", self._bind_key_name, "key_name", "string"),
+            ("Scan Code", self._bind_scan_code, "scan_code", "numeric"),
         ]
 
         # Create and add all columns with sorters
@@ -91,7 +91,7 @@ class Verbose(Gtk.Box):
         # Set an initial sort order
         self.column_view.sort_by_column(
             self.column_view.get_columns()[0],
-            Gtk.SortType.ASCENDING,
+            Gtk.SortType.DESCENDING,
         )
 
     def _factory_setup(
