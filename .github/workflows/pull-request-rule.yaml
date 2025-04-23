@@ -33,26 +33,18 @@ jobs:
           BOLD_GREEN="\033[1;32m"
           RESET="\033[0m"
 
-          failed=false
-
           if ! [[ "$pr_title" =~ $pattern ]]; then
             echo -e "${BOLD_RED}❌ Pull Request title is invalid!${RESET}"
             echo -e "${BOLD_YELLOW}⚠️ Allowed format: fix|feat|pipeline|doc|wip(#TICKET-ID): Description${RESET}"
-            failed=true
+            exit 1
           fi
 
           description="${BASH_REMATCH[2]}"
-
-          echo "DESCRIPTION: $description"
           if ! echo "$description" | cspell stdin --config .cspell.yaml --verbose --show-context; then
             echo -e "${BOLD_YELLOW}⚠️ Spelling issues found in description: $description${RESET}"
-            echo -e "$description" | cspell stdin --config .cspell.yaml --show-suggestions --show-context
-            failed=true
+            echo "$description" | cspell stdin --config .cspell.yaml --show-suggestions --show-context
+            exit 1
           else
             echo -e "${BOLD_GREEN}✅ No spelling issues found in description: $description${RESET}"
-          fi
-
-          if [ "$failed" = true ]; then
-            exit 1
           fi
         shell: bash
