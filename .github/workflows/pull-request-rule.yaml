@@ -25,7 +25,7 @@ jobs:
       - name: Validate PR Title and Spellcheck
         if: env.ACT != 'true'
         run: |
-          pattern="^(fix|feat|pipeline|doc|test|wip)\(#TYP-[0-9]+\): (.+)"
+          pattern="^(fix|feat|pipeline|doc|test|wip)\(#TYP-[0-9]+\): (.+\S)"
           pr_title="${{ github.event.pull_request.title }}"
 
           BOLD_RED="\033[1;31m"
