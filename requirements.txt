@@ -1,0 +1,10 @@
+# Requirements for the TypeTrace project and testing
+
+# Test framework
+pytest>=8.3.2
+
+# For GTK, Adwaita, and Gio (PyGObject is required)
+pygobject>=3.42.0
+
+# Optional: For code coverage (if needed)
+# pytest-cov>=4.0.0

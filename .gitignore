@@ -178,3 +178,6 @@ run.sh
 
 # ACT
 .secrets
+
+# other
+cspell.json
