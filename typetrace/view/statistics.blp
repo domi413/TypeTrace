@@ -8,10 +8,7 @@ template $Statistics: Gtk.Box {
 
         Gtk.Box keystrokes_over_time_page {
             orientation: vertical;
-            halign: fill;
             valign: center;
-            vexpand: true;
-            hexpand: true;
 
             Gtk.Label line_chart_title {
                 label: "Daily Keystrokes";
@@ -79,6 +76,7 @@ template $Statistics: Gtk.Box {
                             lower: 1;
                             upper: 10;
                             step-increment: 1;
+                            page-increment: 3;
                         };
 
                         digits: 0;
