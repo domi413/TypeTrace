@@ -1,9 +1,17 @@
 [project]
+description = "Application to trace your key strokes"
+readme = "README.md"
+authors = [{ name = "Tschöggi", email = "tschöggi@email.com" }]
+license = { text = "MIT" }
 name = "typetrace"
 version = "0.1.0" # TODO: Set this to release version
 
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 # TODO: Add needed dependency versions e.g. "appdirs>=1.4.4",
-requires-python = ">=3.8" 
+requires-python = ">=3.8"
 dependencies = [
     "appdirs",
     "dbus-python",
@@ -11,9 +19,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+build = ["pyinstaller"]
 dev = [
     "ruff",
+    "pytest",
+    "black"
 ]
+test = ["pytest"]
 
 [tool.ruff.lint]
 extend-select = [
@@ -22,6 +34,6 @@ extend-select = [
 ignore = [
     "ANN003", # Ignore missing type annotation for **kwargs
     "ANN401", # Ignore `Any` type annotation for functions
-    "D203",   # In conflict with D211
-    "D213",   # In conflict with D212
+    "D203", # In conflict with D211
+    "D213", # In conflict with D212
 ]

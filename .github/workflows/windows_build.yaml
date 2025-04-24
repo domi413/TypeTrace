@@ -2,53 +2,69 @@ name: Package
 
 on:
   push:
-  workflow_dispatch:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   windows_package:
     runs-on: windows-2022
+    if: env.ACT != 'true'
     strategy:
       matrix:
-        arch: [ x64 ]
-        python: [ "3.12" ]
+        arch: [ x64, x86 ]
+        python: [ "3.10" ]
+        libtorrent: [ 2.0.7, 1.2.19 ]
 
     steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Checkout Deluge source to subdir to enable packaging any tag/commit
+      - name: Checkout Deluge source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: deluge_src
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
+          python-version: ${{ matrix.python}}
           architecture: ${{ matrix.arch }}
+          cache: pip
+
+      - name: Prepare pip
+        run: python -m pip install wheel setuptools==68.*
 
       - name: Install GTK
         run: |
-          $url = "https://github.com/wingtk/gvsbuild/releases/download/2025.2.0/GTK4_Gvsbuild_2025.2.0_${{ matrix.arch }}.zip"
-          Invoke-WebRequest $url -OutFile C:\GTK.zip
-          Expand-Archive C:\GTK.zip -DestinationPath C:\GTK
-          echo "C:\GTK\bin" >> $env:GITHUB_PATH
-          echo "C:\GTK\lib" >> $env:GITHUB_PATH
-          pip install pycairo PyGObject
+          $WebClient = New-Object System.Net.WebClient
+          $WebClient.DownloadFile("https://github.com/deluge-torrent/gvsbuild-release/releases/download/latest/gvsbuild-py${{ matrix.python }}-vs16-${{ matrix.arch }}.zip","C:\GTK.zip")
+          7z x C:\GTK.zip -oc:\GTK
+          echo "C:\GTK\release\lib" | Out-File -FilePath $env:GITHUB_PATH -Append
+          echo "C:\GTK\release\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          echo "C:\GTK\release" | Out-File -FilePath $env:GITHUB_PATH -Append
+          python -m pip install --no-index --find-links="C:\GTK\release\python" pycairo PyGObject
 
-      - name: Install dependencies
-        run: |
-          pip install pyinstaller
-          pip install -r requirements.txt
+      - name: Install Python dependencies
+        # Pillow no longer provides 32-bit wheels for Windows
+        # so specify only-binary to install old version.
+        run: pip install -e .
 
-      - name: Build with PyInstaller
-        run: |
-          pyinstaller _install/bin/typetrace `
-            --onefile `
-            --name TypeTrace `
-            --add-data "C:\GTK\bin\*.dll;." `
-            --hidden-import gi
+      - name: Install build dependecies
+        run: pip install -e.[build]
 
-      - name: Create installer
-        working-directory: packaging/win
-        run: |
-          makensis typetrace.nsi
+      - name: Freeze TypeTrace
+        run: pyinstaller --clean typetrace.spec --distpath freeze
+
+      - name: Make TypeTrace Installer
+        run: makensis /Darch=${{ matrix.arch }} typetrace-win-installer.nsi
 
       - uses: actions/upload-artifact@v4
         with:
-          name: TypeTrace-${{ matrix.arch }}
-          path: dist/*.exe
+          name: typetrace-${{ github.ref_name }}-${{ matrix.arch }}
+          path: |
+            typetrace-installer.exe
+            _install/bin/typetrace  # Falls ihr die rohe Binary auch bereitstellen wollt
