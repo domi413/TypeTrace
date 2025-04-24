@@ -38,6 +38,7 @@ class Heatmap(Gtk.Box):
         """Initialize the heatmap widget.
 
         Args:
+        ----
             keystroke_store: Access to keystrokes.
             layout: Keyboard layout to use.
             beg_color: RGB tuple (0.0 to 1.0) for the lowest frequency.

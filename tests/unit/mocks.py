@@ -22,7 +22,7 @@ gtk_mock.SortListModel = type(
     {"__init__": lambda self, model=None: None, "set_sorter": MagicMock()},
 )
 gtk_mock.SingleSelection = type(
-    "SingleSelection", (), {"__init__": lambda self, model=None: None}
+    "SingleSelection", (), {"__init__": lambda self, model=None: None},
 )
 gtk_mock.ColumnView = type(
     "ColumnView",
@@ -35,7 +35,7 @@ gtk_mock.ColumnView = type(
     },
 )
 gtk_mock.SignalListItemFactory = type(
-    "SignalListItemFactory", (), {"connect": MagicMock()}
+    "SignalListItemFactory", (), {"connect": MagicMock()},
 )
 gtk_mock.ListItem = type("ListItem", (), {"set_child": MagicMock()})
 gtk_mock.ColumnViewColumn = type(
@@ -47,20 +47,20 @@ gtk_mock.ColumnViewColumn = type(
     },
 )
 gtk_mock.PropertyExpression = type(
-    "PropertyExpression", (), {"new": MagicMock(return_value=MagicMock())}
+    "PropertyExpression", (), {"new": MagicMock(return_value=MagicMock())},
 )
 gtk_mock.NumericSorter = type(
-    "NumericSorter", (), {"__init__": lambda self, expression=None: None}
+    "NumericSorter", (), {"__init__": lambda self, expression=None: None},
 )
 gtk_mock.StringSorter = type(
-    "StringSorter", (), {"__init__": lambda self, expression=None: None}
+    "StringSorter", (), {"__init__": lambda self, expression=None: None},
 )
 gtk_mock.SortType = type("SortType", (), {"ASCENDING": 0})
 
 
 gtk_mock.CssProvider = type("CssProvider", (), {})
 gtk_mock.StyleContext = type(
-    "StyleContext", (), {"add_provider_for_display": MagicMock()}
+    "StyleContext", (), {"add_provider_for_display": MagicMock()},
 )
 gtk_mock.STYLE_PROVIDER_PRIORITY_APPLICATION = 600
 gtk_mock.Orientation = type("Orientation", (), {"HORIZONTAL": 0})
@@ -98,7 +98,7 @@ gio_mock.ListStore = MockListStore
 gio_mock.Settings = type("Settings", (), {})
 
 gdk_mock.Display = type(
-    "Display", (), {"get_default": MagicMock(return_value=MagicMock())}
+    "Display", (), {"get_default": MagicMock(return_value=MagicMock())},
 )
 
 glib_mock.idle_add = lambda func: func()

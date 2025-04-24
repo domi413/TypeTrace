@@ -1,23 +1,24 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 # Import mocks (ensures sys.modules is correctly set)
 import tests.unit.mocks  # noqa: F401
+from typetrace.controller.verbose import Verbose
 
 # Import project modules
 from typetrace.model.keystrokes import Keystroke, KeystrokeStore
-from typetrace.controller.verbose import Verbose
 
 
 # Fixtures
-@pytest.fixture
+@pytest.fixture()
 def keystroke_store():
     store = MagicMock(spec=KeystrokeStore)
     store.get_all_keystrokes.return_value = []
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def verbose_widget(keystroke_store):
     return Verbose(keystroke_store=keystroke_store)
 
@@ -45,25 +46,25 @@ class TestVerbose:
         assert verbose_widget.list_store.get_n_items() == 2
 
     def test_populate_list_store_with_invalid_data(
-        self, verbose_widget, keystroke_store
+        self, verbose_widget, keystroke_store,
     ):
         mock_keystrokes = [Keystroke(scan_code=-1, count=-5, key_name="", date="")]
         keystroke_store.get_all_keystrokes.return_value = mock_keystrokes
         verbose_widget.list_store.remove_all()
         verbose_widget.list_store.get_item_mocks = [
-            MagicMock(scan_code=-1, count=-5, key_name="")
+            MagicMock(scan_code=-1, count=-5, key_name=""),
         ]
         verbose_widget._populate_list_store()
         assert verbose_widget.list_store.get_n_items() == 1
 
     def test_populate_list_store_with_none_values(
-        self, verbose_widget, keystroke_store
+        self, verbose_widget, keystroke_store,
     ):
         mock_keystrokes = [Keystroke(scan_code=0, count=0, key_name="", date="")]
         keystroke_store.get_all_keystrokes.return_value = mock_keystrokes
         verbose_widget.list_store.remove_all()
         verbose_widget.list_store.get_item_mocks = [
-            MagicMock(scan_code=0, count=0, key_name="")
+            MagicMock(scan_code=0, count=0, key_name=""),
         ]
         verbose_widget._populate_list_store()
         assert verbose_widget.list_store.get_n_items() == 1

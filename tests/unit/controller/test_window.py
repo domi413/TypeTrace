@@ -1,39 +1,38 @@
-import pytest
 from unittest.mock import MagicMock, patch
 
-import tests.unit.mocks
+import pytest
+from gi.repository import Gio
 
 from typetrace.controller.window import TypetraceWindow
 from typetrace.model.keystrokes import KeystrokeStore
-from gi.repository import Gio
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_keystroke_store():
     """Fixture for mocking KeystrokeStore."""
     return MagicMock(spec=KeystrokeStore)
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_settings():
     """Fixture for mocking Gio.Settings."""
     return MagicMock(spec=Gio.Settings)
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_typetrace_window(mock_keystroke_store, mock_settings):
     """Fixture for TypetraceWindow with mocked dependencies."""
     stack_mock = MagicMock()
 
     with patch("gi.repository.Adw.ApplicationWindow"), patch(
-        "typetrace.controller.window.Heatmap"
+        "typetrace.controller.window.Heatmap",
     ) as mock_heatmap, patch("typetrace.controller.window.Verbose") as mock_verbose:
 
         mock_heatmap.return_value = MagicMock()
         mock_verbose.return_value = MagicMock()
 
         window = TypetraceWindow(
-            keystroke_store=mock_keystroke_store, settings=mock_settings
+            keystroke_store=mock_keystroke_store, settings=mock_settings,
         )
         window.refresh_button = MagicMock()
 

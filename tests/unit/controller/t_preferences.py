@@ -1,6 +1,5 @@
 # Incomplete Testing
-"""
-Test Case 1: Enable Autostart When Disabled
+"""Test Case 1: Enable Autostart When Disabled
 Test Case 2: Disable Autostart When Enabled
 Test Case 3: Import Database with Valid File
 Test Case 4: Import Database with Non-Existent File
@@ -9,21 +8,22 @@ Test Case 6: Delete Data with Confirmation
 Test Case 7: Locate Database Folder
 """
 import os
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
 import gi
 import pytest
-from unittest.mock import MagicMock, patch
-from pathlib import Path
 
 # Fix PyGIWarning by explicitly specifying versions
 gi.require_version("Gio", "2.0")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gio, Gtk, Adw
+from gi.repository import Gio, Gtk
 
 # Load the GResource file
 build_dir = os.environ.get("BUILD_DIR", "build")
 resource_path = os.path.join(
-    build_dir, "typetrace", "typetrace.gresource"
+    build_dir, "typetrace", "typetrace.gresource",
 )  # Adjusted path
 if not os.path.exists(resource_path):
     raise FileNotFoundError(f"Resource file not found: {resource_path}")
@@ -37,7 +37,7 @@ from typetrace.model.keystrokes import KeystrokeStore
 
 
 # Fixture for the Preferences instance
-@pytest.fixture
+@pytest.fixture()
 def preferences():
     parent_window = Gtk.Window()
     db_manager = MagicMock(spec=DatabaseManager)
@@ -56,7 +56,7 @@ def test_enable_autostart(mock_dialog_utils, mock_desktop_utils, preferences):
 
     mock_desktop_utils.enable_autostart.assert_called_once()
     mock_dialog_utils.show_toast.assert_called_with(
-        preferences, "Backend autostart enabled"
+        preferences, "Backend autostart enabled",
     )
 
 
@@ -71,7 +71,7 @@ def test_disable_autostart(mock_dialog_utils, mock_desktop_utils, preferences):
 
     mock_desktop_utils.disable_autostart.assert_called_once()
     mock_dialog_utils.show_toast.assert_called_with(
-        preferences, "Backend autostart disabled"
+        preferences, "Backend autostart disabled",
     )
 
 
@@ -88,7 +88,7 @@ def test_export_database(mock_dialog_utils, preferences):
     mock_dialog_utils.open_file_save_dialog.assert_called_once()
     preferences.db_manager.export_database.assert_called_with(Path("/tmp/export.db"))
     mock_dialog_utils.show_toast.assert_called_with(
-        preferences, "Data Exported Successfully"
+        preferences, "Data Exported Successfully",
     )
 
 
@@ -109,7 +109,7 @@ def test_import_database(mock_dialog_utils, preferences):
     mock_dialog_utils.show_confirmation_dialog.assert_called_once()
     preferences.db_manager.import_database.assert_called_with(Path("/tmp/import.db"))
     mock_dialog_utils.show_toast.assert_called_with(
-        preferences, "Data Imported Successfully"
+        preferences, "Data Imported Successfully",
     )
 
 
@@ -126,7 +126,7 @@ def test_delete_data(mock_dialog_utils, preferences):
     mock_dialog_utils.show_confirmation_dialog.assert_called_once()
     preferences.keystroke_store.clear.assert_called_once()
     mock_dialog_utils.show_toast.assert_called_with(
-        preferences, "Data Cleared Successfully"
+        preferences, "Data Cleared Successfully",
     )
 
 
@@ -136,5 +136,5 @@ def test_locate_database_folder(mock_dialog_utils, preferences):
     preferences._on_locate_clicked(None)
 
     mock_dialog_utils.show_folder_in_filemanager.assert_called_with(
-        Path.home() / ".local" / "share" / "typetrace"
+        Path.home() / ".local" / "share" / "typetrace",
     )

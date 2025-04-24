@@ -22,7 +22,9 @@ class TestLoggerSetup:
         """Test logging setup in debug mode.
 
         Args:
+        ----
             mock_config: Mock for Config class.
+
         """
         mock_config.DEBUG = True
 
@@ -45,7 +47,9 @@ class TestLoggerSetup:
         """Test logging setup in normal (non-debug) mode.
 
         Args:
+        ----
             mock_config: Mock for the Config class.
+
         """
         mock_config.DEBUG = False
 
@@ -68,7 +72,9 @@ class TestLoggerSetup:
         """Test that multiple calls to setup_logging don't add redundant handlers.
 
         Args:
+        ----
             mock_config: Mock for the Config class.
+
         """
         mock_config.DEBUG = False
 
@@ -99,12 +105,14 @@ class TestColoredFormatter:
 
     @mock.patch("platform.system")
     def test_should_use_colors_linux(
-        self, mock_platform_system: mock.MagicMock
+        self, mock_platform_system: mock.MagicMock,
     ) -> None:
         """Test color detection on Linux.
 
         Args:
+        ----
             mock_platform_system: Mock for platform.system.
+
         """
         mock_platform_system.return_value = "Linux"
         formatter = ColoredFormatter()
@@ -112,12 +120,14 @@ class TestColoredFormatter:
 
     @mock.patch("platform.system")
     def test_should_use_colors_darwin(
-        self, mock_platform_system: mock.MagicMock
+        self, mock_platform_system: mock.MagicMock,
     ) -> None:
         """Test color detection on macOS.
 
         Args:
+        ----
             mock_platform_system: Mock for platform.system.
+
         """
         mock_platform_system.return_value = "Darwin"
         formatter = ColoredFormatter()
@@ -125,12 +135,14 @@ class TestColoredFormatter:
 
     @mock.patch("platform.system")
     def test_should_use_colors_windows(
-        self, mock_platform_system: mock.MagicMock
+        self, mock_platform_system: mock.MagicMock,
     ) -> None:
         """Test color detection on Windows.
 
         Args:
+        ----
             mock_platform_system: Mock for platform.system.
+
         """
         mock_platform_system.return_value = "Windows"
         formatter = ColoredFormatter()
@@ -141,7 +153,9 @@ class TestColoredFormatter:
         """Test formatting with colors enabled.
 
         Args:
+        ----
             mock_should_use_colors: Mock for the _should_use_colors method.
+
         """
         formatter = ColoredFormatter()
 
@@ -186,12 +200,14 @@ class TestColoredFormatter:
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=False)
     def test_format_without_colors(
-        self, mock_should_use_colors: mock.MagicMock
+        self, mock_should_use_colors: mock.MagicMock,
     ) -> None:
         """Test formatting with colors disabled.
 
         Args:
+        ----
             mock_should_use_colors: Mock for the _should_use_colors method.
+
         """
         formatter = ColoredFormatter()
 
@@ -231,7 +247,7 @@ class TestColoredFormatter:
 
         formatted = formatter.format(record)
 
-        assert f"{LogColor.RED}ERROR{LogColor.RESET}" in formatted
+        assert LogColor.RED + "ERROR" + LogColor.RESET in formatted
 
         exception_text = str(Exception("Test exception"))
         assert exception_text in formatted

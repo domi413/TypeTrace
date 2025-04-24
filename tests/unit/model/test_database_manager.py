@@ -1,10 +1,6 @@
-import pytest
 import sqlite3
-from pathlib import Path
-from unittest.mock import patch
 
 from typetrace.backend.db import DatabaseManager
-from typetrace.config import DatabasePath
 
 
 class TestDatabaseManager:
@@ -20,7 +16,7 @@ class TestDatabaseManager:
         conn = sqlite3.connect(str(db_path))
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='keystrokes'"
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='keystrokes'",
         )
         result = cursor.fetchone()
         assert result is not None, "Keystrokes table should exist"
@@ -45,7 +41,7 @@ class TestDatabaseManager:
         conn = sqlite3.connect(str(db_path))
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT scan_code, key_name, date FROM keystrokes WHERE scan_code = 16"
+            "SELECT scan_code, key_name, date FROM keystrokes WHERE scan_code = 16",
         )
         result = cursor.fetchone()
         assert result is not None, "Event should be inserted"

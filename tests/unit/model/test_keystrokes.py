@@ -3,7 +3,6 @@ from unittest.mock import patch
 
 import pytest
 
-from typetrace.backend.db import DatabaseManager
 from typetrace.config import DatabasePath
 from typetrace.model.keystrokes import Keystroke, KeystrokeStore
 
@@ -30,7 +29,7 @@ class TestKeystroke:
 class TestKeystrokeStore:
     """Test suite for the KeystrokeStore class with minimal tests."""
 
-    @pytest.fixture
+    @pytest.fixture()
     def setup_database(self, tmp_path):
         """Set up a temporary database with a keystrokes table compatible with the implementation."""
         db_path = tmp_path / "test.db"
@@ -45,7 +44,7 @@ class TestKeystrokeStore:
                     count INTEGER NOT NULL,
                     UNIQUE(scan_code)
                 )
-                """
+                """,
             )
             conn.commit()
 
@@ -53,14 +52,14 @@ class TestKeystrokeStore:
         with sqlite3.connect(str(db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT sql FROM sqlite_master WHERE type='table' AND name='keystrokes'"
+                "SELECT sql FROM sqlite_master WHERE type='table' AND name='keystrokes'",
             )
             table_definition = cursor.fetchone()
             print(f"\nKeystrokes table definition:\n{table_definition[0]}\n")
 
         return db_path
 
-    @pytest.fixture
+    @pytest.fixture()
     def keystroke_store(self, setup_database):
         """Provide a KeystrokeStore instance with a temporary database path."""
         with patch.object(DatabasePath, "DB_PATH", str(setup_database)):
@@ -80,7 +79,7 @@ class TestKeystrokeStore:
         with sqlite3.connect(str(setup_database)) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT scan_code, key_name, count FROM keystrokes WHERE scan_code = 30"
+                "SELECT scan_code, key_name, count FROM keystrokes WHERE scan_code = 30",
             )
             row = cursor.fetchone()
             assert row == (30, "KEY_A", 1), "Keystroke should be inserted with count 1"

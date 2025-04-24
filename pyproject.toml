@@ -21,11 +21,6 @@ dev = [
 [tool.setuptools]
 packages = ["typetrace"]
 
-[tool.ruff]
-extend-select = ["ALL"]
-ignore = [
-    "ANN003", # Ignore missing type annotation for **kwargs
-    "ANN401", # Ignore use of `Any` type annotation in functions
-    "D203",   # Conflicts with D211
-    "D213",   # Conflicts with D212
-]
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ANN101", "SLF001", "D103"]
+

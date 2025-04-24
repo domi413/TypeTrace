@@ -12,11 +12,12 @@ from typetrace.config import ExitCodes
 class TestCLI:
     """Test suite for the CLI class."""
 
-    @pytest.fixture
+    @pytest.fixture()
     def cli_instance(self) -> CLI:
         """Provide a CLI instance for testing.
 
-        Returns:
+        Returns
+        -------
             A fresh CLI instance.
 
         """
@@ -34,6 +35,7 @@ class TestCLI:
         """Test run method with an unsupported platform.
 
         Args:
+        ----
             mock_system: Mock for platform.system function.
             cli_instance: CLI instance fixture.
 
@@ -58,6 +60,7 @@ class TestCLI:
         """Test run method with a permission error.
 
         Args:
+        ----
             mock_check_input: Mock for CLI._check_input_group.
             mock_init_db: Mock for DatabaseManager.initialize_database.
             mock_system: Mock for platform.system function.
@@ -83,6 +86,7 @@ class TestCLI:
         """Test run method with a database error.
 
         Args:
+        ----
             mock_init_db: Mock for DatabaseManager.initialize_database.
             mock_system: Mock for platform.system function.
             cli_instance: CLI instance fixture.
@@ -115,6 +119,7 @@ class TestCLI:
         """Test that database errors take precedence over permission errors.
 
         Args:
+        ----
             mock_check_input: Mock for CLI._check_input_group.
             mock_init_db: Mock for DatabaseManager.initialize_database.
             mock_system: Mock for platform.system function.
@@ -144,6 +149,7 @@ class TestCLI:
         """Test run method with a runtime error.
 
         Args:
+        ----
             mock_event_processor: Mock for LinuxEventProcessor.
             mock_check_input: Mock for CLI._check_input_group.
             mock_init_db: Mock for DatabaseManager.initialize_database.
@@ -169,6 +175,7 @@ class TestCLI:
         """Test handling of platform.system() raising an exception.
 
         Args:
+        ----
             mock_system: Mock for platform.system function.
             cli_instance: CLI instance fixture.
 
@@ -195,6 +202,7 @@ class TestCLI:
         """Test successful run method on Linux platform.
 
         Args:
+        ----
             mock_event_processor: Mock for LinuxEventProcessor.
             mock_check_input: Mock for CLI._check_input_group.
             mock_init_db: Mock for DatabaseManager.initialize_database.
@@ -228,6 +236,7 @@ class TestCLI:
         """Test successful run method on Windows platform.
 
         Args:
+        ----
             mock_event_processor: Mock for WindowsDarwinEventProcessor.
             mock_init_db: Mock for DatabaseManager.initialize_database.
             mock_system: Mock for platform.system function.
@@ -260,6 +269,7 @@ class TestCLI:
         """Test successful run method on Darwin (macOS) platform.
 
         Args:
+        ----
             mock_event_processor: Mock for WindowsDarwinEventProcessor.
             mock_init_db: Mock for DatabaseManager.initialize_database.
             mock_system: Mock for platform.system function.
@@ -296,6 +306,7 @@ class TestCLI:
         """Test run method with debug flag set.
 
         Args:
+        ----
             mock_setup_logging: Mock for LoggerSetup.setup_logging.
             mock_event_processor: Mock for LinuxEventProcessor.
             mock_check_input: Mock for CLI._check_input_group.
@@ -328,6 +339,7 @@ class TestCLI:
         """Test _check_input_group when user is in the input group.
 
         Args:
+        ----
             mock_getgrnam: Mock for grp.getgrnam function.
             mock_getlogin: Mock for os.getlogin function.
             cli_instance: CLI instance fixture.
@@ -352,6 +364,7 @@ class TestCLI:
         """Test _check_input_group when user is not in the input group.
 
         Args:
+        ----
             mock_getgrnam: Mock for grp.getgrnam function.
             mock_getlogin: Mock for os.getlogin function.
             cli_instance: CLI instance fixture.
@@ -377,6 +390,7 @@ class TestCLI:
         """Test _check_input_group with an empty input group.
 
         Args:
+        ----
             mock_getgrnam: Mock for grp.getgrnam function.
             mock_getlogin: Mock for os.getlogin function.
             cli_instance: CLI instance fixture.
@@ -404,6 +418,7 @@ class TestCLI:
         """Test _check_input_group when os.getlogin() fails.
 
         Args:
+        ----
             mock_getgrnam: Mock for grp.getgrnam function.
             mock_getenv: Mock for os.getenv function.
             mock_getlogin: Mock for os.getlogin function.
@@ -431,6 +446,7 @@ class TestCLI:
         """Test _check_input_group when both os.getlogin() and os.getenv() fail.
 
         Args:
+        ----
             mock_getenv: Mock for os.getenv function.
             mock_getlogin: Mock for os.getlogin function.
             cli_instance: CLI instance fixture.
@@ -453,6 +469,7 @@ class TestCLI:
         """Test _check_input_group when grp.getgrnam() fails.
 
         Args:
+        ----
             mock_getgrnam: Mock for grp.getgrnam function.
             mock_getlogin: Mock for os.getlogin function.
             cli_instance: CLI instance fixture.

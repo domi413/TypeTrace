@@ -1,14 +1,12 @@
-import unittest
-from unittest.mock import MagicMock, patch, PropertyMock
-import evdev
-import signal
-import time
-import threading
-import tempfile
 import os
+import signal
+import tempfile
+import unittest
+from unittest.mock import MagicMock, patch
+
+import evdev
 
 from typetrace.backend.events.linux import LinuxEventProcessor
-from typetrace.config import Event
 
 
 class TestLinuxEventProcessor(unittest.TestCase):
@@ -24,7 +22,7 @@ class TestLinuxEventProcessor(unittest.TestCase):
 
     def test_check_device_accessibility_success(self):
         with patch.object(
-            self.linux_processor, "_select_devices", return_value=[MagicMock()]
+            self.linux_processor, "_select_devices", return_value=[MagicMock()],
         ):
             self.linux_processor.check_device_accessibility()
 
@@ -36,12 +34,12 @@ class TestLinuxEventProcessor(unittest.TestCase):
                 devices = self.linux_processor._select_devices()
                 self.assertEqual(len(devices), 1, "Expected exactly one device")
                 self.assertEqual(
-                    devices[0], mock_device, "Device does not match mock_device"
+                    devices[0], mock_device, "Device does not match mock_device",
                 )
 
     def test_signal_termination(self):
         with patch.object(
-            self.linux_processor, "_select_devices", return_value=[MagicMock()]
+            self.linux_processor, "_select_devices", return_value=[MagicMock()],
         ):
             with patch.object(self.linux_processor, "_buffer"):
                 with patch("signal.signal") as mock_signal:

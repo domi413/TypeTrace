@@ -1,11 +1,11 @@
 """Tests for the backend database module."""
 
 import sqlite3
+import tempfile
+import unittest
 from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest import mock
-import unittest
-import tempfile
 
 from typetrace.backend.db import DatabaseManager
 from typetrace.backend.sql import SQLQueries
@@ -38,7 +38,7 @@ class TestDatabaseManager(unittest.TestCase):
     @mock.patch("typetrace.backend.db.logger")
     @mock.patch("sqlite3.connect")
     def test_initialize_database(
-        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock
+        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock,
     ) -> None:
         """Test database initialization."""
         mock_conn = mock.MagicMock()
@@ -53,13 +53,13 @@ class TestDatabaseManager(unittest.TestCase):
         mock_conn.commit.assert_called_once()
         mock_conn.close.assert_called_once()
         mock_logger.debug.assert_called_once_with(
-            "Database initialized at %s", self.mock_db_path
+            "Database initialized at %s", self.mock_db_path,
         )
 
     @mock.patch("typetrace.backend.db.logger")
     @mock.patch("sqlite3.connect")
     def test_initialize_database_sqlite_error(
-        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock
+        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock,
     ) -> None:
         """Test database initialization with SQLite error."""
         mock_conn = mock.MagicMock()
@@ -68,7 +68,7 @@ class TestDatabaseManager(unittest.TestCase):
         mock_conn.cursor.return_value = mock_cursor
         mock_cursor.execute.side_effect = sqlite3.Error("Mock SQLite error")
 
-        with self.assertRaisesRegex(sqlite3.Error, "Mock SQLite error"):
+        with self.pytest.raises(sqlite3.Error, "Mock SQLite error"):
             self.db_manager.initialize_database(self.mock_db_path)
 
         mock_conn.close.assert_called_once()
@@ -77,7 +77,7 @@ class TestDatabaseManager(unittest.TestCase):
     @mock.patch("typetrace.backend.db.logger")
     @mock.patch("sqlite3.connect")
     def test_initialize_database_operational_error(
-        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock
+        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock,
     ) -> None:
         """Test database initialization with SQLite operational error."""
         mock_conn = mock.MagicMock()
@@ -85,7 +85,7 @@ class TestDatabaseManager(unittest.TestCase):
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
         mock_cursor.execute.side_effect = sqlite3.OperationalError(
-            "Mock operational error"
+            "Mock operational error",
         )
 
         with self.assertRaisesRegex(sqlite3.OperationalError, "Mock operational error"):
@@ -107,7 +107,7 @@ class TestDatabaseManager(unittest.TestCase):
     @mock.patch("typetrace.backend.db.logger")
     @mock.patch("sqlite3.connect")
     def test_write_to_database_with_events(
-        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock
+        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock,
     ) -> None:
         """Test write_to_database with events list."""
         mock_conn = mock.MagicMock()
@@ -136,13 +136,13 @@ class TestDatabaseManager(unittest.TestCase):
         mock_conn.commit.assert_called_once()
         mock_conn.close.assert_called_once()
         mock_logger.debug.assert_called_once_with(
-            "Updated database with %d keystroke events", len(input_events)
+            "Updated database with %d keystroke events", len(input_events),
         )
 
     @mock.patch("typetrace.backend.db.logger")
     @mock.patch("sqlite3.connect")
     def test_write_to_database_sqlite_error(
-        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock
+        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock,
     ) -> None:
         """Test write_to_database with SQLite error."""
         mock_conn = mock.MagicMock()
@@ -152,7 +152,7 @@ class TestDatabaseManager(unittest.TestCase):
         mock_cursor.executemany.side_effect = sqlite3.Error("Mock SQLite error")
 
         input_events: list[Event] = [
-            {"scan_code": 30, "name": "KEY_A", "date": "2025-04-22"}
+            {"scan_code": 30, "name": "KEY_A", "date": "2025-04-22"},
         ]
 
         with self.assertRaisesRegex(sqlite3.Error, "Mock SQLite error"):
@@ -163,7 +163,7 @@ class TestDatabaseManager(unittest.TestCase):
 
     @mock.patch("sqlite3.connect")
     def test_write_to_database_with_invalid_characters(
-        self, mock_connect: mock.MagicMock
+        self, mock_connect: mock.MagicMock,
     ) -> None:
         """Test write_to_database with events containing invalid characters."""
         mock_conn = mock.MagicMock()
