@@ -49,7 +49,7 @@ class Heatmap(Gtk.Box):
         self.layout = layout
         self.beg_color = beg_color
         self.end_color = end_color
-        self.key_widgets: dict[int, Gtk.Label] = {}  # Keyed by scancode
+        self.key_widgets: dict[int, Gtk.Label] = {}  
 
         self.css_provider = Gtk.CssProvider()
         Gtk.StyleContext.add_provider_for_display(
