@@ -6,6 +6,9 @@ license = "MIT"
 name = "typetrace"
 version = "0.1.0" # TODO: Set this to release version
 
+[tool.setuptools]
+packages = ["typetrace"]  # Nur Ihr Hauptpaket
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
@@ -28,9 +31,7 @@ dev = [
 test = ["pytest"]
 
 [tool.ruff.lint]
-extend-select = [
-    "ALL",
-]
+extend-select = ["ALL"]
 ignore = [
     "ANN003", # Ignore missing type annotation for **kwargs
     "ANN401", # Ignore `Any` type annotation for functions
