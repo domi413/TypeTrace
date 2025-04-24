@@ -1,10 +1,7 @@
 name: Check Python Code
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
     types:
       - opened
       - synchronize
@@ -14,7 +11,6 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.draft || github.event_name == 'push' }}  # Run this job on push or when the PR is not a draft
 
     steps:
       - name: Checkout code
@@ -35,16 +31,12 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.draft || github.event_name == 'push' }}  # Run this job on push or when the PR is not a draft
-
+  
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0 libadwaita-1-dev
+           
 
       - name: Set up uv and Python
         uses: astral-sh/setup-uv@v5
