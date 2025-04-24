@@ -1,20 +1,19 @@
-import pytest
 import sqlite3
 from pathlib import Path
-import gi
 
+import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
 from gi.repository import Gio
+import pytest
+
 from typetrace.controller.window import TypetraceWindow
-from typetrace.model.keystrokes import KeystrokeStore
 from typetrace.model.database_manager import DatabaseManager
 
 
 @pytest.fixture
 def temp_db(tmp_path: Path) -> sqlite3.Connection:
-    """Create a temporary SQLite database with a keystrokes table."""
     db_path = tmp_path / "test_typetrace.db"
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -26,9 +25,9 @@ def temp_db(tmp_path: Path) -> sqlite3.Connection:
             key_name TEXT NOT NULL,
             date DATE NOT NULL,
             count INTEGER DEFAULT 0,
-            UNIQUE(scan_code, date)
+            UNIQUE(scan_code, date),
         )
-    """
+        """
     )
     conn.commit()
     return conn
@@ -36,20 +35,18 @@ def temp_db(tmp_path: Path) -> sqlite3.Connection:
 
 @pytest.fixture
 def settings() -> Gio.Settings:
-    """Create GSettings for the tests."""
     schema_source = Gio.SettingsSchemaSource.new_from_directory(
         "_install/share/glib-2.0/schemas",
-        None,
-        False,
+        parent=None,
+        trusted=False,
     )
-    schema = schema_source.lookup("edu.ost.typetrace", False)
+    schema = schema_source.lookup("edu.ost.typetrace", recursive=False)
     assert schema is not None, "GSettings schema 'edu.ost.typetrace' not found"
     return Gio.Settings.new_full(schema, None, None)
 
 
 @pytest.fixture
 def window(temp_db: sqlite3.Connection, settings: Gio.Settings) -> TypetraceWindow:
-    """Create a TypetraceWindow with a real database."""
     db_manager = DatabaseManager()
     db_manager.db_connection = temp_db
     win = TypetraceWindow(settings=settings, db_manager=db_manager)
@@ -58,9 +55,10 @@ def window(temp_db: sqlite3.Connection, settings: Gio.Settings) -> TypetraceWind
 
 
 def test_backend_frontend_integration(
-    window: TypetraceWindow, temp_db: sqlite3.Connection
+    window: TypetraceWindow,
+    temp_db: sqlite3.Connection,
 ) -> None:
-    """Test the integration between backend (KeystrokeStore) and frontend (TypetraceWindow)."""
+    """Test backend (KeystrokeStore) and frontend (TypetraceWindow) integration."""
     keystroke = {
         "scan_code": 30,
         "key_name": "a",
