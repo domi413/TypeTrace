@@ -8,7 +8,7 @@ set ZIPFILE=typetrace.zip
 set INSTALLDIR=C:\Program Files\typetrace
 set MSYS2_ROOT=C:\tools\msys64
 set SHORTCUT_NAME=TypeTrace.lnk
-set ICON_PATH=%INSTALLDIR%\data\icons\hicolor\scalable\apps\edu.ost.typetrace.ico
+set ICON_PATH=%INSTALLDIR%\windows\edu.ost.typetrace.ico
 set RELEASELINK=https://github.com/domi413/TypeTrace/archive/refs/tags/R4.zip
 
 :: -----------------------------
@@ -31,24 +31,29 @@ if %CLEANUP_NEEDED% EQU 1 (
 exit /b %1
 
 :main
-:: -----------------------------
-:: CHECK FOR ADMIN RIGHTS
-:: -----------------------------
-openfiles >nul 2>&1
-if %errorlevel% NEQ 0 (
-    echo [ERROR] Please run this script as Administrator.
-    pause
+:: Check if we have admin rights, if not request elevation
+fltmc >nul 2>&1 || (
+    echo Requesting administrator privileges...
+    :: Re-launch as admin
+    PowerShell -Command "Start-Process -FilePath '%~dpnx0' -Verb RunAs"
     exit /b
 )
 
 :: -----------------------------
-:: CHECK FOR CHOCOLATEY
+:: Check for Chocolatey, offer to install if missing
 :: -----------------------------
 where choco >nul 2>&1
 if %errorlevel% NEQ 0 (
-    echo [ERROR] Chocolatey is not installed. Please install Chocolatey first: https://chocolatey.org/install
-    pause
-    exit /b
+    echo Chocolatey is not installed.
+    set /p install="Do you want to install Chocolatey now? (y/n): "
+    if /i "%install%"=="y" (
+        echo Installing Chocolatey...
+        PowerShell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+    ) else (
+        echo [ERROR] Chocolatey is required to continue.
+        pause
+        exit /b
+    )
 )
 
 :: -----------------------------
@@ -77,6 +82,16 @@ if %errorlevel% NEQ 0 (
 )
 
 :: -----------------------------
+:: CREATE LAUNCH SCRIPT
+:: -----------------------------
+set VBS_LAUNCH=%INSTALLDIR%\windows\launch_typetrace.vbs
+(
+    echo Set WshShell = CreateObject^("WScript.Shell"^)
+    echo WshShell.Run """%MSYS2_ROOT%\usr\bin\bash.exe"" -lc ""cd '/C/Program Files/typetrace' ^&^& /mingw64/bin/python ./_install/bin/typetrace -db""", 1, False
+    echo WshShell.Run """%MSYS2_ROOT%\usr\bin\bash.exe"" -lc ""cd '/C/Program Files/typetrace' ^&^& /mingw64/bin/python ./_install/bin/typetrace""", 0, False
+) > "%VBS_LAUNCH%"
+
+:: -----------------------------
 :: CREATE START MENU SHORTCUT
 :: -----------------------------
 set VBS_CREATE=%TEMP%\create_shortcut.vbs
@@ -84,7 +99,7 @@ set VBS_CREATE=%TEMP%\create_shortcut.vbs
     echo Set oWS = WScript.CreateObject^("WScript.Shell"^)
     echo sLinkFile = oWS.SpecialFolders^("Programs"^) ^& "\%SHORTCUT_NAME%"
     echo Set oLink = oWS.CreateShortcut^(sLinkFile^)
-    echo oLink.TargetPath = "%INSTALLDIR%\typetrace.bat"
+    echo oLink.TargetPath = "%VBS_LAUNCH%"
     echo oLink.WorkingDirectory = "%INSTALLDIR%"
     echo oLink.IconLocation = "%ICON_PATH%"
     echo oLink.Save
