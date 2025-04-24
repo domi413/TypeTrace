@@ -21,10 +21,8 @@ dev = [
 [tool.setuptools]
 packages = ["typetrace"]
 
-[tool.ruff.lint]
-extend-select = [
-    "ALL",
-]
+[tool.ruff]
+extend-select = ["ALL"]
 ignore = [
     "ANN003", # Ignore missing type annotation for **kwargs
     "ANN401", # Ignore use of `Any` type annotation in functions

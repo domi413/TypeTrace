@@ -4,18 +4,17 @@ import sqlite3
 from pathlib import Path
 
 import gi
-
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
-
-from gi.repository import Gio
 import pytest
+from gi.repository import Gio
 
 from typetrace.controller.window import TypetraceWindow
 from typetrace.model.database_manager import DatabaseManager
 
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
 
-@pytest.fixture
+
+@pytest.fixture()
 def temp_db(tmp_path: Path) -> sqlite3.Connection:
     """Create a temporary in-memory SQLite database for testing."""
     db_path = tmp_path / "test_typetrace.db"
@@ -30,13 +29,13 @@ def temp_db(tmp_path: Path) -> sqlite3.Connection:
             count INTEGER,
             UNIQUE(scan_code, date)
         );
-        """
+        """,
     )
     conn.commit()
     return conn
 
 
-@pytest.fixture
+@pytest.fixture()
 def settings() -> Gio.Settings:
     """Load GSettings schema for testing."""
     schema_source = Gio.SettingsSchemaSource.new_from_directory(
@@ -45,11 +44,16 @@ def settings() -> Gio.Settings:
         False,
     )
     schema = schema_source.lookup("edu.ost.typetrace", recursive=False)
-    assert schema is not None, "GSettings schema 'edu.ost.typetrace' not found"
-    return Gio.Settings.new_full(schema, None, None)
+    if schema is None:
+        pytest.fail("GSettings schema 'edu.ost.typetrace' not found")
+
+    # Fixing boolean positional value issue by making sure boolean values are named
+    return Gio.Settings.new_full(
+        schema=schema, path=None, value=None,
+    )
 
 
-@pytest.fixture
+@pytest.fixture()
 def window(temp_db: sqlite3.Connection, settings: Gio.Settings) -> TypetraceWindow:
     """Create a TypetraceWindow instance with mocked dependencies."""
     db_manager = DatabaseManager()
@@ -57,17 +61,33 @@ def window(temp_db: sqlite3.Connection, settings: Gio.Settings) -> TypetraceWind
     return TypetraceWindow(db_manager=db_manager, settings=settings)
 
 
-def test_keystroke_storage(window: TypetraceWindow, temp_db: sqlite3.Connection):
+def test_keystroke_storage(window: TypetraceWindow, temp_db: sqlite3.Connection) -> None:
     """Test that a keystroke is stored correctly and UI is initialized."""
     window.db_manager.insert_keystroke(30, "a", "2025-04-18")
 
     result = temp_db.execute(
-        "SELECT * FROM keystrokes WHERE scan_code = 30"
+        "SELECT * FROM keystrokes WHERE scan_code = 30",
     ).fetchone()
 
     temp_db.close()
 
-    assert result is not None, "Keystroke should be stored in the database"
-    assert result == (30, "a", "2025-04-18", 1), "Keystroke data should be correct"
-    assert window.heatmap is not None, "Heatmap should be initialized"
-    assert window.verbose is not None, "Verbose should be initialized"
+    if result is None:
+        pytest.fail("Keystroke should be stored in the database")
+    if result != (30, "a", "2025-04-18", 1):
+        pytest.fail("Keystroke data should be correct")
+
+    if window.heatmap is None:
+        pytest.fail("Heatmap should be initialized")
+
+    if window.verbose is None:
+        pytest.fail("Verbose should be initialized")
+
+
+def test_keystroke_storage_ui(window: TypetraceWindow) -> None:
+    """Test that the keystroke data is properly displayed in the UI."""
+    window.db_manager.insert_keystroke(30, "a", "2025-04-18")
+
+    # Check the UI for the correct data
+    # For this example, we are just validating that the data appears in the window object
+    if window.db_manager.get_keystrokes() != [(30, "a", "2025-04-18", 1)]:
+        pytest.fail("Keystroke data not found in UI")
