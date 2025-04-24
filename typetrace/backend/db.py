@@ -7,7 +7,7 @@ import sqlite3
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, final
 
-from typetrace.backend.sql import SQLQueries
+from typetrace.sql import SQLQueries
 
 if TYPE_CHECKING:
     from collections.abc import Generator

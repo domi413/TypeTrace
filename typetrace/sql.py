@@ -11,6 +11,7 @@ class SQLQueries:
         """Private constructor to prevent instantiation."""
         raise TypeError
 
+    # Database setup
     BEGIN_TRANSACTION = "BEGIN TRANSACTION"
 
     CREATE_KEYSTROKES_TABLE = """
@@ -24,6 +25,7 @@ class SQLQueries:
     )
     """
 
+    # Backend operations
     INSERT_OR_UPDATE_KEYSTROKE = """
     INSERT INTO keystrokes (scan_code, key_name, date, count)
     VALUES (:scan_code, :key_name, :date, 1)
@@ -32,15 +34,36 @@ class SQLQueries:
         key_name = :key_name
     """
 
-    GET_KEYSTROKES_BY_DATE = """
-    SELECT key_name, count
+    # Frontend operations
+    GET_ALL_KEYSTROKES = """
+    SELECT scan_code, SUM(count) as total_count, key_name,
+    MAX(date) as latest_date
     FROM keystrokes
-    WHERE date = :date
-    ORDER BY count DESC
+    GROUP BY scan_code, key_name
+    ORDER BY total_count DESC
     """
 
-# Hinweis: Wenn du den Fehler "no column named date" erhältst, überprüfe die Datenbank:
-# 1. Öffne die Datenbank mit `sqlite3 /pfad/zu/deiner/datenbank.db`
-# 2. Führe `.schema keystrokes` aus, um das aktuelle Schema zu sehen
-# 3. Falls die Spalte `date` fehlt, führe `ALTER TABLE keystrokes ADD COLUMN date DATE;` aus
-#    oder lösche die Tabelle mit `DROP TABLE keystrokes;` und erstelle sie neu mit CREATE_KEYSTROKES_TABLE
+    GET_TOTAL_PRESSES = "SELECT SUM(count) FROM keystrokes"
+
+    GET_HIGHEST_COUNT = """
+    SELECT MAX(total_count) FROM (
+        SELECT SUM(count) as total_count
+        FROM keystrokes
+        GROUP BY scan_code, key_name
+    )
+    """
+
+    GET_KEYSTROKES_BY_DATE = """
+    SELECT scan_code, count, key_name, date FROM keystrokes
+    WHERE date = ?
+    """
+
+    GET_DAILY_KEYSTROKE_COUNTS = """
+    SELECT date, SUM(count) as total_count
+    FROM keystrokes
+    WHERE date >= date('now', '-6 days')
+    GROUP BY date
+    ORDER BY date
+    """
+
+    CLEAR_KEYSTROKES = "DELETE FROM keystrokes"
