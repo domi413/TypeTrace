@@ -17,13 +17,9 @@ template $Statistics: Gtk.Box {
         Gtk.Box keystrokes_over_time_page {
             orientation: vertical;
             halign: fill;
-            valign: start;
+            valign: center;
             vexpand: true;
             hexpand: true;
-            margin-start: 10;
-            margin-end: 10;
-            margin-top: 40;
-            margin-bottom: 10;
 
             Gtk.Label line_chart_title {
                 label: "Daily Keystrokes";
@@ -50,13 +46,9 @@ template $Statistics: Gtk.Box {
         Gtk.Box pie_chart_page {
             orientation: vertical;
             halign: fill;
-            valign: start;
+            valign: center;
             vexpand: true;
             hexpand: true;
-            margin-start: 10;
-            margin-end: 10;
-            margin-top: 40;
-            margin-bottom: 10;
 
             Gtk.Label pie_chart_title {
                 label: "Top Keystrokes";
@@ -71,10 +63,6 @@ template $Statistics: Gtk.Box {
             Gtk.DrawingArea line_drawing_area {
                 height-request: 300;
                 width-request: 800;
-                margin-start: 10;
-                margin-end: 10;
-                margin-top: 10;
-                margin-bottom: 10;
                 halign: center;
                 valign: center;
             }
@@ -135,7 +123,6 @@ template $Statistics: Gtk.Box {
     Adw.CarouselIndicatorDots carousel_indicators {
         carousel: carousel;
         halign: center;
-        margin-top: 10;
         margin-bottom: 10;
     }
 }
