@@ -3,7 +3,6 @@
 }
 
 .keyboard-container label {
-  color: #333;
   font-weight: bold;
   border: 1pt solid rgba(0, 0, 0, 0.2);
   background-color: rgba(140, 140, 140, 0.1);
