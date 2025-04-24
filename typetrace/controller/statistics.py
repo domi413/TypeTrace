@@ -7,7 +7,8 @@ from typing import TYPE_CHECKING
 
 from gi.repository import Gtk
 
-from typetrace.controller.utils.chart_utils import LineChart, PieChart
+from typetrace.controller.utils.charts.line_chart import LineChart
+from typetrace.controller.utils.charts.pie_chart import PieChart
 
 if TYPE_CHECKING:
     from typetrace.model.keystrokes import KeystrokeStore

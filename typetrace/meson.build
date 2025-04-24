@@ -74,9 +74,16 @@ sources_controller_utils = [
   'controller/utils/__init__.py',
   'controller/utils/dialog_utils.py',
   'controller/utils/desktop_utils.py',
-  'controller/utils/chart_utils.py',
   'controller/utils/color_utils.py',
 ]
 install_data(sources_controller_utils, install_dir: moduledir / 'controller' / 'utils')
+
+sources_controller_utils_charts = [
+  'controller/utils/charts/__init__.py',
+  'controller/utils/charts/base_chart.py',
+  'controller/utils/charts/line_chart.py',
+  'controller/utils/charts/pie_chart.py',
+]
+install_data(sources_controller_utils_charts, install_dir: moduledir / 'controller' / 'utils' / 'charts')
 
 subdir('backend')
