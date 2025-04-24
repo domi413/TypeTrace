@@ -15,8 +15,8 @@ class TypetraceWindow(Adw.ApplicationWindow):
     __gtype_name__ = "TypetraceWindow"
 
     refresh_button = Gtk.Template.Child()
-    view_switcher  = Gtk.Template.Child()
-    stack          = Gtk.Template.Child()
+    view_switcher = Gtk.Template.Child()
+    stack = Gtk.Template.Child()
 
     def __init__(
         self,

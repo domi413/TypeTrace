@@ -119,7 +119,7 @@ def open_file_open_dialog(
             if file:
                 callback(Path(file.get_path()))
         except GLib.Error:
-            pass # Canceled or error occurred
+            pass  # Canceled or error occurred
 
     dialog.open(parent, None, on_response, parent)
 
@@ -191,7 +191,9 @@ def show_folder_in_filemanager(
         # Non-Flatpak: Use GIO
         gfile = Gio.File.new_for_path(str(path))
         try:
-            app_info = Gio.AppInfo.get_default_for_type("inode/directory", True)  # noqa: FBT003
+            app_info = Gio.AppInfo.get_default_for_type(
+                "inode/directory", True
+            )  # noqa: FBT003
             if app_info:
                 app_info.launch([gfile], None)
         except GLib.Error:

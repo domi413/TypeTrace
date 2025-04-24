@@ -41,7 +41,9 @@ class CLI:
             from typetrace.backend.ipc.linux_darwin import LinuxMacOSIPC
 
             backend = LinuxMacOSIPC()
-            backend.register_callback(lambda keystroke: logger.info(f"🎯 Dummy keystroke: {keystroke}"))
+            backend.register_callback(
+                lambda keystroke: logger.info(f"🎯 Dummy keystroke: {keystroke}")
+            )
             try:
                 backend.run()
             except KeyboardInterrupt:
@@ -63,7 +65,9 @@ class CLI:
                     processor = LinuxEventProcessor(self.__db_path)
                     processor.check_device_accessibility()
                 case "darwin" | "windows":
-                    from typetrace.backend.events.windows_darwin import WindowsDarwinEventProcessor
+                    from typetrace.backend.events.windows_darwin import (
+                        WindowsDarwinEventProcessor,
+                    )
 
                     processor = WindowsDarwinEventProcessor(self.__db_path)
                 case _:

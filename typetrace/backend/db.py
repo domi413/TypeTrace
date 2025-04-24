@@ -41,9 +41,11 @@ class DatabaseManager:
         processed_events = [
             {
                 "scan_code": event["scan_code"],
-                "key_name": ", ".join(event["name"])
-                if isinstance(event["name"], tuple)
-                else event["name"],
+                "key_name": (
+                    ", ".join(event["name"])
+                    if isinstance(event["name"], tuple)
+                    else event["name"]
+                ),
                 "date": event["date"],
             }
             for event in events

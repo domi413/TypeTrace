@@ -19,7 +19,9 @@ class TestDatabaseManager:
         # Check if the table was created
         conn = sqlite3.connect(str(db_path))
         cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='keystrokes'")
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='keystrokes'"
+        )
         result = cursor.fetchone()
         assert result is not None, "Keystrokes table should exist"
         assert result[0] == "keystrokes"
@@ -34,13 +36,7 @@ class TestDatabaseManager:
         db_manager.initialize_database(db_path)
 
         # Sample event
-        events = [
-            {
-                "scan_code": 16,
-                "name": "q",
-                "date": "2025-04-21"
-            }
-        ]
+        events = [{"scan_code": 16, "name": "q", "date": "2025-04-21"}]
 
         # Write the event to the database
         db_manager.write_to_database(db_path, events)
@@ -48,7 +44,9 @@ class TestDatabaseManager:
         # Check if the event was inserted
         conn = sqlite3.connect(str(db_path))
         cursor = conn.cursor()
-        cursor.execute("SELECT scan_code, key_name, date FROM keystrokes WHERE scan_code = 16")
+        cursor.execute(
+            "SELECT scan_code, key_name, date FROM keystrokes WHERE scan_code = 16"
+        )
         result = cursor.fetchone()
         assert result is not None, "Event should be inserted"
         assert result == (16, "q", "2025-04-21"), "Event data should match"

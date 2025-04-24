@@ -182,6 +182,7 @@ KEYBOARD_LAYOUTS = {
     ],
 }
 
+
 def get_scan_code(key_name: str, layout: str = "en_US") -> int:
     """Get the scan code for a key from the keyboard layout."""
     # Mapping for mouse buttons

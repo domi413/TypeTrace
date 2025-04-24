@@ -27,7 +27,9 @@ class Verbose(Gtk.Box):
     def update(self) -> None:
         """Update the list to reflect current data."""
         self._populate_list_store()
-        print(f"Verbose: List store has {self.list_store.get_n_items()} items")  # Debugging
+        print(
+            f"Verbose: List store has {self.list_store.get_n_items()} items"
+        )  # Debugging
         self.queue_draw()  # Forces the widget to redraw itself.
 
     def _populate_list_store(self) -> None:
@@ -36,12 +38,14 @@ class Verbose(Gtk.Box):
         keystrokes = self.keystroke_store.get_all_keystrokes()
         print(f"Verbose: Found {len(keystrokes)} keystrokes")  # Debugging
         for keystroke in keystrokes:
-            self.list_store.append(Keystroke(
-                scan_code=keystroke.scan_code,
-                count=keystroke.count,
-                key_name=keystroke.key_name,
-                date=keystroke.date,
-            ))
+            self.list_store.append(
+                Keystroke(
+                    scan_code=keystroke.scan_code,
+                    count=keystroke.count,
+                    key_name=keystroke.key_name,
+                    date=keystroke.date,
+                )
+            )
 
     def _setup_column_view(self) -> None:
         """Set up the ColumnView with columns, data binding, and sorting."""
@@ -74,20 +78,27 @@ class Verbose(Gtk.Box):
             Gtk.SortType.ASCENDING,
         )
 
-    def _factory_setup(self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:
+    def _factory_setup(
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+    ) -> None:
         label = Gtk.Label()
         label.set_halign(Gtk.Align.START)
         list_item.set_child(label)
 
-    def _bind_scan_code(self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:
+    def _bind_scan_code(
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+    ) -> None:
         keystroke = list_item.get_item()
         list_item.get_child().set_text(str(keystroke.scan_code))
 
-    def _bind_count(self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:
+    def _bind_count(
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+    ) -> None:
         keystroke = list_item.get_item()
         list_item.get_child().set_text(str(keystroke.count))
 
-    def _bind_key_name(self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:
+    def _bind_key_name(
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+    ) -> None:
         keystroke = list_item.get_item()
         list_item.get_child().set_text(keystroke.key_name)
-

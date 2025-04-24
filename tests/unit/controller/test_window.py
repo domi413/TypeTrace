@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-import tests.unit.mocks  
+import tests.unit.mocks
 
 from typetrace.controller.window import TypetraceWindow
 from typetrace.model.keystrokes import KeystrokeStore
@@ -13,33 +13,34 @@ def mock_keystroke_store():
     """Fixture for mocking KeystrokeStore."""
     return MagicMock(spec=KeystrokeStore)
 
+
 @pytest.fixture
 def mock_settings():
     """Fixture for mocking Gio.Settings."""
     return MagicMock(spec=Gio.Settings)
 
+
 @pytest.fixture
 def mock_typetrace_window(mock_keystroke_store, mock_settings):
     """Fixture for TypetraceWindow with mocked dependencies."""
     stack_mock = MagicMock()
-    
-    with patch('gi.repository.Adw.ApplicationWindow'), \
-         patch('typetrace.controller.window.Heatmap') as mock_heatmap, \
-         patch('typetrace.controller.window.Verbose') as mock_verbose:
-      
+
+    with patch("gi.repository.Adw.ApplicationWindow"), patch(
+        "typetrace.controller.window.Heatmap"
+    ) as mock_heatmap, patch("typetrace.controller.window.Verbose") as mock_verbose:
+
         mock_heatmap.return_value = MagicMock()
         mock_verbose.return_value = MagicMock()
-        
+
         window = TypetraceWindow(
-            keystroke_store=mock_keystroke_store,
-            settings=mock_settings
+            keystroke_store=mock_keystroke_store, settings=mock_settings
         )
-        window.refresh_button = MagicMock()  
-        
+        window.refresh_button = MagicMock()
+
         window.view_switcher = MagicMock()
         window.view_switcher.get_stack.return_value = stack_mock
         window.stack = stack_mock
-        
+
         return window
 
 
@@ -52,6 +53,7 @@ def test_initialization(mock_typetrace_window):
     assert isinstance(window.verbose, MagicMock)
     assert window.view_switcher.get_stack() == window.stack
 
+
 def test_refresh_button_click(mock_typetrace_window):
     """Test the click on the refresh button."""
     window = mock_typetrace_window
@@ -59,10 +61,11 @@ def test_refresh_button_click(mock_typetrace_window):
     window.heatmap.update = MagicMock()
     window.verbose.update = MagicMock()
 
-    window._on_refresh_clicked()  
+    window._on_refresh_clicked()
 
     window.heatmap.update.assert_called_once()
     window.verbose.update.assert_called_once()
+
 
 def test_on_keystroke_received(mock_typetrace_window):
     """Test the handling of received keystrokes."""

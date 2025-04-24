@@ -11,16 +11,18 @@ class Keystroke(GObject.Object):
     __gtype_name__ = "Keystroke"
 
     scan_code = GObject.Property(type=int, default=0)
-    count     = GObject.Property(type=int, default=0)
-    key_name  = GObject.Property(type=str, default="")
-    date      = GObject.Property(type=str, default="")
+    count = GObject.Property(type=int, default=0)
+    key_name = GObject.Property(type=str, default="")
+    date = GObject.Property(type=str, default="")
 
-    def __init__(self, scan_code: int, count: int, key_name: str, date: str = "") -> None:
+    def __init__(
+        self, scan_code: int, count: int, key_name: str, date: str = ""
+    ) -> None:
         super().__init__()
         self.scan_code = scan_code
-        self.count     = count
-        self.key_name  = key_name.replace("KEY_", "")
-        self.date      = date
+        self.count = count
+        self.key_name = key_name.replace("KEY_", "")
+        self.date = date
 
 
 class KeystrokeStore:

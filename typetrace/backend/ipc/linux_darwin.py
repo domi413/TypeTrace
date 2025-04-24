@@ -8,6 +8,7 @@ from typetrace.backend.ipc.base import BaseIPC
 
 logging.basicConfig(level=logging.INFO)
 
+
 class LinuxMacOSIPC(BaseIPC):
     """Real IPC backend for Linux, reads real keyboard inputs."""
 
@@ -42,7 +43,9 @@ class LinuxMacOSIPC(BaseIPC):
         while not self._stop_event.is_set():
             fds = [dev.fd for dev in self._devices]
             try:
-                r, _, _ = select.select(fds, [], [], 1)  # Blocks for 1 second or until a key is pressed
+                r, _, _ = select.select(
+                    fds, [], [], 1
+                )  # Blocks for 1 second or until a key is pressed
                 for dev in self._devices:
                     if dev.fd in r:
                         for event in dev.read():
@@ -65,4 +68,3 @@ class LinuxMacOSIPC(BaseIPC):
         self._stop_event.set()  # <-- ADDED
         print("LinuxMacOSIPC stopped")
         logging.info("Backend stopped")
-        

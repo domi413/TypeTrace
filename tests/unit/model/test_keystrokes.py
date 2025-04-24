@@ -22,9 +22,9 @@ class TestKeystroke:
     def test_key_name_no_prefix(self):
         """Test key_name processing when no KEY_ prefix exists."""
         keystroke = Keystroke(scan_code=1, count=5, key_name="ENTER", date="")
-        assert keystroke.key_name == "ENTER", (
-            "Key name should remain unchanged if no KEY_ prefix"
-        )
+        assert (
+            keystroke.key_name == "ENTER"
+        ), "Key name should remain unchanged if no KEY_ prefix"
 
 
 class TestKeystrokeStore:

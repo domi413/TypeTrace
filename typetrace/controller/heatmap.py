@@ -15,7 +15,13 @@ class Heatmap(Gtk.Box):
     __gtype_name__ = "Heatmap"
 
     EXPANDED_KEYS: ClassVar[list[str]] = [
-        "Backspace", "Tab", "Caps", "Enter", "Shift", "Space", "\\"
+        "Backspace",
+        "Tab",
+        "Caps",
+        "Enter",
+        "Shift",
+        "Space",
+        "\\",
     ]
 
     keyboard_container = Gtk.Template.Child()
@@ -89,17 +95,18 @@ class Heatmap(Gtk.Box):
         }}"""
         rules = [grad_css]
 
-       
-        default_r, default_g, default_b = 239, 239, 239  
+        default_r, default_g, default_b = 239, 239, 239
         for scan_code, label in self.key_widgets.items():
             css_class = f"scancode-{scan_code}"
-            label.set_css_classes([])  
-            if not keys:  
-                rules.append(f"""
+            label.set_css_classes([])
+            if not keys:
+                rules.append(
+                    f"""
                 .{css_class} {{
                   background-color: rgb({default_r},{default_g},{default_b});
                   color: black;
-                }}""")
+                }}"""
+                )
                 label.set_css_classes([css_class])
                 label.set_tooltip_text("0")
 
@@ -116,11 +123,13 @@ class Heatmap(Gtk.Box):
             css_class = f"scancode-{keystroke.scan_code}"
             normalized = min(keystroke.count / top, 1.0)
             bg, fg = self._calculate_color(normalized)
-            rules.append(f"""
+            rules.append(
+                f"""
             .{css_class} {{
               background-color: {bg};
               color: {fg};
-            }}""")
+            }}"""
+            )
             label.set_css_classes([css_class])
             label.set_tooltip_text(str(keystroke.count))
 
