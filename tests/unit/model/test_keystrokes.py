@@ -1,11 +1,11 @@
-import pytest
 import sqlite3
-from pathlib import Path
 from unittest.mock import patch
 
-from typetrace.model.keystrokes import Keystroke, KeystrokeStore
-from typetrace.config import DatabasePath
+import pytest
+
 from typetrace.backend.db import DatabaseManager
+from typetrace.config import DatabasePath
+from typetrace.model.keystrokes import Keystroke, KeystrokeStore
 
 
 class TestKeystroke:
@@ -22,7 +22,9 @@ class TestKeystroke:
     def test_key_name_no_prefix(self):
         """Test key_name processing when no KEY_ prefix exists."""
         keystroke = Keystroke(scan_code=1, count=5, key_name="ENTER", date="")
-        assert keystroke.key_name == "ENTER", "Key name should remain unchanged if no KEY_ prefix"
+        assert keystroke.key_name == "ENTER", (
+            "Key name should remain unchanged if no KEY_ prefix"
+        )
 
 
 class TestKeystrokeStore:
@@ -50,7 +52,9 @@ class TestKeystrokeStore:
         # Debug: Print the table definition
         with sqlite3.connect(str(db_path)) as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='keystrokes'")
+            cursor.execute(
+                "SELECT sql FROM sqlite_master WHERE type='table' AND name='keystrokes'"
+            )
             table_definition = cursor.fetchone()
             print(f"\nKeystrokes table definition:\n{table_definition[0]}\n")
 
@@ -67,7 +71,7 @@ class TestKeystrokeStore:
         """Test adding a keystroke event successfully."""
         event = {
             "key": "KEY_A",
-            "scan_code": 30  # Scan code for 'A'
+            "scan_code": 30,  # Scan code for 'A'
         }
         result = keystroke_store.add(event)
         assert result is True, "Adding keystroke should succeed"
@@ -75,16 +79,15 @@ class TestKeystrokeStore:
         # Check if the entry is in the database
         with sqlite3.connect(str(setup_database)) as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT scan_code, key_name, count FROM keystrokes WHERE scan_code = 30")
+            cursor.execute(
+                "SELECT scan_code, key_name, count FROM keystrokes WHERE scan_code = 30"
+            )
             row = cursor.fetchone()
             assert row == (30, "KEY_A", 1), "Keystroke should be inserted with count 1"
 
     def test_add_mouse_event_ignored(self, keystroke_store, setup_database):
         """Test that mouse events are ignored by the add method."""
-        event = {
-            "key": "BTN_LEFT",
-            "scan_code": 272
-        }
+        event = {"key": "BTN_LEFT", "scan_code": 272}
         result = keystroke_store.add(event)
         assert result is True, "Adding should succeed even if event is ignored"
 
@@ -98,10 +101,7 @@ class TestKeystrokeStore:
     def test_get_all_keystrokes_success(self, keystroke_store, setup_database):
         """Test retrieving all keystrokes from the database."""
         # Add an entry
-        event = {
-            "key": "KEY_A",
-            "scan_code": 30
-        }
+        event = {"key": "KEY_A", "scan_code": 30}
         keystroke_store.add(event)
 
         keystrokes = keystroke_store.get_all_keystrokes()

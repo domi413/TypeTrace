@@ -47,7 +47,6 @@ jobs:
 
       - name: Install dependencies with uv
         run: uv sync --extra dev  # Installs project and development dependencies
-
-  
+        
       - name: Run unittest
         run: uv run python -m unittest discover -s tests/unit/ -p "*.py"

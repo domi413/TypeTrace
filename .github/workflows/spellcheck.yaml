@@ -8,12 +8,12 @@ on:
       - ready_for_review
       - reopened
 
-if: ${{ !github.event.pull_request.draft }}
-
 jobs:
   spellcheck:
     runs-on: ubuntu-latest
     name: Checks the documents for spelling
+
+    if: ${{ !github.event.pull_request.draft }}
 
     steps:
       - name: Checkout repository

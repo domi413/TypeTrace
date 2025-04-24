@@ -1,13 +1,9 @@
 # GTK
-qaccels
-adwaita
-dbus
+accels
 ecodes
 evdev
 executemany
-filemanager
 gapplication
-gfile
 gresource
 gresources
 levelname
