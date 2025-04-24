@@ -12,21 +12,15 @@ jobs:
       matrix:
         arch: [ x64, x86 ]
         python: [ "3.10" ]
-        libtorrent: [ 2.0.7, 1.2.19 ]
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Checkout Deluge source to subdir to enable packaging any tag/commit
-      - name: Checkout Deluge source
+      - name: Checkout Code
         if: env.ACT != 'true'
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          path: deluge_src
 
       - name: Set up Python
         if: env.ACT != 'true'
