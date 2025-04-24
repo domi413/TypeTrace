@@ -2,7 +2,7 @@ name: Generate Release Notes
 on:
   push:
     tags:
-      - "M*" # Trigger on tags such as M3
+      - "R*" # Trigger on tags such as R1
 
 permissions:
   contents: write
@@ -22,7 +22,7 @@ jobs:
         id: extract_tag
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          TAG_NUMBER=${TAG_NAME#M}
+          TAG_NUMBER=${TAG_NAME#R}
           echo "tag_number=$TAG_NUMBER" >> $GITHUB_OUTPUT
           echo "full_tag=$TAG_NAME" >> $GITHUB_OUTPUT
         shell: bash
