@@ -1,9 +1,9 @@
 [project]
 name = "typetrace"
-version = "0.1.0" # TODO: Set this to release version
+version = "0.1.0" # TODO: Set this to the release version
 
-# TODO: Add needed dependency versions e.g. "appdirs>=1.4.4",
-requires-python = ">=3.8" 
+# TODO: Add required dependency versions, e.g. "appdirs>=1.4.4"
+requires-python = ">=3.8"
 dependencies = [
     "appdirs",
     "dbus-python",
@@ -13,6 +13,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "ruff",
+    "pytest>=8.3.2",  # For testing
+    "pygobject>=3.42.0",  # For GTK, Adwaita, and Gio
 ]
 
 [tool.ruff.lint]
@@ -21,7 +23,7 @@ extend-select = [
 ]
 ignore = [
     "ANN003", # Ignore missing type annotation for **kwargs
-    "ANN401", # Ignore `Any` type annotation for functions
-    "D203",   # In conflict with D211
-    "D213",   # In conflict with D212
+    "ANN401", # Ignore use of `Any` type annotation in functions
+    "D203",   # Conflicts with D211
+    "D213",   # Conflicts with D212
 ]
