@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from collections.abc import Generator
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, final
 
@@ -25,12 +24,7 @@ class DatabaseManager:
 
     @final
     def initialize_database(self, db_path: Path) -> None:
-        """Initialize the database by creating necessary tables.
-
-        Args:
-            db_path: Path to the SQLite database file.
-
-        """
+        """Initialize the database by creating necessary tables."""
         with self._get_db_connection(db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(SQLQueries.CREATE_KEYSTROKES_TABLE)
@@ -40,13 +34,7 @@ class DatabaseManager:
 
     @final
     def write_to_database(self, db_path: Path, events: list[Event]) -> None:
-        """Write keystroke events to the database.
-
-        Args:
-            db_path: Path to the SQLite database file.
-            events: List of key events to write to the database.
-
-        """
+        """Write keystroke events to the database."""
         if not events:
             return
 
@@ -74,15 +62,7 @@ class DatabaseManager:
         self,
         db_path: Path,
     ) -> Generator[sqlite3.Connection, None, None]:
-        """Get a database connection to the SQLite database.
-
-        Args:
-            db_path: Path to the SQLite database file.
-
-        Yields:
-            SQLite database connection.
-
-        """
+        """Get a database connection to the SQLite database."""
         conn: sqlite3.Connection | None = None
         try:
             conn = sqlite3.connect(db_path)

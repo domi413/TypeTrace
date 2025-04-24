@@ -4,8 +4,8 @@ import sqlite3
 from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest import mock
-
-import pytest
+import unittest
+import tempfile
 
 from typetrace.backend.db import DatabaseManager
 from typetrace.backend.sql import SQLQueries
@@ -14,90 +14,56 @@ if TYPE_CHECKING:
     from typetrace.config import Event
 
 
-class TestDatabaseManager:
+class TestDatabaseManager(unittest.TestCase):
     """Test suite for the DatabaseManager class."""
 
-    @pytest.fixture
-    def db_manager(self) -> DatabaseManager:
-        """Provide a DatabaseManager instance for testing.
-
-        Returns:
-            A fresh DatabaseManager instance.
-
-        """
-        return DatabaseManager()
-
-    @pytest.fixture
-    def mock_db_path(self, tmp_path: Path) -> Path:
-        """Provide a mock database path.
-
-        Args:
-            tmp_path: Pytest's temporary directory fixture.
-
-        Returns:
-            A Path object for a mock database.
-
-        """
+    def setUp(self):
+        """Set up the test environment before each test."""
+        self.db_manager = DatabaseManager()
+        # Create a temporary directory for the mock database path
+        self.temp_dir = tempfile.mkdtemp()
         from typetrace.config import Config
+        self.mock_db_path = Path(self.temp_dir) / Config.DB_NAME
 
-        return tmp_path / Config.DB_NAME
+    def tearDown(self):
+        """Clean up the test environment after each test."""
+        import shutil
+        shutil.rmtree(self.temp_dir)
 
     # ==========================================================
     # ========== Tests for initialize_database method ==========
     # ==========================================================
+    @mock.patch("typetrace.backend.db.logger")
     @mock.patch("sqlite3.connect")
-    def test_initialize_database(
-        self,
-        mock_connect: mock.MagicMock,
-        db_manager: DatabaseManager,
-        mock_db_path: Path,
-    ) -> None:
-        """Test database initialization.
-
-        Args:
-            mock_connect: Mock for sqlite3.connect function.
-            db_manager: DatabaseManager instance fixture.
-            mock_db_path: Mock database path fixture.
-
-        """
+    def test_initialize_database(self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock) -> None:
+        """Test database initialization."""
         mock_conn = mock.MagicMock()
         mock_cursor = mock.MagicMock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
 
-        db_manager.initialize_database(mock_db_path)
+        self.db_manager.initialize_database(self.mock_db_path)
 
-        mock_connect.assert_called_once_with(mock_db_path)
+        mock_connect.assert_called_once_with(self.mock_db_path)
         mock_cursor.execute.assert_called_once_with(SQLQueries.CREATE_KEYSTROKES_TABLE)
         mock_conn.commit.assert_called_once()
         mock_conn.close.assert_called_once()
+        mock_logger.debug.assert_called_once_with("Database initialized at %s", self.mock_db_path)
 
     @mock.patch("typetrace.backend.db.logger")
     @mock.patch("sqlite3.connect")
     def test_initialize_database_sqlite_error(
-        self,
-        mock_connect: mock.MagicMock,
-        mock_logger: mock.MagicMock,
-        db_manager: DatabaseManager,
-        mock_db_path: Path,
+        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock
     ) -> None:
-        """Test database initialization with SQLite error.
-
-        Args:
-            mock_connect: Mock for sqlite3.connect function.
-            mock_logger: Mock for database logger
-            db_manager: DatabaseManager instance fixture.
-            mock_db_path: Mock database path fixture.
-
-        """
+        """Test database initialization with SQLite error."""
         mock_conn = mock.MagicMock()
         mock_cursor = mock.MagicMock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
         mock_cursor.execute.side_effect = sqlite3.Error("Mock SQLite error")
 
-        with pytest.raises(sqlite3.Error, match="Mock SQLite error"):
-            db_manager.initialize_database(mock_db_path)
+        with self.assertRaisesRegex(sqlite3.Error, "Mock SQLite error"):
+            self.db_manager.initialize_database(self.mock_db_path)
 
         mock_conn.close.assert_called_once()
         mock_logger.exception.assert_called_once_with("Database error")
@@ -105,31 +71,17 @@ class TestDatabaseManager:
     @mock.patch("typetrace.backend.db.logger")
     @mock.patch("sqlite3.connect")
     def test_initialize_database_operational_error(
-        self,
-        mock_connect: mock.MagicMock,
-        mock_logger: mock.MagicMock,
-        db_manager: DatabaseManager,
-        mock_db_path: Path,
+        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock
     ) -> None:
-        """Test database initialization with SQLite error.
-
-        Args:
-            mock_connect: Mock for sqlite3.connect function.
-            mock_logger: Mock for database logger
-            db_manager: DatabaseManager instance fixture.
-            mock_db_path: Mock database path fixture.
-
-        """
+        """Test database initialization with SQLite operational error."""
         mock_conn = mock.MagicMock()
         mock_cursor = mock.MagicMock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.execute.side_effect = sqlite3.OperationalError(
-            "Mock operational error",
-        )
+        mock_cursor.execute.side_effect = sqlite3.OperationalError("Mock operational error")
 
-        with pytest.raises(sqlite3.OperationalError, match="Mock operational error"):
-            db_manager.initialize_database(mock_db_path)
+        with self.assertRaisesRegex(sqlite3.OperationalError, "Mock operational error"):
+            self.db_manager.initialize_database(self.mock_db_path)
 
         mock_conn.close.assert_called_once()
         mock_logger.exception.assert_called_once_with("SQLite operational error")
@@ -138,39 +90,16 @@ class TestDatabaseManager:
     # ========== Tests for write_to_database method ==========
     # ========================================================
     @mock.patch("sqlite3.connect")
-    def test_write_to_database_empty_events(
-        self,
-        mock_connect: mock.MagicMock,
-        db_manager: DatabaseManager,
-        mock_db_path: Path,
-    ) -> None:
-        """Test write_to_database with empty events list.
-
-        Args:
-            mock_connect: Mock for sqlite3.connect function.
-            db_manager: DatabaseManager instance fixture.
-            mock_db_path: Mock database path fixture.
-
-        """
-        db_manager.write_to_database(mock_db_path, [])
+    def test_write_to_database_empty_events(self, mock_connect: mock.MagicMock) -> None:
+        """Test write_to_database with empty events list."""
+        self.db_manager.write_to_database(self.mock_db_path, [])
 
         mock_connect.assert_not_called()
 
+    @mock.patch("typetrace.backend.db.logger")
     @mock.patch("sqlite3.connect")
-    def test_write_to_database_with_events(
-        self,
-        mock_connect: mock.MagicMock,
-        db_manager: DatabaseManager,
-        mock_db_path: Path,
-    ) -> None:
-        """Test write_to_database with events list.
-
-        Args:
-            mock_connect: Mock for sqlite3.connect function.
-            db_manager: DatabaseManager instance fixture.
-            mock_db_path: Mock database path fixture.
-
-        """
+    def test_write_to_database_with_events(self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock) -> None:
+        """Test write_to_database with events list."""
         mock_conn = mock.MagicMock()
         mock_cursor = mock.MagicMock()
         mock_connect.return_value = mock_conn
@@ -186,8 +115,8 @@ class TestDatabaseManager:
             {"scan_code": 42, "key_name": "KEY_LEFTSHIFT", "date": "2025-04-22"},
         ]
 
-        db_manager.write_to_database(mock_db_path, input_events)
-        mock_connect.assert_called_once_with(mock_db_path)
+        self.db_manager.write_to_database(self.mock_db_path, input_events)
+        mock_connect.assert_called_once_with(self.mock_db_path)
 
         mock_cursor.executemany.assert_called_once_with(
             SQLQueries.INSERT_OR_UPDATE_KEYSTROKE,
@@ -196,22 +125,12 @@ class TestDatabaseManager:
 
         mock_conn.commit.assert_called_once()
         mock_conn.close.assert_called_once()
+        mock_logger.debug.assert_called_once_with("Updated database with %d keystroke events", len(input_events))
 
+    @mock.patch("typetrace.backend.db.logger")
     @mock.patch("sqlite3.connect")
-    def test_write_to_database_sqlite_error(
-        self,
-        mock_connect: mock.MagicMock,
-        db_manager: DatabaseManager,
-        mock_db_path: Path,
-    ) -> None:
-        """Test write_to_database with SQLite error.
-
-        Args:
-            mock_connect: Mock for sqlite3.connect function.
-            db_manager: DatabaseManager instance fixture.
-            mock_db_path: Mock database path fixture.
-
-        """
+    def test_write_to_database_sqlite_error(self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock) -> None:
+        """Test write_to_database with SQLite error."""
         mock_conn = mock.MagicMock()
         mock_cursor = mock.MagicMock()
         mock_connect.return_value = mock_conn
@@ -222,29 +141,17 @@ class TestDatabaseManager:
             {"scan_code": 30, "name": "KEY_A", "date": "2025-04-22"}
         ]
 
-        with pytest.raises(sqlite3.Error, match="Mock SQLite error"):
-            db_manager.write_to_database(mock_db_path, input_events)
+        with self.assertRaisesRegex(sqlite3.Error, "Mock SQLite error"):
+            self.db_manager.write_to_database(self.mock_db_path, input_events)
 
         mock_conn.close.assert_called_once()
+        mock_logger.exception.assert_called_once_with("Database error")
 
     @mock.patch("sqlite3.connect")
     def test_write_to_database_with_invalid_characters(
-        self,
-        mock_connect: mock.MagicMock,
-        db_manager: DatabaseManager,
-        mock_db_path: Path,
+        self, mock_connect: mock.MagicMock
     ) -> None:
-        """Test write_to_database with events containing invalid characters.
-
-            This is a test-case that should not happen in a real-world scenario,
-            since the following are not valid keyboard inputs.
-
-        Args:
-            mock_connect: Mock for sqlite3.connect function.
-            db_manager: DatabaseManager instance fixture.
-            mock_db_path: Mock database path fixture.
-
-        """
+        """Test write_to_database with events containing invalid characters."""
         mock_conn = mock.MagicMock()
         mock_cursor = mock.MagicMock()
         mock_connect.return_value = mock_conn
@@ -292,8 +199,8 @@ class TestDatabaseManager:
             },
         ]
 
-        db_manager.write_to_database(mock_db_path, input_events)
-        mock_connect.assert_called_once_with(mock_db_path)
+        self.db_manager.write_to_database(self.mock_db_path, input_events)
+        mock_connect.assert_called_once_with(self.mock_db_path)
 
         mock_cursor.executemany.assert_called_once_with(
             SQLQueries.INSERT_OR_UPDATE_KEYSTROKE,
@@ -302,3 +209,7 @@ class TestDatabaseManager:
 
         mock_conn.commit.assert_called_once()
         mock_conn.close.assert_called_once()
+
+
+if __name__ == "__main__":
+    unittest.main()

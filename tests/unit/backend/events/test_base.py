@@ -1,4 +1,4 @@
-import pytest
+import unittest
 from unittest.mock import patch
 import time
 from pathlib import Path
@@ -7,137 +7,123 @@ from typetrace.backend.events.base import BaseEventProcessor
 from typetrace.config import Config
 
 
-class TestBaseEventProcessor:
-    """Test suite for BaseEventProcessor class."""
+class ConcreteBaseEventProcessor(BaseEventProcessor):
+    def trace(self):
+        pass
 
-    @pytest.fixture
-    def base_processor(self, tmp_path):
-        """Provide a BaseEventProcessor instance with a temporary database path.
+    def _buffer(self, devices):
+        pass
 
-        Args:
-            tmp_path: Pytest fixture for a temporary directory.
+    def _process_single_event(self, event):
+        pass
 
-        Returns:
-            A concrete instance of BaseEventProcessor.
-        """
-        class ConcreteBaseEventProcessor(BaseEventProcessor):
-            def trace(self):
-                pass
 
-            def _buffer(self, devices):
-                pass
+class TestBaseEventProcessor(unittest.TestCase):
+    def setUp(self):
+        self.tmp_path = Path("tests/temp")  # alternativ: tempfile.TemporaryDirectory + Pathlib
+        self.tmp_path.mkdir(parents=True, exist_ok=True)
+        self.processor = ConcreteBaseEventProcessor(self.tmp_path / "test.db")
 
-            def _process_single_event(self, event):
-                pass
+    def test_init(self):
+        self.assertEqual(self.processor._db_path, self.tmp_path / "test.db")
 
-        return ConcreteBaseEventProcessor(tmp_path / "test.db")
-
-    def test_init(self, base_processor, tmp_path):
-        """Test initialization of BaseEventProcessor."""
-        assert base_processor._db_path == tmp_path / "test.db"
-
-    def test_check_timeout_and_flush_no_flush(self, base_processor):
-        """Test _check_timeout_and_flush when no flush is triggered."""
+    def test_check_timeout_and_flush_no_flush(self):
         buffer = [{"scan_code": 1, "name": "a", "date": "2023-10-01"}]
         start_time = time.time()
         with patch('typetrace.backend.db.DatabaseManager.write_to_database') as mock_write:
-            new_buffer, new_start_time = base_processor._check_timeout_and_flush(
-                buffer, start_time, base_processor._db_path
+            new_buffer, new_start_time = self.processor._check_timeout_and_flush(
+                buffer, start_time, self.processor._db_path
             )
-            assert new_buffer == buffer
-            assert new_start_time == start_time
+            self.assertEqual(new_buffer, buffer)
+            self.assertEqual(new_start_time, start_time)
             mock_write.assert_not_called()
 
-    def test_check_timeout_and_flush_with_flush_timeout(self, base_processor):
-        """Test _check_timeout_and_flush when flush is triggered by timeout."""
+    def test_check_timeout_and_flush_with_flush_timeout(self):
         buffer = [{"scan_code": 1, "name": "a", "date": "2023-10-01"}]
         start_time = time.time() - Config.BUFFER_TIMEOUT - 1
         with patch('typetrace.backend.db.DatabaseManager.write_to_database') as mock_write:
-            new_buffer, new_start_time = base_processor._check_timeout_and_flush(
-                buffer, start_time, base_processor._db_path
+            new_buffer, new_start_time = self.processor._check_timeout_and_flush(
+                buffer, start_time, self.processor._db_path
             )
-            assert new_buffer == []
-            assert new_start_time > start_time
-            mock_write.assert_called_once_with(base_processor._db_path, buffer)
+            self.assertEqual(new_buffer, [])
+            self.assertGreater(new_start_time, start_time)
+            mock_write.assert_called_once_with(self.processor._db_path, buffer)
 
-    def test_check_timeout_and_flush_with_flush_size(self, base_processor):
-        """Test _check_timeout_and_flush when flush is triggered by buffer size."""
+    def test_check_timeout_and_flush_with_flush_size(self):
         buffer = [
             {"scan_code": i, "name": f"key_{i}", "date": "2023-10-01"}
             for i in range(Config.BUFFER_SIZE)
         ]
         start_time = time.time()
         with patch('typetrace.backend.db.DatabaseManager.write_to_database') as mock_write:
-            new_buffer, new_start_time = base_processor._check_timeout_and_flush(
-                buffer, start_time, base_processor._db_path
+            new_buffer, new_start_time = self.processor._check_timeout_and_flush(
+                buffer, start_time, self.processor._db_path
             )
-            assert new_buffer == []
-            assert new_start_time > start_time
-            mock_write.assert_called_once_with(base_processor._db_path, buffer)
+            self.assertEqual(new_buffer, [])
+            self.assertGreater(new_start_time, start_time)
+            mock_write.assert_called_once_with(self.processor._db_path, buffer)
 
-    def test_check_timeout_and_flush_empty_buffer(self, base_processor):
-        """Test _check_timeout_and_flush with an empty buffer."""
+    def test_check_timeout_and_flush_empty_buffer(self):
         buffer = []
         start_time = time.time()
         with patch('typetrace.backend.db.DatabaseManager.write_to_database') as mock_write:
-            new_buffer, new_start_time = base_processor._check_timeout_and_flush(
-                buffer, start_time, base_processor._db_path
+            new_buffer, new_start_time = self.processor._check_timeout_and_flush(
+                buffer, start_time, self.processor._db_path
             )
-            assert new_buffer == []
-            assert new_start_time == start_time
+            self.assertEqual(new_buffer, [])
+            self.assertEqual(new_start_time, start_time)
             mock_write.assert_not_called()
 
-    def test_check_timeout_and_flush_force_flush(self, base_processor):
-        """Test _check_timeout_and_flush with forced flush."""
+    def test_check_timeout_and_flush_force_flush(self):
         buffer = [{"scan_code": 1, "name": "a", "date": "2023-10-01"}]
         start_time = time.time()
         with patch('typetrace.backend.db.DatabaseManager.write_to_database') as mock_write:
-            new_buffer, new_start_time = base_processor._check_timeout_and_flush(
-                buffer, start_time, base_processor._db_path, flush=True
+            new_buffer, new_start_time = self.processor._check_timeout_and_flush(
+                buffer, start_time, self.processor._db_path, flush=True
             )
-            assert new_buffer == []
-            assert new_start_time > start_time
-            mock_write.assert_called_once_with(base_processor._db_path, buffer)
+            self.assertEqual(new_buffer, [])
+            self.assertGreater(new_start_time, start_time)
+            mock_write.assert_called_once_with(self.processor._db_path, buffer)
 
-    def test_check_timeout_and_flush_almost_full_buffer(self, base_processor):
-        """Test _check_timeout_and_flush with buffer just below size limit."""
+    def test_check_timeout_and_flush_almost_full_buffer(self):
         buffer = [
             {"scan_code": i, "name": f"key_{i}", "date": "2023-10-01"}
             for i in range(Config.BUFFER_SIZE - 1)
         ]
         start_time = time.time()
         with patch('typetrace.backend.db.DatabaseManager.write_to_database') as mock_write:
-            new_buffer, new_start_time = base_processor._check_timeout_and_flush(
-                buffer, start_time, base_processor._db_path
+            new_buffer, new_start_time = self.processor._check_timeout_and_flush(
+                buffer, start_time, self.processor._db_path
             )
-            assert new_buffer == buffer
-            assert new_start_time == start_time
+            self.assertEqual(new_buffer, buffer)
+            self.assertEqual(new_start_time, start_time)
             mock_write.assert_not_called()
 
-    def test_print_event(self, base_processor):
-        """Test _print_event logs a valid event correctly."""
+    def test_print_event(self):
         event = {"scan_code": 1, "name": "a", "date": "2023-10-01"}
         with patch('logging.Logger.debug') as mock_debug:
-            base_processor._print_event(event)
+            self.processor._print_event(event)
             mock_debug.assert_called_once_with(
                 '{"event_name": "%s", "key_code": %s, "date": "%s"}',
                 "a", 1, "2023-10-01"
             )
 
-    def test_print_event_missing_keys(self, base_processor):
-        """Test _print_event with missing event keys."""
-        event = {"scan_code": 1}  # Missing 'name' and 'date'
+    def test_print_event_missing_keys(self):
+        event = {"scan_code": 1}
         with patch('logging.Logger.debug') as mock_debug:
-            with pytest.raises(KeyError):
-                base_processor._print_event(event)
+            with self.assertRaises(KeyError):
+                self.processor._print_event(event)
             mock_debug.assert_not_called()
 
-    def test_print_event_invalid_values(self, base_processor):
-        """Test _print_event with invalid event values."""
+    def test_print_event_invalid_values(self):
         event = {"scan_code": None, "name": "", "date": ""}
         with patch('logging.Logger.debug') as mock_debug:
-            base_processor._print_event(event)
+            self.processor._print_event(event)
             mock_debug.assert_called_once_with(
                 '{"event_name": "%s", "key_code": %s, "date": "%s"}',
                 "", None, ""
             )
+
+
+if __name__ == "__main__":
+    unittest.main()
