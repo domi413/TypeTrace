@@ -24,6 +24,7 @@ jobs:
           TAG_NAME=${GITHUB_REF#refs/tags/}
           TAG_NUMBER=${TAG_NAME#M}
           echo "tag_number=$TAG_NUMBER" >> $GITHUB_OUTPUT
+          echo "full_tag=$TAG_NAME" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Get Previous Tag
@@ -32,6 +33,10 @@ jobs:
           PREV_TAG=$(git tag --sort=-version:refname | grep -A 1 ${GITHUB_REF#refs/tags/} | tail -n 1)
           echo "prev_tag=$PREV_TAG" >> $GITHUB_OUTPUT
         shell: bash
+
+      - name: Set Version Environment Variable
+        run: |
+          echo "TYPETRACE_VERSION=${{ steps.extract_tag.outputs.full_tag }}" >> $GITHUB_ENV
 
       - name: Build Changelog
         id: build_changelog
