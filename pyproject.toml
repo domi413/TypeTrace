@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "typetrace"
 version = "0.1.0" # TODO: Set this to the release version
@@ -12,8 +16,10 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "ruff",
-   
 ]
+
+[tool.setuptools]
+packages = ["typetrace"]
 
 [tool.ruff.lint]
 extend-select = [
