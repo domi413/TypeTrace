@@ -61,6 +61,12 @@ jobs:
         if: env.ACT != 'true'
         run: pip install -e.[build]
 
+      - name: Build with Meson
+        run: |
+          meson setup builddir
+          meson compile -C builddir
+          meson install -C builddir 
+
       - name: Freeze TypeTrace
         if: env.ACT != 'true'
         run: pyinstaller --clean typetrace.spec --distpath freeze
