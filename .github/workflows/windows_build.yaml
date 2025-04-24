@@ -1,0 +1,56 @@
+name: Package
+
+on:
+  push:
+    tags:
+      - "typetrace-*"
+  workflow_dispatch:
+
+jobs:
+  windows_package:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        arch: [x64]
+        python: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: ${{ matrix.arch }}
+
+      - name: Install GTK
+        run: |
+          $url = "https://github.com/wingtk/gvsbuild/releases/download/2025.2.0/GTK4_Gvsbuild_2025.2.0_${{ matrix.arch }}.zip"
+          Invoke-WebRequest $url -OutFile C:\GTK.zip
+          Expand-Archive C:\GTK.zip -DestinationPath C:\GTK
+          echo "C:\GTK\bin" >> $env:GITHUB_PATH
+          echo "C:\GTK\lib" >> $env:GITHUB_PATH
+          pip install pycairo PyGObject
+
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller _install/bin/typetrace `
+            --onefile `
+            --name TypeTrace `
+            --add-data "C:\GTK\bin\*.dll;." `
+            --hidden-import gi
+
+      - name: Create installer
+        working-directory: packaging/win
+        run: |
+          makensis typetrace.nsi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TypeTrace-${{ matrix.arch }}
+          path: dist/*.exe
