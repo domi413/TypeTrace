@@ -1,7 +1,7 @@
 [project]
 description = "Application to trace your key strokes"
 readme = "README.md"
-authors = [{ name = "Tschöggi", email = "tschöggi@email.com" }]
+authors = [{ name = "Tschogge", email = "tschogge@email.com" }] #TODO Authors
 license = { text = "MIT" }
 name = "typetrace"
 version = "0.1.0" # TODO: Set this to release version
