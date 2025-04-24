@@ -5,6 +5,7 @@
     <file preprocess="xml-stripblanks">view/heatmap.ui</file>
     <file preprocess="xml-stripblanks">view/verbose.ui</file>
     <file preprocess="xml-stripblanks">view/preferences.ui</file>
+    <file preprocess="xml-stripblanks">view/statistics.ui</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
     <file>style.css</file>
     <file>style-dark.css</file>

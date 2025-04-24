@@ -5,6 +5,7 @@ import threading
 
 from typetrace.backend.ipc.linux_darwin import LinuxMacOSIPC
 from typetrace.controller.heatmap import Heatmap
+from typetrace.controller.statistics import Statistics
 from typetrace.controller.verbose import Verbose
 from typetrace.model.keystrokes import KeystrokeStore
 
@@ -39,6 +40,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         # Initialize views
         self.heatmap = Heatmap(settings=settings, keystroke_store=keystroke_store)
         self.verbose = Verbose(keystroke_store=keystroke_store)
+        self.statistics = Statistics(keystroke_store=keystroke_store)
         self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
 
         # Add tabs to the ViewStack
@@ -54,15 +56,20 @@ class TypetraceWindow(Adw.ApplicationWindow):
             "verbose",
             "Verbose",
         )
-        verbose_page.set_icon_name("text-x-generic-symbolic")
-
-        # Connect ViewSwitcher to the Stack
+        verbose_page.set_icon_name("view-list-symbolic")
+        statistics_page = self.stack.add_titled(
+            self.statistics,
+            "statistics",
+            "Statistics",
+        )
+        statistics_page.set_icon_name("image-filter-symbolic")
         self.view_switcher.set_stack(self.stack)
 
     def _on_refresh_clicked(self) -> None:
         """Handle refresh button click."""
         self.heatmap.update()
         self.verbose.update()
+        self.statistics.update()
 
     def _on_keystroke_received(self, event: dict) -> None:
         """Callback for new keystrokes from the backend."""

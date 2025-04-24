@@ -26,11 +26,14 @@ libadwaita
 libevdev
 noarchive
 pathex
+subprojects
 
 # Team Names
 Alali
+Bachmann
 Bühler
 Dominik
 Gioele
 Knöfler
+Mustafa
 Petrillo
