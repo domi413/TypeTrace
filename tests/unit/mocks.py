@@ -2,7 +2,6 @@ import sys
 import types
 from unittest.mock import MagicMock
 
-# Prepare GI Mocks
 gi_mock = types.ModuleType("gi")
 gi_repository_mock = types.ModuleType("gi.repository")
 gtk_mock = types.ModuleType("gi.repository.Gtk")
@@ -14,10 +13,9 @@ gobject_mock = types.ModuleType("gi.repository.GObject")
 
 gi_mock.require_version = MagicMock()
 
-# Mock GTK objects
 gtk_mock.Template = lambda resource_path=None: (lambda cls: cls)
 gtk_mock.Template.Child = MagicMock()
-gtk_mock.Box = type('Box', (), {})  # Updated to match test_verbose.py (was MagicMock in test_window.py)
+gtk_mock.Box = type('Box', (), {})  
 gtk_mock.SortListModel = type('SortListModel', (), {
     '__init__': lambda self, model=None: None,
     'set_sorter': MagicMock()
@@ -40,7 +38,7 @@ gtk_mock.NumericSorter = type('NumericSorter', (), {'__init__': lambda self, exp
 gtk_mock.StringSorter = type('StringSorter', (), {'__init__': lambda self, expression=None: None})
 gtk_mock.SortType = type('SortType', (), {'ASCENDING': 0})
 
-# Additional GTK mocks for test_window.py
+
 gtk_mock.CssProvider = type('CssProvider', (), {})
 gtk_mock.StyleContext = type('StyleContext', (), {'add_provider_for_display': MagicMock()})
 gtk_mock.STYLE_PROVIDER_PRIORITY_APPLICATION = 600
@@ -48,10 +46,10 @@ gtk_mock.Orientation = type('Orientation', (), {'HORIZONTAL': 0})
 gtk_mock.StackSwitcher = MagicMock()
 gtk_mock.Stack = MagicMock()
 
-# Mock Adw objects
+
 adw_mock.ApplicationWindow = type('ApplicationWindow', (), {})
 
-# Mock Gio objects
+
 class MockListStore:
     def __init__(self):
         self.items = []
@@ -71,19 +69,15 @@ class MockListStore:
         return self.get_item_mocks[index] if index < len(self.get_item_mocks) else self.items[index]
 
 gio_mock.ListStore = MockListStore
-gio_mock.Settings = type('Settings', (), {})  # Added for test_window.py
+gio_mock.Settings = type('Settings', (), {})  
 
-# Mock Gdk objects
 gdk_mock.Display = type('Display', (), {'get_default': MagicMock(return_value=MagicMock())})
 
-# Mock GLib objects
-glib_mock.idle_add = lambda func: func()  # GLib.idle_add executes the function directly
+glib_mock.idle_add = lambda func: func()  
 
-# Mock GObject objects
 gobject_mock.Object = type('Object', (), {})
 gobject_mock.Property = MagicMock()
 
-# Register fake modules
 sys.modules["gi"] = gi_mock
 sys.modules["gi.repository"] = gi_repository_mock
 sys.modules["gi.repository.Gtk"] = gtk_mock
