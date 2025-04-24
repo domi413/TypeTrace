@@ -1,14 +1,11 @@
 import pytest
 from unittest.mock import MagicMock
 
-# Import mocks (ensures sys.modules is correctly set)
-import tests.unit.mocks  # noqa: F401
+import tests.unit.mocks  
 
-# Import project modules
 from typetrace.model.keystrokes import Keystroke, KeystrokeStore
 from typetrace.controller.verbose import Verbose
 
-# Fixtures
 @pytest.fixture
 def keystroke_store():
     store = MagicMock(spec=KeystrokeStore)
@@ -19,7 +16,6 @@ def keystroke_store():
 def verbose_widget(keystroke_store):
     return Verbose(keystroke_store=keystroke_store)
 
-# Tests
 class TestVerbose:
     def test_populate_list_store_empty(self, verbose_widget, keystroke_store):
         verbose_widget.list_store.remove_all()
