@@ -32,7 +32,7 @@ class TestLoggerSetup:
 
         LoggerSetup.setup_logging()
 
-        assert root_logger.level == logging.DEBUG  # Level 10
+        assert root_logger.level == logging.DEBUG  
         assert len(root_logger.handlers) == 1
         handler = root_logger.handlers[0]
         assert isinstance(handler, logging.StreamHandler)
@@ -55,7 +55,7 @@ class TestLoggerSetup:
 
         LoggerSetup.setup_logging()
 
-        assert root_logger.level == logging.INFO  # Level 20
+        assert root_logger.level == logging.INFO  
         assert len(root_logger.handlers) == 1
         handler = root_logger.handlers[0]
         assert isinstance(handler, logging.StreamHandler)
@@ -76,19 +76,19 @@ class TestLoggerSetup:
         root_logger.handlers.clear()
         root_logger.setLevel(logging.NOTSET)
 
-        # Call setup_logging multiple times
+        
         LoggerSetup.setup_logging()
         LoggerSetup.setup_logging()
         LoggerSetup.setup_logging()
 
-        # Only one handler should exist
+        
         assert len(root_logger.handlers) == 1
         handler = root_logger.handlers[0]
         assert isinstance(handler, logging.StreamHandler)
         assert isinstance(handler.formatter, ColoredFormatter)
         assert handler.formatter._fmt == "%(asctime)s - %(levelname)s - %(message)s"
         assert handler.formatter.datefmt == "%Y-%m-%d %H:%M:%S"
-        assert root_logger.level == logging.INFO  # Ensure level is still correct
+        assert root_logger.level == logging.INFO  
 
 
 class TestColoredFormatter:
@@ -100,9 +100,7 @@ class TestColoredFormatter:
         assert hasattr(formatter, "_ColoredFormatter__use_colors")
 
     @mock.patch("platform.system")
-    def test_should_use_colors_linux(
-        self, mock_platform_system: mock.MagicMock
-    ) -> None:
+    def test_should_use_colors_linux(self, mock_platform_system: mock.MagicMock) -> None:
         """Test color detection on Linux.
 
         Args:
@@ -113,9 +111,7 @@ class TestColoredFormatter:
         assert formatter._should_use_colors() is True
 
     @mock.patch("platform.system")
-    def test_should_use_colors_darwin(
-        self, mock_platform_system: mock.MagicMock
-    ) -> None:
+    def test_should_use_colors_darwin(self, mock_platform_system: mock.MagicMock) -> None:
         """Test color detection on macOS.
 
         Args:
@@ -126,9 +122,7 @@ class TestColoredFormatter:
         assert formatter._should_use_colors() is True
 
     @mock.patch("platform.system")
-    def test_should_use_colors_windows(
-        self, mock_platform_system: mock.MagicMock
-    ) -> None:
+    def test_should_use_colors_windows(self, mock_platform_system: mock.MagicMock) -> None:
         """Test color detection on Windows.
 
         Args:
@@ -147,7 +141,6 @@ class TestColoredFormatter:
         """
         formatter = ColoredFormatter()
 
-        # Test warning level
         record = logging.LogRecord(
             name="test",
             level=logging.WARNING,
@@ -161,7 +154,6 @@ class TestColoredFormatter:
         assert LogColor.YELLOW in formatted
         assert LogColor.RESET in formatted
 
-        # Test error level
         record = logging.LogRecord(
             name="test",
             level=logging.ERROR,
@@ -175,7 +167,6 @@ class TestColoredFormatter:
         assert LogColor.RED in formatted
         assert LogColor.RESET in formatted
 
-        # Test info level (no colors)
         record = logging.LogRecord(
             name="test",
             level=logging.INFO,
@@ -190,9 +181,7 @@ class TestColoredFormatter:
         assert LogColor.RED not in formatted
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=False)
-    def test_format_without_colors(
-        self, mock_should_use_colors: mock.MagicMock
-    ) -> None:
+    def test_format_without_colors(self, mock_should_use_colors: mock.MagicMock) -> None:
         """Test formatting with colors disabled.
 
         Args:
@@ -200,7 +189,6 @@ class TestColoredFormatter:
         """
         formatter = ColoredFormatter()
 
-        # Test with different log levels
         for level in [logging.INFO, logging.WARNING, logging.ERROR]:
             record = logging.LogRecord(
                 name="test",
@@ -225,7 +213,7 @@ class TestColoredFormatter:
         formatter = ColoredFormatter(fmt="%(levelname)s: %(message)s")
         formatter._ColoredFormatter__use_colors = True
 
-        # Test with a non-string message (like an exception or integer)
+        
         record = logging.LogRecord(
             name="test",
             level=logging.ERROR,
@@ -236,12 +224,12 @@ class TestColoredFormatter:
             exc_info=None,
         )
 
-        # This should not raise an exception
+        
         formatted = formatter.format(record)
 
         assert f"{LogColor.RED}ERROR{LogColor.RESET}" in formatted
 
-        # The exception message itself should not be colored
+        
         exception_text = str(Exception("Test exception"))
         assert exception_text in formatted
 
