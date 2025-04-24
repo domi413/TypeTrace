@@ -1,3 +1,5 @@
+"""Integration tests for the TypeTrace application."""
+
 import sqlite3
 from pathlib import Path
 
@@ -15,19 +17,19 @@ from typetrace.model.database_manager import DatabaseManager
 
 @pytest.fixture
 def temp_db(tmp_path: Path) -> sqlite3.Connection:
+    """Create a temporary in-memory SQLite database for testing."""
     db_path = tmp_path / "test_typetrace.db"
     conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute(
+
+    conn.executescript(
         """
         CREATE TABLE IF NOT EXISTS keystrokes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            scan_code INTEGER NOT NULL,
-            key_name TEXT NOT NULL,
-            date DATE NOT NULL,
-            count INTEGER DEFAULT 0,
-            UNIQUE(scan_code, date),
-        )
+            scan_code INTEGER,
+            key TEXT,
+            date TEXT,
+            count INTEGER,
+            UNIQUE(scan_code, date)
+        );
         """
     )
     conn.commit()
@@ -36,10 +38,11 @@ def temp_db(tmp_path: Path) -> sqlite3.Connection:
 
 @pytest.fixture
 def settings() -> Gio.Settings:
+    """Load GSettings schema for testing."""
     schema_source = Gio.SettingsSchemaSource.new_from_directory(
         "_install/share/glib-2.0/schemas",
-        parent=None,
-        trusted=False,
+        Gio.SettingsSchemaSource.get_default(),
+        False,
     )
     schema = schema_source.lookup("edu.ost.typetrace", recursive=False)
     assert schema is not None, "GSettings schema 'edu.ost.typetrace' not found"
@@ -48,31 +51,20 @@ def settings() -> Gio.Settings:
 
 @pytest.fixture
 def window(temp_db: sqlite3.Connection, settings: Gio.Settings) -> TypetraceWindow:
+    """Create a TypetraceWindow instance with mocked dependencies."""
     db_manager = DatabaseManager()
     db_manager.db_connection = temp_db
-    win = TypetraceWindow(settings=settings, db_manager=db_manager)
-    yield win
-    win.close()
+    return TypetraceWindow(db_manager=db_manager, settings=settings)
 
 
-def test_backend_frontend_integration(
-    window: TypetraceWindow,
-    temp_db: sqlite3.Connection,
-) -> None:
-    """Test backend (KeystrokeStore) and frontend (TypetraceWindow) integration."""
-    keystroke = {
-        "scan_code": 30,
-        "key_name": "a",
-        "date": "2025-04-18",
-    }
-    window.keystroke_store.store_keystroke(keystroke)
+def test_keystroke_storage(window: TypetraceWindow, temp_db: sqlite3.Connection):
+    """Test that a keystroke is stored correctly and UI is initialized."""
+    window.db_manager.insert_keystroke(30, "a", "2025-04-18")
 
-    cursor = temp_db.cursor()
-    cursor.execute(
-        "SELECT scan_code, key_name, date, count FROM keystrokes WHERE scan_code = ?",
-        (keystroke["scan_code"],),
-    )
-    result = cursor.fetchone()
+    result = temp_db.execute(
+        "SELECT * FROM keystrokes WHERE scan_code = 30"
+    ).fetchone()
+
     temp_db.close()
 
     assert result is not None, "Keystroke should be stored in the database"
