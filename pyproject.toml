@@ -1,15 +1,12 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "typetrace"
-version = "0.1.0" # TODO: Set this to the release version
+version = "0.1.0" # TODO: Set this to release version
 
-# TODO: Add required dependency versions, e.g. "appdirs>=1.4.4"
-requires-python = ">=3.8"
+# TODO: Add needed dependency versions e.g. "appdirs>=1.4.4",
+requires-python = ">=3.8" 
 dependencies = [
     "appdirs",
+    "dbus-python",
     "evdev",
 ]
 
@@ -18,9 +15,17 @@ dev = [
     "ruff",
 ]
 
-[tool.setuptools]
-packages = ["typetrace"]
+[tool.ruff.lint]
+extend-select = [
+    "ALL",
+]
+ignore = [
+    "ANN003", # Ignore missing type annotation for **kwargs
+    "ANN401", # Ignore `Any` type annotation for functions
+    "D203",   # In conflict with D211
+    "D213",   # In conflict with D212
+]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ANN101", "SLF001", "D103"]
+"tests/*" = ["S101"]
 

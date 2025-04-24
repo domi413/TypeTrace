@@ -38,7 +38,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_init(self) -> None:
         """Test the initialization of BaseEventProcessor."""
-        assert self.processor._db_path == self.tmp_path / "test.db"  # noqa: SLF001, S101
+        assert self.processor._db_path == self.tmp_path / "test.db"
 
     def test_check_timeout_and_flush_no_flush(self) -> None:
         """Test _check_timeout_and_flush with no flush condition."""
@@ -47,14 +47,16 @@ class TestBaseEventProcessor(unittest.TestCase):
         ]
         start_time: float = time.time()
 
-        with patch("typetrace.backend.db.DatabaseManager.write_to_database") as mock_write:
-            new_buffer, new_start_time = self.processor._check_timeout_and_flush(  # noqa: SLF001
+        with patch(
+            "typetrace.backend.db.DatabaseManager.write_to_database"
+        ) as mock_write:
+            new_buffer, new_start_time = self.processor._check_timeout_and_flush(
                 buffer,
                 start_time,
-                self.processor._db_path,  # noqa: SLF001
+                self.processor._db_path,
             )
-            assert new_buffer == buffer  # noqa: S101
-            assert new_start_time == start_time  # noqa: S101
+            assert new_buffer == buffer
+            assert new_start_time == start_time
             mock_write.assert_not_called()
 
     def test_check_timeout_and_flush_with_flush_timeout(self) -> None:
@@ -64,7 +66,9 @@ class TestBaseEventProcessor(unittest.TestCase):
         ]
         start_time: float = time.time() - Config.BUFFER_TIMEOUT - 1
 
-        with patch("typetrace.backend.db.DatabaseManager.write_to_database") as mock_write:
+        with patch(
+            "typetrace.backend.db.DatabaseManager.write_to_database"
+        ) as mock_write:
             new_buffer, new_start_time = self.processor._check_timeout_and_flush(  # noqa: SLF001
                 buffer,
                 start_time,
@@ -85,7 +89,9 @@ class TestBaseEventProcessor(unittest.TestCase):
         ]
         start_time: float = time.time()
 
-        with patch("typetrace.backend.db.DatabaseManager.write_to_database") as mock_write:
+        with patch(
+            "typetrace.backend.db.DatabaseManager.write_to_database"
+        ) as mock_write:
             new_buffer, new_start_time = self.processor._check_timeout_and_flush(  # noqa: SLF001
                 buffer,
                 start_time,
@@ -103,7 +109,9 @@ class TestBaseEventProcessor(unittest.TestCase):
         buffer: List[Dict[str, Any]] = []
         start_time: float = time.time()
 
-        with patch("typetrace.backend.db.DatabaseManager.write_to_database") as mock_write:
+        with patch(
+            "typetrace.backend.db.DatabaseManager.write_to_database"
+        ) as mock_write:
             new_buffer, new_start_time = self.processor._check_timeout_and_flush(  # noqa: SLF001
                 buffer,
                 start_time,
@@ -120,7 +128,9 @@ class TestBaseEventProcessor(unittest.TestCase):
         ]
         start_time: float = time.time()
 
-        with patch("typetrace.backend.db.DatabaseManager.write_to_database") as mock_write:
+        with patch(
+            "typetrace.backend.db.DatabaseManager.write_to_database"
+        ) as mock_write:
             new_buffer, new_start_time = self.processor._check_timeout_and_flush(  # noqa: SLF001
                 buffer,
                 start_time,
@@ -142,7 +152,9 @@ class TestBaseEventProcessor(unittest.TestCase):
         ]
         start_time: float = time.time()
 
-        with patch("typetrace.backend.db.DatabaseManager.write_to_database") as mock_write:
+        with patch(
+            "typetrace.backend.db.DatabaseManager.write_to_database"
+        ) as mock_write:
             new_buffer, new_start_time = self.processor._check_timeout_and_flush(  # noqa: SLF001
                 buffer,
                 start_time,

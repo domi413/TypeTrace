@@ -15,14 +15,16 @@ class TestLinuxEventProcessor(unittest.TestCase):
         self.db_path = os.path.join(self.temp_dir, "test.db")
         self.linux_processor = LinuxEventProcessor(self.db_path)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         import shutil
 
         shutil.rmtree(self.temp_dir)
 
     def test_check_device_accessibility_success(self):
         with patch.object(
-            self.linux_processor, "_select_devices", return_value=[MagicMock()],
+            self.linux_processor,
+            "_select_devices",
+            return_value=[MagicMock()],
         ):
             self.linux_processor.check_device_accessibility()
 
@@ -34,12 +36,16 @@ class TestLinuxEventProcessor(unittest.TestCase):
                 devices = self.linux_processor._select_devices()
                 self.assertEqual(len(devices), 1, "Expected exactly one device")
                 self.assertEqual(
-                    devices[0], mock_device, "Device does not match mock_device",
+                    devices[0],
+                    mock_device,
+                    "Device does not match mock_device",
                 )
 
     def test_signal_termination(self):
         with patch.object(
-            self.linux_processor, "_select_devices", return_value=[MagicMock()],
+            self.linux_processor,
+            "_select_devices",
+            return_value=[MagicMock()],
         ):
             with patch.object(self.linux_processor, "_buffer"):
                 with patch("signal.signal") as mock_signal:
