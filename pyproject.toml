@@ -13,8 +13,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "ruff",
-    "pytest>=8.3.2",  # For testing
-    "pygobject>=3.42.0",  # For GTK, Adwaita, and Gio
+   
 ]
 
 [tool.ruff.lint]
