@@ -1,7 +1,10 @@
 name: Check Python Code
 
 on:
+  push:
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
     types:
       - opened
       - synchronize
@@ -11,8 +14,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-
-    if: ${{ !github.event.pull_request.draft }}
+    if: ${{ !github.event.pull_request.draft || github.event_name == 'push' }}  # Run this job on push or when the PR is not a draft
 
     steps:
       - name: Checkout code
@@ -25,8 +27,34 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
 
-      - name: Install ruff dependencies
-        run: uv tool install ruff
+      - name: Install dependencies with uv
+        run: uv sync --extra dev  # Installs project and development dependencies
 
       - name: Run ruff
-        run: ruff check
+        run: uv run ruff check
+
+  test:
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft || github.event_name == 'push' }}  # Run this job on push or when the PR is not a draft
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0 libadwaita-1-dev
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"  # Same as in test.yml
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+
+      - name: Install dependencies with uv
+        run: uv sync --extra dev  # Installs project and development dependencies
+
+      - name: Run pytest
+        run: uv run python -m pytest tests/unit/ -v
