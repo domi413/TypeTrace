@@ -31,12 +31,25 @@ class CLI:
 
         Returns:
             Exit code for the application.
-
         """
         if args.debug:
             Config.DEBUG = True
             LoggerSetup.setup_logging()
+            logger.info("Debug mode active: Using dummy backend.")
 
+            # Dummy-Backend verwenden
+            from typetrace.backend.ipc.linux_darwin import LinuxMacOSIPC
+
+            backend = LinuxMacOSIPC()
+            backend.register_callback(lambda keystroke: logger.info(f"🎯 Dummy keystroke: {keystroke}"))
+            try:
+                backend.run()
+            except KeyboardInterrupt:
+                backend.stop()
+                logger.info("Dummy backend stopped (KeyboardInterrupt).")
+            return ExitCodes.SUCCESS
+
+        # Normaler Produktivmodus
         try:
             self.__db_manager.initialize_database(self.__db_path)
 
@@ -50,9 +63,7 @@ class CLI:
                     processor = LinuxEventProcessor(self.__db_path)
                     processor.check_device_accessibility()
                 case "darwin" | "windows":
-                    from typetrace.backend.events.windows_darwin import (
-                        WindowsDarwinEventProcessor,
-                    )
+                    from typetrace.backend.events.windows_darwin import WindowsDarwinEventProcessor
 
                     processor = WindowsDarwinEventProcessor(self.__db_path)
                 case _:
@@ -60,10 +71,10 @@ class CLI:
                     return ExitCodes.PLATFORM_ERROR
 
             processor.trace()
+
         except PermissionError:
             logger.exception(
-                "\nPlease ensure you have sufficient permissions "
-                "(e.g., 'input' group).",
+                "\nPlease ensure you have sufficient permissions (e.g., 'input' group)."
             )
             return ExitCodes.PERMISSION_ERROR
         except sqlite3.Error:

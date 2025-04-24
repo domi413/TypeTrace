@@ -8,8 +8,6 @@ on:
       - ready_for_review
       - reopened
 
-if: ${{ !github.event.pull_request.draft }}
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -25,8 +23,31 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
 
-      - name: Install ruff dependencies
-        run: uv tool install ruff
+      - name: Install dependencies with uv
+        run: uv sync --extra dev  # Installs project and development dependencies
 
       - name: Run ruff
-        run: ruff check
+        run: uv run ruff check
+
+  test:
+    runs-on: ubuntu-latest
+  
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+           
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"  # Same as in test.yml
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+
+      - name: Install dependencies with uv
+        run: uv sync --extra dev  # Installs project and development dependencies
+
+  
+      - name: Run unittest
+        run: uv run python -m unittest discover -s tests/unit/ -p "*.py"

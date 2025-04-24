@@ -177,13 +177,13 @@ class TestDatabaseManager:
         mock_conn.cursor.return_value = mock_cursor
 
         input_events: list[Event] = [
-            {"scan_code": 30, "name": "KEY_A"},
-            {"scan_code": 42, "name": "KEY_LEFTSHIFT"},
+            {"scan_code": 30, "name": "KEY_A", "date": "2025-04-22"},
+            {"scan_code": 42, "name": "KEY_LEFTSHIFT", "date": "2025-04-22"},
         ]
 
         expected_processed_events = [
-            {"scan_code": 30, "key_name": "KEY_A"},
-            {"scan_code": 42, "key_name": "KEY_LEFTSHIFT"},
+            {"scan_code": 30, "key_name": "KEY_A", "date": "2025-04-22"},
+            {"scan_code": 42, "key_name": "KEY_LEFTSHIFT", "date": "2025-04-22"},
         ]
 
         db_manager.write_to_database(mock_db_path, input_events)
@@ -218,7 +218,7 @@ class TestDatabaseManager:
         mock_conn.cursor.return_value = mock_cursor
         mock_cursor.executemany.side_effect = sqlite3.Error("Mock SQLite error")
 
-        input_events: list[Event] = [{"scan_code": 30, "name": "KEY_A"}]
+        input_events: list[Event] = [{"scan_code": 30, "name": "KEY_A", "date": "2025-04-22"}]
 
         with pytest.raises(sqlite3.Error, match="Mock SQLite error"):
             db_manager.write_to_database(mock_db_path, input_events)
@@ -252,19 +252,21 @@ class TestDatabaseManager:
             {
                 "scan_code": 30,
                 "name": "KEY_A;DROP TABLE keystrokes;",
+                "date": "2025-04-22",
             },  # SQL injection attempt
-            {"scan_code": 42, "name": "KEY_'\"\\"},  # Quote characters
-            {"scan_code": 44, "name": "KEY_\u2022\u00a9\u00ae"},  # Unicode characters
-            {"scan_code": 45, "name": ("MULTI", "KEY", "COMBO")},  # Tuple of names
+            {"scan_code": 42, "name": "KEY_'\"\\", "date": "2025-04-22"},  # Quote characters
+            {"scan_code": 44, "name": "KEY_\u2022\u00a9\u00ae", "date": "2025-04-22"},  # Unicode characters
+            {"scan_code": 45, "name": ("MULTI", "KEY", "COMBO"), "date": "2025-04-22"},  # Tuple of names
         ]
 
         expected_processed_events = [
-            {"scan_code": 30, "key_name": "KEY_A;DROP TABLE keystrokes;"},
-            {"scan_code": 42, "key_name": "KEY_'\"\\"},
-            {"scan_code": 44, "key_name": "KEY_\u2022\u00a9\u00ae"},
+            {"scan_code": 30, "key_name": "KEY_A;DROP TABLE keystrokes;", "date": "2025-04-22"},
+            {"scan_code": 42, "key_name": "KEY_'\"\\", "date": "2025-04-22"},
+            {"scan_code": 44, "key_name": "KEY_\u2022\u00a9\u00ae", "date": "2025-04-22"},
             {
                 "scan_code": 45,
                 "key_name": "MULTI, KEY, COMBO",
+                "date": "2025-04-22",
             },
         ]
 

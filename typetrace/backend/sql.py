@@ -38,3 +38,9 @@ class SQLQueries:
     WHERE date = :date
     ORDER BY count DESC
     """
+
+# Hinweis: Wenn du den Fehler "no column named date" erhältst, überprüfe die Datenbank:
+# 1. Öffne die Datenbank mit `sqlite3 /pfad/zu/deiner/datenbank.db`
+# 2. Führe `.schema keystrokes` aus, um das aktuelle Schema zu sehen
+# 3. Falls die Spalte `date` fehlt, führe `ALTER TABLE keystrokes ADD COLUMN date DATE;` aus
+#    oder lösche die Tabelle mit `DROP TABLE keystrokes;` und erstelle sie neu mit CREATE_KEYSTROKES_TABLE
