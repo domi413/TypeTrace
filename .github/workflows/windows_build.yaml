@@ -44,6 +44,8 @@ jobs:
           echo "C:\GTK\release\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
           echo "C:\GTK\release" | Out-File -FilePath $env:GITHUB_PATH -Append
           python -m pip install --no-index --find-links="C:\GTK\release\python" pycairo PyGObject
+          $env:PKG_CONFIG_PATH = "C:\GTK\release\lib\pkgconfig;$env:PKG_CONFIG_PATH"
+          echo "PKG_CONFIG_PATH=$env:PKG_CONFIG_PATH" >> $env:GITHUB_ENV
 
       - name: Install Python dependencies
         if: env.ACT != 'true'
@@ -51,7 +53,7 @@ jobs:
         # so specify only-binary to install old version.
         run: pip install -e .
 
-      - name: Install build dependecies
+      - name: Install build dependencies
         if: env.ACT != 'true'
         run: pip install -e.[build]
 
