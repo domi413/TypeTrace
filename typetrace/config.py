@@ -15,7 +15,7 @@ class Config:
     """Constants and global settings for TypeTrace."""
 
     # Constants
-    PROJECT_VERSION: Final[str] = os.getenv("TYPETRACE_VERSION", "0.1.0 (alpha)")
+    PROJECT_VERSION: Final[str] = os.getenv("TYPETRACE_VERSION")
 
     PROJECT_NAME: Final[str] = "TypeTrace"
     APP_NAME: Final[str] = PROJECT_NAME.lower()
