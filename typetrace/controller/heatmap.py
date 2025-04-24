@@ -1,8 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar
 from gi.repository import Gdk, Gio, Gtk
-
-from typetrace.controller.utils.color_utils import get_color_scheme
 from typetrace.model.layouts import KEYBOARD_LAYOUTS
 from gi.repository import GLib
 
@@ -29,20 +27,16 @@ class Heatmap(Gtk.Box):
         settings: Gio.Settings,
         keystroke_store: KeystrokeStore,
         layout: str = "en_US",
+        beg_color: tuple[float, float, float] = (0.0, 0.0, 1.0),
+        end_color: tuple[float, float, float] = (1.0, 0.0, 0.0),
     ) -> None:
-        """Initialize the heatmap widget.
-
-        Args:
-            settings: Gio settings used to persist and apply preferences.
-            keystroke_store: Access to keystrokes.
-            layout: Keyboard layout to use.
-
-        """
         super().__init__()
         self.settings = settings
         self.keystroke_store = keystroke_store
         self.layout = layout
-        self.key_widgets: dict[int, Gtk.Label] = {}  # Keyed by scancode
+        self.beg_color = beg_color
+        self.end_color = end_color
+        self.key_widgets: dict[int, Gtk.Label] = {}
 
         self.css_provider = Gtk.CssProvider()
         Gtk.StyleContext.add_provider_for_display(
@@ -53,19 +47,6 @@ class Heatmap(Gtk.Box):
 
         self.zoom_in_button.connect("clicked", lambda *_: self._on_zoom_clicked(5))
         self.zoom_out_button.connect("clicked", lambda *_: self._on_zoom_clicked(-5))
-
-        for setting in [
-            "heatmap-begin-color",
-            "heatmap-end-color",
-            "heatmap-single-color",
-            "use-single-color-heatmap",
-            "reverse-heatmap-gradient",
-            "use-accent-color",
-        ]:
-            self.settings.connect(
-                f"changed::{setting}",
-                lambda *_: self._update_colors(),
-            )
 
         self._build_keyboard()
         self._update_colors()
@@ -94,36 +75,31 @@ class Heatmap(Gtk.Box):
         return label
 
     def _update_colors(self) -> None:
-        """Assign each displayed key the appropriate color."""
-        keystrokes = self.keystroke_store.get_all_keystrokes()
-        most_pressed = self.keystroke_store.get_highest_count() or 1
+        keys = self.keystroke_store.get_all_keystrokes()
+        top = self.keystroke_store.get_highest_count()
 
-        color_scheme = get_color_scheme(self.settings)
+        b_r, b_g, b_b = [int(c * 255) for c in self.beg_color]
+        e_r, e_g, e_b = [int(c * 255) for c in self.end_color]
+        grad_css = f"""
+        .gradient-bar {{
+          background: linear-gradient(to right,
+            rgb({b_r},{b_g},{b_b}),
+            rgb({e_r},{e_g},{e_b})
+          );
+        }}"""
+        rules = [grad_css]
 
-        gradient_css = color_scheme.get_gradient_css()
-
-        css_rules = [gradient_css]
-
-        # Clear all tooltips
-        for label in self.key_widgets.values():
-            label.set_tooltip_text(None)
-
-        for keystroke in keystrokes:
-            if label := self.key_widgets.get(keystroke.scan_code):
-                css_class = f"scancode-{keystroke.scan_code}"
-                normalized_count = keystroke.count / most_pressed
-                bg_color, text_color = color_scheme.calculate_color_for_key(
-                    normalized_count,
-                )
-
-                css_rules.append(
-                    f"""
-                   .{css_class} {{
-                        background-color: {bg_color};
-                        color: {text_color};
-                    }}
-                    """,
-                )
+       
+        default_r, default_g, default_b = 239, 239, 239  
+        for scan_code, label in self.key_widgets.items():
+            css_class = f"scancode-{scan_code}"
+            label.set_css_classes([])  
+            if not keys:  
+                rules.append(f"""
+                .{css_class} {{
+                  background-color: rgb({default_r},{default_g},{default_b});
+                  color: black;
+                }}""")
                 label.set_css_classes([css_class])
                 label.set_tooltip_text("0")
 
@@ -131,7 +107,6 @@ class Heatmap(Gtk.Box):
             self.css_provider.load_from_string("\n".join(rules))
             return
 
-        # Verwende eine Mindestschwelle für top
         top = max(top, 5)
 
         for keystroke in keys:
@@ -151,6 +126,16 @@ class Heatmap(Gtk.Box):
 
         self.css_provider.load_from_string("\n".join(rules))
 
+    def _calculate_color(self, normalized: float) -> tuple[str, str]:
+        r = self.beg_color[0] + normalized * (self.end_color[0] - self.beg_color[0])
+        g = self.beg_color[1] + normalized * (self.end_color[1] - self.beg_color[1])
+        b = self.beg_color[2] + normalized * (self.end_color[2] - self.beg_color[2])
+        r_i, g_i, b_i = int(r * 255), int(g * 255), int(b * 255)
+        bg = f"rgb({r_i},{g_i},{b_i})"
+        lum = 0.3 * r + 0.6 * g + 0.1 * b
+        fg = "white" if lum < 0.5 else "black"
+        return bg, fg
+
     def _on_zoom_clicked(self, amount: int) -> None:
         new_size = max(self.settings.get_int("key-size") + amount, 40)
         self.settings.set_int("key-size", new_size)
@@ -160,4 +145,3 @@ class Heatmap(Gtk.Box):
     def on_new_keystroke(self, keystroke):
         """Update heatmap when a new keystroke is received."""
         GLib.idle_add(self.update)
-
