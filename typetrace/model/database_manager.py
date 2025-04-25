@@ -1,7 +1,9 @@
 """Class used to manipulate the database file and initialize schema."""
 
-import sqlite3
+from __future__ import annotations
+
 import shutil
+import sqlite3
 from pathlib import Path
 
 from typetrace.config import DatabasePath
@@ -15,11 +17,12 @@ class DatabaseManager:
         self.db_path = Path(DatabasePath.DB_PATH)
 
     def initialize_database(self, db_path: str | Path) -> None:
-        """
-        Initialize the database schema: create the keystrokes table if it doesn't exist.
+        """Initialize the database schema: create the keystrokes table if it doesn't exist.
 
         Args:
+        ----
             db_path: Path to the SQLite database file.
+
         """
         conn = sqlite3.connect(str(db_path))
         cursor = conn.cursor()
@@ -33,7 +36,7 @@ class DatabaseManager:
                 -- ensure uniqueness for upserts
                 UNIQUE(scan_code, key_name, date)
             )
-            """
+            """,
         )
         conn.commit()
         conn.close()

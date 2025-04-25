@@ -1,8 +1,16 @@
+"""Defines the Heatmap class, which represents a widget for displaying a keyboard heatmap.
+
+The heatmap visualizes keystroke data using color gradients.
+"""
+
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, ClassVar
-from gi.repository import Gdk, Gio, Gtk
+
+from gi.repository import Gdk, Gio, GLib, Gtk
+
+from typetrace.model.keystrokes import KeystrokeStore
 from typetrace.model.layouts import KEYBOARD_LAYOUTS
-from gi.repository import GLib
 
 if TYPE_CHECKING:
     from typetrace.model.keystrokes import KeystrokeStore
@@ -23,6 +31,7 @@ class Heatmap(Gtk.Box):
         "Space",
         "\\",
     ]
+    LUMINANCE_THRESHOLD: ClassVar[float] = 0.5  # Threshold for deciding text color based on luminance
 
     keyboard_container = Gtk.Template.Child()
     zoom_in_button = Gtk.Template.Child()
@@ -33,15 +42,31 @@ class Heatmap(Gtk.Box):
         settings: Gio.Settings,
         keystroke_store: KeystrokeStore,
         layout: str = "en_US",
-        beg_color: tuple[float, float, float] = (0.0, 0.0, 1.0),
-        end_color: tuple[float, float, float] = (1.0, 0.0, 0.0),
+        gradient_colors: tuple[
+            tuple[float, float, float],
+            tuple[float, float, float],
+        ] = (
+            (0.0, 0.0, 1.0),
+            (1.0, 0.0, 0.0),
+        ),
     ) -> None:
+        """Initialize the Heatmap widget.
+
+        Args:
+        ----
+            settings: The GSettings object for storing widget settings.
+            keystroke_store: The store containing keystroke data.
+            layout: The keyboard layout to display (default: "en_US").
+            gradient_colors: A tuple of (beg_color, end_color) for the heatmap gradient,
+                where each color is a tuple of (r, g, b) floats from 0.0 to 1.0.
+                Defaults to blue ((0.0, 0.0, 1.0)) to red ((1.0, 0.0, 0.0)).
+
+        """
         super().__init__()
         self.settings = settings
         self.keystroke_store = keystroke_store
         self.layout = layout
-        self.beg_color = beg_color
-        self.end_color = end_color
+        self.beg_color, self.end_color = gradient_colors
         self.key_widgets: dict[int, Gtk.Label] = {}
 
         self.css_provider = Gtk.CssProvider()
@@ -51,7 +76,10 @@ class Heatmap(Gtk.Box):
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
 
-        self.zoom_in_button.connect("clicked", lambda *_: self._on_zoom_clicked(5))
+        self.zoom_in_button.connect(
+            "clicked",
+            lambda *_: self._on_zoom_clicked(5),
+        )
         self.zoom_out_button.connect("clicked", lambda *_: self._on_zoom_clicked(-5))
 
         self._build_keyboard()
@@ -84,8 +112,8 @@ class Heatmap(Gtk.Box):
         keys = self.keystroke_store.get_all_keystrokes()
         top = self.keystroke_store.get_highest_count()
 
-        b_r, b_g, b_b = [int(c * 255) for c in self.beg_color]
-        e_r, e_g, e_b = [int(c * 255) for c in self.end_color]
+        b_r, b_g, b_b = (int(c * 255) for c in self.beg_color)
+        e_r, e_g, e_b = (int(c * 255) for c in self.end_color)
         grad_css = f"""
         .gradient-bar {{
           background: linear-gradient(to right,
@@ -105,7 +133,7 @@ class Heatmap(Gtk.Box):
                 .{css_class} {{
                   background-color: rgb({default_r},{default_g},{default_b});
                   color: black;
-                }}"""
+                }}""",
                 )
                 label.set_css_classes([css_class])
                 label.set_tooltip_text("0")
@@ -128,7 +156,7 @@ class Heatmap(Gtk.Box):
             .{css_class} {{
               background-color: {bg};
               color: {fg};
-            }}"""
+            }}""",
             )
             label.set_css_classes([css_class])
             label.set_tooltip_text(str(keystroke.count))
@@ -142,7 +170,7 @@ class Heatmap(Gtk.Box):
         r_i, g_i, b_i = int(r * 255), int(g * 255), int(b * 255)
         bg = f"rgb({r_i},{g_i},{b_i})"
         lum = 0.3 * r + 0.6 * g + 0.1 * b
-        fg = "white" if lum < 0.5 else "black"
+        fg = "white" if lum < self.LUMINANCE_THRESHOLD else "black"
         return bg, fg
 
     def _on_zoom_clicked(self, amount: int) -> None:
@@ -151,6 +179,6 @@ class Heatmap(Gtk.Box):
         for label in self.key_widgets.values():
             label.set_size_request(new_size, new_size)
 
-    def on_new_keystroke(self, keystroke):
+    def on_new_keystroke(self) -> None:
         """Update heatmap when a new keystroke is received."""
         GLib.idle_add(self.update)

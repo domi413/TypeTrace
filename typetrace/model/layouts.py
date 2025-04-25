@@ -186,16 +186,16 @@ KEYBOARD_LAYOUTS = {
 def get_scan_code(key_name: str, layout: str = "en_US") -> int:
     """Get the scan code for a key from the keyboard layout."""
     # Mapping for mouse buttons
-    MOUSE_BUTTONS = {
+    mouse_buttons = {
         "BTN_LEFT": 272,
         "BTN_MOUSE": 273,
         "BTN_RIGHT": 274,
     }
-    if key_name in MOUSE_BUTTONS:
-        return MOUSE_BUTTONS[key_name]
+    if key_name in mouse_buttons:
+        return mouse_buttons[key_name]
 
     # Mapping for special keys
-    SPECIAL_KEYS = {
+    special_keys = {
         "KEY_ENTER": "Enter",
         "KEY_LEFTCTRL": "Ctrl",
         "KEY_UP": "↑",
@@ -203,10 +203,10 @@ def get_scan_code(key_name: str, layout: str = "en_US") -> int:
         "KEY_LEFT": "←",
         "KEY_RIGHT": "→",
     }
-    mapped_name = SPECIAL_KEYS.get(key_name, key_name.replace("KEY_", ""))
+    mapped_name = special_keys.get(key_name, key_name.replace("KEY_", ""))
 
     for row in KEYBOARD_LAYOUTS[layout]:
         for scan_code, name in row:
             if name == mapped_name or f"KEY_{name}" == key_name:
                 return scan_code
-    return 0  # Fallback
+    return 0

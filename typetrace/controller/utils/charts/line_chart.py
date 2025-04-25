@@ -39,6 +39,26 @@ class DataLabelsConfig:
     colors: dict[str, Any]
 
 
+@dataclass
+class ChartDimensionsConfig:
+    """Configuration for chart dimensions and scaling."""
+
+    padding: float
+    graph_width: float
+    graph_height: float
+    max_value: float
+
+
+@dataclass
+class LineDrawConfig:
+    """Configuration for drawing the line and fill area."""
+
+    cr: cairo.Context
+    padding: float
+    graph_height: float
+    colors: dict[str, Any]
+
+
 @final
 class LineChart(Chart):
     """Line chart implementation."""
@@ -51,6 +71,7 @@ class LineChart(Chart):
         """Initialize the line chart.
 
         Args:
+        ----
             drawing_area: The GTK drawing area to draw on
             data_provider: A function that returns the data for the chart
 
@@ -120,10 +141,7 @@ class LineChart(Chart):
     def _calculate_points(
         self,
         data: list[dict],
-        padding: float,
-        graph_width: float,
-        graph_height: float,
-        max_value: float,
+        config: ChartDimensionsConfig,
     ) -> list[tuple[float, float]]:
         """Calculate the coordinates for data points."""
         if not data:
@@ -131,40 +149,43 @@ class LineChart(Chart):
 
         return [
             (
-                padding + (i * graph_width / (len(data) - 1) if len(data) > 1 else 0),
-                padding
-                + graph_height
-                - (d["count"] / max_value * graph_height if max_value else 0),
+                config.padding + (
+                    i * config.graph_width / (len(data) - 1)
+                    if len(data) > 1 else 0
+                ),
+                config.padding
+                + config.graph_height
+                - (
+                    d["count"] / config.max_value * config.graph_height
+                    if config.max_value else 0
+                ),
             )
             for i, d in enumerate(data)
         ]
 
     def _draw_line_and_fill(
         self,
-        cr: cairo.Context,
         points: list[tuple[float, float]],
-        padding: float,
-        graph_height: float,
-        colors: dict,
+        config: LineDrawConfig,
     ) -> None:
         """Draw the line graph and the filled area underneath."""
         if not points:
             return
 
-        cr.set_line_width(2)
-        cr.set_source_rgba(*colors["line"], 1)
-        cr.move_to(*points[0])
+        config.cr.set_line_width(2)
+        config.cr.set_source_rgba(*config.colors["line"], 1)
+        config.cr.move_to(*points[0])
         for i in range(1, len(points)):
             x0, y0 = points[i - 1]
             x1, y1 = points[i]
             cp_dist_x = (x1 - x0) * 0.4
-            cr.curve_to(x0 + cp_dist_x, y0, x1 - cp_dist_x, y1, x1, y1)
-        cr.stroke_preserve()
-        cr.line_to(points[-1][0], padding + graph_height)
-        cr.line_to(padding, padding + graph_height)
-        cr.close_path()
-        cr.set_source_rgba(*colors["fill"])
-        cr.fill()
+            config.cr.curve_to(x0 + cp_dist_x, y0, x1 - cp_dist_x, y1, x1, y1)
+        config.cr.stroke_preserve()
+        config.cr.line_to(points[-1][0], config.padding + config.graph_height)
+        config.cr.line_to(config.padding, config.padding + config.graph_height)
+        config.cr.close_path()
+        config.cr.set_source_rgba(*config.colors["fill"])
+        config.cr.fill()
 
     def _draw_data_labels(self, config: DataLabelsConfig) -> None:
         """Draw data points and labels on the chart."""
@@ -233,12 +254,22 @@ class LineChart(Chart):
         )
         points = self._calculate_points(
             data,
-            padding,
-            graph_width,
-            graph_height,
-            max_value,
+            ChartDimensionsConfig(
+                padding=padding,
+                graph_width=graph_width,
+                graph_height=graph_height,
+                max_value=max_value,
+            ),
         )
-        self._draw_line_and_fill(cr, points, padding, graph_height, colors)
+        self._draw_line_and_fill(
+            points,
+            LineDrawConfig(
+                cr=cr,
+                padding=padding,
+                graph_height=graph_height,
+                colors=colors,
+            ),
+        )
         self._draw_data_labels(
             DataLabelsConfig(
                 cr=cr,

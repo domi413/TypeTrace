@@ -1,8 +1,15 @@
+"""IPC backend module for Linux and macOS systems.
+
+This module provides a real IPC backend for capturing keyboard inputs on Linux
+and macOS systems using the evdev library.
+"""
+
 import logging
-import time
-import evdev
-import threading
 import select
+import threading
+from typing import Callable
+
+import evdev
 
 from typetrace.backend.ipc.base import BaseIPC
 
@@ -12,30 +19,32 @@ logging.basicConfig(level=logging.INFO)
 class LinuxMacOSIPC(BaseIPC):
     """Real IPC backend for Linux, reads real keyboard inputs."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the real backend."""
         self._running = False
         self._callback = None
         self._devices = []
-        self._stop_event = threading.Event()  # <-- ADDED
-        print("LinuxMacOSIPC object created")
+        self._stop_event = threading.Event()
 
-    def register_callback(self, callback):
-        """Register a callback to be called when new events occur."""
+    def register_callback(self, callback: Callable[[dict], None]) -> None:
+        """Register a callback to be called when new events occur.
+
+        Args:
+        ----
+            callback: A function to call with event data as a dictionary.
+
+        """
         self._callback = callback
         logging.info("Callback successfully registered")
 
-    def run(self):
+    def run(self) -> None:
         """Start the backend main loop."""
-        print("LinuxMacOSIPC.run() started")
         if self._running:
             logging.warning("Backend is already running")
             return
 
         self._running = True
         self._devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
-        print(f"Devices found: {[dev.name for dev in self._devices]}")
-
         self._thread = threading.Thread(target=self._event_loop, daemon=True)
         self._thread.start()
 
@@ -44,7 +53,7 @@ class LinuxMacOSIPC(BaseIPC):
             fds = [dev.fd for dev in self._devices]
             try:
                 r, _, _ = select.select(
-                    fds, [], [], 1
+                    fds, [], [], 1,
                 )  # Blocks for 1 second or until a key is pressed
                 for dev in self._devices:
                     if dev.fd in r:
@@ -53,18 +62,16 @@ class LinuxMacOSIPC(BaseIPC):
                                 key_event = evdev.categorize(event)
                                 if key_event.keystate == evdev.events.KeyEvent.key_down:
                                     key_name = key_event.keycode
-                                    print(f" Key detected: {key_name}")  # <--- ADDED
                                     self._callback({"key": key_name})
-            except Exception as e:
-                print(f"Error in event loop: {e}")
+            except OSError:
+                logging.exception("Error in event loop")
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the backend."""
         if not self._running:
             logging.warning("Backend is not running")
             return
 
         self._running = False
-        self._stop_event.set()  # <-- ADDED
-        print("LinuxMacOSIPC stopped")
+        self._stop_event.set()
         logging.info("Backend stopped")

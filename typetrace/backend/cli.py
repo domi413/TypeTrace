@@ -27,10 +27,13 @@ class CLI:
         """Run the main logic of the TypeTrace backend.
 
         Args:
+        ----
             args: Command-line arguments.
 
         Returns:
+        -------
             Exit code for the application.
+
         """
         if args.debug:
             Config.DEBUG = True
@@ -42,7 +45,7 @@ class CLI:
 
             backend = LinuxMacOSIPC()
             backend.register_callback(
-                lambda keystroke: logger.info(f"🎯 Dummy keystroke: {keystroke}")
+                lambda keystroke: logger.info(" Dummy keystroke:%s", keystroke),
             )
             try:
                 backend.run()
@@ -78,7 +81,8 @@ class CLI:
 
         except PermissionError:
             logger.exception(
-                "\nPlease ensure you have sufficient permissions (e.g., 'input' group)."
+                "\nPlease ensure you have sufficient permissions "
+                "(e.g., 'input' group).",
             )
             return ExitCodes.PERMISSION_ERROR
         except sqlite3.Error:

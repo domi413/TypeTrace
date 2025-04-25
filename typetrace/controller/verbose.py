@@ -1,7 +1,13 @@
 """The verbose widget that displays keystroke data in text."""
 
+import logging
+
 from gi.repository import Gio, Gtk
+
 from typetrace.model.keystrokes import Keystroke, KeystrokeStore
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/verbose.ui")
@@ -13,6 +19,14 @@ class Verbose(Gtk.Box):
     column_view = Gtk.Template.Child()
 
     def __init__(self, keystroke_store: KeystrokeStore, **kwargs) -> None:
+        """Initialize the Verbose widget.
+
+        Args:
+        ----
+            keystroke_store: The store containing keystroke data.
+            **kwargs: Additional arguments passed to the parent class.
+
+        """
         super().__init__(**kwargs)
         self.keystroke_store = keystroke_store
         self.list_store = Gio.ListStore()
@@ -27,16 +41,14 @@ class Verbose(Gtk.Box):
     def update(self) -> None:
         """Update the list to reflect current data."""
         self._populate_list_store()
-        print(
-            f"Verbose: List store has {self.list_store.get_n_items()} items"
-        )  # Debugging
+        logger.debug("List store has %d items", self.list_store.get_n_items())
         self.queue_draw()  # Forces the widget to redraw itself.
 
     def _populate_list_store(self) -> None:
         """Populate the list store with keystroke data."""
         self.list_store.remove_all()
         keystrokes = self.keystroke_store.get_all_keystrokes()
-        print(f"Verbose: Found {len(keystrokes)} keystrokes")  # Debugging
+        logger.debug("Found %d keystrokes", len(keystrokes))
         for keystroke in keystrokes:
             self.list_store.append(
                 Keystroke(
@@ -44,7 +56,7 @@ class Verbose(Gtk.Box):
                     count=keystroke.count,
                     key_name=keystroke.key_name,
                     date=keystroke.date,
-                )
+                ),
             )
 
     def _setup_column_view(self) -> None:
@@ -68,7 +80,8 @@ class Verbose(Gtk.Box):
             elif sort_type == "string":
                 sorter = Gtk.StringSorter(expression=expression)
             else:
-                raise ValueError(f"Unknown sort type: {sort_type}")
+                error_msg = "Unknown sort type: " + sort_type
+                raise ValueError(error_msg)
 
             column.set_sorter(sorter)
             self.column_view.append_column(column)
@@ -79,26 +92,26 @@ class Verbose(Gtk.Box):
         )
 
     def _factory_setup(
-        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,
     ) -> None:
         label = Gtk.Label()
         label.set_halign(Gtk.Align.START)
         list_item.set_child(label)
 
     def _bind_scan_code(
-        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,
     ) -> None:
         keystroke = list_item.get_item()
         list_item.get_child().set_text(str(keystroke.scan_code))
 
     def _bind_count(
-        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,
     ) -> None:
         keystroke = list_item.get_item()
         list_item.get_child().set_text(str(keystroke.count))
 
     def _bind_key_name(
-        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,
     ) -> None:
         keystroke = list_item.get_item()
         list_item.get_child().set_text(keystroke.key_name)
