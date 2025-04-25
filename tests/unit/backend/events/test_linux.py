@@ -23,6 +23,7 @@ class TestLinuxEventProcessor(unittest.TestCase):
     def tearDown(self) -> None:
         """Clean up temporary files."""
         import shutil
+
         shutil.rmtree(self.temp_dir)
 
     def test_check_device_accessibility_success(self) -> None:
@@ -52,7 +53,9 @@ class TestLinuxEventProcessor(unittest.TestCase):
     def test_signal_termination(self) -> None:
         """SIGINT should set termination flag to True."""
         with (
-            patch.object(self.linux_processor, "_select_devices", return_value=[MagicMock()]),
+            patch.object(
+                self.linux_processor, "_select_devices", return_value=[MagicMock()]
+            ),
             patch.object(self.linux_processor, "_buffer"),
             patch("signal.signal") as mock_signal,
         ):
@@ -62,6 +65,7 @@ class TestLinuxEventProcessor(unittest.TestCase):
             assert self.linux_processor._LinuxEventProcessor__terminate, (
                 "Termination flag should be True"
             )
+
 
 if __name__ == "__main__":
     unittest.main()

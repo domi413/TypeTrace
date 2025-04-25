@@ -87,27 +87,34 @@ class TestColoredFormatter(TestCase):
         assert hasattr(formatter, "_ColoredFormatter__use_colors")
 
     @mock.patch("platform.system")
-    def test_should_use_colors_linux(self, mock_platform_system: mock.MagicMock) -> None:
+    def test_should_use_colors_linux(
+        self, mock_platform_system: mock.MagicMock
+    ) -> None:
         """Test color detection on Linux."""
         mock_platform_system.return_value = "Linux"
         formatter = ColoredFormatter()
         assert formatter._should_use_colors()
 
     @mock.patch("platform.system")
-    def test_should_use_colors_darwin(self, mock_platform_system: mock.MagicMock) -> None:
+    def test_should_use_colors_darwin(
+        self, mock_platform_system: mock.MagicMock
+    ) -> None:
         """Test color detection on macOS."""
         mock_platform_system.return_value = "Darwin"
         formatter = ColoredFormatter()
         assert formatter._should_use_colors()
 
     @mock.patch("platform.system")
-    def test_should_use_colors_windows(self, mock_platform_system: mock.MagicMock) -> None:
+    def test_should_use_colors_windows(
+        self, mock_platform_system: mock.MagicMock
+    ) -> None:
         """Test color detection on Windows."""
         mock_platform_system.return_value = "Windows"
         formatter = ColoredFormatter()
         assert not formatter._should_use_colors()
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=True)
+    @pytest.mark.usefixtures("_mock_should_use_colors")
     def test_format_with_colors(self, _mock_should_use_colors: mock.MagicMock) -> None:
         """Test formatting with colors enabled."""
         formatter = ColoredFormatter()
@@ -152,7 +159,10 @@ class TestColoredFormatter(TestCase):
         assert LogColor.RED not in formatted
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=False)
-    def test_format_without_colors(self, _mock_should_use_colors: mock.MagicMock) -> None:
+    @pytest.mark.usefixtures("_mock_should_use_colors")
+    def test_format_without_colors(
+        self, _mock_should_use_colors: mock.MagicMock
+    ) -> None:
         """Test formatting with colors disabled."""
         formatter = ColoredFormatter()
 

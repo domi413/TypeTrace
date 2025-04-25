@@ -7,7 +7,10 @@ color formatting for log messages, and integration of log output.
 
 import io
 import logging
+from typing import Final
 from unittest import TestCase, mock
+
+import pytest
 
 from typetrace.backend.logging_setup import ColoredFormatter, LogColor, LoggerSetup
 
@@ -89,27 +92,34 @@ class TestColoredFormatter(TestCase):
         assert hasattr(formatter, "_ColoredFormatter__use_colors")
 
     @mock.patch("platform.system")
-    def test_should_use_colors_linux(self, mock_platform_system: mock.MagicMock) -> None:
+    def test_should_use_colors_linux(
+        self, mock_platform_system: mock.MagicMock
+    ) -> None:
         """Test color detection on Linux."""
         mock_platform_system.return_value = "Linux"
         formatter = ColoredFormatter()
         assert formatter._should_use_colors()
 
     @mock.patch("platform.system")
-    def test_should_use_colors_darwin(self, mock_platform_system: mock.MagicMock) -> None:
+    def test_should_use_colors_darwin(
+        self, mock_platform_system: mock.MagicMock
+    ) -> None:
         """Test color detection on macOS."""
         mock_platform_system.return_value = "Darwin"
         formatter = ColoredFormatter()
         assert formatter._should_use_colors()
 
     @mock.patch("platform.system")
-    def test_should_use_colors_windows(self, mock_platform_system: mock.MagicMock) -> None:
+    def test_should_use_colors_windows(
+        self, mock_platform_system: mock.MagicMock
+    ) -> None:
         """Test color detection on Windows."""
         mock_platform_system.return_value = "Windows"
         formatter = ColoredFormatter()
         assert not formatter._should_use_colors()
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=True)
+    @pytest.mark.usefixtures("_mock_should_use_colors")
     def test_format_with_colors(self, _mock_should_use_colors: mock.MagicMock) -> None:
         """Test formatting with colors enabled."""
         formatter = ColoredFormatter()
@@ -154,7 +164,10 @@ class TestColoredFormatter(TestCase):
         assert LogColor.RED not in formatted
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=False)
-    def test_format_without_colors(self, _mock_should_use_colors: mock.MagicMock) -> None:
+    @pytest.mark.usefixtures("_mock_should_use_colors")
+    def test_format_without_colors(
+        self, _mock_should_use_colors: mock.MagicMock
+    ) -> None:
         """Test formatting with colors disabled."""
         formatter = ColoredFormatter()
 
@@ -193,7 +206,9 @@ class TestColoredFormatter(TestCase):
         assert LogColor.RED + "ERROR" + LogColor.RESET in formatted
         exception_text = str(Exception("Test exception"))
         assert exception_text in formatted
-def test_log_output_integration(self) -> None:
+
+
+def test_log_output_integration() -> None:
     """Integration test for actual log output."""
     captured_output = io.StringIO()
     handler = logging.StreamHandler(captured_output)
@@ -215,10 +230,11 @@ def test_log_output_integration(self) -> None:
     output = captured_output.getvalue()
     lines = output.strip().split("\n")
 
-
-    assert len(lines) >= 3, f"Expected at least 3 log lines, but got {len(lines)}"
+    expected_var: Final[int] = 3
+    assert len(lines) >= expected_var, (
+        f"Expected at least 3 log lines, but got {len(lines)}"
+    )
 
     assert "INFO - Info message" in lines[0]
     assert f"{LogColor.YELLOW}WARNING{LogColor.RESET}" in lines[1]
     assert f"{LogColor.RED}ERROR{LogColor.RESET}" in lines[2]
-
