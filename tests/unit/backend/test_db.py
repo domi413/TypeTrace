@@ -195,7 +195,7 @@ class TestColoredFormatter(TestCase):
 
     def test_log_output_integration(self) -> None:
         """Integration test for actual log output."""
-        expected_log_lines = 3  # Number of log messages expected
+        expected_log_lines = 3
 
         captured_output = io.StringIO()
         handler = logging.StreamHandler(captured_output)
@@ -206,21 +206,20 @@ class TestColoredFormatter(TestCase):
 
         logger = logging.getLogger("test_logger")
         logger.setLevel(logging.DEBUG)
+        logger.handlers.clear()
         logger.addHandler(handler)
 
         logger.info("Info message")
         logger.warning("Warning message")
         logger.error("Error message")
 
-        captured_output.flush()  # Ensure the output is flushed
+        captured_output.flush()
 
         output = captured_output.getvalue()
         lines = output.strip().split("\n")
 
-        # Sicherstellen, dass genügend Zeilen vorhanden sind
         assert len(lines) >= expected_log_lines, f"Expected at least {expected_log_lines} log lines, but got {len(lines)}"
 
-        # Nun kannst du sicher auf jede Zeile zugreifen
         assert "INFO - Info message" in lines[0]
         assert f"{LogColor.YELLOW}WARNING{LogColor.RESET}" in lines[1]
         assert f"{LogColor.RED}ERROR{LogColor.RESET}" in lines[2]
