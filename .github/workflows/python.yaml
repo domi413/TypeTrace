@@ -41,8 +41,10 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
 
-      - name: Install dependencies pytest
-        run: pip install pytest
+      - name: Install  pytest
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install pytest
       
       - name: Install uv
         run: |
