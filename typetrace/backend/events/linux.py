@@ -16,7 +16,8 @@ if TYPE_CHECKING:
     from pathlib import Path
     from types import FrameType
 
-from typetrace.backend.events.base import BaseEventProcessor
+from backend.events.base import BaseEventProcessor
+
 from typetrace.config import Config, Event
 
 logger = logging.getLogger(__name__)
@@ -35,8 +36,7 @@ class LinuxEventProcessor(BaseEventProcessor):
     def check_device_accessibility(self) -> None:
         """Check if the script has access to any input devices.
 
-        Raises
-        ------
+        Raises:
             PermissionError: If no input devices can be accessed.
 
         """
@@ -126,8 +126,7 @@ class LinuxEventProcessor(BaseEventProcessor):
     def _managed_devices(self) -> Generator[list[evdev.device.InputDevice], None, None]:
         """Context manager for handling devices.
 
-        Yields
-        ------
+        Yields:
             List of input devices.
 
         """
@@ -145,8 +144,7 @@ class LinuxEventProcessor(BaseEventProcessor):
     def _select_devices(self) -> list[evdev.device.InputDevice]:
         """Find and return all devices.
 
-        Returns
-        -------
+        Returns:
             List of input devices.
 
         """
@@ -179,13 +177,11 @@ class LinuxEventProcessor(BaseEventProcessor):
         """Read events from a single device.
 
         Args:
-        ----
             device: Input device to read from
             buffer: Current buffer of events
             start_time: Time when the buffer started
 
         Returns:
-        -------
             Updated buffer and start time
 
         """

@@ -20,14 +20,3 @@ dbus
 autohide
 gsettings
 signum
-EUID
-usermod
-flatpaks
-flathub
-Sandboxed
-esac
-keystate
-up
-LEFTCTRL
-Prebuild
-usefixtures
