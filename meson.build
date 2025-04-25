@@ -12,7 +12,7 @@ gnome = import('gnome')
 python = import('python')
 
 dependency('gtk4', version: '>= 4.0')
-dependency('libadwaita-1', version: '>= 1.0')
+dependency('libadwaita-1', version: '>= 1.6')
 find_program('blueprint-compiler', required: true)
 
 subdir('data')
