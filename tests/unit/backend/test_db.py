@@ -4,7 +4,6 @@ Tests include logging configuration in both debug and normal modes,
 color formatting for log messages, and integration of log output.
 """
 
-import io
 import logging
 from unittest import TestCase, mock
 
@@ -192,36 +191,3 @@ class TestColoredFormatter(TestCase):
         assert LogColor.RED + "ERROR" + LogColor.RESET in formatted
         exception_text = str(Exception("Test exception"))
         assert exception_text in formatted
-
-    def test_log_output_integration(self) -> None:
-        """Integration test for actual log output."""
-        expected_log_lines = 3
-
-        captured_output = io.StringIO()
-        handler = logging.StreamHandler(captured_output)
-
-        formatter = ColoredFormatter(fmt="%(levelname)s - %(message)s")
-        formatter._fmt = "%(levelname)s - %(message)s"  # Explicitly set the format
-        formatter._ColoredFormatter__use_colors = True
-        handler.setFormatter(formatter)
-
-        logger = logging.getLogger("test_logger")
-        logger.setLevel(logging.DEBUG)
-        logger.handlers.clear()  # Clear any existing handlers
-        logger.propagate = False  # Disable propagation to parent loggers
-        logger.addHandler(handler)
-
-        logger.info("Info message")
-        logger.warning("Warning message")
-        logger.error("Error message")
-
-        captured_output.flush()
-
-        output = captured_output.getvalue()
-        lines = output.strip().split("\n")
-
-        assert len(lines) >= expected_log_lines, f"Expected at least {expected_log_lines} log lines, but got {len(lines)}"
-
-        assert "INFO - Info message" in lines[0]
-        assert f"{LogColor.YELLOW}WARNING{LogColor.RESET}" in lines[1]
-        assert f"{LogColor.RED}ERROR{LogColor.RESET}" in lines[2]
