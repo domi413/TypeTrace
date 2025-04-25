@@ -14,6 +14,7 @@ import evdev
 from typetrace.backend.ipc.base import BaseIPC
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class LinuxMacOSIPC(BaseIPC):
@@ -35,12 +36,12 @@ class LinuxMacOSIPC(BaseIPC):
 
         """
         self._callback = callback
-        logging.info("Callback successfully registered")
+        logger.info("Callback successfully registered")
 
     def run(self) -> None:
         """Start the backend main loop."""
         if self._running:
-            logging.warning("Backend is already running")
+            logger.warning("Backend is already running")
             return
 
         self._running = True
@@ -64,14 +65,14 @@ class LinuxMacOSIPC(BaseIPC):
                                     key_name = key_event.keycode
                                     self._callback({"key": key_name})
             except OSError:
-                logging.exception("Error in event loop")
+                logger.exception("Error in event loop")
 
     def stop(self) -> None:
         """Stop the backend."""
         if not self._running:
-            logging.warning("Backend is not running")
+            logger.warning("Backend is not running")
             return
 
         self._running = False
         self._stop_event.set()
-        logging.info("Backend stopped")
+        logger.info("Backend stopped")
