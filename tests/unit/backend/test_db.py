@@ -201,12 +201,14 @@ class TestColoredFormatter(TestCase):
         handler = logging.StreamHandler(captured_output)
 
         formatter = ColoredFormatter(fmt="%(levelname)s - %(message)s")
+        formatter._fmt = "%(levelname)s - %(message)s"  # Explicitly set the format
         formatter._ColoredFormatter__use_colors = True
         handler.setFormatter(formatter)
 
         logger = logging.getLogger("test_logger")
         logger.setLevel(logging.DEBUG)
-        logger.handlers.clear()
+        logger.handlers.clear()  # Clear any existing handlers
+        logger.propagate = False  # Disable propagation to parent loggers
         logger.addHandler(handler)
 
         logger.info("Info message")
