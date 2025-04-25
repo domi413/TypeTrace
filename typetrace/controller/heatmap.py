@@ -1,7 +1,4 @@
-"""Defines the Heatmap class, which represents a widget for displaying a keyboard heatmap.
-
-The heatmap visualizes keystroke data using color gradients.
-"""
+"""The heatmap visualizes keystroke data using color gradients."""
 
 from __future__ import annotations
 
@@ -31,7 +28,7 @@ class Heatmap(Gtk.Box):
         "Space",
         "\\",
     ]
-    LUMINANCE_THRESHOLD: ClassVar[float] = 0.5  # Threshold for deciding text color based on luminance
+    LUMINANCE_THRESHOLD: ClassVar[float] = 0.5
 
     keyboard_container = Gtk.Template.Child()
     zoom_in_button = Gtk.Template.Child()

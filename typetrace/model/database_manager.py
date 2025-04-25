@@ -17,10 +17,9 @@ class DatabaseManager:
         self.db_path = Path(DatabasePath.DB_PATH)
 
     def initialize_database(self, db_path: str | Path) -> None:
-        """Initialize the database schema: create the keystrokes table if it doesn't exist.
+        """Create the keystrokes table if it doesn't exist.
 
         Args:
-        ----
             db_path: Path to the SQLite database file.
 
         """

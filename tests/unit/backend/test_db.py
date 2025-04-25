@@ -1,11 +1,9 @@
-"""Test suite for logging setup, including LoggerSetup and ColoredFormatter.
-
-Tests include logging configuration in both debug and normal modes,
-color formatting for log messages, and integration of log output.
-"""
+"""Test suite for logging setup, including LoggerSetup and ColoredFormatter."""
 
 import logging
 from unittest import TestCase, mock
+
+import pytest
 
 from typetrace.backend.logging_setup import ColoredFormatter, LogColor, LoggerSetup
 
@@ -115,7 +113,7 @@ class TestColoredFormatter(TestCase):
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=True)
     @pytest.mark.usefixtures("_mock_should_use_colors")
-    def test_format_with_colors(self, _mock_should_use_colors: mock.MagicMock) -> None:
+    def test_format_with_colors(self) -> None:
         """Test formatting with colors enabled."""
         formatter = ColoredFormatter()
 
@@ -160,10 +158,8 @@ class TestColoredFormatter(TestCase):
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=False)
     @pytest.mark.usefixtures("_mock_should_use_colors")
-    def test_format_without_colors(
-        self, _mock_should_use_colors: mock.MagicMock
-    ) -> None:
-        """Test formatting with colors disabled."""
+    def test_format_without_colors(self) -> None:
+        """Test formatting without colors enabled."""
         formatter = ColoredFormatter()
 
         for level in [logging.INFO, logging.WARNING, logging.ERROR]:

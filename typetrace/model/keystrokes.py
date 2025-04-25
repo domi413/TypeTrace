@@ -19,12 +19,10 @@ def get_scan_code(key: str, layout: str) -> int:
     """Get the scan code for a given key name and keyboard layout.
 
     Args:
-    ----
         key: The name of the key (e.g., "KEY_A").
         layout: The keyboard layout (e.g., "en_US").
 
     Returns:
-    -------
         The scan code for the key, or 0 if not found.
 
     """
@@ -46,12 +44,15 @@ class Keystroke(GObject.Object):
     date = GObject.Property(type=str, default="")
 
     def __init__(
-        self, scan_code: int, count: int, key_name: str, date: str = "",
+        self,
+        scan_code: int,
+        count: int,
+        key_name: str,
+        date: str = "",
     ) -> None:
         """Initialize a Keystroke object.
 
         Args:
-        ----
             scan_code: The scan code of the key.
             count: The number of times the key was pressed.
             key_name: The name of the key (e.g., "KEY_A").
@@ -76,12 +77,9 @@ class KeystrokeStore:
         """Add a keystroke event to the database.
 
         Args:
-        ----
             event: A dictionary containing the keystroke event data.
-                  Expected keys include "key" (str or list of str) and optionally "scan_code".
 
         Returns:
-        -------
             True if the keystroke was added successfully, False otherwise.
 
         """
@@ -125,8 +123,7 @@ class KeystrokeStore:
     def get_all_keystrokes(self) -> list[Keystroke]:
         """Retrieve all keystrokes from the database.
 
-        Returns
-        -------
+        Returns:
             A list of Keystroke objects representing all keystrokes.
 
         """
@@ -170,11 +167,9 @@ class KeystrokeStore:
         """Retrieve keystrokes for a specific date.
 
         Args:
-        ----
             date: Date in ISO format (YYYY-MM-DD)
 
         Returns:
-        -------
             List of Keystroke objects for the specified date
 
         """
@@ -216,8 +211,7 @@ class KeystrokeStore:
     def get_daily_keystroke_counts(self) -> list[dict]:
         """Get daily keystroke counts for the past 7 days.
 
-        Returns
-        -------
+        Returns:
             List of dictionaries with date and count for each day
 
         """

@@ -120,7 +120,7 @@ class TestColoredFormatter(TestCase):
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=True)
     @pytest.mark.usefixtures("_mock_should_use_colors")
-    def test_format_with_colors(self, _mock_should_use_colors: mock.MagicMock) -> None:
+    def test_format_with_colors(self) -> None:
         """Test formatting with colors enabled."""
         formatter = ColoredFormatter()
 
@@ -165,9 +165,7 @@ class TestColoredFormatter(TestCase):
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=False)
     @pytest.mark.usefixtures("_mock_should_use_colors")
-    def test_format_without_colors(
-        self, _mock_should_use_colors: mock.MagicMock
-    ) -> None:
+    def test_format_without_colors(self) -> None:
         """Test formatting with colors disabled."""
         formatter = ColoredFormatter()
 
