@@ -22,6 +22,12 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
 
+      - name: Install additional dependencies for dbus-python
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y build-essential clang libdbus-1-dev libgirepository1.0-dev pkg-config python3-dev cmake
+            pkg-config --modversion dbus-1  # Debugging step to verify dbus-1 installation
+
       - name: Install dependencies with uv
         run: uv sync --extra dev
 
