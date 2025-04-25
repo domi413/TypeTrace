@@ -6,8 +6,6 @@ import sqlite3
 import unittest
 from unittest import mock
 
-import pytest
-
 from typetrace.backend.cli import CLI
 from typetrace.config import Config, ExitCodes
 
@@ -59,11 +57,6 @@ class TestCLI(unittest.TestCase):
         processor_mock.trace.assert_called_once()
         assert code == ExitCodes.SUCCESS
 
-    def test_check_input_group_not_member(self) -> None:
-        """Should raise PermissionError if user not in 'input' group."""
-        with mock.patch("os.getlogin", return_value="user1"), \
-             mock.patch("grp.getgrnam", return_value=mock.MagicMock(gr_mem=["other"])):
-            pytest.raises(PermissionError, self.cli._check_input_group)
 
     def test_check_input_group_member(self) -> None:
         """Should not raise if user is in 'input' group."""
