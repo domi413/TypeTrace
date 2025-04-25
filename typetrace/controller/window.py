@@ -1,23 +1,19 @@
 """Window module for the Typetrace application."""
 
-import logging
-import threading
+from gi.repository import Adw, Gio, Gtk
 
-from gi.repository import Adw, Gio, GLib, Gtk
-
-from typetrace.backend.ipc.linux_darwin import LinuxMacOSIPC
 from typetrace.controller.heatmap import Heatmap
 from typetrace.controller.statistics import Statistics
 from typetrace.controller.verbose import Verbose
 from typetrace.model.keystrokes import KeystrokeStore
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/window.ui")
 class TypetraceWindow(Adw.ApplicationWindow):
-    """Main application window for the Typetrace application."""
+    """Main application window class for Typetrace.
+
+    Provides the user interface for the application.
+    """
 
     __gtype_name__ = "TypetraceWindow"
 
@@ -31,42 +27,26 @@ class TypetraceWindow(Adw.ApplicationWindow):
         settings: Gio.Settings,
         **kwargs,
     ) -> None:
-        """Initialize the TypetraceWindow.
+        """Initialize the application window.
 
         Args:
-        ----
-            keystroke_store: The store containing keystroke data.
-            settings: The GSettings object for storing application settings.
-            **kwargs: Additional arguments passed to the parent class.
+            **kwargs: Keyword arguments passed to the parent constructor
+            keystroke_store: Access to keystrokes
+            settings: GSettings used to persist preferences of a user
 
         """
         super().__init__(**kwargs)
-
-        # Start backend
-        logger.info("Starting backend...")
-        self.backend = LinuxMacOSIPC()
-        self.backend.register_callback(self._on_keystroke_received)
-        self.backend_thread = threading.Thread(
-            target=self.backend.run,
-            daemon=True,
-        )
-        self.backend_thread.start()
-        logger.info("Backend thread started")
-
-        # Initialize views
-        self.heatmap = Heatmap(settings=settings, keystroke_store=keystroke_store)
+        self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
         self.verbose = Verbose(keystroke_store=keystroke_store)
         self.statistics = Statistics(keystroke_store=keystroke_store)
         self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
 
-        # Add tabs to the ViewStack
         heatmap_page = self.stack.add_titled(
             self.heatmap,
             "heatmap",
             "Heatmap",
         )
         heatmap_page.set_icon_name("input-keyboard-symbolic")
-
         verbose_page = self.stack.add_titled(
             self.verbose,
             "verbose",
@@ -86,10 +66,3 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self.heatmap.update()
         self.verbose.update()
         self.statistics.update()
-
-    def _on_keystroke_received(self, event: dict) -> None:
-        """Handle new keystrokes from the backend."""
-        logger.debug("Received event: %s", event)
-        self.heatmap.keystroke_store.add(event)
-        GLib.idle_add(self.heatmap.update)
-        GLib.idle_add(self.verbose.update)

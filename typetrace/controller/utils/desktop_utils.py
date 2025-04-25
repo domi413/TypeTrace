@@ -1,5 +1,4 @@
 """Class used to manipulate the database file."""
-
 from __future__ import annotations
 
 from typetrace.config import Config

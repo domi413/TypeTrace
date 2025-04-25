@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, override
 
-from typetrace.backend.events.base import BaseEventProcessor
+from backend.events.base import BaseEventProcessor
 
 if TYPE_CHECKING:
     from pathlib import Path

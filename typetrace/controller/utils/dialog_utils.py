@@ -15,7 +15,6 @@ def show_toast(window: Gtk.Window, message: str, timeout: int = 3) -> None:
     """Display an Adwaita toast notification anchored to a window.
 
     Args:
-    ----
         window: The parent Gtk.Window to attach the toast to.
         message: The text message to display in the toast.
         timeout: Duration in seconds the toast remains visible (0 for indefinite).
@@ -35,7 +34,6 @@ def show_error_dialog(
     """Display a modal error dialog using Adw.AlertDialog.
 
     Args:
-    ----
         window: The parent Gtk.Window for the dialog.
         text: The primary heading text for the error message.
         secondary_text: Optional detailed body text for the error.
@@ -61,7 +59,6 @@ def open_file_save_dialog(
     """Open a 'Save As...' file chooser dialog using Gtk.FileDialog.
 
     Args:
-    ----
         parent: The parent Gtk.Window for the dialog.
         title: The title displayed in the dialog window.
         initial_name: The suggested filename to save as.
@@ -99,7 +96,6 @@ def open_file_open_dialog(
     """Open a file chooser dialog using Gtk.FileDialog.
 
     Args:
-    ----
         parent: The parent Gtk.Window for the dialog.
         title: The title displayed in the dialog window.
         filters: A Gio.ListStore containing Gtk.FileFilter objects to apply.
@@ -123,7 +119,7 @@ def open_file_open_dialog(
             if file:
                 callback(Path(file.get_path()))
         except GLib.Error:
-            pass  # Canceled or error occurred
+            pass # Canceled or error occurred
 
     dialog.open(parent, None, on_response, parent)
 
@@ -139,7 +135,6 @@ def show_confirmation_dialog(
     The 'Yes' button has a destructive appearance.
 
     Args:
-    ----
         parent: The parent Gtk.Window for the dialog.
         text: The primary heading text for the confirmation question.
         secondary_text: Additional body text explaining the action.
@@ -172,7 +167,6 @@ def show_folder_in_filemanager(
     """Open the system's default file manager at the specified folder path.
 
     Args:
-    ----
         folder_path: The path to the folder to open in the file manager.
 
     """
@@ -197,9 +191,7 @@ def show_folder_in_filemanager(
         # Non-Flatpak: Use GIO
         gfile = Gio.File.new_for_path(str(path))
         try:
-            app_info = Gio.AppInfo.get_default_for_type(
-                "inode/directory", must_support_uris=True,
-            )
+            app_info = Gio.AppInfo.get_default_for_type("inode/directory", True)  # noqa: FBT003
             if app_info:
                 app_info.launch([gfile], None)
         except GLib.Error:
