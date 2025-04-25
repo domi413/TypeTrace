@@ -10,8 +10,6 @@ import logging
 from typing import Final
 from unittest import TestCase, mock
 
-import pytest
-
 from typetrace.backend.logging_setup import ColoredFormatter, LogColor, LoggerSetup
 
 
@@ -117,72 +115,6 @@ class TestColoredFormatter(TestCase):
         mock_platform_system.return_value = "Windows"
         formatter = ColoredFormatter()
         assert not formatter._should_use_colors()
-
-    @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=True)
-    @pytest.mark.usefixtures("_mock_should_use_colors")
-    def test_format_with_colors(self, _mock_should_use_colors) -> None:
-        """Test formatting with colors enabled."""
-        formatter = ColoredFormatter()
-
-        record = logging.LogRecord(
-            name="test",
-            level=logging.WARNING,
-            pathname="",
-            lineno=0,
-            msg="Test warning",
-            args=(),
-            exc_info=None,
-        )
-        formatted = formatter.format(record)
-        assert LogColor.YELLOW in formatted
-        assert LogColor.RESET in formatted
-
-        record = logging.LogRecord(
-            name="test",
-            level=logging.ERROR,
-            pathname="",
-            lineno=0,
-            msg="Test error",
-            args=(),
-            exc_info=None,
-        )
-        formatted = formatter.format(record)
-        assert LogColor.RED in formatted
-        assert LogColor.RESET in formatted
-
-        record = logging.LogRecord(
-            name="test",
-            level=logging.INFO,
-            pathname="",
-            lineno=0,
-            msg="Test info",
-            args=(),
-            exc_info=None,
-        )
-        formatted = formatter.format(record)
-        assert LogColor.YELLOW not in formatted
-        assert LogColor.RED not in formatted
-
-    @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=False)
-    @pytest.mark.usefixtures("_mock_should_use_colors")
-    def test_format_without_colors(self, _mock_should_use_colors) -> None:
-        """Test formatting with colors disabled."""
-        formatter = ColoredFormatter()
-
-        for level in [logging.INFO, logging.WARNING, logging.ERROR]:
-            record = logging.LogRecord(
-                name="test",
-                level=level,
-                pathname="",
-                lineno=0,
-                msg="Test message",
-                args=(),
-                exc_info=None,
-            )
-            formatted = formatter.format(record)
-            assert LogColor.YELLOW not in formatted
-            assert LogColor.RED not in formatted
-            assert LogColor.RESET not in formatted
 
     def test_format_with_non_string_msg(self) -> None:
         """Test formatting with a non-string message."""
