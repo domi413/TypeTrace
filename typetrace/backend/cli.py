@@ -40,7 +40,6 @@ class CLI:
             LoggerSetup.setup_logging()
             logger.info("Debug mode active: Using dummy backend.")
 
-            # Dummy-Backend verwenden
             from typetrace.backend.ipc.linux_darwin import LinuxMacOSIPC
 
             backend = LinuxMacOSIPC()
@@ -54,7 +53,6 @@ class CLI:
                 logger.info("Dummy backend stopped (KeyboardInterrupt).")
             return ExitCodes.SUCCESS
 
-        # Normaler Produktivmodus
         try:
             self.__db_manager.initialize_database(self.__db_path)
 

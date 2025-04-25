@@ -33,7 +33,6 @@ class DatabaseManager:
                 count     INTEGER NOT NULL,
                 key_name  TEXT    NOT NULL,
                 date      TEXT    NOT NULL,
-                -- ensure uniqueness for upserts
                 UNIQUE(scan_code, key_name, date)
             )
             """,
