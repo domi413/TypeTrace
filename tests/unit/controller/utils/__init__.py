@@ -1,1 +1,1 @@
-"""This package contains utility functions for the controller module."""
+"""Package containing utility functions for the controller module."""
