@@ -12,6 +12,12 @@ wheels = [
 ]
 
 [[package]]
+name = "dbus-python"
+version = "1.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ff/24/63118050c7dd7be04b1ccd60eab53fef00abe844442e1b6dec92dae505d6/dbus-python-1.4.0.tar.gz", hash = "sha256:991666e498f60dbf3e49b8b7678f5559b8a65034fdf61aae62cdecdb7d89c770", size = 232490, upload_time = "2025-03-13T19:57:54.212Z" }
+
+[[package]]
 name = "evdev"
 version = "1.9.1"
 source = { registry = "https://pypi.org/simple" }
@@ -48,6 +54,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "appdirs" },
+    { name = "dbus-python" },
     { name = "evdev" },
 ]
 
@@ -59,6 +66,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "appdirs" },
+    { name = "dbus-python" },
     { name = "evdev" },
     { name = "ruff", marker = "extra == 'dev'" },
 ]
