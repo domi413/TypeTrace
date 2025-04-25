@@ -1,226 +1,226 @@
-"""Tests for the backend database module of the TypeTrace project."""
+"""Test suite for logging setup, including LoggerSetup and ColoredFormatter.
 
-from __future__ import annotations
+Tests include logging configuration in both debug and normal modes,
+color formatting for log messages, and integration of log output.
+"""
 
-import sqlite3
-import tempfile
-import unittest
-from pathlib import Path
-from typing import TYPE_CHECKING
-from unittest import mock
+import io
+import logging
+from unittest import TestCase, mock
 
-import pytest
-
-from typetrace.backend.db import DatabaseManager
-from typetrace.sql import SQLQueries
-
-if TYPE_CHECKING:
-    from typetrace.config import Event
+from typetrace.backend.logging_setup import ColoredFormatter, LogColor, LoggerSetup
 
 
-class TestDatabaseManager(unittest.TestCase):
-    """Test suite for the DatabaseManager class."""
+class TestLoggerSetup(TestCase):
+    """Test suite for the LoggerSetup class."""
 
-    def setUp(self) -> None:
-        """Set up the test environment before each test."""
-        self.db_manager = DatabaseManager()
-        self.temp_dir = tempfile.mkdtemp()
-        from typetrace.config import Config
+    def test_logger_setup_instantiation_fails(self) -> None:
+        """Test that LoggerSetup cannot be instantiated."""
+        with self.assertRaises(TypeError):  # noqa: PT027
+            LoggerSetup()
 
-        self.mock_db_path = Path(self.temp_dir) / Config.DB_NAME
+    @mock.patch("typetrace.backend.logging_setup.Config")
+    def test_setup_logging_debug_mode(self, mock_config: mock.MagicMock) -> None:
+        """Test logging setup in debug mode."""
+        mock_config.DEBUG = True
 
-    def tearDown(self) -> None:
-        """Clean up the test environment after each test."""
-        import shutil
+        root_logger = logging.getLogger()
+        root_logger.handlers.clear()
+        root_logger.setLevel(logging.NOTSET)
 
-        shutil.rmtree(self.temp_dir)
+        LoggerSetup.setup_logging()
 
-    @mock.patch("typetrace.backend.db.logger")
-    @mock.patch("sqlite3.connect")
-    def test_initialize_database(
-        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock,
-    ) -> None:
-        """Test database initialization."""
-        mock_conn = mock.MagicMock()
-        mock_cursor = mock.MagicMock()
-        mock_connect.return_value = mock_conn
-        mock_conn.cursor.return_value = mock_cursor
+        assert root_logger.level == logging.DEBUG
+        assert len(root_logger.handlers) == 1
+        handler = root_logger.handlers[0]
+        assert isinstance(handler, logging.StreamHandler)
+        assert isinstance(handler.formatter, ColoredFormatter)
+        assert handler.formatter._fmt == "%(asctime)s - %(levelname)s - %(message)s"
+        assert handler.formatter.datefmt == "%Y-%m-%d %H:%M:%S"
 
-        self.db_manager.initialize_database(self.mock_db_path)
+    @mock.patch("typetrace.backend.logging_setup.Config")
+    def test_setup_logging_normal_mode(self, mock_config: mock.MagicMock) -> None:
+        """Test logging setup in normal (non-debug) mode."""
+        mock_config.DEBUG = False
 
-        mock_connect.assert_called_once_with(self.mock_db_path)
-        mock_cursor.execute.assert_called_once_with(SQLQueries.CREATE_KEYSTROKES_TABLE)
-        mock_conn.commit.assert_called_once()
-        mock_conn.close.assert_called_once()
-        mock_logger.debug.assert_called_once_with(
-            "Database initialized at %s", self.mock_db_path,
+        root_logger = logging.getLogger()
+        root_logger.handlers.clear()
+        root_logger.setLevel(logging.NOTSET)
+
+        LoggerSetup.setup_logging()
+
+        assert root_logger.level == logging.INFO
+        assert len(root_logger.handlers) == 1
+        handler = root_logger.handlers[0]
+        assert isinstance(handler, logging.StreamHandler)
+        assert isinstance(handler.formatter, ColoredFormatter)
+        assert handler.formatter._fmt == "%(asctime)s - %(levelname)s - %(message)s"
+        assert handler.formatter.datefmt == "%Y-%m-%d %H:%M:%S"
+
+    @mock.patch("typetrace.backend.logging_setup.Config")
+    def test_setup_logging_multiple_calls(self, mock_config: mock.MagicMock) -> None:
+        """Test that multiple calls to setup_logging don't add redundant handlers."""
+        mock_config.DEBUG = False
+
+        root_logger = logging.getLogger()
+        root_logger.handlers.clear()
+        root_logger.setLevel(logging.NOTSET)
+
+        LoggerSetup.setup_logging()
+        LoggerSetup.setup_logging()
+        LoggerSetup.setup_logging()
+
+        assert len(root_logger.handlers) == 1
+        handler = root_logger.handlers[0]
+        assert isinstance(handler, logging.StreamHandler)
+        assert isinstance(handler.formatter, ColoredFormatter)
+        assert handler.formatter._fmt == "%(asctime)s - %(levelname)s - %(message)s"
+        assert handler.formatter.datefmt == "%Y-%m-%d %H:%M:%S"
+        assert root_logger.level == logging.INFO
+
+
+class TestColoredFormatter(TestCase):
+    """Test suite for the ColoredFormatter class."""
+
+    def test_formatter_initialization(self) -> None:
+        """Test ColoredFormatter initialization."""
+        formatter = ColoredFormatter()
+        assert hasattr(formatter, "_ColoredFormatter__use_colors")
+
+    @mock.patch("platform.system")
+    def test_should_use_colors_linux(self, mock_platform_system: mock.MagicMock) -> None:
+        """Test color detection on Linux."""
+        mock_platform_system.return_value = "Linux"
+        formatter = ColoredFormatter()
+        assert formatter._should_use_colors()
+
+    @mock.patch("platform.system")
+    def test_should_use_colors_darwin(self, mock_platform_system: mock.MagicMock) -> None:
+        """Test color detection on macOS."""
+        mock_platform_system.return_value = "Darwin"
+        formatter = ColoredFormatter()
+        assert formatter._should_use_colors()
+
+    @mock.patch("platform.system")
+    def test_should_use_colors_windows(self, mock_platform_system: mock.MagicMock) -> None:
+        """Test color detection on Windows."""
+        mock_platform_system.return_value = "Windows"
+        formatter = ColoredFormatter()
+        assert not formatter._should_use_colors()
+
+    @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=True)
+    def test_format_with_colors(self, _mock_should_use_colors: mock.MagicMock) -> None:
+        """Test formatting with colors enabled."""
+        formatter = ColoredFormatter()
+
+        record = logging.LogRecord(
+            name="test",
+            level=logging.WARNING,
+            pathname="",
+            lineno=0,
+            msg="Test warning",
+            args=(),
+            exc_info=None,
+        )
+        formatted = formatter.format(record)
+        assert LogColor.YELLOW in formatted
+        assert LogColor.RESET in formatted
+
+        record = logging.LogRecord(
+            name="test",
+            level=logging.ERROR,
+            pathname="",
+            lineno=0,
+            msg="Test error",
+            args=(),
+            exc_info=None,
+        )
+        formatted = formatter.format(record)
+        assert LogColor.RED in formatted
+        assert LogColor.RESET in formatted
+
+        record = logging.LogRecord(
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="Test info",
+            args=(),
+            exc_info=None,
+        )
+        formatted = formatter.format(record)
+        assert LogColor.YELLOW not in formatted
+        assert LogColor.RED not in formatted
+
+    @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=False)
+    def test_format_without_colors(self, _mock_should_use_colors: mock.MagicMock) -> None:
+        """Test formatting with colors disabled."""
+        formatter = ColoredFormatter()
+
+        for level in [logging.INFO, logging.WARNING, logging.ERROR]:
+            record = logging.LogRecord(
+                name="test",
+                level=level,
+                pathname="",
+                lineno=0,
+                msg="Test message",
+                args=(),
+                exc_info=None,
+            )
+            formatted = formatter.format(record)
+            assert LogColor.YELLOW not in formatted
+            assert LogColor.RED not in formatted
+            assert LogColor.RESET not in formatted
+
+    def test_format_with_non_string_msg(self) -> None:
+        """Test formatting with a non-string message."""
+        formatter = ColoredFormatter(fmt="%(levelname)s: %(message)s")
+        formatter._ColoredFormatter__use_colors = True
+
+        record = logging.LogRecord(
+            name="test",
+            level=logging.ERROR,
+            pathname="",
+            lineno=0,
+            msg=Exception("Test exception"),
+            args=(),
+            exc_info=None,
         )
 
-    @mock.patch("typetrace.backend.db.logger")
-    @mock.patch("sqlite3.connect")
-    def test_initialize_database_sqlite_error(
-        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock,
-    ) -> None:
-        """Test database initialization with SQLite error."""
-        mock_conn = mock.MagicMock()
-        mock_cursor = mock.MagicMock()
-        mock_connect.return_value = mock_conn
-        mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.execute.side_effect = sqlite3.Error("Mock SQLite error")
+        formatted = formatter.format(record)
 
-        with pytest.raises(sqlite3.Error, match="Mock SQLite error"):
-            self.db_manager.initialize_database(self.mock_db_path)
+        assert LogColor.RED + "ERROR" + LogColor.RESET in formatted
+        exception_text = str(Exception("Test exception"))
+        assert exception_text in formatted
 
-        mock_conn.close.assert_called_once()
-        mock_logger.exception.assert_called_once_with("Database error")
+    def test_log_output_integration(self) -> None:
+        """Integration test for actual log output."""
+        expected_log_lines = 3  # Number of log messages expected
 
-    @mock.patch("typetrace.backend.db.logger")
-    @mock.patch("sqlite3.connect")
-    def test_initialize_database_operational_error(
-        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock,
-    ) -> None:
-        """Test database initialization with SQLite operational error."""
-        mock_conn = mock.MagicMock()
-        mock_cursor = mock.MagicMock()
-        mock_connect.return_value = mock_conn
-        mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.execute.side_effect = sqlite3.OperationalError(
-            "Mock operational error",
-        )
+        captured_output = io.StringIO()
+        handler = logging.StreamHandler(captured_output)
 
-        with pytest.raises(sqlite3.OperationalError, match="Mock operational error"):
-            self.db_manager.initialize_database(self.mock_db_path)
+        formatter = ColoredFormatter(fmt="%(levelname)s - %(message)s")
+        formatter._ColoredFormatter__use_colors = True
+        handler.setFormatter(formatter)
 
-        mock_conn.close.assert_called_once()
-        mock_logger.exception.assert_called_once_with("SQLite operational error")
+        logger = logging.getLogger("test_logger")
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(handler)
 
-    @mock.patch("sqlite3.connect")
-    def test_write_to_database_empty_events(self, mock_connect: mock.MagicMock) -> None:
-        """Test write_to_database with empty events list."""
-        self.db_manager.write_to_database(self.mock_db_path, [])
+        logger.info("Info message")
+        logger.warning("Warning message")
+        logger.error("Error message")
 
-        mock_connect.assert_not_called()
+        captured_output.flush()  # Ensure the output is flushed
 
-    @mock.patch("typetrace.backend.db.logger")
-    @mock.patch("sqlite3.connect")
-    def test_write_to_database_with_events(
-        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock,
-    ) -> None:
-        """Test write_to_database with events list."""
-        mock_conn = mock.MagicMock()
-        mock_cursor = mock.MagicMock()
-        mock_connect.return_value = mock_conn
-        mock_conn.cursor.return_value = mock_cursor
+        output = captured_output.getvalue()
+        lines = output.strip().split("\n")
 
-        input_events: list[Event] = [
-            {"scan_code": 30, "name": "KEY_A", "date": "2025-04-22"},
-            {"scan_code": 42, "name": "KEY_LEFTSHIFT", "date": "2025-04-22"},
-        ]
+        # Sicherstellen, dass genügend Zeilen vorhanden sind
+        assert len(lines) >= expected_log_lines, f"Expected at least {expected_log_lines} log lines, but got {len(lines)}"
 
-        expected_processed_events = [
-            {"scan_code": 30, "key_name": "KEY_A", "date": "2025-04-22"},
-            {"scan_code": 42, "key_name": "KEY_LEFTSHIFT", "date": "2025-04-22"},
-        ]
-
-        self.db_manager.write_to_database(self.mock_db_path, input_events)
-        mock_connect.assert_called_once_with(self.mock_db_path)
-
-        mock_cursor.executemany.assert_called_once_with(
-            SQLQueries.INSERT_OR_UPDATE_KEYSTROKE,
-            expected_processed_events,
-        )
-
-        mock_conn.commit.assert_called_once()
-        mock_conn.close.assert_called_once()
-        mock_logger.debug.assert_called_once_with(
-            "Updated database with %d keystroke events", len(input_events),
-        )
-
-    @mock.patch("typetrace.backend.db.logger")
-    @mock.patch("sqlite3.connect")
-    def test_write_to_database_sqlite_error(
-        self, mock_connect: mock.MagicMock, mock_logger: mock.MagicMock,
-    ) -> None:
-        """Test write_to_database with SQLite error."""
-        mock_conn = mock.MagicMock()
-        mock_cursor = mock.MagicMock()
-        mock_connect.return_value = mock_conn
-        mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.executemany.side_effect = sqlite3.Error("Mock SQLite error")
-
-        input_events: list[Event] = [
-            {"scan_code": 30, "name": "KEY_A", "date": "2025-04-22"},
-        ]
-
-        with pytest.raises(sqlite3.Error, match="Mock SQLite error"):
-            self.db_manager.write_to_database(self.mock_db_path, input_events)
-
-        mock_conn.close.assert_called_once()
-        mock_logger.exception.assert_called_once_with("Database error")
-
-    @mock.patch("sqlite3.connect")
-    def test_write_to_database_with_invalid_characters(
-        self, mock_connect: mock.MagicMock,
-    ) -> None:
-        """Test write_to_database with events containing invalid characters."""
-        mock_conn = mock.MagicMock()
-        mock_cursor = mock.MagicMock()
-        mock_connect.return_value = mock_conn
-        mock_conn.cursor.return_value = mock_cursor
-
-        input_events: list[Event] = [
-            {
-                "scan_code": 30,
-                "name": "KEY_A;DROP TABLE keystrokes;",
-                "date": "2025-04-22",
-            },
-            {
-                "scan_code": 42,
-                "name": "KEY_'\"\\",
-                "date": "2025-04-22",
-            },
-            {
-                "scan_code": 44,
-                "name": "KEY_\u2022\u00a9\u00ae",
-                "date": "2025-04-22",
-            },
-            {
-                "scan_code": 45,
-                "name": ("MULTI", "KEY", "COMBO"),
-                "date": "2025-04-22",
-            },
-        ]
-
-        expected_processed_events = [
-            {
-                "scan_code": 30,
-                "key_name": "KEY_A;DROP TABLE keystrokes;",
-                "date": "2025-04-22",
-            },
-            {"scan_code": 42, "key_name": "KEY_'\"\\", "date": "2025-04-22"},
-            {
-                "scan_code": 44,
-                "key_name": "KEY_\u2022\u00a9\u00ae",
-                "date": "2025-04-22",
-            },
-            {
-                "scan_code": 45,
-                "key_name": "MULTI, KEY, COMBO",
-                "date": "2025-04-22",
-            },
-        ]
-
-        self.db_manager.write_to_database(self.mock_db_path, input_events)
-        mock_connect.assert_called_once_with(self.mock_db_path)
-
-        mock_cursor.executemany.assert_called_once_with(
-            SQLQueries.INSERT_OR_UPDATE_KEYSTROKE,
-            expected_processed_events,
-        )
-
-        mock_conn.commit.assert_called_once()
-        mock_conn.close.assert_called_once()
-
-
-if __name__ == "__main__":
-    unittest.main()
+        # Nun kannst du sicher auf jede Zeile zugreifen
+        assert "INFO - Info message" in lines[0]
+        assert f"{LogColor.YELLOW}WARNING{LogColor.RESET}" in lines[1]
+        assert f"{LogColor.RED}ERROR{LogColor.RESET}" in lines[2]
