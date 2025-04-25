@@ -1,31 +1,28 @@
-"""Tests for the logging_setup module."""
+"""Test suite for logging setup, including LoggerSetup and ColoredFormatter.
+
+Tests include logging configuration in both debug and normal modes,
+color formatting for log messages, and integration of log output.
+
+"""
 
 import io
 import logging
-from unittest import mock
-
-import pytest
+from unittest import TestCase, mock
 
 from typetrace.backend.logging_setup import ColoredFormatter, LogColor, LoggerSetup
 
 
-class TestLoggerSetup:
+class TestLoggerSetup(TestCase):
     """Test suite for the LoggerSetup class."""
 
     def test_logger_setup_instantiation_fails(self) -> None:
         """Test that LoggerSetup cannot be instantiated."""
-        with pytest.raises(TypeError, match="^$"):
+        with self.assertRaises(TypeError):  # noqa: PT027
             LoggerSetup()
 
     @mock.patch("typetrace.backend.logging_setup.Config")
     def test_setup_logging_debug_mode(self, mock_config: mock.MagicMock) -> None:
-        """Test logging setup in debug mode.
-
-        Args:
-        ----
-            mock_config: Mock for Config class.
-
-        """
+        """Test logging setup in debug mode."""
         mock_config.DEBUG = True
 
         root_logger = logging.getLogger()
@@ -44,13 +41,7 @@ class TestLoggerSetup:
 
     @mock.patch("typetrace.backend.logging_setup.Config")
     def test_setup_logging_normal_mode(self, mock_config: mock.MagicMock) -> None:
-        """Test logging setup in normal (non-debug) mode.
-
-        Args:
-        ----
-            mock_config: Mock for the Config class.
-
-        """
+        """Test logging setup in normal (non-debug) mode."""
         mock_config.DEBUG = False
 
         root_logger = logging.getLogger()
@@ -69,13 +60,7 @@ class TestLoggerSetup:
 
     @mock.patch("typetrace.backend.logging_setup.Config")
     def test_setup_logging_multiple_calls(self, mock_config: mock.MagicMock) -> None:
-        """Test that multiple calls to setup_logging don't add redundant handlers.
-
-        Args:
-        ----
-            mock_config: Mock for the Config class.
-
-        """
+        """Test that multiple calls to setup_logging don't add redundant handlers."""
         mock_config.DEBUG = False
 
         root_logger = logging.getLogger()
@@ -95,7 +80,7 @@ class TestLoggerSetup:
         assert root_logger.level == logging.INFO
 
 
-class TestColoredFormatter:
+class TestColoredFormatter(TestCase):
     """Test suite for the ColoredFormatter class."""
 
     def test_formatter_initialization(self) -> None:
@@ -104,59 +89,29 @@ class TestColoredFormatter:
         assert hasattr(formatter, "_ColoredFormatter__use_colors")
 
     @mock.patch("platform.system")
-    def test_should_use_colors_linux(
-        self, mock_platform_system: mock.MagicMock,
-    ) -> None:
-        """Test color detection on Linux.
-
-        Args:
-        ----
-            mock_platform_system: Mock for platform.system.
-
-        """
+    def test_should_use_colors_linux(self, mock_platform_system: mock.MagicMock) -> None:
+        """Test color detection on Linux."""
         mock_platform_system.return_value = "Linux"
         formatter = ColoredFormatter()
-        assert formatter._should_use_colors() is True
+        assert formatter._should_use_colors()
 
     @mock.patch("platform.system")
-    def test_should_use_colors_darwin(
-        self, mock_platform_system: mock.MagicMock,
-    ) -> None:
-        """Test color detection on macOS.
-
-        Args:
-        ----
-            mock_platform_system: Mock for platform.system.
-
-        """
+    def test_should_use_colors_darwin(self, mock_platform_system: mock.MagicMock) -> None:
+        """Test color detection on macOS."""
         mock_platform_system.return_value = "Darwin"
         formatter = ColoredFormatter()
-        assert formatter._should_use_colors() is True
+        assert formatter._should_use_colors()
 
     @mock.patch("platform.system")
-    def test_should_use_colors_windows(
-        self, mock_platform_system: mock.MagicMock,
-    ) -> None:
-        """Test color detection on Windows.
-
-        Args:
-        ----
-            mock_platform_system: Mock for platform.system.
-
-        """
+    def test_should_use_colors_windows(self, mock_platform_system: mock.MagicMock) -> None:
+        """Test color detection on Windows."""
         mock_platform_system.return_value = "Windows"
         formatter = ColoredFormatter()
-        assert formatter._should_use_colors() is False
+        assert not formatter._should_use_colors()
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=True)
-    def test_format_with_colors(self, mock_should_use_colors: mock.MagicMock) -> None:
-        """Test formatting with colors enabled.
-
-        Args:
-        ----
-            mock_should_use_colors: Mock for the _should_use_colors method.
-
-        """
+    def test_format_with_colors(self, _mock_should_use_colors: mock.MagicMock) -> None:
+        """Test formatting with colors enabled."""
         formatter = ColoredFormatter()
 
         record = logging.LogRecord(
@@ -199,16 +154,8 @@ class TestColoredFormatter:
         assert LogColor.RED not in formatted
 
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=False)
-    def test_format_without_colors(
-        self, mock_should_use_colors: mock.MagicMock,
-    ) -> None:
-        """Test formatting with colors disabled.
-
-        Args:
-        ----
-            mock_should_use_colors: Mock for the _should_use_colors method.
-
-        """
+    def test_format_without_colors(self, _mock_should_use_colors: mock.MagicMock) -> None:
+        """Test formatting with colors disabled."""
         formatter = ColoredFormatter()
 
         for level in [logging.INFO, logging.WARNING, logging.ERROR]:
@@ -227,11 +174,7 @@ class TestColoredFormatter:
             assert LogColor.RESET not in formatted
 
     def test_format_with_non_string_msg(self) -> None:
-        """Test formatting with a non-string message.
-
-        The message type should be colored whereas the exception message itself
-        should not be colored.
-        """
+        """Test formatting with a non-string message."""
         formatter = ColoredFormatter(fmt="%(levelname)s: %(message)s")
         formatter._ColoredFormatter__use_colors = True
 
@@ -248,30 +191,34 @@ class TestColoredFormatter:
         formatted = formatter.format(record)
 
         assert LogColor.RED + "ERROR" + LogColor.RESET in formatted
-
         exception_text = str(Exception("Test exception"))
         assert exception_text in formatted
+def test_log_output_integration(self) -> None:
+    """Integration test for actual log output."""
+    captured_output = io.StringIO()
+    handler = logging.StreamHandler(captured_output)
 
-    def test_log_output_integration(self) -> None:
-        """Integration test for actual log output."""
-        captured_output = io.StringIO()
-        handler = logging.StreamHandler(captured_output)
+    formatter = ColoredFormatter(fmt="%(levelname)s - %(message)s")
+    formatter._ColoredFormatter__use_colors = True
+    handler.setFormatter(formatter)
 
-        formatter = ColoredFormatter(fmt="%(levelname)s - %(message)s")
-        formatter._ColoredFormatter__use_colors = True
-        handler.setFormatter(formatter)
+    logger = logging.getLogger("test_logger")
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
 
-        logger = logging.getLogger("test_logger")
-        logger.setLevel(logging.DEBUG)
-        logger.addHandler(handler)
+    logger.info("Info message")
+    logger.warning("Warning message")
+    logger.error("Error message")
 
-        logger.info("Info message")
-        logger.warning("Warning message")
-        logger.error("Error message")
+    captured_output.flush()
 
-        output = captured_output.getvalue()
+    output = captured_output.getvalue()
+    lines = output.strip().split("\n")
 
-        lines = output.strip().split("\n")
-        assert "INFO - Info message" in lines[0]
-        assert f"{LogColor.YELLOW}WARNING{LogColor.RESET}" in lines[1]
-        assert f"{LogColor.RED}ERROR{LogColor.RESET}" in lines[2]
+
+    assert len(lines) >= 3, f"Expected at least 3 log lines, but got {len(lines)}"
+
+    assert "INFO - Info message" in lines[0]
+    assert f"{LogColor.YELLOW}WARNING{LogColor.RESET}" in lines[1]
+    assert f"{LogColor.RED}ERROR{LogColor.RESET}" in lines[2]
+

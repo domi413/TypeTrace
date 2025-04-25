@@ -1,4 +1,6 @@
-"""Tests for the backend database module."""
+"""Tests for the backend database module of the TypeTrace project."""
+
+from __future__ import annotations
 
 import sqlite3
 import tempfile
@@ -7,8 +9,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest import mock
 
+import pytest
+
 from typetrace.backend.db import DatabaseManager
-from typetrace.backend.sql import SQLQueries
+from typetrace.sql import SQLQueries
 
 if TYPE_CHECKING:
     from typetrace.config import Event
@@ -17,24 +21,20 @@ if TYPE_CHECKING:
 class TestDatabaseManager(unittest.TestCase):
     """Test suite for the DatabaseManager class."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up the test environment before each test."""
         self.db_manager = DatabaseManager()
-        # Create a temporary directory for the mock database path
         self.temp_dir = tempfile.mkdtemp()
         from typetrace.config import Config
 
         self.mock_db_path = Path(self.temp_dir) / Config.DB_NAME
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up the test environment after each test."""
         import shutil
 
         shutil.rmtree(self.temp_dir)
 
-    # ==========================================================
-    # ========== Tests for initialize_database method ==========
-    # ==========================================================
     @mock.patch("typetrace.backend.db.logger")
     @mock.patch("sqlite3.connect")
     def test_initialize_database(
@@ -68,7 +68,7 @@ class TestDatabaseManager(unittest.TestCase):
         mock_conn.cursor.return_value = mock_cursor
         mock_cursor.execute.side_effect = sqlite3.Error("Mock SQLite error")
 
-        with self.pytest.raises(sqlite3.Error, "Mock SQLite error"):
+        with pytest.raises(sqlite3.Error, match="Mock SQLite error"):
             self.db_manager.initialize_database(self.mock_db_path)
 
         mock_conn.close.assert_called_once()
@@ -88,15 +88,12 @@ class TestDatabaseManager(unittest.TestCase):
             "Mock operational error",
         )
 
-        with self.assertRaisesRegex(sqlite3.OperationalError, "Mock operational error"):
+        with pytest.raises(sqlite3.OperationalError, match="Mock operational error"):
             self.db_manager.initialize_database(self.mock_db_path)
 
         mock_conn.close.assert_called_once()
         mock_logger.exception.assert_called_once_with("SQLite operational error")
 
-    # ========================================================
-    # ========== Tests for write_to_database method ==========
-    # ========================================================
     @mock.patch("sqlite3.connect")
     def test_write_to_database_empty_events(self, mock_connect: mock.MagicMock) -> None:
         """Test write_to_database with empty events list."""
@@ -155,7 +152,7 @@ class TestDatabaseManager(unittest.TestCase):
             {"scan_code": 30, "name": "KEY_A", "date": "2025-04-22"},
         ]
 
-        with self.assertRaisesRegex(sqlite3.Error, "Mock SQLite error"):
+        with pytest.raises(sqlite3.Error, match="Mock SQLite error"):
             self.db_manager.write_to_database(self.mock_db_path, input_events)
 
         mock_conn.close.assert_called_once()
@@ -176,22 +173,22 @@ class TestDatabaseManager(unittest.TestCase):
                 "scan_code": 30,
                 "name": "KEY_A;DROP TABLE keystrokes;",
                 "date": "2025-04-22",
-            },  # SQL injection attempt
+            },
             {
                 "scan_code": 42,
                 "name": "KEY_'\"\\",
                 "date": "2025-04-22",
-            },  # Quote characters
+            },
             {
                 "scan_code": 44,
                 "name": "KEY_\u2022\u00a9\u00ae",
                 "date": "2025-04-22",
-            },  # Unicode characters
+            },
             {
                 "scan_code": 45,
                 "name": ("MULTI", "KEY", "COMBO"),
                 "date": "2025-04-22",
-            },  # Tuple of names
+            },
         ]
 
         expected_processed_events = [
