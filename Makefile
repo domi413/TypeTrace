@@ -30,7 +30,7 @@ flatpak-install: clean
 
 # Meson targets
 meson-setup: clean
-	meson setup $(BUILD_DIR) --prefix=$(CURDIR)/$(INSTALL_DIR)
+	meson setup $(BUILD_DIR) --prefix="$(CURDIR)/$(INSTALL_DIR)"
 
 meson-build: meson-setup
 	meson compile -C $(BUILD_DIR)
