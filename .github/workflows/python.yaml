@@ -55,7 +55,7 @@ jobs:
       - name: Install libg
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgirepository1.0-dev
+          sudo apt-get install -y build-essential clang libdbus-1-dev libgirepository1.0-dev
 
       - name: Install dependencies with uv
         run: uv sync --extra dev
