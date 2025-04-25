@@ -9,7 +9,7 @@ set INSTALLDIR=C:\Program Files\typetrace
 set MSYS2_ROOT=C:\tools\msys64
 set SHORTCUT_NAME=TypeTrace.lnk
 set ICON_PATH=%INSTALLDIR%\windows\edu.ost.typetrace.ico
-set RELEASELINK=https://github.com/domi413/TypeTrace/archive/refs/tags/R4.zip
+set RELEASE_LINK=https://github.com/domi413/TypeTrace/archive/refs/tags/R5.zip
 
 :: -----------------------------
 :: ERROR HANDLING SETUP
@@ -45,7 +45,7 @@ fltmc >nul 2>&1 || (
 where choco >nul 2>&1
 if %errorlevel% NEQ 0 (
     echo Chocolatey is not installed.
-    set /p install="Do you want to install Chocolatey now? (y/n): "
+    set /p install="Do you want to install Chocolatey now? (y/n):"
     if /i "%install%"=="y" (
         echo Installing Chocolatey...
         PowerShell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
@@ -71,25 +71,30 @@ if not exist "%MSYS2_ROOT%\msys2_shell.cmd" (
 )
 
 :: -----------------------------
+:: DOWNLOAD ZIPFILE IF NOT EXISTS
+:: -----------------------------
+if not exist "%ZIPFILE%" (
+    echo [INFO] Downloading %ZIPFILE% to %TEMP%...
+    powershell -Command "Invoke-WebRequest -Uri '%RELEASE_LINK%' -OutFile '%TEMP%\%ZIPFILE%' -UseBasicParsing"
+    set ZIPPED_FILE=%TEMP%\%ZIPFILE%
+    if %errorlevel% NEQ 0 (
+        call :cleanup 1
+    )
+) else (
+    echo [INFO] %ZIPFILE% already exists in %cd%\%ZIPFILE%
+    set ZIPPED_FILE=%cd%\%ZIPFILE%
+)
+
+:: -----------------------------
 :: UNZIP APPLICATION
 :: -----------------------------
 echo [INFO] Extracting %ZIPFILE% to %INSTALLDIR%...
 pushd "%~dp0"
 set CLEANUP_NEEDED=1
-powershell -Command "Expand-Archive -LiteralPath '%ZIPFILE%' -DestinationPath '%INSTALLDIR%' -Force"
+powershell -Command "Expand-Archive -LiteralPath '%ZIPPED_FILE%' -DestinationPath '%INSTALLDIR%' -Force"
 if %errorlevel% NEQ 0 (
     call :cleanup 1
 )
-
-:: -----------------------------
-:: CREATE LAUNCH SCRIPT
-:: -----------------------------
-set VBS_LAUNCH=%INSTALLDIR%\windows\launch_typetrace.vbs
-(
-    echo Set WshShell = CreateObject^("WScript.Shell"^)
-    echo WshShell.Run """%MSYS2_ROOT%\usr\bin\bash.exe"" -lc ""cd '/C/Program Files/typetrace' ^&^& /mingw64/bin/python ./_install/bin/typetrace -db""", 1, False
-    echo WshShell.Run """%MSYS2_ROOT%\usr\bin\bash.exe"" -lc ""cd '/C/Program Files/typetrace' ^&^& /mingw64/bin/python ./_install/bin/typetrace""", 0, False
-) > "%VBS_LAUNCH%"
 
 :: -----------------------------
 :: CREATE START MENU SHORTCUT
@@ -99,7 +104,7 @@ set VBS_CREATE=%TEMP%\create_shortcut.vbs
     echo Set oWS = WScript.CreateObject^("WScript.Shell"^)
     echo sLinkFile = oWS.SpecialFolders^("Programs"^) ^& "\%SHORTCUT_NAME%"
     echo Set oLink = oWS.CreateShortcut^(sLinkFile^)
-    echo oLink.TargetPath = "%VBS_LAUNCH%"
+    echo oLink.TargetPath = "%INSTALLDIR%\windows\launch_typetrace.vbs%"
     echo oLink.WorkingDirectory = "%INSTALLDIR%"
     echo oLink.IconLocation = "%ICON_PATH%"
     echo oLink.Save
