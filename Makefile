@@ -13,7 +13,7 @@ clean:
 	rm -rf $(BUILD_DIR) $(INSTALL_DIR)
 
 test: $(INSTALL_DIR)/bin/typetrace
-	env GSETTINGS_SCHEMA_DIR=$(INSTALL_DIR)/share/glib-2.0/schemas $(INSTALL_DIR)/bin/typetrace
+	env GSETTINGS_SCHEMA_DIR=$(INSTALL_DIR)/share/glib-2.0/schemas $(INSTALL_DIR)/bin/typetrace $(ARGS)
 
 $(INSTALL_DIR)/bin/typetrace:
 	$(MAKE) meson-install
@@ -39,4 +39,4 @@ meson-install: meson-build
 	meson install -C $(BUILD_DIR)
 
 # Phony targets
-.PHONY: all flatpak-build flatpak-run flatpak-install meson-setup meson-build meson-install clean
+.PHONY: all flatpak-build flatpak-run flatpak-install meson-setup meson-build meson-install clean test

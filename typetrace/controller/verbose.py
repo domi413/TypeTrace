@@ -1,8 +1,13 @@
 """The verbose widget that displays keystroke data in text."""
 
+import logging
+
 from gi.repository import Gio, Gtk
 
 from typetrace.model.keystrokes import Keystroke, KeystrokeStore
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/verbose.ui")
@@ -11,14 +16,15 @@ class Verbose(Gtk.Box):
 
     __gtype_name__ = "Verbose"
 
-    column_view = Gtk.Template.Child("column_view")
+    column_view = Gtk.Template.Child()
 
     def __init__(self, keystroke_store: KeystrokeStore, **kwargs) -> None:
-        """Initialize the verbose widget with keystroke data.
+        """Initialize the Verbose widget.
 
         Args:
-            keystroke_store: Access to keystrokes models
-            **kwargs: Keyword arguments passed to the parent constructor
+        ----
+            keystroke_store: The store containing keystroke data.
+            **kwargs: Additional arguments passed to the parent class.
 
         """
         super().__init__(**kwargs)
@@ -30,18 +36,20 @@ class Verbose(Gtk.Box):
 
         self._populate_list_store()
         self._setup_column_view()
-
-        # Set the sort_model's sorter to the column_view's sorter
         self.sort_model.set_sorter(self.column_view.get_sorter())
 
     def update(self) -> None:
         """Update the list to reflect current data."""
         self._populate_list_store()
+        logger.debug("List store has %d items", self.list_store.get_n_items())
+        self.queue_draw()  # Forces the widget to redraw itself.
 
     def _populate_list_store(self) -> None:
         """Populate the list store with keystroke data."""
         self.list_store.remove_all()
-        for keystroke in self.keystroke_store.get_all_keystrokes():
+        keystrokes = self.keystroke_store.get_all_keystrokes()
+        logger.debug("Found %d keystrokes", len(keystrokes))
+        for keystroke in keystrokes:
             self.list_store.append(
                 Keystroke(
                     scan_code=keystroke.scan_code,
@@ -54,71 +62,56 @@ class Verbose(Gtk.Box):
     def _setup_column_view(self) -> None:
         """Set up the ColumnView with columns, data binding, and sorting."""
         columns = [
+            ("Scan Code", self._bind_scan_code, "scan_code", "numeric"),
             ("Count", self._bind_count, "count", "numeric"),
             ("Key Name", self._bind_key_name, "key_name", "string"),
-            ("Scan Code", self._bind_scan_code, "scan_code", "numeric"),
         ]
 
-        # Create and add all columns with sorters
         for title, bind_func, prop_name, sort_type in columns:
-            # Set up the factory for rendering items
             factory = Gtk.SignalListItemFactory()
             factory.connect("setup", self._factory_setup)
             factory.connect("bind", bind_func)
 
             column = Gtk.ColumnViewColumn(title=title, factory=factory, expand=True)
-
-            # Create and set the sorter based on the sort type
             expression = Gtk.PropertyExpression.new(Keystroke, None, prop_name)
+
             if sort_type == "numeric":
                 sorter = Gtk.NumericSorter(expression=expression)
             elif sort_type == "string":
                 sorter = Gtk.StringSorter(expression=expression)
             else:
-                raise ValueError
-            column.set_sorter(sorter)
+                error_msg = "Unknown sort type: " + sort_type
+                raise ValueError(error_msg)
 
+            column.set_sorter(sorter)
             self.column_view.append_column(column)
 
-        # Set an initial sort order
         self.column_view.sort_by_column(
             self.column_view.get_columns()[0],
-            Gtk.SortType.DESCENDING,
+            Gtk.SortType.ASCENDING,
         )
 
     def _factory_setup(
-        self,
-        _: Gtk.SignalListItemFactory,
-        list_item: Gtk.ListItem,
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,
     ) -> None:
-        """Set up a label widget for each list item."""
         label = Gtk.Label()
         label.set_halign(Gtk.Align.START)
         list_item.set_child(label)
 
     def _bind_scan_code(
-        self,
-        _: Gtk.SignalListItemFactory,
-        list_item: Gtk.ListItem,
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,
     ) -> None:
-        """Bind scan_code property to the label."""
         keystroke = list_item.get_item()
         list_item.get_child().set_text(str(keystroke.scan_code))
 
     def _bind_count(
-        self,
-        _: Gtk.SignalListItemFactory,
-        list_item: Gtk.ListItem,
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,
     ) -> None:
-        """Bind count property to the label."""
         keystroke = list_item.get_item()
         list_item.get_child().set_text(str(keystroke.count))
 
     def _bind_key_name(
-        self,
-        _: Gtk.SignalListItemFactory,
-        list_item: Gtk.ListItem,
+        self, _: Gtk.SignalListItemFactory, list_item: Gtk.ListItem,
     ) -> None:
-        """Bind key_name property to the label."""
         keystroke = list_item.get_item()
         list_item.get_child().set_text(keystroke.key_name)

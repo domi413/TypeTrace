@@ -4,16 +4,15 @@ on:
   pull_request:
     types:
       - opened
-      - synchronize
-      - ready_for_review
+      - edited
       - reopened
+      - ready_for_review
+      - synchronize
 
 jobs:
   lint:
     runs-on: ubuntu-latest
-
     if: ${{ !github.event.pull_request.draft }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,8 +24,51 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
 
-      - name: Install ruff dependencies
-        run: uv tool install ruff
+      - name: Install additional dependencies for dbus-python
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y build-essential clang libdbus-1-dev libgirepository1.0-dev pkg-config python3-dev cmake
+            pkg-config --modversion dbus-1  # Debugging step to verify dbus-1 installation
+
+      - name: Install dependencies with uv
+        run: uv sync --extra dev
 
       - name: Run ruff
-        run: ruff check
+        run: uv run ruff check --fix
+
+  test:
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+
+            
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies with uv
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential clang libdbus-1-dev
+
+      - name: Install additional dependencies for dbus-python
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y build-essential clang libdbus-1-dev libgirepository1.0-dev pkg-config python3-dev cmake
+            pkg-config --modversion dbus-1  # Debugging step to verify dbus-1 installation
+
+      - name: Install dependencies with uv
+        run: uv sync --extra dev
+
+      - name: Run unittest
+        run: python3 -m unittest discover -s tests/unit/backend -p "test_*.py" -v
