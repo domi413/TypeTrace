@@ -8,8 +8,10 @@ set ZIPFILE=typetrace.zip
 set INSTALLDIR=C:\Program Files\typetrace
 set MSYS2_ROOT=C:\tools\msys64
 set SHORTCUT_NAME=TypeTrace.lnk
-set ICON_PATH=%INSTALLDIR%\windows\edu.ost.typetrace.ico
-set RELEASE_LINK=https://github.com/domi413/TypeTrace/archive/refs/tags/R5.zip
+set RELEASE_NAME=TypeTrace-R4
+set RELEASE_DIR=%INSTALLDIR%\%RELEASE_NAME%
+set ICON_PATH=%INSTALLDIR%\%RELEASE_NAME%\windows\edu.ost.typetrace.ico
+set RELEASE_LINK=https://github.com/domi413/TypeTrace/archive/refs/tags/R4.zip
 
 :: -----------------------------
 :: ERROR HANDLING SETUP
@@ -104,8 +106,8 @@ set VBS_CREATE=%TEMP%\create_shortcut.vbs
     echo Set oWS = WScript.CreateObject^("WScript.Shell"^)
     echo sLinkFile = oWS.SpecialFolders^("Programs"^) ^& "\%SHORTCUT_NAME%"
     echo Set oLink = oWS.CreateShortcut^(sLinkFile^)
-    echo oLink.TargetPath = "%INSTALLDIR%\windows\launch_typetrace.vbs%"
-    echo oLink.WorkingDirectory = "%INSTALLDIR%"
+    echo oLink.TargetPath = "%RELEASE_DIR%\windows\launch_typetrace.vbs%"
+    echo oLink.WorkingDirectory = "%RELEASE_DIR%"
     echo oLink.IconLocation = "%ICON_PATH%"
     echo oLink.Save
 ) > "%VBS_CREATE%"
