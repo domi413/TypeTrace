@@ -20,6 +20,7 @@ def enable_autostart(
     callback: Callable[[bool, str | None], None] | None = None,
 ) -> None:
     """Enable autostart using portal for Flatpak or symlink for non-Flatpak."""
+
     def invoke_callback(error_msg: str | None, success: bool) -> None:  # noqa: FBT001
         if callback:
             GLib.idle_add(callback, success, error_msg)
@@ -75,7 +76,8 @@ def enable_autostart(
             # Store the signal handler ID
             signal_handler_id = [None]  # Mutable list to allow modification in handler
             signal_handler_id[0] = req_interface.connect_to_signal(
-                "Response", handle_response)
+                "Response", handle_response
+            )
 
             return
 
@@ -85,7 +87,7 @@ def enable_autostart(
         invoke_callback(None, success=True)
 
     except FileExistsError:
-        invoke_callback("Autostart symlink already existed.", success=False)
+        invoke_callback("Autostart symlink already existed.", success=True)
     except PermissionError:
         invoke_callback("Denied trying to create autostart symlink.", success=False)
     except dbus.DBusException as e:
@@ -98,8 +100,9 @@ def disable_autostart() -> tuple[bool, str | None]:
         if Config.AUTOSTART_TARGET_FILE.exists():
             Config.AUTOSTART_TARGET_FILE.unlink()
             return True, None
-        return False, "Autostart was not enabled."  # noqa: TRY300
     except PermissionError:
         return False, "Permission denied when trying to remove autostart symlink."
     except OSError as e:
         return False, f"Failed to remove autostart symlink: {e!s}"
+    else:
+        return True, "Autostart was already not enabled."

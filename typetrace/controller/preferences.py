@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from typing import TYPE_CHECKING, Any, Callable
 
 from gi.repository import Adw, Gdk, Gio, Gtk
 
 from typetrace.config import Config, DatabasePath
 from typetrace.controller.utils import desktop_utils, dialog_utils
-
 from typetrace.controller.utils.color_utils import (
     get_system_accent_color,
     parse_color_string,
@@ -269,7 +266,11 @@ class Preferences(Adw.PreferencesDialog):
                     secondary_text=error_msg,
                 )
                 # Revert the toggle state if the operation failed
-                row.set_active(not row.get_active())
+                handler_id = row.handler_block_by_func(self._on_autostart_toggled)
+                try:
+                    row.set_active(not row.get_active())
+                finally:
+                    row.handler_unblock(handler_id)
 
         if row.get_active():
             desktop_utils.enable_autostart(callback=on_autostart_result)
