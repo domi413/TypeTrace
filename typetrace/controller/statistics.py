@@ -11,7 +11,7 @@ from typetrace.controller.utils.charts.line_chart import LineChart
 from typetrace.controller.utils.charts.pie_chart import PieChart
 
 if TYPE_CHECKING:
-    from typetrace.model.keystrokes import KeystrokeStore
+    from typetrace.model.keystrokes import Keystroke, KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/statistics.ui")
@@ -75,21 +75,17 @@ class Statistics(Gtk.Box):
         self.date_button.get_child().set_label(self.selected_date)
         self.pie_chart.update()
 
-    def _get_top_keystrokes(self) -> list:
+    def _get_top_keystrokes(self) -> list[Keystroke]:
         """Get the top keystrokes for the pie chart.
 
         Returns:
             The list of top keystrokes ordered by count
 
         """
-        keystrokes = (
-            self.keystroke_store.get_keystrokes_by_date(self.selected_date)
-            if self.selected_date
-            else self.keystroke_store.get_all_keystrokes()
+        return self.keystroke_store.get_top_keystrokes(
+            limit=int(self.bar_count_spin.get_value()),
+            date=self.selected_date,
         )
-        return sorted(keystrokes, key=lambda k: k.count, reverse=True)[
-            : int(self.bar_count_spin.get_value())
-        ]
 
     def _get_total_keystroke_count(self) -> int:
         """Get the total count of all keystrokes.
@@ -98,12 +94,9 @@ class Statistics(Gtk.Box):
             Total count of all keystrokes for the selected date or all time
 
         """
-        keystrokes = (
-            self.keystroke_store.get_keystrokes_by_date(self.selected_date)
-            if self.selected_date
-            else self.keystroke_store.get_all_keystrokes()
+        return self.keystroke_store.get_total_keystroke_count(
+            date=self.selected_date,
         )
-        return sum(k.count for k in keystrokes)
 
     def _get_keystroke_data(self) -> list[dict]:
         """Get daily keystroke data for the line chart using SQL queries.
