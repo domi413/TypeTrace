@@ -32,9 +32,10 @@ class Keystroke(GObject.Object):
 class KeystrokeStore:
     """Model for interacting with the keystrokes table in the database."""
 
-    def __init__(self) -> None:
+    def __init__(self, conn: sqlite3.Connection) -> None:
         """Initialize the model with the database path."""
         self.db_path = DatabasePath.DB_PATH
+        self.conn = conn
 
     def get_all_keystrokes(self) -> list[Keystroke]:
         """Retrieve all keystrokes with their counts and names.
@@ -42,45 +43,42 @@ class KeystrokeStore:
         Returns aggregated data across all dates.
         """
         try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute(SQLQueries.GET_ALL_KEYSTROKES)
-                rows = cursor.fetchall()
-
-                # Convert rows to Keystroke objects
-                return [
-                    Keystroke(
-                        scan_code=row[0],
-                        count=row[1],
-                        key_name=row[2],
-                        date=row[3],
-                    )
-                    for row in rows
-                ]
+            cursor = self.conn.cursor()
+            cursor.execute(SQLQueries.GET_ALL_KEYSTROKES)
+            rows = cursor.fetchall()
+            return [
+                Keystroke(
+                    scan_code=row[0],
+                    count=row[1],
+                    key_name=row[2],
+                    date=row[3],
+                )
+                for row in rows
+            ]
         except sqlite3.Error:
             return []
 
     def get_total_presses(self) -> int:
         """Get the total number of key presses across all keystrokes and all dates."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute(SQLQueries.GET_TOTAL_PRESSES)
-                result = cursor.fetchone()[0]
-                return result if result is not None else 0
+            cursor = self.conn.cursor()
+            cursor.execute(SQLQueries.GET_TOTAL_PRESSES)
+            result = cursor.fetchone()[0]
         except sqlite3.Error:
             return 0
+        else:
+            return result or 0
 
     def get_highest_count(self) -> int:
         """Retrieve the highest total count of any keystroke across all dates."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute(SQLQueries.GET_HIGHEST_COUNT)
-                result = cursor.fetchone()[0]
-                return result if result is not None else 0
+            cursor = self.conn.cursor()
+            cursor.execute(SQLQueries.GET_HIGHEST_COUNT)
+            result = cursor.fetchone()[0]
         except sqlite3.Error:
             return 0
+        else:
+            return result or 0
 
     def get_keystrokes_by_date(self, date: str) -> list[Keystroke]:
         """Retrieve keystrokes for a specific date.
@@ -93,40 +91,32 @@ class KeystrokeStore:
 
         """
         try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute(
-                    SQLQueries.GET_KEYSTROKES_BY_DATE,
-                    (date,),
+            cursor = self.conn.cursor()
+            cursor.execute(SQLQueries.GET_KEYSTROKES_BY_DATE, (date,))
+            rows = cursor.fetchall()
+            return [
+                Keystroke(
+                    scan_code=row[0],
+                    count=row[1],
+                    key_name=row[2],
+                    date=row[3],
                 )
-                rows = cursor.fetchall()
-
-                # Convert rows to Keystroke objects
-                return [
-                    Keystroke(
-                        scan_code=row[0],
-                        count=row[1],
-                        key_name=row[2],
-                        date=row[3],
-                    )
-                    for row in rows
-                ]
+                for row in rows
+            ]
         except sqlite3.Error:
             return []
 
     def clear(self) -> bool:
         """Remove all entries."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute(SQLQueries.CLEAR_KEYSTROKES)
-                conn.commit()
+            cursor = self.conn.cursor()
+            cursor.execute(SQLQueries.CLEAR_KEYSTROKES)
+            self.conn.commit()
         except sqlite3.Error:
             return False
         else:
             return True
 
-    # Note: refactor every 'with' in this file to only use one connection
     def get_daily_keystroke_counts(self) -> list[dict]:
         """Get daily keystroke counts for the past 7 days.
 
@@ -135,17 +125,15 @@ class KeystrokeStore:
 
         """
         try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute(SQLQueries.GET_DAILY_KEYSTROKE_COUNTS)
-                rows = cursor.fetchall()
-
-                return [
-                    {
-                        "date": row[0],
-                        "count": row[1],
-                    }
-                    for row in rows
-                ]
+            cursor = self.conn.cursor()
+            cursor.execute(SQLQueries.GET_DAILY_KEYSTROKE_COUNTS)
+            rows = cursor.fetchall()
+            return [
+                {
+                    "date": row[0],
+                    "count": row[1],
+                }
+                for row in rows
+            ]
         except sqlite3.Error:
             return []
