@@ -29,13 +29,18 @@ class Keystroke(GObject.Object):
         self.date = date
 
 
-class KeystrokeStore:
+class KeystrokeStore(GObject.Object):
     """Model for interacting with the keystrokes table in the database."""
 
     def __init__(self, conn: sqlite3.Connection) -> None:
         """Initialize the model with the database path."""
+        super().__init__()
         self.db_path = DatabasePath.DB_PATH
         self.conn = conn
+
+    __gsignals__ = {  # noqa: RUF012
+        "changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
 
     def get_all_keystrokes(self) -> list[Keystroke]:
         """Retrieve all keystrokes with their counts and names.
@@ -112,6 +117,7 @@ class KeystrokeStore:
             cursor = self.conn.cursor()
             cursor.execute(SQLQueries.CLEAR_KEYSTROKES)
             self.conn.commit()
+            self.emit("changed")
         except sqlite3.Error:
             return False
         else:

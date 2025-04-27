@@ -5,6 +5,7 @@ from gi.repository import Adw, Gio, Gtk
 from typetrace.controller.heatmap import Heatmap
 from typetrace.controller.statistics import Statistics
 from typetrace.controller.verbose import Verbose
+from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
 
 
@@ -23,6 +24,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
     def __init__(
         self,
+        db_manager: DatabaseManager,
         keystroke_store: KeystrokeStore,
         settings: Gio.Settings,
         **kwargs,
@@ -31,16 +33,20 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         Args:
             **kwargs: Keyword arguments passed to the parent constructor
+            db_manager: DB File operations
             keystroke_store: Access to keystrokes
             settings: GSettings used to persist preferences of a user
 
         """
         super().__init__(**kwargs)
+        self.db_manager = db_manager
         self.keystroke_store = keystroke_store
         self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
         self.verbose = Verbose(keystroke_store=keystroke_store)
         self.statistics = Statistics(keystroke_store=keystroke_store)
         self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
+        self.keystroke_store.connect("changed", lambda *_: self._on_refresh_clicked())
+        self.db_manager.connect("changed", lambda *_: self._on_refresh_clicked())
 
         heatmap_page = self.stack.add_titled(
             self.heatmap,

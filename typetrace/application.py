@@ -40,7 +40,12 @@ class Application(Adw.Application):
         """
         win = self.props.active_window
         if not win:
-            win = TypetraceWindow(self.keystroke_store, self.settings, application=self)
+            win = TypetraceWindow(
+                self.db_manager,
+                self.keystroke_store,
+                self.settings,
+                application=self,
+            )
         win.present()
 
     def do_shutdown(self) -> None:
