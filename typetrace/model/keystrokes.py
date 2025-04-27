@@ -112,6 +112,65 @@ class KeystrokeStore(GObject.Object):
         except sqlite3.Error:
             return []
 
+    def get_top_keystrokes(
+        self,
+        limit: int,
+        date: str | None = None,
+    ) -> list[Keystroke]:
+        """Retrieve the top N keystrokes, optionally filtered by date.
+
+        Args:
+            limit: The maximum number of keystrokes to return
+            date: Optional date in ISO format (YYYY-MM-DD) to filter by
+
+        Returns:
+            List of top Keystroke objects
+
+        """
+        try:
+            cursor = self.conn.cursor()
+            if date:
+                cursor.execute(
+                    SQLQueries.GET_TOP_KEYSTROKES_BY_DATE,
+                    (date, limit),
+                )
+            else:
+                cursor.execute(SQLQueries.GET_TOP_KEYSTROKES_ALL_TIME, (limit,))
+            rows = cursor.fetchall()
+            return [
+                Keystroke(
+                    scan_code=row[0],
+                    count=row[1],
+                    key_name=row[2],
+                    date=row[3],
+                )
+                for row in rows
+            ]
+        except sqlite3.Error:
+            return []
+
+    def get_total_keystroke_count(self, date: str | None = None) -> int:
+        """Get the total count of keystrokes, optionally filtered by date.
+
+        Args:
+            date: Optional date in ISO format (YYYY-MM-DD) to filter by
+
+        Returns:
+            Total keystroke count
+
+        """
+        try:
+            cursor = self.conn.cursor()
+            if date:
+                cursor.execute(SQLQueries.GET_TOTAL_KEYSTROKE_COUNT_BY_DATE, (date,))
+            else:
+                cursor.execute(SQLQueries.GET_TOTAL_PRESSES)
+            result = cursor.fetchone()[0]
+        except sqlite3.Error:
+            return 0
+        else:
+            return result or 0
+
     def clear(self) -> bool:
         """Remove all entries."""
         try:
