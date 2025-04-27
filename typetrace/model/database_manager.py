@@ -2,16 +2,24 @@
 
 import shutil
 from pathlib import Path
+from typing import ClassVar
+
+from gi.repository import GObject
 
 from typetrace.config import DatabasePath
 
 
-class DatabaseManager:
+class DatabaseManager(GObject.Object):
     """Used for manipulations concerning the database file."""
 
     def __init__(self) -> None:
         """Construct an instance of DatabaseManager."""
+        super().__init__()
         self.db_path = Path(DatabasePath.DB_PATH)
+
+    __gsignals__: ClassVar[dict] = {
+        "changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
 
     def export_database(self, dest_path: Path) -> bool:
         """Export the database to the specified destination path."""
@@ -30,4 +38,5 @@ class DatabaseManager:
         except OSError:
             return False
         else:
+            self.emit("changed")
             return True
