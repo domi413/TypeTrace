@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from typing import Any, ClassVar
 
 from gi.repository import GObject
 
@@ -38,7 +39,7 @@ class KeystrokeStore(GObject.Object):
         self.db_path = DatabasePath.DB_PATH
         self.conn = conn
 
-    __gsignals__ = {  # noqa: RUF012
+    __gsignals__: ClassVar[Any] = {
         "changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 

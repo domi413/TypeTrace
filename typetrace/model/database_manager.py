@@ -2,6 +2,7 @@
 
 import shutil
 from pathlib import Path
+from typing import Any, ClassVar
 
 from gi.repository import GObject
 
@@ -16,7 +17,7 @@ class DatabaseManager(GObject.Object):
         super().__init__()
         self.db_path = Path(DatabasePath.DB_PATH)
 
-    __gsignals__ = {  # noqa: RUF012
+    __gsignals__: ClassVar[Any] = {
         "changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
