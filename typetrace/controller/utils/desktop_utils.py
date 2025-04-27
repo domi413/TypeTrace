@@ -97,7 +97,7 @@ def enable_autostart(
 def disable_autostart() -> tuple[bool, str | None]:
     """Disable autostart by removing the autostart symlink."""
     try:
-        if Config.AUTOSTART_TARGET_FILE.exists():
+        if Config.AUTOSTART_TARGET_FILE.is_symlink():
             Config.AUTOSTART_TARGET_FILE.unlink()
             return True, None
     except PermissionError:
