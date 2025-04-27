@@ -13,7 +13,7 @@ from typetrace.config import Config
 
 def is_autostart_enabled() -> bool:
     """Check if the backend autostart is enabled by checking for the symlink."""
-    return Config.AUTOSTART_TARGET_FILE.is_symlink()
+    return Config.AUTOSTART_TARGET_FILE.exists(follow_symlinks=False)
 
 
 def enable_autostart(
@@ -76,7 +76,8 @@ def enable_autostart(
             # Store the signal handler ID
             signal_handler_id = [None]  # Mutable list to allow modification in handler
             signal_handler_id[0] = req_interface.connect_to_signal(
-                "Response", handle_response
+                "Response",
+                handle_response,
             )
 
             return
@@ -97,7 +98,7 @@ def enable_autostart(
 def disable_autostart() -> tuple[bool, str | None]:
     """Disable autostart by removing the autostart symlink."""
     try:
-        if Config.AUTOSTART_TARGET_FILE.is_symlink():
+        if Config.AUTOSTART_TARGET_FILE.exists(follow_symlinks=False):
             Config.AUTOSTART_TARGET_FILE.unlink()
             return True, None
     except PermissionError:
