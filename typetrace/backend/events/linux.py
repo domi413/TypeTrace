@@ -154,16 +154,15 @@ class LinuxEventProcessor(BaseEventProcessor):
         devices: list[evdev.device.InputDevice] = [
             evdev.device.InputDevice(fp) for fp in evdev.util.list_devices()
         ]
-        processed_devices: list[evdev.device.InputDevice] = []
 
-        for device in devices:
-            if evdev.ecodes.EV_KEY in device.capabilities():
-                processed_devices.append(device)
-                logger.debug(
-                    "Found keyboard device: %s, %r",
-                    device.name,
-                    device.path,
-                )
+        if logging.DEBUG:
+            for device in devices:
+                if evdev.ecodes.EV_KEY in device.capabilities():
+                    logger.debug(
+                        "Found keyboard device: %s, %r",
+                        device.name,
+                        device.path,
+                    )
 
         # Cache the list of devices
         self.__stored_devices = devices
