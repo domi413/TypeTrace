@@ -28,13 +28,11 @@ class Config:
 
     AUTOSTART_TARGET_DIR: Final[Path] = Path.home() / ".config" / "autostart"
     AUTOSTART_TARGET_FILE: Final[Path] = (
-        AUTOSTART_TARGET_DIR / "typetrace-backend.desktop"
+        AUTOSTART_TARGET_DIR / "edu.ost.typetrace.desktop"
     )
     AUTOSTART_SOURCE: Final[Path] = (
         Path.home()
-        / ".local"
-        / "share"
-        / ("flatpak/exports/share" if IS_FLATPAK else "")
+        / "@datadir@" # This is changed by meson depending on install prefix
         / "applications"
         / "edu.ost.typetrace-backend.desktop"
     )
@@ -42,7 +40,6 @@ class Config:
     # Global settings
     DEBUG: bool = False
 
-    # DB path
     @classmethod
     def resolve_db_path(cls) -> Path:
         """Determine the database path using appdirs for cross-platform support."""

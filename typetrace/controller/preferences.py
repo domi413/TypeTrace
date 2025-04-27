@@ -251,28 +251,32 @@ class Preferences(Adw.PreferencesDialog):
 
     def _on_autostart_toggled(self, row: Adw.SwitchRow, *_: any) -> None:
         """Handle the autostart toggle change."""
-        if row.get_active():
-            success, error_msg = desktop_utils.enable_autostart()
+
+        def on_autostart_result(success: bool, error_msg: str | None) -> None:  # noqa: FBT001
+            """Use callback to handle autostart enable/disable result."""
             if success:
-                dialog_utils.show_toast(self, "Backend autostart enabled")
+                dialog_utils.show_toast(
+                    self,
+                    f"Autostart {'enabled' if row.get_active() else 'disabled'}",
+                )
             else:
                 dialog_utils.show_error_dialog(
                     self.parent_window,
-                    "Failed to enable autostart",
+                    f"Couldn't {'enable' if row.get_active() else 'disable'} autostart",
                     secondary_text=error_msg,
                 )
-                row.set_active(False)
+                # Revert the toggle state if the operation failed
+                handler_id = row.handler_block_by_func(self._on_autostart_toggled)
+                try:
+                    row.set_active(not row.get_active())
+                finally:
+                    row.handler_unblock(handler_id)
+
+        if row.get_active():
+            desktop_utils.enable_autostart(callback=on_autostart_result)
         else:
             success, error_msg = desktop_utils.disable_autostart()
-            if success:
-                dialog_utils.show_toast(self, "Backend autostart disabled")
-            else:
-                dialog_utils.show_error_dialog(
-                    self.parent_window,
-                    "Failed to disable autostart",
-                    secondary_text=error_msg,
-                )
-                row.set_active(True)
+            on_autostart_result(success, error_msg)
 
     def _on_export_clicked(self, _button: Gtk.Button) -> None:
         """Handle the export button click event, opens a save dialog for export."""
