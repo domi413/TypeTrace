@@ -1,6 +1,5 @@
 .keyboard-container label {
   border: 1pt solid rgba(255, 255, 255, 0.1);
-  color: #ddd;
 }
 
 .keyboard-container label:hover {

@@ -12,6 +12,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
 
+    if: ${{ !github.event.pull_request.draft }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,4 +29,4 @@ jobs:
         run: uv tool install ruff
 
       - name: Run ruff
-        run: ruff check typetrace/
+        run: ruff check

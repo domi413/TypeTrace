@@ -4,21 +4,49 @@ on:
   pull_request:
     types:
       - edited
+      - opened
 
 jobs:
   pull-request-title:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Validate PR Title
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install cspell
+        run: npm install -g cspell
+
+      - name: Validate PR Title and Spellcheck
         if: env.ACT != 'true'
         run: |
-          pattern="^(fix|feat|pipeline|doc|test|wip)\(#TYP-[0-9]+\): .+"
+          pattern="^(fix|feat|pipeline|doc|test|wip)\(#TYP-[0-9]+\): (.+\S)"
           pr_title="${{ github.event.pull_request.title }}"
+
+          BOLD_RED="\033[1;31m"
+          BOLD_YELLOW="\033[1;33m"
+          BOLD_GREEN="\033[1;32m"
+          RESET="\033[0m"
+
           if ! [[ "$pr_title" =~ $pattern ]]; then
-              echo "❌ Pull Request title is invalid!"
-              echo "Allowed format: fix|feat|pipeline|doc|wip(#TICKET-ID): Description"
-              exit 1
+            echo -e "${BOLD_RED}❌ Pull Request title is invalid!${RESET}"
+            echo -e "${BOLD_YELLOW}⚠️ Allowed format: fix|feat|pipeline|doc|wip(#TICKET-ID): Description${RESET}"
+            exit 1
+          else
+            echo -e "${BOLD_GREEN}✅ Pull Request title is valid!${RESET}"
           fi
+
+          description="${BASH_REMATCH[2]}"
+          if ! echo "$description" | cspell stdin --config .cspell.yaml --verbose --show-context; then
+            echo -e "${BOLD_YELLOW}⚠️ Spelling issues found in description: $description${RESET}"
+            echo "$description" | cspell stdin --config .cspell.yaml --show-suggestions --show-context
+            exit 1
+          else
+            echo -e "${BOLD_GREEN}✅ No spelling issues found in description: $description${RESET}"
+          fi
+        shell: bash
