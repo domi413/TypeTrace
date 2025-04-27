@@ -6,7 +6,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, final
+from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -15,14 +15,17 @@ from backend.db import DatabaseManager
 
 from typetrace.config import Config, Event
 
+DeviceType = TypeVar("DeviceType")
+
 logger = logging.getLogger(__name__)
 
 
-class BaseEventProcessor(ABC):
+class BaseEventProcessor(ABC, Generic[DeviceType]):
     """Abstract base class for event processing."""
 
     def __init__(self, db_path: Path) -> None:
         """Initialize the processor with a database path."""
+        self.__db_manager = DatabaseManager()
         self._db_path: Path = db_path
         self._current_date: str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
@@ -60,7 +63,7 @@ class BaseEventProcessor(ABC):
             or len(buffer) >= Config.BUFFER_SIZE
             or current_time - start_time >= Config.BUFFER_TIMEOUT
         ):
-            DatabaseManager.write_to_database(db_path, buffer)
+            self.__db_manager.write_to_database(db_path, buffer)
             buffer.clear()
             start_time = current_time
             self._current_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -83,7 +86,7 @@ class BaseEventProcessor(ABC):
         )
 
     @abstractmethod
-    def _buffer(self, devices: list[Any]) -> None:
+    def _buffer(self, devices: list[DeviceType]) -> None:
         """Buffer events.
 
         Args:
@@ -92,7 +95,7 @@ class BaseEventProcessor(ABC):
         """
 
     @abstractmethod
-    def _process_single_event(self, event: Any) -> Event | None:
+    def _process_single_event(self, event: DeviceType) -> Event | None:
         """Process a single input event.
 
         Args:

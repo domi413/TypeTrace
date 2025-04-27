@@ -32,13 +32,6 @@ install_data(
   install_dir: backenddir / 'events',
 )
 
-# IPC files
-backend_ipc_sources = [
-  'ipc/__init__.py',
-  'ipc/base.py',
-  'ipc/linux_darwin.py',
-  'ipc/windows.py',
-]
 install_data(
   backend_ipc_sources,
   install_dir: backenddir / 'ipc',

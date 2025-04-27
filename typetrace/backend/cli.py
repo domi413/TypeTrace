@@ -21,6 +21,7 @@ class CLI:
 
     def __init__(self) -> None:
         """Initialize the CLI."""
+        self.__db_manager = DatabaseManager()
         self.__db_path = DatabasePath.DB_PATH
 
     def run(self, args: argparse.Namespace) -> int:
@@ -38,7 +39,7 @@ class CLI:
             LoggerSetup.setup_logging()
 
         try:
-            DatabaseManager.initialize_database(self.__db_path)
+            self.__db_manager.initialize_database(self.__db_path)
 
             match platform.system().lower():
                 case "linux":
@@ -49,12 +50,14 @@ class CLI:
 
                     processor = LinuxEventProcessor(self.__db_path)
                     processor.check_device_accessibility()
+
                 case "darwin" | "windows":
                     from backend.events.windows_darwin import (
                         WindowsDarwinEventProcessor,
                     )
 
                     processor = WindowsDarwinEventProcessor(self.__db_path)
+
                 case _:
                     logger.error("Unsupported platform: %s", platform.system())
                     return ExitCodes.PLATFORM_ERROR
@@ -83,7 +86,15 @@ class CLI:
             username = os.getlogin()
         except OSError:
             username = os.getenv("USER") or os.getenv("USERNAME")
-        input_group = grp.getgrnam("input")
-        if username not in input_group.gr_mem:
-            logger.error("The User %s is not in the 'input' group", username)
-            raise PermissionError
+            if not username:
+                logger.exception("Could not determine username")
+                raise PermissionError from OSError
+
+        try:
+            input_group = grp.getgrnam("input")
+            if username not in input_group.gr_mem:
+                logger.error("The User %s is not in the 'input' group", username)
+                raise PermissionError
+        except KeyError:
+            logger.exception("The 'input' group does not exist")
+            raise PermissionError from KeyError
