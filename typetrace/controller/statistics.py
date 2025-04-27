@@ -11,7 +11,7 @@ from typetrace.controller.utils.charts.line_chart import LineChart
 from typetrace.controller.utils.charts.pie_chart import PieChart
 
 if TYPE_CHECKING:
-    from typetrace.model.keystrokes import KeystrokeStore
+    from typetrace.model.keystrokes import Keystroke, KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/statistics.ui")
@@ -75,7 +75,7 @@ class Statistics(Gtk.Box):
         self.date_button.get_child().set_label(self.selected_date)
         self.pie_chart.update()
 
-    def _get_top_keystrokes(self) -> list:
+    def _get_top_keystrokes(self) -> list[Keystroke]:
         """Get the top keystrokes for the pie chart.
 
         Returns:
