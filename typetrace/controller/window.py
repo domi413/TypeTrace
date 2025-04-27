@@ -65,7 +65,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
             "statistics",
             "Statistics",
         )
-        statistics_page.set_icon_name("image-filter-symbolic")
+        statistics_page.set_icon_name("view-grid-symbolic")
         self.view_switcher.set_stack(self.stack)
 
     def _on_refresh_clicked(self) -> None:
