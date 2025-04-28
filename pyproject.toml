@@ -25,7 +25,6 @@ ignore = [
     "ANN401", # Ignore `Any` type annotation for functions
     "D203",   # In conflict with D211
     "D213",   # In conflict with D212
-    "COM812"  # Is redundant when using formatter
 ]
 
 [tool.ruff.lint.per-file-ignores]
