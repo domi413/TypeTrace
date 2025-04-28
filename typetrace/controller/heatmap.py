@@ -19,16 +19,6 @@ class Heatmap(Gtk.Box):
 
     __gtype_name__ = "Heatmap"
 
-    EXPANDED_KEYS: ClassVar[list[str]] = [
-        "Backspace",
-        "Tab",
-        "Caps",
-        "Enter",
-        "Shift",
-        "Space",
-        "\\",
-    ]
-
     keyboard_container = Gtk.Template.Child()
 
     zoom_in_button = Gtk.Template.Child()
@@ -115,25 +105,23 @@ class Heatmap(Gtk.Box):
 
     def _build_keyboard(self) -> None:
         """Build the keyboard layout dynamically using scancodes."""
-        for row_count, row in enumerate(KEYBOARD_LAYOUTS[self.layout]):
+        for row in KEYBOARD_LAYOUTS[self.layout]:
             box = Gtk.Box(
                 orientation=Gtk.Orientation.HORIZONTAL,
                 spacing=5,
             )
-            if row_count == 0:
-                box.set_homogeneous(True)
 
             self.keyboard_container.append(box)
 
-            for scancode, key_label in row:
-                label = self._create_key_widget(key_label)
+            for scancode, key_label, is_expanded in row:
+                label = self._create_key_widget(key_label, is_expanded=is_expanded)
                 self.key_widgets[scancode] = label
                 box.append(label)
 
-    def _create_key_widget(self, key_label: str) -> Gtk.Label:
+    def _create_key_widget(self, key_label: str, *, is_expanded: bool) -> Gtk.Label:
         """Create a single key widget with the appropriate properties."""
         label = Gtk.Label(label=key_label)
-        label.set_hexpand(True) if key_label in self.EXPANDED_KEYS else None
+        label.set_hexpand(True) if is_expanded else None
         size = self.settings.get_int("key-size")
         label.set_size_request(size, size)
         return label
