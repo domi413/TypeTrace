@@ -21,7 +21,7 @@ class BackendConnector(GObject.Object):
 
     __gsignals__: ClassVar[dict] = {
         "backend-available": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "backend-unavailable": (GObject.SignalFlags.RUN_FIRST, None, (str,)),  # reason
+        "backend-unavailable": (GObject.SignalFlags.RUN_FIRST, None, (str,)),
     }
 
     def __init__(self) -> None:
@@ -66,7 +66,12 @@ class BackendConnector(GObject.Object):
             user_data=None,
         )
 
-    def _on_proxy_created(self, _source_object: any, res: any, _user_data: any) -> None:
+    def _on_proxy_created(
+        self,
+        _source_object: Gio.DBusProxy | None,
+        res: Gio.AsyncResult,
+        _user_data: None,
+    ) -> None:
         """Use callback for async D-Bus proxy creation."""
         try:
             proxy = Gio.DBusProxy.new_for_bus_finish(res)
@@ -110,15 +115,19 @@ class BackendConnector(GObject.Object):
 
     def _on_backend_signal(
         self,
-        proxy: any,
-        sender_name: any,
-        signal_name: any,
-        parameters: any,
+        proxy: Gio.DBusProxy,
+        sender_name: str,
+        signal_name: str,
+        parameters: GLib.Variant,
     ) -> None:
         """Handle signals emitted by the backend service itself."""
         # Handle specific signals if the backend emits any useful ones
 
-    def _on_backend_owner_changed(self, _proxy: any, _pspec: any) -> None:
+    def _on_backend_owner_changed(
+        self,
+        _proxy: Gio.DBusProxy,
+        _pspec: GObject.ParamSpec,
+    ) -> None:
         """Handle notification when the D-Bus name owner changes."""
         if not self._proxy:
             return  # Should not happen if signal is connected
@@ -166,7 +175,12 @@ class BackendConnector(GObject.Object):
             callback,  # Pass the original callback as user_data
         )
 
-    def _on_ping_response(self, source_object: any, res: any, user_data: any) -> None:
+    def _on_ping_response(
+        self,
+        source_object: Gio.DBusProxy,
+        res: Gio.AsyncResult,
+        user_data: None,
+    ) -> None:
         """Use callback for the async ping response."""
         original_callback = user_data
         error_msg = ""
@@ -220,7 +234,12 @@ class BackendConnector(GObject.Object):
             None,
         )
 
-    def _on_quit_response(self, source_object: any, res: any, _user_data: any) -> None:
+    def _on_quit_response(
+        self,
+        source_object: Gio.DBusProxy,
+        res: Gio.AsyncResult,
+        _user_data: None,
+    ) -> None:
         """Use callback for the async quit response."""
         try:
             source_object.call_finish(res)

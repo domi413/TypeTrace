@@ -89,13 +89,13 @@ class DbusServiceManager:
         }
 
         def method_call_handler(
-            _conn: any,
-            _sender: any,
-            _obj_path: any,
-            _iface_name: any,
+            _conn: Gio.DBusConnection,
+            _sender: str,
+            _obj_path: str,
+            _iface_name: str,
             method_name: str,
-            _params: any,
-            inv: any,
+            _params: GLib.Variant,
+            inv: Gio.DBusMethodInvocation,
         ) -> None:
             if method_name in method_map:
                 method_map[method_name](inv)
@@ -228,6 +228,4 @@ class DbusServiceManager:
     def stop(self) -> None:
         """Public method to stop the service from outside."""
         logger.info("External stop requested.")
-        # Ensure this runs in the main loop's thread context if necessary
-        # Using GLib.idle_add ensures it runs in the main loop thread
         GLib.idle_add(self._trigger_shutdown)
