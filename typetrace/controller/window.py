@@ -4,7 +4,9 @@ from gi.repository import Adw, Gio, GLib, Gtk
 
 from typetrace.controller.heatmap import Heatmap
 from typetrace.controller.utils import dialog_utils
+from typetrace.controller.statistics import Statistics
 from typetrace.controller.verbose import Verbose
+from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
 from typetrace.service.backend_connector import BackendConnector
 
@@ -26,6 +28,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
     def __init__(
         self,
+        db_manager: DatabaseManager,
         keystroke_store: KeystrokeStore,
         settings: Gio.Settings,
         **kwargs,
@@ -34,6 +37,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         Args:
             **kwargs: Keyword arguments passed to the parent constructor
+            db_manager: DB File operations
             keystroke_store: Access to keystrokes
             settings: GSettings used to persist preferences of a user
 
@@ -43,11 +47,14 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self._backend_connector.connect("backend-available", self._on_available)
         self._backend_connector.connect("backend-unavailable", self._on_unavailable)
 
-        self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
-        self.refresh_button.set_sensitive(False)
-
+        self.db_manager = db_manager
+        self.keystroke_store = keystroke_store
         self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
         self.verbose = Verbose(keystroke_store=keystroke_store)
+        self.statistics = Statistics(keystroke_store=keystroke_store)
+        self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
+        self.keystroke_store.connect("changed", lambda *_: self._on_refresh_clicked())
+        self.db_manager.connect("changed", lambda *_: self._on_refresh_clicked())
 
         heatmap_page = self.stack.add_titled(
             self.heatmap,
@@ -60,22 +67,29 @@ class TypetraceWindow(Adw.ApplicationWindow):
             "verbose",
             "Verbose",
         )
-        verbose_page.set_icon_name("text-x-generic-symbolic")
+        verbose_page.set_icon_name("view-list-symbolic")
+        statistics_page = self.stack.add_titled(
+            self.statistics,
+            "statistics",
+            "Statistics",
+        )
+        statistics_page.set_icon_name("view-grid-symbolic")
         self.view_switcher.set_stack(self.stack)
 
         GLib.idle_add(self._backend_connector.check_and_activate_async)
 
     def _on_refresh_clicked(self) -> None:
         """Handle refresh button click."""
-        self.heatmap.update()
-        self.verbose.update()
+        keystrokes = self.keystroke_store.get_all_keystrokes()
+        self.heatmap.update(keystrokes)
+        self.verbose.update(keystrokes)
+        self.statistics.update()
 
     # --- Signal Handlers for BackendConnector ---
 
     def _on_available(self, _: any) -> None:
         """Call when the backend becomes available."""
         dialog_utils.show_toast(self.toast_overlay, "Backend service connected.")
-        self.refresh_button.set_sensitive(True)
 
     def _on_unavailable(self, _: any, reason: str) -> None:
         """Call when the backend becomes unavailable."""
@@ -83,7 +97,6 @@ class TypetraceWindow(Adw.ApplicationWindow):
             self.toast_overlay,
             f"Backend service disconnected: {reason}",
         )
-        self.refresh_button.set_sensitive(False)
 
     # --- Window Lifecycle ---
 

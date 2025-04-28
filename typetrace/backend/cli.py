@@ -44,6 +44,7 @@ class CLI:
 
     def __init__(self) -> None:
         """Initialize the CLI."""
+        self.__db_manager = DatabaseManager()
         self.__db_path = DatabasePath.DB_PATH
         # Thread reference might still be useful for is_alive checks if needed elsewhere
         self._processor_thread: threading.Thread | None = None
@@ -85,14 +86,11 @@ class CLI:
         processor: Optional[BaseEventProcessor] = None
 
         try:
-            DatabaseManager.initialize_database(self.__db_path)
+            self.__db_manager.initialize_database(self.__db_path)
 
             ProcessorClass = self._get_processor_class()
             if not ProcessorClass:
                 return ExitCodes.PLATFORM_ERROR
-
-            if platform.system().lower() == "linux" and not Config.IS_FLATPAK:
-                self._check_input_group()
 
             processor = ProcessorClass(self.__db_path)
             if hasattr(processor, "check_device_accessibility"):
@@ -123,6 +121,27 @@ class CLI:
             logger.info("D-Bus manager run() finished with code: %d", dbus_exit_code)
             if dbus_exit_code != 0:
                 exit_code = ExitCodes.RUNTIME_ERROR
+
+            match platform.system().lower():
+                case "linux":
+                    from backend.events.linux import LinuxEventProcessor
+
+                    if not Config.IS_FLATPAK:
+                        self._check_input_group()
+
+                    processor = LinuxEventProcessor(self.__db_path)
+                    processor.check_device_accessibility()
+
+                case "darwin" | "windows":
+                    from backend.events.windows_darwin import (
+                        WindowsDarwinEventProcessor,
+                    )
+
+                    processor = WindowsDarwinEventProcessor(self.__db_path)
+
+                case _:
+                    logger.error("Unsupported platform: %s", platform.system())
+                    return ExitCodes.PLATFORM_ERROR
 
         # --- Handle Setup Errors ---
         except PermissionError as e:
@@ -158,7 +177,15 @@ class CLI:
             username = os.getlogin()
         except OSError:
             username = os.getenv("USER") or os.getenv("USERNAME")
-        input_group = grp.getgrnam("input")
-        if username not in input_group.gr_mem:
-            logger.error("The User %s is not in the 'input' group", username)
-            raise PermissionError
+            if not username:
+                logger.exception("Could not determine username")
+                raise PermissionError from OSError
+
+        try:
+            input_group = grp.getgrnam("input")
+            if username not in input_group.gr_mem:
+                logger.error("The User %s is not in the 'input' group", username)
+                raise PermissionError
+        except KeyError:
+            logger.exception("The 'input' group does not exist")
+            raise PermissionError from KeyError

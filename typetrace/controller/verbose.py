@@ -1,4 +1,5 @@
 """The verbose widget that displays keystroke data in text."""
+from __future__ import annotations
 
 from gi.repository import Gio, Gtk
 
@@ -34,14 +35,16 @@ class Verbose(Gtk.Box):
         # Set the sort_model's sorter to the column_view's sorter
         self.sort_model.set_sorter(self.column_view.get_sorter())
 
-    def update(self) -> None:
+    def update(self, keystrokes: list[Keystroke] | None = None) -> None:
         """Update the list to reflect current data."""
-        self._populate_list_store()
+        self._populate_list_store(keystrokes)
 
-    def _populate_list_store(self) -> None:
+    def _populate_list_store(self, keystrokes: list[Keystroke] | None = None) -> None:
         """Populate the list store with keystroke data."""
+        if keystrokes is None:
+            keystrokes = self.keystroke_store.get_all_keystrokes()
         self.list_store.remove_all()
-        for keystroke in self.keystroke_store.get_all_keystrokes():
+        for keystroke in keystrokes:
             self.list_store.append(
                 Keystroke(
                     scan_code=keystroke.scan_code,
@@ -54,9 +57,9 @@ class Verbose(Gtk.Box):
     def _setup_column_view(self) -> None:
         """Set up the ColumnView with columns, data binding, and sorting."""
         columns = [
-            ("Scan Code", self._bind_scan_code, "scan_code", "numeric"),
             ("Count", self._bind_count, "count", "numeric"),
             ("Key Name", self._bind_key_name, "key_name", "string"),
+            ("Scan Code", self._bind_scan_code, "scan_code", "numeric"),
         ]
 
         # Create and add all columns with sorters
@@ -83,7 +86,7 @@ class Verbose(Gtk.Box):
         # Set an initial sort order
         self.column_view.sort_by_column(
             self.column_view.get_columns()[0],
-            Gtk.SortType.ASCENDING,
+            Gtk.SortType.DESCENDING,
         )
 
     def _factory_setup(

@@ -1,5 +1,6 @@
-pkgdatadir = get_option('prefix') / get_option('datadir') / meson.project_name()
-moduledir = pkgdatadir / 'typetrace'
+datadir = get_option('prefix') / get_option('datadir')
+pkgdatadir = datadir / meson.project_name()
+moduledir = pkgdatadir / meson.project_name()
 
 blueprints = custom_target(
   'blueprints',
@@ -9,6 +10,7 @@ blueprints = custom_target(
     'view/window.blp',
     'view/heatmap.blp',
     'view/verbose.blp',
+    'view/statistics.blp',
   ),
   output: '.',
   command: [
@@ -32,6 +34,7 @@ gnome.compile_resources(
 conf = configuration_data()
 conf.set('application_id', 'edu.ost.typetrace')
 conf.set('PYTHON', python.find_installation('python3').full_path())
+conf.set('datadir', datadir)
 conf.set('pkgdatadir', pkgdatadir)
 conf.set('VERSION', meson.project_version())
 configure_file(
@@ -43,10 +46,18 @@ configure_file(
   install_mode: 'r-xr-xr-x',
 )
 
+configure_file(
+  input: 'config.py',
+  output: 'config.py',
+  configuration: conf,
+  install: true,
+  install_dir: moduledir,
+)
+
 sources = [
   '__init__.py',
   'application.py',
-  'config.py',
+  'sql.py',
 ]
 install_data(sources, install_dir: moduledir)
 
@@ -63,6 +74,7 @@ sources_controller = [
   'controller/window.py',
   'controller/heatmap.py',
   'controller/verbose.py',
+  'controller/statistics.py',
   'controller/preferences.py',
 ]
 install_data(sources_controller, install_dir: moduledir / 'controller')
@@ -70,7 +82,8 @@ install_data(sources_controller, install_dir: moduledir / 'controller')
 sources_controller_utils = [
   'controller/utils/__init__.py',
   'controller/utils/dialog_utils.py',
-  'controller/utils/desktop_utils.py'
+  'controller/utils/desktop_utils.py',
+  'controller/utils/color_utils.py',
 ]
 install_data(sources_controller_utils, install_dir: moduledir / 'controller' / 'utils')
 
@@ -79,5 +92,13 @@ sources_service = [
   'service/backend_connector.py',
 ]
 install_data(sources_service, install_dir: moduledir / 'service')
+
+sources_controller_utils_charts = [
+  'controller/utils/charts/__init__.py',
+  'controller/utils/charts/base_chart.py',
+  'controller/utils/charts/line_chart.py',
+  'controller/utils/charts/pie_chart.py',
+]
+install_data(sources_controller_utils_charts, install_dir: moduledir / 'controller' / 'utils' / 'charts')
 
 subdir('backend')

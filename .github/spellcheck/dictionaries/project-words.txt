@@ -13,14 +13,28 @@ QWERTZ
 scancode
 scancodes
 vexpand
+gsignals
 
 # Build
 bindir
+codesign
+datas
+datas
+hiddenimports
+hooksconfig
+hookspath
+libadwaita
+libevdev
+noarchive
+pathex
+subprojects
 
 # Team Names
 Alali
+Bachmann
 Bühler
 Dominik
 Gioele
 Knöfler
+Mustafa
 Petrillo

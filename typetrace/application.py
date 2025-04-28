@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import sqlite3
 from typing import Any, Callable
 
 from gi.repository import Adw, Gio
 
+from typetrace.config import DatabasePath
 from typetrace.controller.preferences import Preferences
 from typetrace.controller.window import TypetraceWindow
 from typetrace.model.database_manager import DatabaseManager
@@ -25,7 +27,8 @@ class Application(Adw.Application):
         self.version = version
         self.settings = Gio.Settings.new("edu.ost.typetrace")
 
-        self.keystroke_store = KeystrokeStore()
+        self.db_conn = sqlite3.connect(DatabasePath.DB_PATH)
+        self.keystroke_store = KeystrokeStore(self.db_conn)
         self.db_manager = DatabaseManager()
 
         self._setup_actions()
@@ -37,8 +40,18 @@ class Application(Adw.Application):
         """
         win = self.props.active_window
         if not win:
-            win = TypetraceWindow(self.keystroke_store, self.settings, application=self)
+            win = TypetraceWindow(
+                self.db_manager,
+                self.keystroke_store,
+                self.settings,
+                application=self,
+            )
         win.present()
+
+    def do_shutdown(self) -> None:
+        """Clean up resources when the application shuts down."""
+        self.db_conn.close()
+        Gio.Application.do_shutdown(self)
 
     def _setup_actions(self) -> None:
         """Set up application actions and their shortcuts."""
@@ -73,6 +86,7 @@ class Application(Adw.Application):
             parent_window=self.props.active_window,
             db_manager=self.db_manager,
             keystroke_store=self.keystroke_store,
+            settings=self.settings,
         )
         pref_dialog.present(self.props.active_window)
 
