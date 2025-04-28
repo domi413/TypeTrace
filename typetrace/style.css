@@ -22,9 +22,9 @@
 }
 
 .backend-status-stopped {
-  color: rgba(255, 0, 0, 0.8);
+  color: orangered;
 }
 
 .backend-status-running {
-  color: rgba(0, 255, 0, 0.8);
+  color: greenyellow;
 }

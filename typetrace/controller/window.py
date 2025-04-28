@@ -93,7 +93,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         """Call when the backend becomes available."""
         dialog_utils.show_toast(self.toast_overlay, "Backend service connected.")
         self.backend_toggle.set_label("Backend running")
-        self.backend_toggle.set_css_classes(["backend-status-running"])
+        self.backend_toggle.set_css_classes(["backend-status-running", "flat"])
         self.is_backend_running = True
 
     def _on_unavailable(self, _: any, reason: str) -> None:
@@ -103,7 +103,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
             f"Backend service disconnected: {reason}",
         )
         self.backend_toggle.set_label("Backend stopped")
-        self.backend_toggle.set_css_classes(["backend-status-stopped"])
+        self.backend_toggle.set_css_classes(["backend-status-stopped", "flat"])
         self.is_backend_running = False
 
     def _on_backend_label_clicked(self, _: any) -> None:
