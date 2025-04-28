@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable
 
-from gi.repository import Adw, Gdk, Gio, Gtk
+from gi.repository import Adw, Gdk, Gio, GObject, Gtk
 
 from typetrace.config import Config, DatabasePath
 from typetrace.controller.utils import desktop_utils, dialog_utils
@@ -13,6 +13,7 @@ from typetrace.controller.utils.color_utils import (
     parse_color_string,
     rgba_to_rgb_string,
 )
+from typetrace.model.layouts import KEYBOARD_LAYOUTS
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -130,6 +131,8 @@ class Preferences(Adw.PreferencesDialog):
 
         is_accent_enabled = self.settings.get_boolean("use-accent-color")
         self.color_row.set_sensitive(not is_accent_enabled)
+
+        self._setup_keyboard_layouts()
 
     def _init_color_buttons(self) -> None:
         """Initialize color buttons with current settings."""
@@ -349,3 +352,42 @@ class Preferences(Adw.PreferencesDialog):
     def _on_locate_clicked(self, _button: Gtk.Button) -> None:
         """Open Filemanager where the data file is stored."""
         dialog_utils.show_folder_in_filemanager(DatabasePath.DB_PATH.parent)
+
+    def _setup_keyboard_layouts(self) -> None:
+        """Set up the keyboard layout selection dropdown."""
+        keyboard_layouts_model = Gtk.StringList()
+        for layout_id in KEYBOARD_LAYOUTS:
+            keyboard_layouts_model.append(layout_id)
+
+        self.keyboard_row.set_model(keyboard_layouts_model)
+
+        current_layout = self.settings.get_string("keyboard-layout")
+        if not current_layout or current_layout not in KEYBOARD_LAYOUTS:
+            current_layout = "en_US"
+            self.settings.set_string("keyboard-layout", current_layout)
+
+        for i, layout_id in enumerate(KEYBOARD_LAYOUTS):
+            if layout_id == current_layout:
+                self.keyboard_row.set_selected(i)
+                break
+
+        self.keyboard_row.connect("notify::selected", self._on_keyboard_layout_changed)
+
+    def _on_keyboard_layout_changed(
+        self,
+        row: Adw.ComboRow,
+        _: GObject.ParamSpec,
+    ) -> None:
+        """Handle the keyboard layout selection change.
+
+        Args:
+            row: The combo row widget that was changed.
+            _: The property that changed (unused).
+
+        """
+        selected_index = row.get_selected()
+        string_list = row.get_model()
+        selected_layout = string_list.get_string(selected_index)
+
+        self.settings.set_string("keyboard-layout", selected_layout)
+        dialog_utils.show_toast(self, f"Keyboard layout set to: {selected_layout}")
