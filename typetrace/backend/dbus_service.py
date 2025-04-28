@@ -43,6 +43,8 @@ class DbusServiceManager:
               <arg type='s' name='response' direction='out'/>
             </method>
             <method name='quit'/>
+            <signal name='db_updated'>
+            </signal>
           </interface>
           <interface name='org.freedesktop.DBus.Introspectable'>
             <method name='introspect'>
@@ -50,7 +52,7 @@ class DbusServiceManager:
             </method>
           </interface>
           <interface name='org.freedesktop.DBus.Properties'>
-             </interface>
+          </interface>
         </node>
         """
 
@@ -70,6 +72,24 @@ class DbusServiceManager:
     def introspect(self, invocation: Gio.DBusMethodInvocation) -> None:
         """Handle the Introspect D-Bus method call."""
         invocation.return_value(GLib.Variant("(s)", (self._dbus_interface_xml,)))
+
+    # --- D-Bus Signal Emission ---
+    def emit_db_updated(self) -> None:
+        """Emit the db_updated signal to notify clients of a database update."""
+        if self._connection is None:
+            logger.warning("Cannot emit db_updated signal: No D-Bus connection")
+            return
+        try:
+            self._connection.emit_signal(
+                None,  # Destination bus name (None for broadcast)
+                BACKEND_DBUS_PATH,
+                BACKEND_DBUS_INTERFACE,
+                "db_updated",
+                None,
+            )
+            logger.debug("Emitted db_updated signal")
+        except Exception:
+            logger.exception("Failed to emit db_updated signal")
 
     # --- D-Bus Service Management ---
     def _on_bus_acquired(self, connection: Gio.DBusConnection, name: str) -> None:
