@@ -26,6 +26,8 @@ class TypetraceWindow(Adw.ApplicationWindow):
     view_switcher = Gtk.Template.Child()
     stack = Gtk.Template.Child()
 
+    backend_running = Gtk.Template.Child()
+
     def __init__(
         self,
         db_manager: DatabaseManager,
@@ -88,6 +90,8 @@ class TypetraceWindow(Adw.ApplicationWindow):
     def _on_available(self, _: any) -> None:
         """Call when the backend becomes available."""
         dialog_utils.show_toast(self.toast_overlay, "Backend service connected.")
+        self.backend_running.set_label("Backend running")
+        self.backend_running.set_css_classes(["backend-status-running"])
 
     def _on_unavailable(self, _: any, reason: str) -> None:
         """Call when the backend becomes unavailable."""
@@ -95,6 +99,8 @@ class TypetraceWindow(Adw.ApplicationWindow):
             self.toast_overlay,
             f"Backend service disconnected: {reason}",
         )
+        self.backend_running.set_label("Backend stopped")
+        self.backend_running.set_css_classes(["backend-status-stopped"])
 
     def do_close_request(self) -> bool:
         """Handle window close request."""

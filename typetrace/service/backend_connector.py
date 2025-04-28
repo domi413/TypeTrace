@@ -166,7 +166,7 @@ class BackendConnector(GObject.Object):
             return
 
         self._proxy.call(
-            "Ping",
+            "ping",
             None,
             Gio.DBusCallFlags.NONE,
             500,  # Timeout 500ms
@@ -225,7 +225,7 @@ class BackendConnector(GObject.Object):
             return
 
         self._proxy.call(
-            "Quit",
+            "quit",
             None,
             Gio.DBusCallFlags.NO_AUTO_START,  # Don't restart if it's already stopping
             500,  # Timeout

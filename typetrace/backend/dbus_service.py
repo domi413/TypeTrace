@@ -82,9 +82,9 @@ class DbusServiceManager:
 
         # Map D-Bus methods to Python methods
         method_map = {
-            "Ping": self.ping,
-            "Quit": self.quit,
-            "Introspect": self.Introspect,
+            "ping": self.ping,
+            "quit": self.quit,
+            "introspect": self.introspect,
             # Add other methods if needed for Properties interface
         }
 
