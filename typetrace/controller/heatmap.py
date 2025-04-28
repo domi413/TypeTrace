@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
 from gi.repository import Gdk, Gio, Gtk
 
@@ -19,16 +19,6 @@ class Heatmap(Gtk.Box):
 
     __gtype_name__ = "Heatmap"
 
-    EXPANDED_KEYS: ClassVar[list[str]] = [
-        "Backspace",
-        "Tab",
-        "Caps",
-        "Enter",
-        "Shift",
-        "Space",
-        "\\",
-    ]
-
     keyboard_container = Gtk.Template.Child()
 
     zoom_in_button = Gtk.Template.Child()
@@ -38,21 +28,23 @@ class Heatmap(Gtk.Box):
         self,
         settings: Gio.Settings,
         keystroke_store: KeystrokeStore,
-        layout: str = "en_US",
     ) -> None:
         """Initialize the heatmap widget.
 
         Args:
             settings: Gio settings used to persist and apply preferences.
             keystroke_store: Access to keystrokes.
-            layout: Keyboard layout to use.
 
         """
         super().__init__()
         self.settings = settings
         self.keystroke_store: KeystrokeStore = keystroke_store
-        self.layout = layout
-        self.key_widgets: dict[int, Gtk.Label] = {}  # Keyed by scancode
+
+        self.layout = self.settings.get_string("keyboard-layout")
+        if not self.layout or self.layout not in KEYBOARD_LAYOUTS:
+            self.layout = "en_US"
+
+        self.key_widgets: dict[int, Gtk.Label] = {}
 
         self.css_provider = Gtk.CssProvider()
         Gtk.StyleContext.add_provider_for_display(
@@ -77,6 +69,11 @@ class Heatmap(Gtk.Box):
                 lambda *_: self._update_colors(),
             )
 
+        self.settings.connect(
+            "changed::keyboard-layout",
+            self._on_keyboard_layout_changed,
+        )
+
         self._build_keyboard()
         self._update_colors()
 
@@ -84,27 +81,43 @@ class Heatmap(Gtk.Box):
         """Update the heatmap to reflect current data."""
         self._update_colors(keystrokes)
 
+    def _on_keyboard_layout_changed(self, settings: Gio.Settings, key: str) -> None:
+        """Handle keyboard layout setting changes.
+
+        Args:
+            settings: The settings object.
+            key: The key that changed.
+
+        """
+        new_layout = settings.get_string(key)
+        if new_layout != self.layout and new_layout in KEYBOARD_LAYOUTS:
+            self.layout = new_layout
+            self.key_widgets.clear()
+            self._build_keyboard()
+            self._update_colors()
+
     def _build_keyboard(self) -> None:
         """Build the keyboard layout dynamically using scancodes."""
-        for row_count, row in enumerate(KEYBOARD_LAYOUTS[self.layout]):
+        while (child := self.keyboard_container.get_first_child()):
+                self.keyboard_container.remove(child)
+
+        for row in KEYBOARD_LAYOUTS[self.layout]:
             box = Gtk.Box(
                 orientation=Gtk.Orientation.HORIZONTAL,
                 spacing=5,
             )
-            if row_count == 0:
-                box.set_homogeneous(True)
 
             self.keyboard_container.append(box)
 
-            for scancode, key_label in row:
-                label = self._create_key_widget(key_label)
+            for scancode, key_label, is_expanded in row:
+                label = self._create_key_widget(key_label, is_expanded=is_expanded)
                 self.key_widgets[scancode] = label
                 box.append(label)
 
-    def _create_key_widget(self, key_label: str) -> Gtk.Label:
+    def _create_key_widget(self, key_label: str, *, is_expanded: bool) -> Gtk.Label:
         """Create a single key widget with the appropriate properties."""
         label = Gtk.Label(label=key_label)
-        label.set_hexpand(True) if key_label in self.EXPANDED_KEYS else None
+        label.set_hexpand(True) if is_expanded else None
         size = self.settings.get_int("key-size")
         label.set_size_request(size, size)
         return label
