@@ -2,6 +2,7 @@ APP_ID = edu.ost.typetrace
 MANIFEST = $(APP_ID).yaml
 BUILD_DIR = _build
 INSTALL_DIR = _install
+REPO_DIR = _repo
 BP_DIR = subprojects/blueprint-compiler
 BP_REPO = https://gitlab.gnome.org/jwestman/blueprint-compiler.git
 BP_BRANCH = v0.16.0
@@ -20,13 +21,17 @@ $(INSTALL_DIR)/bin/typetrace:
 
 # Flatpak targets
 flatpak-build: clean $(MANIFEST)
-	flatpak-builder --force-clean $(BUILD_DIR) $(MANIFEST)
+	flatpak-builder --force-clean --repo=$(REPO_DIR) $(BUILD_DIR) $(MANIFEST)
 
 flatpak-run: flatpak-build
 	flatpak-builder --run $(BUILD_DIR) $(MANIFEST) typetrace
 
 flatpak-install: clean
 	flatpak-builder --install --user $(BUILD_DIR) $(MANIFEST)
+
+flatpak-export: flatpak-build
+	flatpak build-bundle $(REPO_DIR) typetrace.flatpak $(APP_ID) --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+	@echo "Flatpak bundle created: $(FLATPAK_BUNDLE)"
 
 # Meson targets
 meson-setup: clean

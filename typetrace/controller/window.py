@@ -3,7 +3,9 @@
 from gi.repository import Adw, Gio, Gtk
 
 from typetrace.controller.heatmap import Heatmap
+from typetrace.controller.statistics import Statistics
 from typetrace.controller.verbose import Verbose
+from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
 
 
@@ -22,6 +24,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
     def __init__(
         self,
+        db_manager: DatabaseManager,
         keystroke_store: KeystrokeStore,
         settings: Gio.Settings,
         **kwargs,
@@ -30,14 +33,20 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         Args:
             **kwargs: Keyword arguments passed to the parent constructor
+            db_manager: DB File operations
             keystroke_store: Access to keystrokes
             settings: GSettings used to persist preferences of a user
 
         """
         super().__init__(**kwargs)
-        self.heatmap = Heatmap(settings=settings, keystroke_store=keystroke_store)
+        self.db_manager = db_manager
+        self.keystroke_store = keystroke_store
+        self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
         self.verbose = Verbose(keystroke_store=keystroke_store)
+        self.statistics = Statistics(keystroke_store=keystroke_store)
         self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
+        self.keystroke_store.connect("changed", lambda *_: self._on_refresh_clicked())
+        self.db_manager.connect("changed", lambda *_: self._on_refresh_clicked())
 
         heatmap_page = self.stack.add_titled(
             self.heatmap,
@@ -50,10 +59,18 @@ class TypetraceWindow(Adw.ApplicationWindow):
             "verbose",
             "Verbose",
         )
-        verbose_page.set_icon_name("text-x-generic-symbolic")
+        verbose_page.set_icon_name("view-list-symbolic")
+        statistics_page = self.stack.add_titled(
+            self.statistics,
+            "statistics",
+            "Statistics",
+        )
+        statistics_page.set_icon_name("view-grid-symbolic")
         self.view_switcher.set_stack(self.stack)
 
     def _on_refresh_clicked(self) -> None:
         """Handle refresh button click."""
-        self.heatmap.update()
-        self.verbose.update()
+        keystrokes = self.keystroke_store.get_all_keystrokes()
+        self.heatmap.update(keystrokes)
+        self.verbose.update(keystrokes)
+        self.statistics.update()
