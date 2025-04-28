@@ -26,7 +26,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
     view_switcher = Gtk.Template.Child()
     stack = Gtk.Template.Child()
 
-    backend_label = Gtk.Template.Child()
+    backend_toggle = Gtk.Template.Child()
 
     def __init__(
         self,
@@ -48,6 +48,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self._backend_connector = BackendConnector()
         self._backend_connector.connect("backend-available", self._on_available)
         self._backend_connector.connect("backend-unavailable", self._on_unavailable)
+        self.backend_toggle.connect("clicked", self._on_backend_label_clicked)
         self.is_backend_running = False
 
         self.db_manager = db_manager
@@ -55,9 +56,9 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
         self.verbose = Verbose(keystroke_store=keystroke_store)
         self.statistics = Statistics(keystroke_store=keystroke_store)
-        self.refresh_button.connect("clicked", lambda *_: self._on_refresh_clicked())
-        self.keystroke_store.connect("changed", lambda *_: self._on_refresh_clicked())
-        self.db_manager.connect("changed", lambda *_: self._on_refresh_clicked())
+        self.refresh_button.connect("clicked", self._on_refresh_clicked)
+        self.keystroke_store.connect("changed", self._on_refresh_clicked)
+        self.db_manager.connect("changed", self._on_refresh_clicked)
 
         heatmap_page = self.stack.add_titled(
             self.heatmap,
@@ -81,21 +82,18 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         GLib.idle_add(self._backend_connector.check_and_activate_async)
 
-    def _on_refresh_clicked(self) -> None:
+    def _on_refresh_clicked(self, _:any) -> None:
         """Handle refresh button click."""
         keystrokes = self.keystroke_store.get_all_keystrokes()
         self.heatmap.update(keystrokes)
         self.verbose.update(keystrokes)
         self.statistics.update()
 
-        if not self.is_backend_running:
-            GLib.idle_add(self._backend_connector.check_and_activate_async)
-
     def _on_available(self, _: any) -> None:
         """Call when the backend becomes available."""
         dialog_utils.show_toast(self.toast_overlay, "Backend service connected.")
-        self.backend_label.set_label("Backend running")
-        self.backend_label.set_css_classes(["backend-status-running"])
+        self.backend_toggle.set_label("Backend running")
+        self.backend_toggle.set_css_classes(["backend-status-running"])
         self.is_backend_running = True
 
     def _on_unavailable(self, _: any, reason: str) -> None:
@@ -104,9 +102,16 @@ class TypetraceWindow(Adw.ApplicationWindow):
             self.toast_overlay,
             f"Backend service disconnected: {reason}",
         )
-        self.backend_label.set_label("Backend stopped")
-        self.backend_label.set_css_classes(["backend-status-stopped"])
+        self.backend_toggle.set_label("Backend stopped")
+        self.backend_toggle.set_css_classes(["backend-status-stopped"])
         self.is_backend_running = False
+
+    def _on_backend_label_clicked(self, _: any) -> None:
+        """Call when the backend becomes unavailable."""
+        if self.is_backend_running:
+            GLib.idle_add(self._backend_connector.request_quit_async)
+        else:
+            GLib.idle_add(self._backend_connector.check_and_activate_async)
 
     def do_close_request(self) -> bool:
         """Handle window close request."""
