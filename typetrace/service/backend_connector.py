@@ -1,4 +1,4 @@
-"""Nah."""
+"""Establishes dbus connection to backend service."""
 
 from __future__ import annotations
 

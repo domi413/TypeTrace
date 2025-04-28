@@ -26,7 +26,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
     view_switcher = Gtk.Template.Child()
     stack = Gtk.Template.Child()
 
-    backend_running = Gtk.Template.Child()
+    backend_label = Gtk.Template.Child()
 
     def __init__(
         self,
@@ -48,6 +48,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self._backend_connector = BackendConnector()
         self._backend_connector.connect("backend-available", self._on_available)
         self._backend_connector.connect("backend-unavailable", self._on_unavailable)
+        self.is_backend_running = False
 
         self.db_manager = db_manager
         self.keystroke_store = keystroke_store
@@ -87,11 +88,15 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self.verbose.update(keystrokes)
         self.statistics.update()
 
+        if not self.is_backend_running:
+            GLib.idle_add(self._backend_connector.check_and_activate_async)
+
     def _on_available(self, _: any) -> None:
         """Call when the backend becomes available."""
         dialog_utils.show_toast(self.toast_overlay, "Backend service connected.")
-        self.backend_running.set_label("Backend running")
-        self.backend_running.set_css_classes(["backend-status-running"])
+        self.backend_label.set_label("Backend running")
+        self.backend_label.set_css_classes(["backend-status-running"])
+        self.is_backend_running = True
 
     def _on_unavailable(self, _: any, reason: str) -> None:
         """Call when the backend becomes unavailable."""
@@ -99,8 +104,9 @@ class TypetraceWindow(Adw.ApplicationWindow):
             self.toast_overlay,
             f"Backend service disconnected: {reason}",
         )
-        self.backend_running.set_label("Backend stopped")
-        self.backend_running.set_css_classes(["backend-status-stopped"])
+        self.backend_label.set_label("Backend stopped")
+        self.backend_label.set_css_classes(["backend-status-stopped"])
+        self.is_backend_running = False
 
     def do_close_request(self) -> bool:
         """Handle window close request."""

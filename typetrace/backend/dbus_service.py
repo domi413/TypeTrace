@@ -1,4 +1,4 @@
-"""Apples."""
+"""Used to setup dbus connection."""
 
 from __future__ import annotations
 
@@ -56,13 +56,13 @@ class DbusServiceManager:
 
     # --- D-Bus Method Implementations ---
     def ping(self, invocation: Gio.DBusMethodInvocation) -> None:
-        """Handle the Ping D-Bus method call."""
-        logger.debug("Received Ping request")
+        """Handle the ping D-Bus method call."""
+        logger.debug("Received ping request")
         invocation.return_value(GLib.Variant("(s)", ("pong",)))
 
     def quit(self, invocation: Gio.DBusMethodInvocation) -> None:
-        """Handle the Quit D-Bus method call."""
-        logger.info("Received Quit request via D-Bus")
+        """Handle the quit D-Bus method call."""
+        logger.info("Received quit request via D-Bus")
         invocation.return_value(None)  # Complete the D-Bus call first
         self._trigger_shutdown()
 
