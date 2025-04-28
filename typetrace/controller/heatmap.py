@@ -92,19 +92,15 @@ class Heatmap(Gtk.Box):
         new_layout = settings.get_string(key)
         if new_layout != self.layout and new_layout in KEYBOARD_LAYOUTS:
             self.layout = new_layout
-
-            # Clear keyboard
-            child = self.keyboard_container.get_first_child()
-            while child:
-                self.keyboard_container.remove(child)
-                child = self.keyboard_container.get_first_child()
             self.key_widgets.clear()
-
             self._build_keyboard()
             self._update_colors()
 
     def _build_keyboard(self) -> None:
         """Build the keyboard layout dynamically using scancodes."""
+        while (child := self.keyboard_container.get_first_child()):
+                self.keyboard_container.remove(child)
+
         for row in KEYBOARD_LAYOUTS[self.layout]:
             box = Gtk.Box(
                 orientation=Gtk.Orientation.HORIZONTAL,
