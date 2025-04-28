@@ -3,8 +3,8 @@
 from gi.repository import Adw, Gio, GLib, Gtk
 
 from typetrace.controller.heatmap import Heatmap
-from typetrace.controller.utils import dialog_utils
 from typetrace.controller.statistics import Statistics
+from typetrace.controller.utils import dialog_utils
 from typetrace.controller.verbose import Verbose
 from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
@@ -85,8 +85,6 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self.verbose.update(keystrokes)
         self.statistics.update()
 
-    # --- Signal Handlers for BackendConnector ---
-
     def _on_available(self, _: any) -> None:
         """Call when the backend becomes available."""
         dialog_utils.show_toast(self.toast_overlay, "Backend service connected.")
@@ -97,8 +95,6 @@ class TypetraceWindow(Adw.ApplicationWindow):
             self.toast_overlay,
             f"Backend service disconnected: {reason}",
         )
-
-    # --- Window Lifecycle ---
 
     def do_close_request(self) -> bool:
         """Handle window close request."""

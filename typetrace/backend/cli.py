@@ -1,4 +1,4 @@
-# backend/cli.py
+"""Command-line interface for TypeTrace."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import os
 import platform
 import sqlite3
 import threading
-from typing import TYPE_CHECKING, Optional, final
+from typing import TYPE_CHECKING, final
 
 from backend.db import DatabaseManager
 from backend.dbus_service import DbusServiceManager
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 # --- Helper Function ---
 def _run_processor_thread(processor: BaseEventProcessor) -> None:
-    """Runs the processor's trace method in the current thread."""
+    """Run the processor's trace method in the current thread."""
     try:
         # NOTE: Processor runs as daemon, may be terminated abruptly.
         logger.info("Event processor daemon thread started (PID: %d).", os.getpid())
@@ -51,7 +51,7 @@ class CLI:
         self._dbus_manager: DbusServiceManager | None = None
 
     def _get_processor_class(self) -> type[BaseEventProcessor] | None:
-        """Determines the correct event processor class based on the platform."""
+        """Determine the correct event processor class based on the platform."""
         system = platform.system().lower()
         logger.info("Detected platform: %s", system)
         if system == "linux":
@@ -68,31 +68,31 @@ class CLI:
         return None
 
     def _initiate_shutdown_callback(self) -> None:
-        """Callback triggered by DbusServiceManager when its loop is stopping."""
+        """Trigger Callback by DbusServiceManager when its loop is stopping."""
         # This callback signals the D-Bus loop should stop.
         # The daemon processor thread will exit when the main thread finishes.
         logger.info(
             "D-Bus service loop stopping callback triggered (backend will exit).",
         )
 
-    def run(self, args: argparse.Namespace) -> int:
-        """Runs the backend service with processor as daemon thread."""
+    def run(self, args: argparse.Namespace) -> int:  # noqa: C901
+        """Run the backend service with processor as daemon thread."""
         if args.debug:
             Config.DEBUG = True
         LoggerSetup.setup_logging()
 
         logger.info("TypeTrace Backend starting...")
         exit_code = ExitCodes.SUCCESS
-        processor: Optional[BaseEventProcessor] = None
+        processor: BaseEventProcessor | None = None
 
         try:
             self.__db_manager.initialize_database(self.__db_path)
 
-            ProcessorClass = self._get_processor_class()
-            if not ProcessorClass:
+            processor_class = self._get_processor_class()
+            if not processor_class:
                 return ExitCodes.PLATFORM_ERROR
 
-            processor = ProcessorClass(self.__db_path)
+            processor = processor_class(self.__db_path)
             if hasattr(processor, "check_device_accessibility"):
                 processor.check_device_accessibility()
 
@@ -144,20 +144,16 @@ class CLI:
                     return ExitCodes.PLATFORM_ERROR
 
         # --- Handle Setup Errors ---
-        except PermissionError as e:
+        except PermissionError:
             logger.exception(
-                "Permission error during setup: %s", e, exc_info=Config.DEBUG,
+                "Permission error during setup: %s", exc_info=Config.DEBUG,
             )
             exit_code = ExitCodes.PERMISSION_ERROR
-        except sqlite3.Error as e:
+        except sqlite3.Error:
             logger.exception(
-                "Database error during setup: %s", e, exc_info=Config.DEBUG,
+                "Database error during setup: %s", exc_info=Config.DEBUG,
             )
             exit_code = ExitCodes.DATABASE_ERROR
-        except Exception as e:
-            logger.critical("Unexpected error during setup: %s", e, exc_info=True)
-            exit_code = ExitCodes.RUNTIME_ERROR
-        # --- Shutdown Sequence (Simplified for Daemon Thread) ---
         finally:
             # No need to signal or join the daemon thread.
             logger.info("Initiating backend shutdown sequence (main thread exiting)...")

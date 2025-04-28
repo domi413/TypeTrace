@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import contextlib
-from typing import Callable
+from typing import Callable, ClassVar
 
 from gi.repository import Gio, GLib, GObject
 
-# Define D-Bus details (ensure these match backend/dbus_service.py and the .service file)
+# Define D-Bus details
 BACKEND_DBUS_NAME = "edu.ost.typetrace.backend"
 BACKEND_DBUS_PATH = "/edu/ost/typetrace/backend"
 BACKEND_DBUS_INTERFACE = "edu.ost.typetrace.backend"
@@ -19,7 +19,7 @@ class BackendConnector(GObject.Object):
     Emits signals 'backend-available' and 'backend-unavailable'.
     """
 
-    __gsignals__ = {  # noqa: RUF012
+    __gsignals__: ClassVar[dict] = {
         "backend-available": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "backend-unavailable": (GObject.SignalFlags.RUN_FIRST, None, (str,)),  # reason
     }
@@ -45,13 +45,11 @@ class BackendConnector(GObject.Object):
         if self._proxy:
             # If proxy exists, verify owner
             if self._proxy.get_name_owner():
-                self._set_availability(True)  # Assume available if owner exists
-                # Optionally ping async here for certainty
+                self._set_availability(available=True)
             else:
                 # Proxy exists but is stale
                 self._cleanup_proxy()
-                self._set_availability(False, "Connection lost")
-                # Retry getting proxy below
+                self._set_availability("Connection lost", available=False)
             # If we already determined it's available, no need to recreate proxy
             if self.is_available:
                 return
@@ -68,7 +66,7 @@ class BackendConnector(GObject.Object):
             user_data=None,
         )
 
-    def _on_proxy_created(self, source_object, res, user_data) -> None:
+    def _on_proxy_created(self, _source_object: any, res: any, _user_data: any) -> None:
         """Use callback for async D-Bus proxy creation."""
         try:
             proxy = Gio.DBusProxy.new_for_bus_finish(res)
@@ -79,7 +77,7 @@ class BackendConnector(GObject.Object):
 
         except GLib.Error as e:
             self._proxy = None
-            self._set_availability(False, f"Connection failed: {e.message}")
+            self._set_availability(f"Connection failed: {e.message}", available=False)
 
     def _connect_proxy_signals(self) -> None:
         """Connect to signals on the valid D-Bus proxy."""
@@ -110,11 +108,17 @@ class BackendConnector(GObject.Object):
         self._disconnect_proxy_signals()
         self._proxy = None
 
-    def _on_backend_signal(self, proxy, sender_name, signal_name, parameters) -> None:
+    def _on_backend_signal(
+        self,
+        proxy: any,
+        sender_name: any,
+        signal_name: any,
+        parameters: any,
+    ) -> None:
         """Handle signals emitted by the backend service itself."""
         # Handle specific signals if the backend emits any useful ones
 
-    def _on_backend_owner_changed(self, proxy, pspec) -> None:
+    def _on_backend_owner_changed(self, _proxy: any, _pspec: any) -> None:
         """Handle notification when the D-Bus name owner changes."""
         if not self._proxy:
             return  # Should not happen if signal is connected
@@ -126,9 +130,9 @@ class BackendConnector(GObject.Object):
                 self.ping_async(self._on_reconnect_ping_result)
         else:
             self._cleanup_proxy()
-            self._set_availability(False, "Service stopped or crashed")
+            self._set_availability("Service stopped or crashed", available=False)
 
-    def _set_availability(self, available: bool, reason: str = "") -> None:
+    def _set_availability(self, reason: str = "", *, available: bool) -> None:
         """Update availability status and emits the appropriate signal."""
         if available != self._is_available:
             self._is_available = available
@@ -144,17 +148,17 @@ class BackendConnector(GObject.Object):
         """Asynchronously pings the backend.
 
         Args:
-            callback: Optional function to call with result (bool: success, str: error_msg)
+            callback: Optional function to call with result (bool: success, str: error)
 
         """
         if not self._proxy:
             if callback:
-                callback(False, "No connection")
+                callback("No connection")
             return
 
         self._proxy.call(
             "Ping",
-            None,  # No arguments
+            None,
             Gio.DBusCallFlags.NONE,
             500,  # Timeout 500ms
             self._cancellable,
@@ -162,42 +166,40 @@ class BackendConnector(GObject.Object):
             callback,  # Pass the original callback as user_data
         )
 
-    def _on_ping_response(self, source_object, res, user_data) -> None:
+    def _on_ping_response(self, source_object: any, res: any, user_data: any) -> None:
         """Use callback for the async ping response."""
         original_callback = user_data
-        success = False
         error_msg = ""
         try:
             result = source_object.call_finish(res)
             if result:
-                success = True
                 # If ping succeeds, confirm availability
-                self._set_availability(True)
+                self._set_availability(available=True)
             else:
                 error_msg = "Ping returned no result"
-                self._set_availability(False, error_msg)
+                self._set_availability(error_msg, available=False)
         except GLib.Error as e:
             error_msg = e.message
             # If ping fails, assume unavailable
             self._cleanup_proxy()  # Ping failure often means proxy is dead
-            self._set_availability(False, f"Ping failed: {error_msg}")
+            self._set_availability(f"Ping failed: {error_msg}", available=False)
 
         if original_callback:
-            original_callback(success, error_msg)
+            original_callback(error_msg)
 
     # --- Callbacks passed to ping_async ---
-    def _on_initial_ping_result(self, success: bool, error_msg: str) -> None:
+    def _on_initial_ping_result(self, error_msg: str) -> None:
         """Handle result of ping right after proxy creation."""
-        if success:
-            self._set_availability(True)
+        if not error_msg:
+            self._set_availability(available=True)
         else:
             self._cleanup_proxy()
-            self._set_availability(False, f"Initial ping failed: {error_msg}")
+            self._set_availability(f"Initial ping failed: {error_msg}", available=False)
 
-    def _on_reconnect_ping_result(self, success: bool, error_msg: str) -> None:
+    def _on_reconnect_ping_result(self, error_msg: str) -> None:
         """Handle result of ping after owner reappeared."""
-        if success:
-            self._set_availability(True)
+        if not error_msg:
+            self._set_availability(available=True)
         else:
             pass
             # Owner appeared but service isn't responsive? Strange.
@@ -218,7 +220,7 @@ class BackendConnector(GObject.Object):
             None,
         )
 
-    def _on_quit_response(self, source_object, res, user_data) -> None:
+    def _on_quit_response(self, source_object: any, res: any, _user_data: any) -> None:
         """Use callback for the async quit response."""
         try:
             source_object.call_finish(res)
@@ -228,7 +230,7 @@ class BackendConnector(GObject.Object):
         finally:
             # Assume backend is gone after requesting quit
             self._cleanup_proxy()
-            self._set_availability(False, "Quit requested")
+            self._set_availability("Quit requested", available=False)
 
     def shutdown(self) -> None:
         """Cancel ongoing operations and cleans up."""
