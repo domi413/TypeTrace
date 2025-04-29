@@ -128,7 +128,7 @@ class DbusServiceManager:
                 interface_info=interface_info,
                 method_call_closure=method_call_handler,
             )
-            logger.debug("D-Bus object exported successfully at %s", Config.BACKEND_DBUS_PATH)
+            logger.debug("D-Bus object exported at %s", Config.BACKEND_DBUS_PATH)
         except GLib.Error:
             logger.exception("Failed to register D-Bus object")
             self._mainloop.quit()
