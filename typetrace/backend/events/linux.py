@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import select
-import signal
 import time
 from contextlib import contextmanager, suppress
 from typing import TYPE_CHECKING, final, override
