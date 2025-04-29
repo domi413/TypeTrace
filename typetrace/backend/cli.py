@@ -50,7 +50,7 @@ class CLI:
     def _get_processor_class(self) -> type[BaseEventProcessor] | None:
         """Determine the correct event processor class based on the platform."""
         system = platform.system().lower()
-        logger.info("Detected platform: %s", system)
+        logger.debug("Detected platform: %s", system)
         if system == "linux":
             from backend.events.linux import LinuxEventProcessor
 
