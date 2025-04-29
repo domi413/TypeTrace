@@ -28,13 +28,13 @@ def _run_processor_thread(processor: BaseEventProcessor) -> None:
     """Run the processor's trace method in the current thread."""
     try:
         # NOTE: Processor runs as daemon, may be terminated abruptly.
-        logger.info("Event processor thread started (PID: %d).", os.getpid())
+        logger.debug("Event processor thread started (PID: %d).", os.getpid())
         processor.trace()
     except Exception:
         logger.exception("Unhandled exception in event processor daemon thread")
     finally:
         # This block might not run fully if thread is terminated abruptly.
-        logger.info("Event processor thread finished.")
+        logger.debug("Event processor thread finished.")
 
 
 # --- Main CLI Class ---
@@ -68,7 +68,7 @@ class CLI:
 
     def _initiate_shutdown_callback(self) -> None:
         """Trigger Callback by DbusServiceManager when its loop is stopping."""
-        logger.info(
+        logger.debug(
             "D-Bus service loop stopping callback triggered (backend will exit).",
         )
 
@@ -93,7 +93,7 @@ class CLI:
             if hasattr(processor, "check_device_accessibility"):
                 processor.check_device_accessibility()
 
-            logger.info("Starting event processor thread as DAEMON.")
+            logger.debug("Starting event processor thread.")
             self._processor_thread = threading.Thread(
                 target=_run_processor_thread,
                 args=(processor,),
@@ -102,13 +102,13 @@ class CLI:
             self._processor_thread.start()
 
             # --- Start D-Bus Service ---
-            logger.info("Initializing D-Bus service manager...")
+            logger.debug("Initializing D-Bus service manager...")
             self._dbus_manager = DbusServiceManager(
                 stop_callback=self._initiate_shutdown_callback,
             )
 
             exit_code = self._dbus_manager.run()
-            logger.info("D-Bus manager run() finished with code: %d", exit_code)
+            logger.debug("D-Bus manager finished with code: %d", exit_code)
 
         except PermissionError:
             logger.exception(
@@ -121,9 +121,9 @@ class CLI:
             )
             exit_code = ExitCodes.DATABASE_ERROR
         finally:
-            logger.info("Initiating backend shutdown sequence (main thread exiting)...")
+            logger.debug("Initiating backend shutdown sequence (main thread exiting)..")
             if self._processor_thread and self._processor_thread.is_alive():
-                logger.info("Processor thread will be terminated.")
+                logger.debug("Processor thread will be terminated.")
                 processor.stop()
 
             logger.info("TypeTrace Backend finished.")

@@ -134,14 +134,14 @@ class DbusServiceManager:
                 interface_info=interface_info,
                 method_call_closure=method_call_handler,
             )
-            logger.info("D-Bus object exported successfully at %s", BACKEND_DBUS_PATH)
+            logger.debug("D-Bus object exported successfully at %s", BACKEND_DBUS_PATH)
         except GLib.Error:
             logger.exception("Failed to register D-Bus object")
             self._mainloop.quit()
 
     def _on_name_acquired(self, _conn: Gio.DBusConnection, name: str) -> None:
         """Call when the D-Bus name is successfully acquired."""
-        logger.info("Acquired D-Bus name: %s", name)
+        logger.debug("Acquired D-Bus name: %s", name)
 
     def _on_name_lost(self, _conn: Gio.DBusConnection | None, name: str) -> None:
         """Call when the D-Bus name is lost."""
