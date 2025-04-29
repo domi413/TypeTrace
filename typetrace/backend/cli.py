@@ -125,6 +125,7 @@ class CLI:
             if self._processor_thread and self._processor_thread.is_alive():
                 logger.debug("Processor thread will be terminated.")
                 processor.stop()
+                self._processor_thread.join()
             logger.info("TypeTrace Backend finished.")
 
         return exit_code
