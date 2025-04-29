@@ -88,9 +88,6 @@ class CLI:
                     logger.error("Unsupported platform: %s", platform.system())
                     return ExitCodes.PLATFORM_ERROR
 
-            if hasattr(processor, "check_device_accessibility"):
-                processor.check_device_accessibility()
-
             logger.debug("Starting event processor thread.")
             self._processor_thread = threading.Thread(
                 target=_run_processor_thread,
