@@ -75,7 +75,7 @@ class CLI:
             "D-Bus service loop stopping callback triggered (backend will exit).",
         )
 
-    def run(self, args: argparse.Namespace) -> int:  # noqa: C901
+    def run(self, args: argparse.Namespace) -> int:
         """Run the backend service with processor as daemon thread."""
         if args.debug:
             Config.DEBUG = True
@@ -96,17 +96,12 @@ class CLI:
             if hasattr(processor, "check_device_accessibility"):
                 processor.check_device_accessibility()
 
-            # --- Start Processor Thread as DAEMON ---
-            # NOTE: Using daemon thread because processor's internal signal
-            # handling cannot be set up from a secondary thread, and modifying
-            # the processor is disallowed. This means abrupt termination.
             logger.info("Starting event processor thread as DAEMON.")
             self._processor_thread = threading.Thread(
                 target=_run_processor_thread,
                 args=(processor,),
                 name="EventProcessorThread",
             )
-            # *** Set daemon=True ***
             self._processor_thread.daemon = True
             self._processor_thread.start()
 
@@ -121,27 +116,6 @@ class CLI:
             logger.info("D-Bus manager run() finished with code: %d", dbus_exit_code)
             if dbus_exit_code != 0:
                 exit_code = ExitCodes.RUNTIME_ERROR
-
-            match platform.system().lower():
-                case "linux":
-                    from backend.events.linux import LinuxEventProcessor
-
-                    if not Config.IS_FLATPAK:
-                        self._check_input_group()
-
-                    processor = LinuxEventProcessor(self.__db_path)
-                    processor.check_device_accessibility()
-
-                case "darwin" | "windows":
-                    from backend.events.windows_darwin import (
-                        WindowsDarwinEventProcessor,
-                    )
-
-                    processor = WindowsDarwinEventProcessor(self.__db_path)
-
-                case _:
-                    logger.error("Unsupported platform: %s", platform.system())
-                    return ExitCodes.PLATFORM_ERROR
 
         # --- Handle Setup Errors ---
         except PermissionError:
