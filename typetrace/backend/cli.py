@@ -27,13 +27,11 @@ logger = logging.getLogger(__name__)
 def _run_processor_thread(processor: BaseEventProcessor) -> None:
     """Run the processor's trace method in the current thread."""
     try:
-        # NOTE: Processor runs as daemon, may be terminated abruptly.
         logger.debug("Event processor thread started (PID: %d).", os.getpid())
         processor.trace()
     except Exception:
         logger.exception("Unhandled exception in event processor daemon thread")
     finally:
-        # This block might not run fully if thread is terminated abruptly.
         logger.debug("Event processor thread finished.")
 
 
@@ -79,8 +77,8 @@ class CLI:
         LoggerSetup.setup_logging()
 
         logger.info("TypeTrace Backend starting...")
-        exit_code = ExitCodes.SUCCESS
         processor: BaseEventProcessor | None = None
+        exit_code = ExitCodes.SUCCESS
 
         try:
             self.__db_manager.initialize_database(self.__db_path)
@@ -107,17 +105,19 @@ class CLI:
                 stop_callback=self._initiate_shutdown_callback,
             )
 
-            exit_code = self._dbus_manager.run()
-            logger.debug("D-Bus manager finished with code: %d", exit_code)
+            dbus_exit_code = self._dbus_manager.run()
+            logger.debug("D-Bus manager finished with code: %d", dbus_exit_code)
 
         except PermissionError:
             logger.exception(
-                "Permission error during setup: %s", exc_info=Config.DEBUG,
+                "Permission error during setup: %s",
+                exc_info=Config.DEBUG,
             )
             exit_code = ExitCodes.PERMISSION_ERROR
         except sqlite3.Error:
             logger.exception(
-                "Database error during setup: %s", exc_info=Config.DEBUG,
+                "Database error during setup: %s",
+                exc_info=Config.DEBUG,
             )
             exit_code = ExitCodes.DATABASE_ERROR
         finally:
@@ -125,7 +125,6 @@ class CLI:
             if self._processor_thread and self._processor_thread.is_alive():
                 logger.debug("Processor thread will be terminated.")
                 processor.stop()
-
             logger.info("TypeTrace Backend finished.")
 
         return exit_code
