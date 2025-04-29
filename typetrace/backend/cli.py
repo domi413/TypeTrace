@@ -61,7 +61,7 @@ class CLI:
             )
 
             return WindowsDarwinEventProcessor
-        logger.error("Unsupported platform: %s", platform.system())
+        logger.exception("Unsupported platform: %s", platform.system())
         return None
 
     def _initiate_shutdown_callback(self) -> None:
@@ -110,13 +110,13 @@ class CLI:
 
         except PermissionError:
             logger.exception(
-                "Permission error during setup: %s",
-                exc_info=Config.DEBUG,
+                "\nPlease ensure you have sufficient permissions "
+                "(e.g., 'input' group).",
             )
             exit_code = ExitCodes.PERMISSION_ERROR
         except sqlite3.Error:
             logger.exception(
-                "Database error during setup: %s",
+                "Database error: %s",
                 exc_info=Config.DEBUG,
             )
             exit_code = ExitCodes.DATABASE_ERROR
