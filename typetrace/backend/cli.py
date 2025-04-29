@@ -117,6 +117,9 @@ class CLI:
                 exc_info=Config.DEBUG,
             )
             exit_code = ExitCodes.DATABASE_ERROR
+        except (OSError, ValueError, RuntimeError):
+            logger.exception("Unexpected error: %s")
+            exit_code = ExitCodes.RUNTIME_ERROR
         finally:
             logger.debug("Initiating backend shutdown sequence (main thread exiting)..")
             if self._processor_thread and self._processor_thread.is_alive():
