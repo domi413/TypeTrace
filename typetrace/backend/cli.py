@@ -28,13 +28,13 @@ def _run_processor_thread(processor: BaseEventProcessor) -> None:
     """Run the processor's trace method in the current thread."""
     try:
         # NOTE: Processor runs as daemon, may be terminated abruptly.
-        logger.info("Event processor daemon thread started (PID: %d).", os.getpid())
+        logger.info("Event processor thread started (PID: %d).", os.getpid())
         processor.trace()
     except Exception:
         logger.exception("Unhandled exception in event processor daemon thread")
     finally:
         # This block might not run fully if thread is terminated abruptly.
-        logger.info("Event processor daemon thread finished (possibly abruptly).")
+        logger.info("Event processor thread finished.")
 
 
 # --- Main CLI Class ---
@@ -68,8 +68,6 @@ class CLI:
 
     def _initiate_shutdown_callback(self) -> None:
         """Trigger Callback by DbusServiceManager when its loop is stopping."""
-        # This callback signals the D-Bus loop should stop.
-        # The daemon processor thread will exit when the main thread finishes.
         logger.info(
             "D-Bus service loop stopping callback triggered (backend will exit).",
         )
@@ -101,7 +99,6 @@ class CLI:
                 args=(processor,),
                 name="EventProcessorThread",
             )
-            self._processor_thread.daemon = True
             self._processor_thread.start()
 
             # --- Start D-Bus Service ---
@@ -126,7 +123,8 @@ class CLI:
         finally:
             logger.info("Initiating backend shutdown sequence (main thread exiting)...")
             if self._processor_thread and self._processor_thread.is_alive():
-                logger.info("Processor daemon thread will be terminated.")
+                logger.info("Processor thread will be terminated.")
+                processor.stop()
 
             logger.info("TypeTrace Backend finished.")
 

@@ -5,8 +5,10 @@ from __future__ import annotations
 import logging
 import signal
 from typing import Callable
-from typetrace.config import ExitCodes
+
 from gi.repository import Gio, GLib
+
+from typetrace.config import ExitCodes
 
 logger = logging.getLogger(__name__)
 

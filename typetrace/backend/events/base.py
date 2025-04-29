@@ -28,6 +28,7 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
         self.__db_manager = DatabaseManager()
         self._db_path: Path = db_path
         self._current_date: str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        self._terminate: bool = False
 
     @abstractmethod
     def trace(self) -> None:
@@ -105,3 +106,8 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
             Updated buffer and start time
 
         """
+
+    def stop(self) -> None:
+        """Handle termination."""
+        logger.debug("Received signal to stop, shutting down...")
+        self._terminate = True
