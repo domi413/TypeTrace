@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import signal
 from typing import Callable
-
+from typetrace.config import ExitCodes
 from gi.repository import Gio, GLib
 
 logger = logging.getLogger(__name__)
@@ -65,7 +65,7 @@ class DbusServiceManager:
     def quit(self, invocation: Gio.DBusMethodInvocation) -> None:
         """Handle the quit D-Bus method call."""
         logger.info("Received quit request via D-Bus")
-        invocation.return_value(None)  # Complete the D-Bus call first
+        invocation.return_value(None)
         self._trigger_shutdown()
 
     # --- Standard D-Bus Interface Implementations ---
@@ -105,7 +105,6 @@ class DbusServiceManager:
             "ping": self.ping,
             "quit": self.quit,
             "introspect": self.introspect,
-            # Add other methods if needed for Properties interface
         }
 
         def method_call_handler(
@@ -136,7 +135,7 @@ class DbusServiceManager:
             logger.info("D-Bus object exported successfully at %s", BACKEND_DBUS_PATH)
         except GLib.Error:
             logger.exception("Failed to register D-Bus object")
-            self._mainloop.quit()  # Stop if registration fails
+            self._mainloop.quit()
 
     def _on_name_acquired(self, _conn: Gio.DBusConnection, name: str) -> None:
         """Call when the D-Bus name is successfully acquired."""
@@ -146,12 +145,11 @@ class DbusServiceManager:
         """Call when the D-Bus name is lost."""
         logger.warning("Lost D-Bus name: %s. Shutting down.", name)
         self._cleanup_dbus()
-        self._trigger_shutdown(from_dbus_lost=True)  # Trigger general shutdown
+        self._trigger_shutdown(from_dbus_lost=True)
 
     def _trigger_shutdown(self, *, from_dbus_lost: bool = False) -> None:
         """Initiate the shutdown sequence."""
         logger.debug("Shutdown triggered.")
-        # Call the provided callback first to signal other parts (like CLI)
         if self._stop_callback:
             try:
                 self._stop_callback()
@@ -165,7 +163,6 @@ class DbusServiceManager:
         else:
             logger.debug("GLib MainLoop was not running.")
 
-        # If shutdown wasn't triggered by name loss, try to clean up D-Bus resources
         if not from_dbus_lost:
             self._cleanup_dbus()
 
@@ -190,17 +187,17 @@ class DbusServiceManager:
 
         """
         self._owner_id = Gio.bus_own_name(
-            Gio.BusType.SESSION,  # bus_type
-            BACKEND_DBUS_NAME,  # name
-            Gio.BusNameOwnerFlags.NONE,  # flags
-            self._on_bus_acquired,  # bus_acquired_handler (positional)
-            self._on_name_acquired,  # name_acquired_handler (positional)
-            self._on_name_lost,  # name_lost_handler (positional)
+            Gio.BusType.SESSION,
+            BACKEND_DBUS_NAME,
+            Gio.BusNameOwnerFlags.NONE, # flags
+            self._on_bus_acquired,
+            self._on_name_acquired,
+            self._on_name_lost,
         )
 
         if self._owner_id == 0:
             logger.error("Failed to acquire D-Bus name ownership immediately.")
-            return 1  # Indicate D-Bus setup failure
+            return ExitCodes.RUNTIME_ERROR
 
         # Handle signals gracefully
         # GLib can integrate signal handling into the main loop

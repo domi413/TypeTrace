@@ -46,7 +46,6 @@ class CLI:
         """Initialize the CLI."""
         self.__db_manager = DatabaseManager()
         self.__db_path = DatabasePath.DB_PATH
-        # Thread reference might still be useful for is_alive checks if needed elsewhere
         self._processor_thread: threading.Thread | None = None
         self._dbus_manager: DbusServiceManager | None = None
 
@@ -111,13 +110,9 @@ class CLI:
                 stop_callback=self._initiate_shutdown_callback,
             )
 
-            # Blocks main thread until D-Bus loop stops
-            dbus_exit_code = self._dbus_manager.run()
-            logger.info("D-Bus manager run() finished with code: %d", dbus_exit_code)
-            if dbus_exit_code != 0:
-                exit_code = ExitCodes.RUNTIME_ERROR
+            exit_code = self._dbus_manager.run()
+            logger.info("D-Bus manager run() finished with code: %d", exit_code)
 
-        # --- Handle Setup Errors ---
         except PermissionError:
             logger.exception(
                 "Permission error during setup: %s", exc_info=Config.DEBUG,
@@ -129,13 +124,11 @@ class CLI:
             )
             exit_code = ExitCodes.DATABASE_ERROR
         finally:
-            # No need to signal or join the daemon thread.
             logger.info("Initiating backend shutdown sequence (main thread exiting)...")
             if self._processor_thread and self._processor_thread.is_alive():
                 logger.info("Processor daemon thread will be terminated.")
 
             logger.info("TypeTrace Backend finished.")
-            # Main thread exits here, interpreter terminates daemon threads.
 
         return exit_code
 
