@@ -8,15 +8,9 @@ from typing import Callable
 
 from gi.repository import Gio, GLib
 
-from typetrace.config import ExitCodes
+from typetrace.config import Config, ExitCodes
 
 logger = logging.getLogger(__name__)
-
-# Define D-Bus details (ensure these match your .service file and frontend)
-BACKEND_DBUS_NAME = "edu.ost.typetrace.backend"
-BACKEND_DBUS_PATH = "/edu/ost/typetrace/backend"
-BACKEND_DBUS_INTERFACE = "edu.ost.typetrace.backend"
-
 
 class DbusServiceManager:
     """Manages the D-Bus service lifecycle for the TypeTrace backend."""
@@ -40,7 +34,7 @@ class DbusServiceManager:
         <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
         "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
         <node>
-          <interface name='{BACKEND_DBUS_INTERFACE}'>
+          <interface name='{Config.BACKEND_DBUS_INTERFACE}'>
             <method name='ping'>
               <arg type='s' name='response' direction='out'/>
             </method>
@@ -66,7 +60,7 @@ class DbusServiceManager:
 
     def quit(self, invocation: Gio.DBusMethodInvocation) -> None:
         """Handle the quit D-Bus method call."""
-        logger.info("Received quit request via D-Bus")
+        logger.debug("Received quit request via D-Bus")
         invocation.return_value(None)
         self._trigger_shutdown()
 
@@ -84,8 +78,8 @@ class DbusServiceManager:
         try:
             self._connection.emit_signal(
                 None,  # Destination bus name (None for broadcast)
-                BACKEND_DBUS_PATH,
-                BACKEND_DBUS_INTERFACE,
+                Config.BACKEND_DBUS_PATH,
+                Config.BACKEND_DBUS_INTERFACE,
                 "db_updated",
                 None,
             )
@@ -96,7 +90,7 @@ class DbusServiceManager:
     # --- D-Bus Service Management ---
     def _on_bus_acquired(self, connection: Gio.DBusConnection, name: str) -> None:
         """Call when the D-Bus connection is acquired."""
-        logger.info("D-Bus connection acquired for '%s'", name)
+        logger.debug("D-Bus connection acquired for '%s'", name)
         self._connection = connection
         interface_info = Gio.DBusNodeInfo.new_for_xml(
             self._dbus_interface_xml,
@@ -130,11 +124,11 @@ class DbusServiceManager:
 
         try:
             self._registration_id = connection.register_object(
-                object_path=BACKEND_DBUS_PATH,
+                object_path=Config.BACKEND_DBUS_PATH,
                 interface_info=interface_info,
                 method_call_closure=method_call_handler,
             )
-            logger.debug("D-Bus object exported successfully at %s", BACKEND_DBUS_PATH)
+            logger.debug("D-Bus object exported successfully at %s", Config.BACKEND_DBUS_PATH)
         except GLib.Error:
             logger.exception("Failed to register D-Bus object")
             self._mainloop.quit()
@@ -190,7 +184,7 @@ class DbusServiceManager:
         """
         self._owner_id = Gio.bus_own_name(
             Gio.BusType.SESSION,
-            BACKEND_DBUS_NAME,
+            Config.BACKEND_DBUS_NAME,
             Gio.BusNameOwnerFlags.NONE, # flags
             self._on_bus_acquired,
             self._on_name_acquired,
@@ -216,13 +210,13 @@ class DbusServiceManager:
             signal.SIGTERM,
         )
 
-        logger.info("Starting GLib MainLoop for D-Bus service...")
+        logger.debug("Starting GLib MainLoop for D-Bus service...")
         try:
             self._mainloop.run()
-            logger.info("GLib MainLoop finished.")
+            logger.debug("GLib MainLoop finished.")
             exit_code = 0
         except KeyboardInterrupt:
-            logger.info("KeyboardInterrupt caught, initiating shutdown.")
+            logger.debug("KeyboardInterrupt caught, initiating shutdown.")
             self._trigger_shutdown()
             exit_code = 0  # Normal exit on Ctrl+C
         except Exception:
@@ -233,12 +227,12 @@ class DbusServiceManager:
             # Ensure cleanup happens even if loop exits unexpectedly
             self._cleanup_dbus()
 
-        logger.info("D-Bus service manager finished running.")
+        logger.debug("D-Bus service manager finished running.")
         return exit_code
 
     def _handle_signal(self, signum: str) -> bool:
         """Signal handler integrated with GLib main loop."""
-        logger.info("Received signal %s, initiating shutdown.", signum)
+        logger.debug("Received signal %s, initiating shutdown.", signum)
         self._trigger_shutdown()
         # Returning False removes the signal handler after first invocation
         # Returning True keeps it active (usually want False for exit signals)
@@ -246,5 +240,5 @@ class DbusServiceManager:
 
     def stop(self) -> None:
         """Public method to stop the service from outside."""
-        logger.info("External stop requested.")
+        logger.debug("External stop requested.")
         GLib.idle_add(self._trigger_shutdown)

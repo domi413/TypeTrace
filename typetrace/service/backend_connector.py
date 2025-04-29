@@ -7,10 +7,7 @@ from typing import Callable, ClassVar
 
 from gi.repository import Gio, GLib, GObject
 
-# Define D-Bus details
-BACKEND_DBUS_NAME = "edu.ost.typetrace.backend"
-BACKEND_DBUS_PATH = "/edu/ost/typetrace/backend"
-BACKEND_DBUS_INTERFACE = "edu.ost.typetrace.backend"
+from typetrace.config import Config
 
 
 class BackendConnector(GObject.Object):
@@ -58,9 +55,9 @@ class BackendConnector(GObject.Object):
             bus_type=Gio.BusType.SESSION,
             flags=Gio.DBusProxyFlags.NONE,
             info=None,
-            name=BACKEND_DBUS_NAME,
-            object_path=BACKEND_DBUS_PATH,
-            interface_name=BACKEND_DBUS_INTERFACE,
+            name=Config.BACKEND_DBUS_NAME,
+            object_path=Config.BACKEND_DBUS_PATH,
+            interface_name=Config.BACKEND_DBUS_INTERFACE,
             cancellable=self._cancellable,
             callback=self._on_proxy_created,
             user_data=None,

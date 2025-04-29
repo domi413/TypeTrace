@@ -47,23 +47,6 @@ class CLI:
         self._processor_thread: threading.Thread | None = None
         self._dbus_manager: DbusServiceManager | None = None
 
-    def _get_processor_class(self) -> type[BaseEventProcessor] | None:
-        """Determine the correct event processor class based on the platform."""
-        system = platform.system().lower()
-        logger.debug("Detected platform: %s", system)
-        if system == "linux":
-            from backend.events.linux import LinuxEventProcessor
-
-            return LinuxEventProcessor
-        if system in ("darwin", "windows"):
-            from backend.events.windows_darwin import (
-                WindowsDarwinEventProcessor,
-            )
-
-            return WindowsDarwinEventProcessor
-        logger.exception("Unsupported platform: %s", platform.system())
-        return None
-
     def _initiate_shutdown_callback(self) -> None:
         """Trigger Callback by DbusServiceManager when its loop is stopping."""
         logger.debug(
@@ -83,11 +66,28 @@ class CLI:
         try:
             self.__db_manager.initialize_database(self.__db_path)
 
-            processor_class = self._get_processor_class()
-            if not processor_class:
-                return ExitCodes.PLATFORM_ERROR
+            # --- Start processor Thread ---
+            match platform.system().lower():
+                case "linux":
+                    from backend.events.linux import LinuxEventProcessor
 
-            processor = processor_class(self.__db_path)
+                    if not Config.IS_FLATPAK:
+                        self._check_input_group()
+
+                    processor = LinuxEventProcessor(self.__db_path)
+                    processor.check_device_accessibility()
+
+                case "darwin" | "windows":
+                    from backend.events.windows_darwin import (
+                        WindowsDarwinEventProcessor,
+                    )
+
+                    processor = WindowsDarwinEventProcessor(self.__db_path)
+
+                case _:
+                    logger.error("Unsupported platform: %s", platform.system())
+                    return ExitCodes.PLATFORM_ERROR
+
             if hasattr(processor, "check_device_accessibility"):
                 processor.check_device_accessibility()
 
