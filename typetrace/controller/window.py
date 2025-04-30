@@ -48,6 +48,8 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self._backend_connector = BackendConnector()
         self._backend_connector.connect("backend-available", self._on_available)
         self._backend_connector.connect("backend-unavailable", self._on_unavailable)
+        self._backend_connector.connect("db-updated", self._on_refresh_clicked)
+
         self.backend_toggle.connect("clicked", self._on_backend_label_clicked)
         self.is_backend_running = False
 

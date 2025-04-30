@@ -1,3 +1,3 @@
 [D-BUS Service]
 Name=edu.ost.typetrace
-Exec=@bindir@/typetrace --gapplication-service
+Exec=@bindir@/typetrace

@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, final
 from backend.db import DatabaseManager
 from backend.dbus_service import DbusServiceManager
 from backend.logging_setup import LoggerSetup
+from gi.repository import GLib
 
 from typetrace.config import Config, DatabasePath, ExitCodes
 
@@ -55,8 +56,7 @@ class CLI:
 
     def run(self, args: argparse.Namespace) -> int:
         """Run the backend service with processor as daemon thread."""
-        if args.debug:
-            Config.DEBUG = True
+        Config.DEBUG = bool(args.debug)
         LoggerSetup.setup_logging()
 
         logger.info("TypeTrace Backend starting...")
@@ -66,6 +66,10 @@ class CLI:
         try:
             self.__db_manager.initialize_database(self.__db_path)
 
+            def db_updated_callback() -> None:
+                if self._dbus_manager:
+                    GLib.idle_add(self._dbus_manager.emit_db_updated)
+
             # --- Start processor Thread ---
             match platform.system().lower():
                 case "linux":
@@ -74,7 +78,7 @@ class CLI:
                     if not Config.IS_FLATPAK:
                         self._check_input_group()
 
-                    processor = LinuxEventProcessor(self.__db_path)
+                    processor = LinuxEventProcessor(self.__db_path, db_updated_callback)
                     processor.check_device_accessibility()
 
                 case "darwin" | "windows":

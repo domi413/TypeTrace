@@ -6,7 +6,7 @@ import logging
 import select
 import time
 from contextlib import contextmanager, suppress
-from typing import TYPE_CHECKING, final, override
+from typing import TYPE_CHECKING, Callable, final, override
 
 import evdev
 
@@ -25,9 +25,13 @@ logger = logging.getLogger(__name__)
 class LinuxEventProcessor(BaseEventProcessor):
     """Event processor for the Linux platform."""
 
-    def __init__(self, db_path: Path) -> None:
+    def __init__(
+        self,
+        db_path: Path,
+        db_updated_callback: Callable[[], None] | None = None,
+    ) -> None:
         """Initialize the Linux event processor."""
-        super().__init__(db_path)
+        super().__init__(db_path, db_updated_callback)
         self.__stored_devices: list[evdev.device.InputDevice] | None = None
 
     def check_device_accessibility(self) -> None:

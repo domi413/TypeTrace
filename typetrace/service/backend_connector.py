@@ -19,6 +19,7 @@ class BackendConnector(GObject.Object):
     __gsignals__: ClassVar[dict] = {
         "backend-available": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "backend-unavailable": (GObject.SignalFlags.RUN_FIRST, None, (str,)),
+        "db-updated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     def __init__(self) -> None:
@@ -112,13 +113,14 @@ class BackendConnector(GObject.Object):
 
     def _on_backend_signal(
         self,
-        proxy: Gio.DBusProxy,
-        sender_name: str,
+        _proxy: Gio.DBusProxy,
+        _sender_name: str,
         signal_name: str,
-        parameters: GLib.Variant,
+        _parameters: GLib.Variant,
     ) -> None:
         """Handle signals emitted by the backend service itself."""
-        # Handle specific signals if the backend emits any useful ones
+        if signal_name == "db_updated":
+            self.emit("db-updated")
 
     def _on_backend_owner_changed(
         self,
