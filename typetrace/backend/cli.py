@@ -30,7 +30,7 @@ def _run_processor_thread(processor: BaseEventProcessor) -> None:
         logger.debug("Event processor thread started (PID: %d).", os.getpid())
         processor.trace()
     except Exception:
-        logger.exception("Unhandled exception in event processor daemon thread")
+        logger.exception("Unhandled exception in event processor thread")
     finally:
         logger.debug("Event processor thread finished.")
 
