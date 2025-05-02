@@ -46,6 +46,7 @@ jobs:
       - name: Build and Export Flatpak
         id: build_flatpak
         run: |
+          flatpak install -y "org.gnome.Sdk//48" "org.gnome.Platform//48"
           make flatpak-export 
           echo "flatpak_file=typetrace.flatpak" >> $GITHUB_OUTPUT
         shell: bash
