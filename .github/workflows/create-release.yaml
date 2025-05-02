@@ -19,7 +19,7 @@ jobs:
       - name: Run Release Drafter
         uses: release-drafter/release-drafter@v6
         with:
-          config-name: .github/release-drafter.yaml
+          config-name: release-drafter.yaml
           publish: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
