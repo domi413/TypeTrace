@@ -1,0 +1,51 @@
+{
+  "template": "## What's Changed\n\n#{{CHANGELOG}}\n\n**Full Changelog**: #{{RELEASE_DIFF}}",
+  "pr_template": "- (#{{TICKET}}): #{{CLEAN_TITLE}} by @#{{AUTHOR}} in [#{{NUMBER}}](https://github.com/#{{OWNER}}/#{{REPO}}/pull/#{{NUMBER}})",
+  "categories":
+    [
+      { "title": "### 🚀 Pipeline", "labels": ["pipeline"] },
+      { "title": "### ✨ Features", "labels": ["feat"] },
+      { "title": "### 📝 Documentation", "labels": ["doc"] },
+      { "title": "### 🐛 Fixes", "labels": ["fix"] },
+      { "title": "### 🧪 Tests", "labels": ["test"] },
+      { "title": "### 🔄 Work in Progress", "labels": ["wip"] },
+    ],
+  "label_extractor":
+    [
+      {
+        "pattern": "^(pipeline|feat|doc|fix|test|wip)(?:\\(.*\\))?:.*",
+        "on_property": "title",
+        "target": "$1",
+        "method": "replace",
+      },
+    ],
+  "custom_placeholders":
+    [
+      {
+        "name": "TICKET",
+        "source": "TITLE",
+        "transformer":
+          {
+            "pattern": "^(?:pipeline|feat|doc|fix|test|wip)\\((#TYP-\\d+)\\):.*",
+            "target": "$1",
+            "method": "replace",
+            "on_empty": "N/A",
+          },
+      },
+      {
+        "name": "CLEAN_TITLE",
+        "source": "TITLE",
+        "transformer":
+          {
+            "pattern": "^(?:pipeline|feat|doc|fix|test|wip)(?:\\(.*\\))?:\\s*(.+)",
+            "target": "$1",
+            "method": "replace",
+            "on_empty": "#{{TITLE}}",
+          },
+      },
+    ],
+  "sort": { "order": "ASC", "on_property": "mergedAt" },
+  "max_tags_to_fetch": 200,
+  "max_pull_requests": 200,
+  "max_back_track_time_days": 365,
+}

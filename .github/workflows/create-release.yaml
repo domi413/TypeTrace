@@ -1,74 +1,87 @@
 name: Generate Release Notes
-
 on:
   push:
-    branches:
-      - main
     tags:
-      - "R*" # Trigger on tags such as R4
+      - "M*" # Trigger on tags such as M3
+
+permissions:
+  contents: write
+  pull-requests: read
 
 jobs:
-  update_release_draft:
-    name: Update Release Draft
-    if: github.ref_type == 'branch' && github.ref_name == 'main'
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: read
-    steps:
-      - name: Run Release Drafter
-        uses: release-drafter/release-drafter@v6
-        with:
-          config-name: .github/release-drafter.yaml
-          publish: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  publish_release:
-    name: Publish Release
-    needs: update_release_draft
-    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'R')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: read
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install Flatpak and Flatpak-builder
-        run: |
-          sudo apt update
-          sudo apt install -y flatpak flatpak-builder make
-
-      - name: Extract Tag Number for Release Name
+      - name: Extract Tag Number
         id: extract_tag
         run: |
-          TAG_NAME=${{ github.ref_name }}
-          TAG_NUMBER=${TAG_NAME#R}
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          TAG_NUMBER=${TAG_NAME#M}
           echo "tag_number=$TAG_NUMBER" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Build and Export Flatpak
-        id: build_flatpak
+      - name: Get Previous Tag
+        id: previous_tag
         run: |
-          make flatpak-export 
-          echo "flatpak_file=typetrace.flatpak" >> $GITHUB_OUTPUT
+          PREV_TAG=$(git tag --sort=-version:refname | grep -A 1 ${GITHUB_REF#refs/tags/} | tail -n 1)
+          echo "prev_tag=$PREV_TAG" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Publish Release with Release Drafter
-        id: publish_release_step
-        uses: release-drafter/release-drafter@v6
+      - name: Build Changelog
+        id: build_changelog
+        uses: mikepenz/release-changelog-builder-action@v5
         with:
-          config-name: release-drafter.yaml
-          publish: true
-          tag: ${{ github.ref_name }}
-          name: Review ${{ steps.extract_tag.outputs.tag_number }}
-          files: |
-            ${{ steps.build_flatpak.outputs.flatpak_file }}
-          prerelease: false
-          latest: true
+          fromTag: ${{ steps.previous_tag.outputs.prev_tag }}
+          toTag: ${{ github.ref_name }}
+          configuration: .github/changelog-config.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Calibri Fonts
+        id: cache-fonts
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/fonts/MS
+          key: ${{ runner.os }}-calibri-fonts-v1
+          restore-keys: |
+            ${{ runner.os }}-calibri-fonts-
+
+      - name: Tectonic Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Tectonic
+          key: ${{ runner.os }}-tectonic-${{ hashFiles('**/*.tex') }}
+          restore-keys: |
+            ${{ runner.os }}-tectonic-
+
+      - name: Set up Tectonic
+        uses: wtfjoke/setup-tectonic@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Git Version File
+        run: |
+          echo "\newcommand{\gitVersion}{$(git describe --always --long --dirty --broken)}" > gitVersion.tex
+          echo "Generated gitVersion.tex containing: $(cat gitVersion.tex)"
+        shell: bash
+
+      - name: Compile LaTeX
+        run: bash .github/scripts/latex-compile-and-check-overfull-box.sh "${{ steps.cache-fonts.outputs.cache-hit }}"
+        shell: bash
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Review ${{ steps.extract_tag.outputs.tag_number }}
+          body: ${{ steps.build_changelog.outputs.changelog }}
+          files: docs/TypeTrace.pdf
+          draft: false
+          prerelease: false
+          make_latest: true
+          generate_release_notes: false
