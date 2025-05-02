@@ -46,11 +46,14 @@ jobs:
 
       - name: Build and Export Flatpak
         id: build_flatpak
-        run: |
-          flatpak install -y org.gnome.Sdk//46 org.gnome.Platform//46 # We're using 46 here, since ubuntu doesn't support 48 yet
-          make flatpak-export 
-          echo "flatpak_file=typetrace.flatpak" >> $GITHUB_OUTPUT
-        shell: bash
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: typetrace.flatpak
+          manifest-path: edu.ost.typetrace.yaml
+          repository-name: flathub
+          repository-url: https://flathub.org/repo/flathub.flatpakrepo
+          cache-key: flatpak-builder-${{ github.sha }}
+          arch: x86_64
 
       - name: Build Changelog
         id: build_changelog
@@ -67,7 +70,7 @@ jobs:
         with:
           name: Release ${{ steps.extract_tag.outputs.tag_number }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          files: ${{ steps.build_flatpak.outputs.flatpak_file }}
+          files: ${{ steps.build_flatpak.outputs.bundle }}
           draft: false
           prerelease: false
           make_latest: true

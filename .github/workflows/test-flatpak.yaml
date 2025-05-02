@@ -1,0 +1,37 @@
+name: Test Flatpak Install
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-flatpak:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Flatpak
+        run: |
+          sudo apt update
+          sudo apt install -y flatpak
+          flatpak --version
+        shell: bash
+
+      - name: Add Flathub Remote
+        run: |
+          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak remote-list
+        shell: bash
+
+      - name: List Available Runtimes
+        run: |
+          flatpak remote-ls flathub | grep org.gnome.Sdk || echo "No org.gnome.Sdk found"
+          flatpak remote-ls flathub | grep org.gnome.Platform || echo "No org.gnome.Platform found"
+        shell: bash
+
+      - name: Install GNOME Runtimes
+        run: |
+          flatpak install -y flathub org.gnome.Sdk//48 org.gnome.Platform//48
+        shell: bash
