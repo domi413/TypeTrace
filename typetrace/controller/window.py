@@ -22,7 +22,6 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
     toast_overlay = Gtk.Template.Child()
 
-    refresh_button = Gtk.Template.Child()
     view_switcher = Gtk.Template.Child()
     stack = Gtk.Template.Child()
 
@@ -48,7 +47,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self._backend_connector = BackendConnector()
         self._backend_connector.connect("backend-available", self._on_available)
         self._backend_connector.connect("backend-unavailable", self._on_unavailable)
-        self._backend_connector.connect("db-updated", self._on_refresh_clicked)
+        self._backend_connector.connect("db-updated", self._update_view)
 
         self.backend_toggle.connect("clicked", self._on_backend_label_clicked)
         self.is_backend_running = False
@@ -58,9 +57,8 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
         self.verbose = Verbose(keystroke_store=keystroke_store)
         self.statistics = Statistics(keystroke_store=keystroke_store)
-        self.refresh_button.connect("clicked", self._on_refresh_clicked)
-        self.keystroke_store.connect("changed", self._on_refresh_clicked)
-        self.db_manager.connect("changed", self._on_refresh_clicked)
+        self.keystroke_store.connect("changed", self._update_view)
+        self.db_manager.connect("changed", self._update_view)
 
         heatmap_page = self.stack.add_titled(
             self.heatmap,
@@ -84,7 +82,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         GLib.idle_add(self._backend_connector.check_and_activate_async)
 
-    def _on_refresh_clicked(self, _:any) -> None:
+    def _update_view(self, _:any) -> None:
         """Handle refresh button click."""
         keystrokes = self.keystroke_store.get_all_keystrokes()
         self.heatmap.update(keystrokes)
