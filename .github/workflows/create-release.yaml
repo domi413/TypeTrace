@@ -1,59 +1,76 @@
 name: Generate Release Notes
+
 on:
   push:
+    branches:
+      - main
     tags:
-      - "R*" # Trigger on tags such as R1
+      - "R*" # Trigger on tags such as R4
 
-permissions:
-  contents: write
-  pull-requests: read
+permissions: read-only
 
 jobs:
-  release:
-    if: startsWith(github.ref, 'refs/tags/')
+  update_release_draft:
+    name: Update Release Draft
+    if: github.ref_type == 'branch' && (github.ref_name == 'main' || github.ref_name == 'master')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - name: Run Release Drafter
+        uses: release-drafter/release-drafter@v6
+        with:
+          config-name: .github/release-drafter.yml
+          publish: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish_release:
+    name: Publish Release
+    needs: update_release_draft
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'R')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Extract Tag Number
+      - name: Install Flatpak and Flatpak-builder
+        run: |
+          sudo apt update
+          sudo apt install -y flatpak flatpak-builder make
+
+      - name: Extract Tag Number for Release Name
         id: extract_tag
         run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          TAG_NUMBER=${TAG_NAME#R}
+          TAG_NAME=${{ github.ref_name }}
+          TAG_NUMBER=${TAG_NAME#M}
           echo "tag_number=$TAG_NUMBER" >> $GITHUB_OUTPUT
-          echo "full_tag=$TAG_NAME" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Get Previous Tag
-        id: previous_tag
+      - name: Build and Export Flatpak
+        id: build_flatpak
         run: |
-          PREV_TAG=$(git tag --sort=-version:refname | grep -A 1 ${GITHUB_REF#refs/tags/} | tail -n 1)
-          echo "prev_tag=$PREV_TAG" >> $GITHUB_OUTPUT
+          make flatpak-export 
+          echo "flatpak_file=typetrace.flatpak" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Set Version Environment Variable
-        run: |
-          echo "TYPETRACE_VERSION=${{ steps.extract_tag.outputs.full_tag }}" >> $GITHUB_ENV
-
-      - name: Build Changelog
-        id: build_changelog
-        uses: mikepenz/release-changelog-builder-action@v5
+      - name: Publish Release with Release Drafter
+        id: publish_release_step
+        uses: release-drafter/release-drafter@v6
         with:
-          fromTag: ${{ steps.previous_tag.outputs.prev_tag }}
-          toTag: ${{ github.ref_name }}
-          configuration: .github/changelog-config.json
+          config-name: .github/release-drafter.yml
+          publish: true
+          tag: ${{ github.ref_name }}
+          name: Review ${{ steps.extract_tag.outputs.tag_number }}
+          files: |
+            ${{ steps.build_flatpak.outputs.flatpak_file }}
+          prerelease: false
+          latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: Release ${{ steps.extract_tag.outputs.tag_number }}
-          body: ${{ steps.build_changelog.outputs.changelog }}
-          draft: false
-          prerelease: false
-          make_latest: true
-          generate_release_notes: false

@@ -1,0 +1,33 @@
+name-template: "Review M$NEXT_PATCH_VERSION"
+tag-template: "M$NEXT_PATCH_VERSION"
+
+categories:
+  - title: "### 🚀 Pipeline"
+    labels: ["pipeline"]
+
+  - title: "### ✨ Features"
+    labels: ["feat"]
+
+  - title: "### 📝 Documentation"
+    labels: ["doc"]
+
+  - title: "### 🐛 Fixes"
+    labels: ["fix"]
+
+  - title: "### 🧪 Tests"
+    labels: ["test"]
+
+  - title: "### 🔄 Work in Progress"
+    labels: ["wip"]
+
+template: |
+  ## What's Changed
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$TAG
+
+change-template: "- $TITLE by @$AUTHOR in #$NUMBER"
+
+sort-by: merged_at
+sort-direction: ascending
