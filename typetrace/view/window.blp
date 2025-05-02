@@ -14,19 +14,10 @@ template $TypetraceWindow: Adw.ApplicationWindow {
         };
 
         [start]
-        Gtk.Box {
-          Gtk.Button refresh_button {
-            valign: center;
-            has-frame: false;
-            icon-name: "view-refresh-symbolic";
-            margin-start: 5;
-            tooltip-text: "Updates views";
-          }
-          Gtk.Button backend_toggle {
-            label: "Backend stopped";
-            css-classes: ["backend-status-stopped", "flat"];
-            margin-start: 10;
-          }
+        Gtk.Button backend_toggle {
+          label: "Backend stopped";
+          css-classes: ["backend-status-stopped", "flat"];
+          margin-start: 10;
         }
 
         [end]
