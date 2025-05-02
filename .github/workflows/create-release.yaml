@@ -47,7 +47,7 @@ jobs:
       - name: Build and Export Flatpak
         id: build_flatpak
         run: |
-          flatpak install -y flathub org.gnome.Sdk//46 org.gnome.Platform//46 # We're using here 46, since ubuntu doesn't support 48 yet
+          flatpak install -y org.gnome.Sdk//46 org.gnome.Platform//46 # We're using 46 here, since ubuntu doesn't support 48 yet
           make flatpak-export 
           echo "flatpak_file=typetrace.flatpak" >> $GITHUB_OUTPUT
         shell: bash
