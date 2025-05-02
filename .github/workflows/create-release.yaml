@@ -19,7 +19,7 @@ jobs:
       - name: Run Release Drafter
         uses: release-drafter/release-drafter@v6
         with:
-          config-name: release-drafter.yaml
+          config-name: .github/release-drafter.yaml
           publish: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,7 +47,7 @@ jobs:
         id: extract_tag
         run: |
           TAG_NAME=${{ github.ref_name }}
-          TAG_NUMBER=${TAG_NAME#M}
+          TAG_NUMBER=${TAG_NAME#R}
           echo "tag_number=$TAG_NUMBER" >> $GITHUB_OUTPUT
         shell: bash
 
