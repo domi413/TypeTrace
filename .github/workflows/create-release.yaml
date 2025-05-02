@@ -12,7 +12,7 @@ permissions: read-only
 jobs:
   update_release_draft:
     name: Update Release Draft
-    if: github.ref_type == 'branch' && (github.ref_name == 'main' || github.ref_name == 'master')
+    if: github.ref_type == 'branch' && github.ref_name == 'main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,7 +21,7 @@ jobs:
       - name: Run Release Drafter
         uses: release-drafter/release-drafter@v6
         with:
-          config-name: .github/release-drafter.yml
+          config-name: .github/release-drafter.yaml
           publish: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -64,7 +64,7 @@ jobs:
         id: publish_release_step
         uses: release-drafter/release-drafter@v6
         with:
-          config-name: .github/release-drafter.yml
+          config-name: release-drafter.yaml
           publish: true
           tag: ${{ github.ref_name }}
           name: Review ${{ steps.extract_tag.outputs.tag_number }}
