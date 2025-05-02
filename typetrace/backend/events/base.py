@@ -6,7 +6,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Generic, TypeVar, final
+from typing import TYPE_CHECKING, Callable, Generic, TypeVar, final
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -23,11 +23,17 @@ logger = logging.getLogger(__name__)
 class BaseEventProcessor(ABC, Generic[DeviceType]):
     """Abstract base class for event processing."""
 
-    def __init__(self, db_path: Path) -> None:
+    def __init__(
+        self,
+        db_path: Path,
+        db_updated_callback: Callable[[], None] | None = None,
+    ) -> None:
         """Initialize the processor with a database path."""
         self.__db_manager = DatabaseManager()
         self._db_path: Path = db_path
         self._current_date: str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        self._terminate: bool = False
+        self.db_updated_callback = db_updated_callback
 
     @abstractmethod
     def trace(self) -> None:
@@ -67,6 +73,8 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
             buffer.clear()
             start_time = current_time
             self._current_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            if self.db_updated_callback:
+                self.db_updated_callback()
 
         return buffer, start_time
 
@@ -105,3 +113,8 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
             Updated buffer and start time
 
         """
+
+    def stop(self) -> None:
+        """Handle termination."""
+        logger.debug("Received signal to stop, shutting down...")
+        self._terminate = True

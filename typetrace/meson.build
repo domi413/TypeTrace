@@ -87,6 +87,12 @@ sources_controller_utils = [
 ]
 install_data(sources_controller_utils, install_dir: moduledir / 'controller' / 'utils')
 
+sources_service = [
+  'service/__init__.py',
+  'service/backend_connector.py',
+]
+install_data(sources_service, install_dir: moduledir / 'service')
+
 sources_controller_utils_charts = [
   'controller/utils/charts/__init__.py',
   'controller/utils/charts/base_chart.py',

@@ -37,6 +37,10 @@ class Config:
         / "edu.ost.typetrace-backend.desktop"
     )
 
+    BACKEND_DBUS_NAME = "edu.ost.typetrace.backend"
+    BACKEND_DBUS_PATH = "/edu/ost/typetrace/backend"
+    BACKEND_DBUS_INTERFACE = "edu.ost.typetrace.backend"
+
     # Global settings
     DEBUG: bool = False
 
