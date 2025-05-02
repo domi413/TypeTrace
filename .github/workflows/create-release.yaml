@@ -2,7 +2,7 @@ name: Generate Release Notes
 on:
   push:
     tags:
-      - "M*" # Trigger on tags such as M3
+      - "R*" # Trigger on tags such as R1
 
 permissions:
   contents: write
@@ -22,8 +22,9 @@ jobs:
         id: extract_tag
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          TAG_NUMBER=${TAG_NAME#M}
+          TAG_NUMBER=${TAG_NAME#R}
           echo "tag_number=$TAG_NUMBER" >> $GITHUB_OUTPUT
+          echo "full_tag=$TAG_NAME" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Get Previous Tag
@@ -31,6 +32,22 @@ jobs:
         run: |
           PREV_TAG=$(git tag --sort=-version:refname | grep -A 1 ${GITHUB_REF#refs/tags/} | tail -n 1)
           echo "prev_tag=$PREV_TAG" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Set Version Environment Variable
+        run: |
+          echo "TYPETRACE_VERSION=${{ steps.extract_tag.outputs.full_tag }}" >> $GITHUB_ENV
+
+      - name: Install Flatpak and Flatpak-builder
+        run: |
+          sudo apt update
+          sudo apt install -y flatpak flatpak-builder make
+
+      - name: Build and Export Flatpak
+        id: build_flatpak
+        run: |
+          make flatpak-export 
+          echo "flatpak_file=typetrace.flatpak" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Build Changelog
@@ -43,44 +60,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Cache Calibri Fonts
-        id: cache-fonts
-        uses: actions/cache@v4
-        with:
-          path: ~/.local/share/fonts/MS
-          key: ${{ runner.os }}-calibri-fonts-v1
-          restore-keys: |
-            ${{ runner.os }}-calibri-fonts-
-
-      - name: Tectonic Cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/Tectonic
-          key: ${{ runner.os }}-tectonic-${{ hashFiles('**/*.tex') }}
-          restore-keys: |
-            ${{ runner.os }}-tectonic-
-
-      - name: Set up Tectonic
-        uses: wtfjoke/setup-tectonic@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate Git Version File
-        run: |
-          echo "\newcommand{\gitVersion}{$(git describe --always --long --dirty --broken)}" > gitVersion.tex
-          echo "Generated gitVersion.tex containing: $(cat gitVersion.tex)"
-        shell: bash
-
-      - name: Compile LaTeX
-        run: bash .github/scripts/latex-compile-and-check-overfull-box.sh "${{ steps.cache-fonts.outputs.cache-hit }}"
-        shell: bash
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Review ${{ steps.extract_tag.outputs.tag_number }}
+          name: Release ${{ steps.extract_tag.outputs.tag_number }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          files: docs/TypeTrace.pdf
+          files: ${{ steps.build_flatpak.outputs.flatpak_file }}
           draft: false
           prerelease: false
           make_latest: true
