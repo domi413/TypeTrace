@@ -7,8 +7,6 @@ on:
     tags:
       - "R*" # Trigger on tags such as R4
 
-permissions: read-only
-
 jobs:
   update_release_draft:
     name: Update Release Draft
