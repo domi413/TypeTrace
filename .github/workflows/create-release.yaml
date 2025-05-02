@@ -50,8 +50,6 @@ jobs:
         with:
           bundle: typetrace.flatpak
           manifest-path: edu.ost.typetrace.yaml
-          repository-name: flathub
-          repository-url: https://flathub.org/repo/flathub.flatpakrepo
           cache-key: flatpak-builder-${{ github.sha }}
           arch: x86_64
 
