@@ -17,8 +17,6 @@ from gi.repository import GLib
 from typetrace.config import Config, DatabasePath, ExitCodes
 
 if TYPE_CHECKING:
-    import argparse
-
     from backend.events.base import BaseEventProcessor
 
 logger = logging.getLogger(__name__)
