@@ -54,9 +54,8 @@ class CLI:
             "D-Bus service loop stopping callback triggered (backend will exit).",
         )
 
-    def run(self, args: argparse.Namespace) -> int:
+    def run(self) -> int:
         """Run the backend service with processor as daemon thread."""
-        Config.DEBUG = bool(args.debug)
         LoggerSetup.setup_logging()
 
         logger.info("TypeTrace Backend starting...")

@@ -14,7 +14,7 @@ clean:
 	rm -rf $(BUILD_DIR) $(INSTALL_DIR)
 
 test: $(INSTALL_DIR)/bin/typetrace
-	env GSETTINGS_SCHEMA_DIR=$(INSTALL_DIR)/share/glib-2.0/schemas $(INSTALL_DIR)/bin/typetrace
+	env GSETTINGS_SCHEMA_DIR=$(INSTALL_DIR)/share/glib-2.0/schemas $(INSTALL_DIR)/bin/typetrace -d
 
 $(INSTALL_DIR)/bin/typetrace:
 	$(MAKE) meson-install
