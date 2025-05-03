@@ -16,12 +16,25 @@ dev = [
 ]
 
 [tool.ruff.lint]
-extend-select = [
-    "ALL",
+select = [
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "ANN",  # type annotations
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "I",      # isort
+    "PT",     # pytest-style 
 ]
+
 ignore = [
+    "ANN001", # Ignore missing type annotation for function arguments
+    "ANN002", # Ignore missing type annotation for *args
     "ANN003", # Ignore missing type annotation for **kwargs
-    "ANN401", # Ignore `Any` type annotation for functions
     "D203",   # In conflict with D211
     "D213",   # In conflict with D212
+    
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ANN","PT009","E402", "SLF001"]
+

@@ -63,7 +63,7 @@ class PieChart(Chart):
     MIN_PERCENTAGE_THRESHOLD = 0.05  # Minimum percentage to display in the pie chart
 
     def __init__(
-        self,
+        self: "PieChart",
         drawing_area: Gtk.DrawingArea,
         data_provider: callable,
         total_count_provider: callable | None = None,
@@ -71,6 +71,7 @@ class PieChart(Chart):
         """Initialize the pie chart.
 
         Args:
+        ----
             drawing_area: The GTK drawing area to draw on
             data_provider: A function that returns the data for the chart
             total_count_provider: A function that returns the total count of all data
@@ -81,7 +82,7 @@ class PieChart(Chart):
         self.total_count_provider = total_count_provider
 
     def _calculate_geometry(
-        self,
+        self: "PieChart",
         width: int,
         height: int,
     ) -> tuple[float, float, float]:
@@ -93,17 +94,19 @@ class PieChart(Chart):
         return center_x, center_y, radius
 
     def _calculate_data_with_others(
-        self,
+        self: "PieChart",
         data: list[Any],
         total_count: int,
     ) -> tuple[list[Any], int, tuple[float, float, float]]:
         """Calculate others count and return data with others info.
 
         Args:
+        ----
             data: List of data items
             total_count: Total count of all items
 
         Returns:
+        -------
             Tuple containing (data items, others count, others color)
 
         """
@@ -119,12 +122,13 @@ class PieChart(Chart):
         return data, others_count, others_color
 
     def _draw_pie_slice(
-        self,
+        self: "PieChart",
         config: PieSliceDrawConfig,
     ) -> float:
         """Draw a single pie slice with optional label.
 
-        Returns:
+        Returns
+        -------
             The end angle of the slice
 
         """
@@ -161,7 +165,7 @@ class PieChart(Chart):
 
         return config.start_angle + angle
 
-    def _draw_slices_and_labels(self, config: PieSliceConfig) -> float:
+    def _draw_slices_and_labels(self: "PieChart", config: PieSliceConfig) -> float:
         """Draw pie slices and their percentage labels."""
         start_angle = -math.pi / 2
 
@@ -209,7 +213,7 @@ class PieChart(Chart):
 
         return start_angle
 
-    def _draw_legend(self, config: LegendConfig) -> None:
+    def _draw_legend(self: "PieChart", config: LegendConfig) -> None:
         """Draw the legend for the pie chart."""
         legend_x = config.width * 0.75
         legend_y = config.height * 0.15
@@ -269,7 +273,7 @@ class PieChart(Chart):
 
     @override
     def draw(
-        self,
+        self: "PieChart",
         _area: Gtk.DrawingArea,
         cr: cairo.Context,
         width: int,

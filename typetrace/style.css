@@ -20,11 +20,3 @@
 .gradient-bar {
   border-radius: 4pt;
 }
-
-.backend-status-stopped {
-  color: orangered;
-}
-
-.backend-status-running {
-  color: green;
-}

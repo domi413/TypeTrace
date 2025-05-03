@@ -1,27 +1,49 @@
-"""Class used to manipulate the database file."""
+"""Class used to manipulate the database file and initialize schema."""
+
+from __future__ import annotations
 
 import shutil
+import sqlite3
 from pathlib import Path
-from typing import ClassVar
-
-from gi.repository import GObject
 
 from typetrace.config import DatabasePath
 
 
-class DatabaseManager(GObject.Object):
-    """Used for manipulations concerning the database file."""
+class DatabaseManager:
+    """Used for manipulations concerning the database file and schema."""
 
-    def __init__(self) -> None:
+    def __init__(self: DatabaseManager) -> None:
         """Construct an instance of DatabaseManager."""
-        super().__init__()
         self.db_path = Path(DatabasePath.DB_PATH)
 
-    __gsignals__: ClassVar[dict] = {
-        "changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
-    }
+    def initialize_database(self: DatabaseManager, db_path: str | Path) -> None:
+        """Initialize the database schema.
 
-    def export_database(self, dest_path: Path) -> bool:
+        This method creates the keystrokes table if it doesn't already exist.
+
+        Args:
+        ----
+            db_path: Path to the SQLite database file.
+
+        """
+        conn = sqlite3.connect(str(db_path))
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS keystrokes (
+                scan_code INTEGER NOT NULL,
+                count     INTEGER NOT NULL,
+                key_name  TEXT    NOT NULL,
+                date      TEXT    NOT NULL,
+                -- ensure uniqueness for upserts
+                UNIQUE(scan_code, key_name, date)
+            )
+            """,
+        )
+        conn.commit()
+        conn.close()
+
+    def export_database(self: DatabaseManager, dest_path: Path) -> bool:
         """Export the database to the specified destination path."""
         try:
             shutil.copy2(self.db_path, dest_path)
@@ -30,7 +52,7 @@ class DatabaseManager(GObject.Object):
         else:
             return True
 
-    def import_database(self, src_path: Path) -> bool:
+    def import_database(self: DatabaseManager, src_path: Path) -> bool:
         """Import database from the source path, overwriting the current one."""
         try:
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -38,5 +60,4 @@ class DatabaseManager(GObject.Object):
         except OSError:
             return False
         else:
-            self.emit("changed")
             return True

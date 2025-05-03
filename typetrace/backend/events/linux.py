@@ -1,21 +1,27 @@
-"""Linux-specific event processing."""
+"""Module for processing Linux input events for the TypeTrace application.
+
+This module defines the `LinuxEventProcessor` class, which handles capturing
+and processing key events from the system's input devices. It supports managing
+input devices, buffering events, and graceful shutdown.
+"""
 
 from __future__ import annotations
 
 import logging
 import select
+import signal
 import time
 from contextlib import contextmanager, suppress
-from typing import TYPE_CHECKING, Callable, final, override
+from typing import TYPE_CHECKING, final, override
 
 import evdev
 
 if TYPE_CHECKING:
     from collections.abc import Generator
     from pathlib import Path
+    from types import FrameType
 
-from backend.events.base import BaseEventProcessor
-
+from typetrace.backend.events.base import BaseEventProcessor
 from typetrace.config import Config, Event
 
 logger = logging.getLogger(__name__)
@@ -25,19 +31,17 @@ logger = logging.getLogger(__name__)
 class LinuxEventProcessor(BaseEventProcessor):
     """Event processor for the Linux platform."""
 
-    def __init__(
-        self,
-        db_path: Path,
-        db_updated_callback: Callable[[], None] | None = None,
-    ) -> None:
+    def __init__(self: LinuxEventProcessor, db_path: Path) -> None:
         """Initialize the Linux event processor."""
-        super().__init__(db_path, db_updated_callback)
+        super().__init__(db_path)
         self.__stored_devices: list[evdev.device.InputDevice] | None = None
+        self.__terminate: bool = False
 
-    def check_device_accessibility(self) -> None:
+    def check_device_accessibility(self: LinuxEventProcessor) -> None:
         """Check if the script has access to any input devices.
 
-        Raises:
+        Raises
+        ------
             PermissionError: If no input devices can be accessed.
 
         """
@@ -48,8 +52,10 @@ class LinuxEventProcessor(BaseEventProcessor):
             logger.exception("Failed trying to access input devices")
 
     @override
-    def trace(self) -> None:
-        """See base class."""
+    def trace(self: LinuxEventProcessor) -> None:
+        """Start processing events."""
+        self.__setup_signal_handlers()
+
         with self._managed_devices() as devices:
             if not devices:
                 logger.warning("No devices found")
@@ -58,13 +64,16 @@ class LinuxEventProcessor(BaseEventProcessor):
             self._buffer(devices)
 
     @override
-    def _buffer(self, devices: list[evdev.device.InputDevice]) -> None:
-        """See base class."""
+    def _buffer(
+        self: LinuxEventProcessor, devices: list[evdev.device.InputDevice],
+    ) -> None:
+        """Buffer the events for processing."""
         buffer: list[Event] = []
         start_time: float = time.time()
+        self.__terminate = False
 
         try:
-            while not self._terminate:
+            while not self.__terminate:
                 # Wait for events with timeout
                 r: list[evdev.device.InputDevice]
                 r, _, _ = select.select(devices, [], [], Config.BUFFER_TIMEOUT)
@@ -94,9 +103,11 @@ class LinuxEventProcessor(BaseEventProcessor):
             )
 
     @override
-    def _process_single_event(self, event: evdev.events.InputEvent) -> Event | None:
-        """See base class."""
-        # Trigger on press
+    def _process_single_event(
+        self: LinuxEventProcessor, event: evdev.events.InputEvent,
+    ) -> Event | None:
+        """Process a single input event."""
+        # Trigger on key press
         if event.type == evdev.ecodes.EV_KEY and event.value == 1:
             event_map: dict[int, str | tuple[str]] | None = None
             event_code: int = event.code
@@ -104,10 +115,6 @@ class LinuxEventProcessor(BaseEventProcessor):
             # Keyboard input
             if event_code in evdev.ecodes.KEY:
                 event_map = evdev.ecodes.KEY
-
-            # Mouse input
-            # elif event_code in evdev.ecodes.BTN:  # noqa: ERA001
-            #     event_map = evdev.ecodes.BTN  # noqa: ERA001
 
             if event_map is not None:
                 event_data: Event = {
@@ -121,13 +128,10 @@ class LinuxEventProcessor(BaseEventProcessor):
         return None
 
     @contextmanager
-    def _managed_devices(self) -> Generator[list[evdev.device.InputDevice], None, None]:
-        """Context manager for handling devices.
-
-        Yields:
-            List of input devices.
-
-        """
+    def _managed_devices(
+        self: LinuxEventProcessor,
+    ) -> Generator[list[evdev.device.InputDevice], None, None]:
+        """Context manager for managing input devices."""
         devices: list[evdev.device.InputDevice] = self._select_devices()
         try:
             yield devices
@@ -139,47 +143,44 @@ class LinuxEventProcessor(BaseEventProcessor):
             # Clear the cached devices since we have closed them
             self.__stored_devices = None
 
-    def _select_devices(self) -> list[evdev.device.InputDevice]:
-        """Find and return all devices.
-
-        Returns:
-            List of input devices.
-
-        """
+    def _select_devices(self: LinuxEventProcessor) -> list[evdev.device.InputDevice]:
+        """Select and return all input devices."""
         if self.__stored_devices is not None:
             return self.__stored_devices
 
         devices: list[evdev.device.InputDevice] = [
             evdev.device.InputDevice(fp) for fp in evdev.util.list_devices()
         ]
+        processed_devices: list[evdev.device.InputDevice] = []
 
-        if logging.DEBUG:
-            for device in devices:
-                if evdev.ecodes.EV_KEY in device.capabilities():
-                    logger.debug(
-                        "Found keyboard device: %s, %r",
-                        device.name,
-                        device.path,
-                    )
+        for device in devices:
+            if evdev.ecodes.EV_KEY in device.capabilities():
+                processed_devices.append(device)
+                logger.debug(
+                    "Found keyboard device: %s, %r",
+                    device.name,
+                    device.path,
+                )
 
         # Cache the list of devices
         self.__stored_devices = devices
         return devices
 
     def _read_device_events(
-        self,
+        self: LinuxEventProcessor,
         device: evdev.device.InputDevice,
         buffer: list[Event],
     ) -> list[Event]:
         """Read events from a single device.
 
         Args:
+        ----
             device: Input device to read from
             buffer: Current buffer of events
-            start_time: Time when the buffer started
 
         Returns:
-            Updated buffer and start time
+        -------
+            Updated buffer
 
         """
         try:
@@ -191,3 +192,15 @@ class LinuxEventProcessor(BaseEventProcessor):
             logger.exception("Error reading from device")
 
         return buffer
+
+    def __setup_signal_handlers(self: LinuxEventProcessor) -> None:
+        """Set up signal handlers for graceful termination."""
+        signal.signal(signal.SIGTERM, self.__handle_termination_signal)
+        signal.signal(signal.SIGINT, self.__handle_termination_signal)
+
+    def __handle_termination_signal(
+        self: LinuxEventProcessor, signum: int, _: FrameType | None,
+    ) -> None:
+        """Handle termination signals."""
+        logger.debug("Received signal %s, shutting down...", signum)
+        self.__terminate = True

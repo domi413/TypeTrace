@@ -1,8 +1,9 @@
 [Desktop Entry]
 Name=TypeTrace
-Exec=@bindir@/typetrace
+Exec=typetrace
 Icon=edu.ost.typetrace
 Type=Application
 Categories=Utility;
 Keywords=GTK;
 StartupNotify=true
+DBusActivatable=false

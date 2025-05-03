@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable
 
-from gi.repository import Adw, Gdk, Gio, GObject, Gtk
+from gi.repository import Adw, Gdk, Gio, Gtk
 
 from typetrace.config import Config, DatabasePath
 from typetrace.controller.utils import desktop_utils, dialog_utils
@@ -13,7 +13,6 @@ from typetrace.controller.utils.color_utils import (
     parse_color_string,
     rgba_to_rgb_string,
 )
-from typetrace.model.layouts import KEYBOARD_LAYOUTS
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -48,7 +47,7 @@ class Preferences(Adw.PreferencesDialog):
     keyboard_row = Gtk.Template.Child()
 
     def __init__(
-        self,
+        self: "Preferences",
         parent_window: Gtk.Window,
         db_manager: DatabaseManager,
         keystroke_store: KeystrokeStore,
@@ -57,6 +56,7 @@ class Preferences(Adw.PreferencesDialog):
         """Initialize the preferences dialog with a parent window and database manager.
 
         Args:
+        ----
             parent_window: The main application window, used as parent for dialogs.
             db_manager: Manages database import/export operations.
             keystroke_store: Manages access to and clearing of keystroke data.
@@ -132,9 +132,7 @@ class Preferences(Adw.PreferencesDialog):
         is_accent_enabled = self.settings.get_boolean("use-accent-color")
         self.color_row.set_sensitive(not is_accent_enabled)
 
-        self._setup_keyboard_layouts()
-
-    def _init_color_buttons(self) -> None:
+    def _init_color_buttons(self: "Preferences") -> None:
         """Initialize color buttons with current settings."""
         if self.settings.get_boolean("use-accent-color"):
             accent_color = get_system_accent_color()
@@ -152,7 +150,7 @@ class Preferences(Adw.PreferencesDialog):
         self._update_color_buttons(single_color, begin_color, end_color)
 
     def _update_color_buttons(
-        self,
+        self: "Preferences",
         single_color: Gdk.RGBA,
         begin_color: Gdk.RGBA,
         end_color: Gdk.RGBA,
@@ -160,6 +158,7 @@ class Preferences(Adw.PreferencesDialog):
         """Update all color buttons with the given colors.
 
         Args:
+        ----
             single_color: The color to set for single color mode.
             begin_color: The color to set for multi-color begin.
             end_color: The color to set for the end color button.
@@ -170,7 +169,7 @@ class Preferences(Adw.PreferencesDialog):
         self.multi_end_color_button.set_rgba(end_color)
 
     def _setup_switch(
-        self,
+        self: "Preferences",
         switch: Adw.SwitchRow,
         setting_key: str,
         handler: Callable[[Adw.SwitchRow, Any], None],
@@ -178,6 +177,7 @@ class Preferences(Adw.PreferencesDialog):
         """Set up a switch and bind it to a setting.
 
         Args:
+        ----
             switch: The switch widget to set up
             setting_key: The setting key to bind to
             handler: The callback function for notify::active signal
@@ -194,7 +194,11 @@ class Preferences(Adw.PreferencesDialog):
             handler,
         )
 
-    def _on_single_color_toggled(self, switch: Adw.SwitchRow, _: any) -> None:
+    def _on_single_color_toggled(
+        self: "Preferences",
+        switch: Adw.SwitchRow,
+        *_,
+    ) -> None:
         """Handle the single color switch toggle."""
         is_single_color = switch.get_active()
         self.single_color_expander.set_visible(is_single_color)
@@ -207,13 +211,21 @@ class Preferences(Adw.PreferencesDialog):
         mode = "Single color" if is_single_color else "Multi-color"
         dialog_utils.show_toast(self, f"Heatmap mode set to: {mode}")
 
-    def _on_reverse_gradient_toggled(self, switch: Adw.SwitchRow, _: any) -> None:
+    def _on_reverse_gradient_toggled(
+        self: "Preferences",
+        switch: Adw.SwitchRow,
+        *_,
+    ) -> None:
         """Handle the reverse gradient switch toggle."""
         is_reversed = switch.get_active()
         direction = "Dark → Light" if is_reversed else "Light → Dark"
         dialog_utils.show_toast(self, f"Gradient direction: {direction}")
 
-    def _on_accent_color_toggled(self, switch: Adw.SwitchRow, _: any) -> None:
+    def _on_accent_color_toggled(
+        self: "Preferences",
+        switch: Adw.SwitchRow,
+        *_,
+    ) -> None:
         """Handle the accent color switch toggle."""
         use_accent = switch.get_active()
         self.color_row.set_sensitive(not use_accent)
@@ -231,13 +243,14 @@ class Preferences(Adw.PreferencesDialog):
             dialog_utils.show_toast(self, "Using custom color")
 
     def _handle_color_change(
-        self,
+        self: "Preferences",
         button: Gtk.ColorDialogButton,
         setting_key: str,
     ) -> None:
         """Handle color change from a color button.
 
         Args:
+        ----
             button: The color dialog button that was changed.
             setting_key: The settings key to update.
 
@@ -252,38 +265,37 @@ class Preferences(Adw.PreferencesDialog):
         self.settings.set_string(setting_key, rgba_to_rgb_string(rgba))
         dialog_utils.show_toast(self, "Heatmap color updated")
 
-    def _on_autostart_toggled(self, row: Adw.SwitchRow, *_: any) -> None:
+    def _on_autostart_toggled(
+        self: "Preferences",
+        row: Adw.SwitchRow,
+        *_,
+    ) -> None:
         """Handle the autostart toggle change."""
-
-        def on_autostart_result(success: bool, error_msg: str | None) -> None:  # noqa: FBT001
-            """Use callback to handle autostart enable/disable result."""
+        if row.get_active():
+            success, error_msg = desktop_utils.enable_autostart()
             if success:
-                dialog_utils.show_toast(
-                    self,
-                    f"Autostart {'enabled' if row.get_active() else 'disabled'}",
-                )
+                dialog_utils.show_toast(self, "Backend autostart enabled")
             else:
                 dialog_utils.show_error_dialog(
                     self.parent_window,
-                    f"Couldn't {'enable' if row.get_active() else 'disable'} autostart",
+                    "Failed to enable autostart",
                     secondary_text=error_msg,
                 )
-                # Revert the toggle state if the operation failed
-                handler_id = row.handler_block_by_func(self._on_autostart_toggled)
-                try:
-                    row.set_active(not row.get_active())
-                finally:
-                    row.handler_unblock(handler_id)
-
-        if row.get_active():
-            desktop_utils.enable_autostart(callback=on_autostart_result)
+                row.set_active(False)
         else:
             success, error_msg = desktop_utils.disable_autostart()
-            on_autostart_result(success, error_msg)
+            if success:
+                dialog_utils.show_toast(self, "Backend autostart disabled")
+            else:
+                dialog_utils.show_error_dialog(
+                    self.parent_window,
+                    "Failed to disable autostart",
+                    secondary_text=error_msg,
+                )
+                row.set_active(True)
 
-    def _on_export_clicked(self, _button: Gtk.Button) -> None:
+    def _on_export_clicked(self: "Preferences", _button: Gtk.Button) -> None:
         """Handle the export button click event, opens a save dialog for export."""
-
         def export_callback(path: Path) -> None:
             if self.db_manager.export_database(path):
                 dialog_utils.show_toast(self, "Data Exported Successfully")
@@ -297,9 +309,8 @@ class Preferences(Adw.PreferencesDialog):
             callback=export_callback,
         )
 
-    def _on_import_clicked(self, _button: Gtk.Button) -> None:
+    def _on_import_clicked(self: "Preferences", _button: Gtk.Button) -> None:
         """Handle the import button click event, opens a file chooser dialog."""
-
         def import_callback(path: Path) -> None:
             dialog_utils.show_confirmation_dialog(
                 parent=self.parent_window,
@@ -321,10 +332,11 @@ class Preferences(Adw.PreferencesDialog):
             callback=import_callback,
         )
 
-    def _perform_import(self, src_path: Path) -> None:
+    def _perform_import(self: "Preferences", src_path: Path) -> None:
         """Perform the database import operation after user confirmation.
 
         Args:
+        ----
             src_path: The path to the database file for import.
 
         """
@@ -333,9 +345,8 @@ class Preferences(Adw.PreferencesDialog):
         else:
             dialog_utils.show_error_dialog(self.parent_window, "Import Failed")
 
-    def _on_delete_clicked(self, _button: Gtk.Button) -> None:
+    def _on_delete_clicked(self: "Preferences", _button: Gtk.Button) -> None:
         """Perform the database clear operation after user confirmation."""
-
         def delete_callback() -> None:
             if self.keystroke_store.clear():
                 dialog_utils.show_toast(self, "Data Cleared Successfully")
@@ -349,45 +360,6 @@ class Preferences(Adw.PreferencesDialog):
             callback=lambda: delete_callback(),
         )
 
-    def _on_locate_clicked(self, _button: Gtk.Button) -> None:
+    def _on_locate_clicked(self: "Preferences", _button: Gtk.Button) -> None:
         """Open Filemanager where the data file is stored."""
         dialog_utils.show_folder_in_filemanager(DatabasePath.DB_PATH.parent)
-
-    def _setup_keyboard_layouts(self) -> None:
-        """Set up the keyboard layout selection dropdown."""
-        keyboard_layouts_model = Gtk.StringList()
-        for layout_id in KEYBOARD_LAYOUTS:
-            keyboard_layouts_model.append(layout_id)
-
-        self.keyboard_row.set_model(keyboard_layouts_model)
-
-        current_layout = self.settings.get_string("keyboard-layout")
-        if not current_layout or current_layout not in KEYBOARD_LAYOUTS:
-            current_layout = "en_US"
-            self.settings.set_string("keyboard-layout", current_layout)
-
-        for i, layout_id in enumerate(KEYBOARD_LAYOUTS):
-            if layout_id == current_layout:
-                self.keyboard_row.set_selected(i)
-                break
-
-        self.keyboard_row.connect("notify::selected", self._on_keyboard_layout_changed)
-
-    def _on_keyboard_layout_changed(
-        self,
-        row: Adw.ComboRow,
-        _: GObject.ParamSpec,
-    ) -> None:
-        """Handle the keyboard layout selection change.
-
-        Args:
-            row: The combo row widget that was changed.
-            _: The property that changed (unused).
-
-        """
-        selected_index = row.get_selected()
-        string_list = row.get_model()
-        selected_layout = string_list.get_string(selected_index)
-
-        self.settings.set_string("keyboard-layout", selected_layout)
-        dialog_utils.show_toast(self, f"Keyboard layout set to: {selected_layout}")

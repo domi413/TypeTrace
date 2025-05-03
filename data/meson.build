@@ -1,26 +1,23 @@
 fs = import('fs')
 
-conf = configuration_data()
-conf.set('bindir', get_option('prefix') / get_option('bindir'))
-
 # Desktop Entry
-desktop_file = configure_file(
-  input: 'edu.ost.typetrace.desktop.in',
-  output: 'edu.ost.typetrace.desktop',
-  configuration: conf,
+desktop_file = fs.copyfile(
+  'edu.ost.typetrace.desktop.in',
+  'edu.ost.typetrace.desktop',
+  install: true,
   install_dir: get_option('datadir') / 'applications',
 )
 
-desktop_file_backend = configure_file(
-  input: 'edu.ost.typetrace-backend.desktop.in',
-  output: 'edu.ost.typetrace-backend.desktop',
-  configuration: conf,
+desktop_file_backend = fs.copyfile(
+  'edu.ost.typetrace-backend.desktop.in',
+  'edu.ost.typetrace-backend.desktop',
+  install: true,
   install_dir: get_option('datadir') / 'applications',
 )
 
 desktop_utils = find_program('desktop-file-validate', required: false)
 if desktop_utils.found()
-  test('Validate desktop file', desktop_utils, args: [desktop_file, desktop_file_backend])
+  test('Validate desktop file', desktop_utils, args: [desktop_file])
 endif
 
 # Metainfo (will probably be unnecessary)
@@ -52,16 +49,11 @@ test(
 )
 
 # Services
+conf = configuration_data()
+conf.set('bindir', get_option('prefix') / get_option('bindir'))
 configure_file(
   input: 'edu.ost.typetrace.service.in',
   output: 'edu.ost.typetrace.service',
-  configuration: conf,
-  install_dir: get_option('datadir') / 'dbus-1' / 'services',
-)
-
-configure_file(
-  input: 'edu.ost.typetrace.backend.service.in',
-  output: 'edu.ost.typetrace.backend.service',
   configuration: conf,
   install_dir: get_option('datadir') / 'dbus-1' / 'services',
 )

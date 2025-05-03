@@ -36,10 +36,5 @@
 			<summary>Use system accent color</summary>
 			<description>If enabled, the system accent color will be used as the base color for the heatmap.</description>
 		</key>
-		<key name="keyboard-layout" type="s">
-			<default>"en_US"</default>
-			<summary>Keyboard layout</summary>
-			<description>The keyboard layout to use for the heatmap visualization.</description>
-		</key>
 	</schema>
 </schemalist>

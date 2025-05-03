@@ -18,9 +18,11 @@ def parse_color_string(color_str: str) -> Gdk.RGBA:
     Handles formats like "rgb(r,g,b)" and standard Gdk color names/formats.
 
     Args:
+    ----
         color_str: String representation of a color (e.g., "rgb(0,0,255)").
 
     Returns:
+    -------
         Gdk.RGBA object. Returns blue as a default if parsing fails.
 
     """
@@ -48,9 +50,11 @@ def rgba_to_rgb_string(rgba: Gdk.RGBA) -> str:
     """Convert Gdk.RGBA to rgb(r,g,b) string format.
 
     Args:
+    ----
         rgba: The RGBA color object.
 
     Returns:
+    -------
         String in the format "rgb(r,g,b)" with integer values 0-255.
 
     """
@@ -66,9 +70,11 @@ def get_color_scheme(settings: Gio.Settings) -> HeatmapColorScheme:
     """Get the appropriate color scheme based on settings.
 
     Args:
+    ----
         settings: Application settings.
 
     Returns:
+    -------
         HeatmapColorScheme instance.
 
     """
@@ -85,7 +91,8 @@ def get_color_scheme(settings: Gio.Settings) -> HeatmapColorScheme:
 def get_system_accent_color() -> Gdk.RGBA:
     """Get the system accent color from Adwaita.
 
-    Returns:
+    Returns
+    -------
         RGBA color object.
 
     """
@@ -111,10 +118,11 @@ class HeatmapColorScheme(ABC):
     # Decide when to use white vs black text
     LUMINANCE_THRESHOLD: Final[float] = 0.5
 
-    def __init__(self, settings: Gio.Settings) -> None:
+    def __init__(self: "HeatmapColorScheme", settings: Gio.Settings) -> None:
         """Initialize with settings.
 
         Args:
+        ----
             settings: Application settings.
 
         """
@@ -122,11 +130,12 @@ class HeatmapColorScheme(ABC):
 
     @abstractmethod
     def get_color_gradient(
-        self,
+        self: "HeatmapColorScheme",
     ) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
         """Get the begin and end color for the gradient.
 
-        Returns:
+        Returns
+        -------
             A tuple containing:
                 - begin_color: RGB tuple (float values 0-1)
                 - end_color: RGB tuple (float values 0-1)
@@ -135,15 +144,17 @@ class HeatmapColorScheme(ABC):
 
     @final
     def calculate_color_for_key(
-        self,
+        self: "HeatmapColorScheme",
         normalized_count: float,
     ) -> tuple[str, str]:
         """Calculate heatmap color and contrast text color based on normalized count.
 
         Args:
+        ----
             normalized_count: A float between 0.0 and 1.0.
 
         Returns:
+        -------
             A tuple containing:
                 - str: The calculated background color.
                 - str: The calculated text color ('white' or 'black') for contrast.
@@ -166,17 +177,18 @@ class HeatmapColorScheme(ABC):
         return bg_color, text_color
 
     @final
-    def get_gradient_css(self) -> str:
+    def get_gradient_css(self: "HeatmapColorScheme") -> str:
         """Generate CSS for a gradient bar.
 
-        Returns:
+        Returns
+        -------
             CSS string for gradient bar.
 
         """
         beg_color, end_color = self.get_color_gradient()
 
-        beg_r, beg_g, beg_b = [int(x * 255) for x in beg_color]
-        end_r, end_g, end_b = [int(x * 255) for x in end_color]
+        beg_r, beg_g, beg_b = (int(x * 255) for x in beg_color)
+        end_r, end_g, end_b = (int(x * 255) for x in end_color)
 
         return f"""
         .gradient-bar {{
@@ -191,15 +203,17 @@ class SingleColorHeatmap(HeatmapColorScheme):
     """Single color heatmap with auto-generated light/dark gradient."""
 
     def _generate_gradient_from_color(
-        self,
+        self: "SingleColorHeatmap",
         color_rgba: Gdk.RGBA,
     ) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
         """Generate a gradient pair from a single color.
 
         Args:
+        ----
             color_rgba: The base color to generate gradient from.
 
         Returns:
+        -------
             Tuple of (begin_color, end_color) as RGB tuples.
 
         """
@@ -224,11 +238,12 @@ class SingleColorHeatmap(HeatmapColorScheme):
 
     @override
     def get_color_gradient(
-        self,
+        self: "SingleColorHeatmap",
     ) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
         """Get begin and end colors derived from a single color.
 
-        Returns:
+        Returns
+        -------
             Tuple of (begin_color, end_color) as RGB tuples.
 
         """
@@ -241,11 +256,12 @@ class AccentColorHeatmap(SingleColorHeatmap):
 
     @override
     def get_color_gradient(
-        self,
+        self: "AccentColorHeatmap",
     ) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
         """Get begin and end colors derived from the system accent color.
 
-        Returns:
+        Returns
+        -------
             Tuple of (begin_color, end_color) as RGB tuples.
 
         """
@@ -259,11 +275,12 @@ class MultiColorHeatmap(HeatmapColorScheme):
 
     @override
     def get_color_gradient(
-        self,
+        self: "MultiColorHeatmap",
     ) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
         """Get begin and end colors from settings.
 
-        Returns:
+        Returns
+        -------
             Tuple of (begin_color, end_color) as RGB tuples.
 
         """

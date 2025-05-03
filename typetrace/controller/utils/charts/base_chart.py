@@ -48,10 +48,11 @@ class TextConfig:
 class Chart(ABC):
     """Abstract base class for charts."""
 
-    def __init__(self, drawing_area: Gtk.DrawingArea) -> None:
+    def __init__(self: "Chart", drawing_area: Gtk.DrawingArea) -> None:
         """Initialize the chart.
 
         Args:
+        ----
             drawing_area: The GTK drawing area to draw on
 
         """
@@ -61,7 +62,7 @@ class Chart(ABC):
 
     @abstractmethod
     def draw(
-        self,
+        self: "Chart",
         area: Gtk.DrawingArea,
         cr: cairo.Context,
         width: int,
@@ -70,6 +71,7 @@ class Chart(ABC):
         """Draw the chart.
 
         Args:
+        ----
             area: The drawing area
             cr: The Cairo context
             width: The width of the drawing area
@@ -78,19 +80,20 @@ class Chart(ABC):
         """
 
     @final
-    def update(self) -> None:
+    def update(self: "Chart") -> None:
         """Queue a redraw of the chart."""
         self.drawing_area.queue_draw()
 
     @final
     def _draw_text(
-        self,
+        self: "Chart",
         config: TextConfig,
         color: tuple[float, float, float] = (1.0, 1.0, 1.0),
     ) -> None:
         """Draw text on the chart.
 
         Args:
+        ----
             config: The text configuration
             color: The text color as RGB tuple
 
@@ -106,7 +109,7 @@ class Chart(ABC):
 
     @final
     def _draw_no_data(
-        self,
+        self: "Chart",
         cr: cairo.Context,
         width: int,
         height: int,
@@ -115,6 +118,7 @@ class Chart(ABC):
         """Draw a message when no data is available.
 
         Args:
+        ----
             cr: The Cairo context
             width: The width of the drawing area
             height: The height of the drawing area
@@ -135,10 +139,11 @@ class Chart(ABC):
         )
 
     @final
-    def _get_accent_color(self) -> tuple:
+    def _get_accent_color(self: "Chart") -> tuple:
         """Get the system accent color.
 
-        Returns:
+        Returns
+        -------
             The accent color as RGB tuple
 
         """
@@ -146,10 +151,11 @@ class Chart(ABC):
         return (rgba.red, rgba.green, rgba.blue)
 
     @final
-    def get_colors(self) -> dict[str, Any]:
+    def get_colors(self: "Chart") -> dict[str, Any]:
         """Get the color scheme for the chart.
 
-        Returns:
+        Returns
+        -------
             A dictionary with color values
 
         """

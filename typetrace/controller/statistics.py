@@ -11,7 +11,7 @@ from typetrace.controller.utils.charts.line_chart import LineChart
 from typetrace.controller.utils.charts.pie_chart import PieChart
 
 if TYPE_CHECKING:
-    from typetrace.model.keystrokes import Keystroke, KeystrokeStore
+    from typetrace.model.keystrokes import KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/statistics.ui")
@@ -27,10 +27,11 @@ class Statistics(Gtk.Box):
     date_button = Gtk.Template.Child()
     clear_date_button = Gtk.Template.Child()
 
-    def __init__(self, keystroke_store: KeystrokeStore, **kwargs) -> None:
+    def __init__(self: Statistics, keystroke_store: KeystrokeStore, **kwargs) -> None:
         """Initialize the statistics page with keystroke data.
 
         Args:
+        ----
             keystroke_store: Access to keystrokes models
             **kwargs: Keyword arguments passed to the parent constructor
 
@@ -58,50 +59,60 @@ class Statistics(Gtk.Box):
         self.calendar.connect("day-selected", self._date_selected)
         self.clear_date_button.set_sensitive(False)
 
-    def update(self) -> None:
+    def update(self: Statistics) -> None:
         """Queue a redraw of the statistics drawing areas."""
         self.line_chart.update()
         self.pie_chart.update()
 
-    def _clear_date(self, _button: Gtk.Button) -> None:
+    def _clear_date(self: Statistics, _button: Gtk.Button) -> None:
         self.selected_date = None
         self.clear_date_button.set_sensitive(False)
         self.date_button.get_child().set_label("Select Date")
         self.pie_chart.update()
 
-    def _date_selected(self, calendar: Gtk.Calendar) -> None:
+    def _date_selected(self: Statistics, calendar: Gtk.Calendar) -> None:
         self.selected_date = calendar.get_date().format("%Y-%m-%d")
         self.clear_date_button.set_sensitive(True)
         self.date_button.get_child().set_label(self.selected_date)
         self.pie_chart.update()
 
-    def _get_top_keystrokes(self) -> list[Keystroke]:
+    def _get_top_keystrokes(self: Statistics) -> list:
         """Get the top keystrokes for the pie chart.
 
-        Returns:
+        Returns
+        -------
             The list of top keystrokes ordered by count
 
         """
-        return self.keystroke_store.get_top_keystrokes(
-            limit=int(self.bar_count_spin.get_value()),
-            date=self.selected_date,
+        keystrokes = (
+            self.keystroke_store.get_keystrokes_by_date(self.selected_date)
+            if self.selected_date
+            else self.keystroke_store.get_all_keystrokes()
         )
+        return sorted(keystrokes, key=lambda k: k.count, reverse=True)[
+            : int(self.bar_count_spin.get_value())
+        ]
 
-    def _get_total_keystroke_count(self) -> int:
+    def _get_total_keystroke_count(self: Statistics) -> int:
         """Get the total count of all keystrokes.
 
-        Returns:
+        Returns
+        -------
             Total count of all keystrokes for the selected date or all time
 
         """
-        return self.keystroke_store.get_total_keystroke_count(
-            date=self.selected_date,
+        keystrokes = (
+            self.keystroke_store.get_keystrokes_by_date(self.selected_date)
+            if self.selected_date
+            else self.keystroke_store.get_all_keystrokes()
         )
+        return sum(k.count for k in keystrokes)
 
-    def _get_keystroke_data(self) -> list[dict]:
+    def _get_keystroke_data(self: Statistics) -> list[dict]:
         """Get daily keystroke data for the line chart using SQL queries.
 
-        Returns:
+        Returns
+        -------
             A list of data points with date and count values
 
         """

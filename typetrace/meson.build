@@ -1,6 +1,5 @@
-datadir = get_option('prefix') / get_option('datadir')
-pkgdatadir = datadir / meson.project_name()
-moduledir = pkgdatadir / meson.project_name()
+pkgdatadir = get_option('prefix') / get_option('datadir') / meson.project_name()
+moduledir = pkgdatadir / 'typetrace'
 
 blueprints = custom_target(
   'blueprints',
@@ -34,7 +33,6 @@ gnome.compile_resources(
 conf = configuration_data()
 conf.set('application_id', 'edu.ost.typetrace')
 conf.set('PYTHON', python.find_installation('python3').full_path())
-conf.set('datadir', datadir)
 conf.set('pkgdatadir', pkgdatadir)
 conf.set('VERSION', meson.project_version())
 configure_file(
@@ -46,17 +44,10 @@ configure_file(
   install_mode: 'r-xr-xr-x',
 )
 
-configure_file(
-  input: 'config.py',
-  output: 'config.py',
-  configuration: conf,
-  install: true,
-  install_dir: moduledir,
-)
-
 sources = [
   '__init__.py',
   'application.py',
+  'config.py',
   'sql.py',
 ]
 install_data(sources, install_dir: moduledir)
@@ -86,12 +77,6 @@ sources_controller_utils = [
   'controller/utils/color_utils.py',
 ]
 install_data(sources_controller_utils, install_dir: moduledir / 'controller' / 'utils')
-
-sources_service = [
-  'service/__init__.py',
-  'service/backend_connector.py',
-]
-install_data(sources_service, install_dir: moduledir / 'service')
 
 sources_controller_utils_charts = [
   'controller/utils/charts/__init__.py',

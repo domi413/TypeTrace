@@ -5,9 +5,9 @@ from __future__ import annotations
 import logging
 import platform
 from enum import StrEnum
-from typing import final
+from typing import Any, final
 
-from typetrace.config import Config
+from typetrace.config import Config  # Import the missing Config object
 
 
 class LogColor(StrEnum):
@@ -22,12 +22,12 @@ class LogColor(StrEnum):
 class ColoredFormatter(logging.Formatter):
     """Custom formatter with colored output for specific log levels."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self: ColoredFormatter, **kwargs: dict[str, Any]) -> None:
         """Initialize formatter with color support detection."""
         super().__init__(**kwargs)
         self.__use_colors = self._should_use_colors()
 
-    def format(self, record: logging.LogRecord) -> str:
+    def format(self: ColoredFormatter, record: logging.LogRecord) -> str:
         """Format log record with colors for warnings and errors."""
         original_levelname = record.levelname
         original_msg = record.msg
@@ -50,7 +50,7 @@ class ColoredFormatter(logging.Formatter):
 
         return result
 
-    def _should_use_colors(self) -> bool:
+    def _should_use_colors(self: ColoredFormatter) -> bool:
         """Determine if colors should be used based on platform."""
         return platform.system().lower() in ("linux", "darwin")
 
@@ -59,7 +59,7 @@ class ColoredFormatter(logging.Formatter):
 class LoggerSetup:
     """Logger setup for TypeTrace."""
 
-    def __init__(self) -> None:
+    def __init__(self: LoggerSetup) -> None:
         """Private constructor to prevent instantiation."""
         raise TypeError
 

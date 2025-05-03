@@ -1,13 +1,13 @@
 """SQL queries for TypeTrace database operations."""
 
-from typing import final
+from typing import final  # Standard library import
 
 
 @final
 class SQLQueries:
     """SQL queries for TypeTrace database operations."""
 
-    def __init__(self) -> None:
+    def __init__(self: "SQLQueries") -> None:
         """Private constructor to prevent instantiation."""
         raise TypeError
 
@@ -43,29 +43,7 @@ class SQLQueries:
     ORDER BY total_count DESC
     """
 
-    GET_TOP_KEYSTROKES_ALL_TIME = """
-    SELECT scan_code, SUM(count) as total_count, key_name,
-    MAX(date) as latest_date
-    FROM keystrokes
-    GROUP BY scan_code, key_name
-    ORDER BY total_count DESC
-    LIMIT ?
-    """
-
-    GET_TOP_KEYSTROKES_BY_DATE = """
-    SELECT scan_code, count, key_name, date
-    FROM keystrokes
-    WHERE date = ?
-    ORDER BY count DESC
-    LIMIT ?
-    """
-
     GET_TOTAL_PRESSES = "SELECT SUM(count) FROM keystrokes"
-
-    GET_TOTAL_KEYSTROKE_COUNT_BY_DATE = """
-    SELECT SUM(count) FROM keystrokes
-    WHERE date = ?
-    """
 
     GET_HIGHEST_COUNT = """
     SELECT MAX(total_count) FROM (
@@ -89,3 +67,4 @@ class SQLQueries:
     """
 
     CLEAR_KEYSTROKES = "DELETE FROM keystrokes"
+
