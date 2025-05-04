@@ -30,19 +30,19 @@ print_step() {
 }
 
 print_success() {
-    _print_message "$C_GREEN" "SUCCESS:" "$1"
+    _print_message "$C_GREEN" "SUCCESS" "$1"
 }
 
 print_info() {
-    _print_message "$C_BLUE" "INFO:" "$1"
+    _print_message "$C_BLUE" "INFO" "$1"
 }
 
 print_warning() {
-    _print_message "$C_YELLOW" "WARNING:" "$1"
+    _print_message "$C_YELLOW" "WARNING" "$1"
 }
 
 print_error() {
-    _print_message "$C_RED" "ERROR:" "$1"
+    _print_message "$C_RED" "ERROR" "$1"
     exit 1
 }
 
