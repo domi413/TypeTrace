@@ -11,6 +11,7 @@ from gi.repository import Adw, Gio
 from typetrace.config import DatabasePath
 from typetrace.controller.preferences import Preferences
 from typetrace.controller.window import TypetraceWindow
+from typetrace.logging_setup import LoggerSetup
 from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
 
@@ -22,6 +23,7 @@ class Application(Adw.Application):
 
     def __init__(self, application_id: str, version: str) -> None:
         """Initialize the application with default settings."""
+        LoggerSetup.setup_logging()
         logger.debug(
             "Initializing application with ID: %s, version: %s",
             application_id,
@@ -44,9 +46,7 @@ class Application(Adw.Application):
             self.db_conn = sqlite3.connect(DatabasePath.DB_PATH)
             logger.debug("Database connection established to: %s", DatabasePath.DB_PATH)
             self.keystroke_store = KeystrokeStore(self.db_conn)
-            logger.debug("KeystrokeStore initialized")
             self.db_manager = DatabaseManager()
-            logger.debug("DatabaseManager initialized")
         except Exception:
             logger.exception("Failed to initialize database components")
             raise
@@ -62,7 +62,6 @@ class Application(Adw.Application):
         logger.debug("Activating application")
         win = self.props.active_window
         if not win:
-            logger.debug("No active window found, creating new TypetraceWindow")
             try:
                 win = TypetraceWindow(
                     self.db_manager,
