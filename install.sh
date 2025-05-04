@@ -223,7 +223,6 @@ install_flatpak() {
         print_error "Failed to download typetrace.flatpak from $download_url"
     fi
 
-    # Install the flatpak
     print_info "Installing $APP_NAME as a Flatpak (user)..."
     if flatpak --user install -y "$flatpak_file"; then
         print_success "$APP_NAME Flatpak installation complete."
@@ -234,7 +233,63 @@ install_flatpak() {
 }
 
 install_local() {
-    true # placeholder
+    print_step "Starting Local Installation to $USER_LOCAL_PREFIX"
+
+    # Check for required commands for local installation
+    local local_commands=(
+        "meson"
+        "ninja"
+        "pkg-config"
+    )
+    check_commands "${local_commands[@]}" # Exits on error
+
+    print_info "Checking for GTK4 dependency..."
+    if ! pkg-config --modversion gtk4 &>/dev/null; then
+        print_error "GTK4 not found. Please install GTK4 libraries and try again."
+    fi
+    print_success "GTK4 dependency found."
+
+    print_info "Configuring Meson build..."
+    local build_dir="$WORK_DIR/build"
+    if ! meson setup "$build_dir" --prefix="$USER_LOCAL_PREFIX" --buildtype=release; then
+        print_error "Failed to configure Meson build."
+    fi
+    print_success "Meson build configured successfully."
+
+    print_info "Compiling $APP_NAME..."
+    if ! ninja -C "$build_dir"; then
+        print_error "Failed to compile $APP_NAME."
+    fi
+    print_success "$APP_NAME compiled successfully."
+
+    # Create directory for uninstall manifest
+    local manifest_dir="$USER_LOCAL_PREFIX/share/typetrace"
+    local manifest_file="$manifest_dir/uninstall_manifest.txt"
+    mkdir -p "$manifest_dir" || print_error "Failed to create manifest directory $manifest_dir."
+
+    print_info "Installing $APP_NAME to $USER_LOCAL_PREFIX..."
+    if ! ninja -C "$build_dir" install; then
+        print_error "Failed to install $APP_NAME to $USER_LOCAL_PREFIX."
+    fi
+
+    # Copy Meson's install manifest
+    local meson_manifest="$build_dir/meson-logs/install-log.txt"
+    if [[ -f "$meson_manifest" ]]; then
+        cp "$meson_manifest" "$manifest_file" || print_warning "Failed to copy install manifest to $manifest_file."
+        print_success "Uninstall manifest copied to $manifest_file."
+    else
+        print_warning "Meson install manifest not found at $meson_manifest."
+        print_info "Uninstallation may require manual cleanup of files in $USER_LOCAL_PREFIX."
+    fi
+
+    print_success "$APP_NAME installed successfully to $USER_LOCAL_PREFIX."
+
+    # Provide instructions for running and uninstalling
+    print_info "The application should now be visible within your desktop environment."
+    print_info "To run $APP_NAME using 'typetrace', ensure $USER_LOCAL_PREFIX/bin is in your PATH."
+    print_info "You can run it directly using: ${C_BOLD}$USER_LOCAL_PREFIX/bin/typetrace${C_RESET}"
+    print_info "To add to PATH, consider adding to ~/.bashrc or equivalent."
+    print_info "To uninstall, run: ${C_BOLD}xargs -r rm -rf < \"$manifest_file && rm -r "$HOME/.local/share/typetrace\"${C_RESET}"
 }
 
 # --- Main Execution Function ---
