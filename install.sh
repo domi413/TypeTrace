@@ -47,6 +47,7 @@ print_error() {
 }
 
 # Function to ensure script is running with root privileges
+# Usage: ensure_sudo "$@"
 ensure_sudo() {
     if [[ $EUID -eq 0 ]]; then
         return 0
@@ -61,6 +62,7 @@ ensure_sudo() {
     print_warning "This operation requires root privileges."
     print_info "Attempting to re-run script with sudo..."
 
+    # Execute sudo, passing all original arguments
     sudo "$0" "$@"
     exit $?
 }
@@ -349,4 +351,5 @@ main() {
     print_step "Cleanup"
 }
 
+# --- Script Entry Point ---
 main "$@"
