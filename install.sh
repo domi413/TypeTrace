@@ -191,53 +191,49 @@ trap cleanup EXIT SIGINT SIGTERM
 
 # --- Installation Functions ---
 install_flatpak() {
-    print_step "Starting Flatpak installation"
+        print_step "Starting Flatpak installation"
 
-    # TODO: Prebuild flatpak, remove builder and you may remove the flatpak_commands
+    # Check for required commands
     local flatpak_commands=(
         "flatpak"
-        "flatpak-builder"
+        "curl"
+        "jq"
     )
     check_commands "${flatpak_commands[@]}" # Exits on error
 
-    local required_flatpaks=(
-        "org.gnome.Sdk//48"
-        "org.gnome.Platform//48"
-    )
+    local api_url="https://api.github.com/repos/domi413/TypeTrace/releases/latest"
 
-    # Check and install missing Flatpak packages
-    for pkg in "${required_flatpaks[@]}"; do
-        if ! flatpak list | grep -q "${pkg%%//*}"; then
-            print_info "Installing $pkg..."
-            flatpak install -y flathub "$pkg" || print_error "Failed to install $pkg"
-        else
-            print_info "$pkg is already installed."
-        fi
-    done
+    print_info "Fetching latest release information from GitHub..."
 
-    local manifest_file="${APP_ID}.yaml"
-    if [[ ! -f "$manifest_file" ]]; then
-        print_error "Flatpak manifest file '$manifest_file' not found in repository."
+    # Fetch the latest release and extract the typetrace.flatpak download URL
+    local download_url
+    download_url=$(curl -s "$api_url" | jq -r '.assets[] | select(.name == "typetrace.flatpak") | .browser_download_url')
+
+    if [[ -z "$download_url" ]]; then
+        print_error "Failed to find 'typetrace.flatpak' in the latest release."
     fi
 
-    print_info "Building and installing $APP_NAME as a Flatpak (user)..."
+    print_info "Found download URL: $download_url"
 
-    if flatpak-builder --user --install --force-clean _build "$manifest_file"; then
+    # Download the flatpak file to the temporary working directory
+    local flatpak_file="$WORK_DIR/typetrace.flatpak"
+    if curl -L -o "$flatpak_file" "$download_url"; then
+        print_success "Successfully downloaded typetrace.flatpak"
+    else
+        print_error "Failed to download typetrace.flatpak from $download_url"
+    fi
+
+    # Install the flatpak
+    print_info "Installing $APP_NAME as a Flatpak (user)..."
+    if flatpak --user install -y "$flatpak_file"; then
         print_success "$APP_NAME Flatpak installation complete."
         print_info "You can run it using: ${C_BOLD}flatpak run $APP_ID${C_RESET}"
     else
-        print_error "Flatpak build or installation failed."
+        print_error "Flatpak installation failed."
     fi
 }
 
 install_local() {
-    # TODO:
-    # - Fetch binary from GitHub release
-    # - Move binary to the correct location (curl already can do this, no need for mv)
-    # - You may need to fetch de .desktop file as well and move it to the correct location
-    # - Update the desktop icons cache
-    # - Something else?
-
     true # placeholder
 }
 
