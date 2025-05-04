@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Callable
 
@@ -9,6 +10,8 @@ import dbus
 from gi.repository import Adw, Gio, GLib, Gtk
 
 from typetrace.config import Config
+
+logger = logging.getLogger(__name__)
 
 
 def show_toast(window: Gtk.Window, message: str, timeout: int = 3) -> None:
@@ -18,7 +21,6 @@ def show_toast(window: Gtk.Window, message: str, timeout: int = 3) -> None:
         window: The parent Gtk.Window to attach the toast to.
         message: The text message to display in the toast.
         timeout: Duration in seconds the toast remains visible (0 for indefinite).
-                    Defaults to 3 seconds.
 
     """
     toast = Adw.Toast.new(message)
@@ -62,8 +64,7 @@ def open_file_save_dialog(
         parent: The parent Gtk.Window for the dialog.
         title: The title displayed in the dialog window.
         initial_name: The suggested filename to save as.
-        callback: A function to call with the chosen Path object if the user
-                confirms the save action. Called only on acceptance.
+        callback: A function to call with the chosen Path object.
         initial_folder: Optional path to open the dialog at.
 
     """
@@ -81,7 +82,7 @@ def open_file_save_dialog(
             if file:
                 callback(Path(file.get_path()))
         except GLib.Error:
-            pass  # Canceled or error occurred
+            logger.exception("Failed to save file in dialog: %s", title)
 
     dialog.save(parent, None, on_response, parent)
 
@@ -119,7 +120,7 @@ def open_file_open_dialog(
             if file:
                 callback(Path(file.get_path()))
         except GLib.Error:
-            pass # Canceled or error occurred
+            logger.exception("Failed to open file in dialog: %s", title)
 
     dialog.open(parent, None, on_response, parent)
 
@@ -139,7 +140,6 @@ def show_confirmation_dialog(
         text: The primary heading text for the confirmation question.
         secondary_text: Additional body text explaining the action.
         callback: A function to call if the user clicks 'Yes'.
-                    Not called if the user clicks 'No' or closes the dialog.
 
     """
     dialog = Adw.AlertDialog(
@@ -170,29 +170,38 @@ def show_folder_in_filemanager(
         folder_path: The path to the folder to open in the file manager.
 
     """
-    path = Path(folder_path).resolve()
-    if not path.is_dir():
-        msg = f"Path '{path}' does not exist"
-        raise ValueError(msg)
+    try:
+        path = Path(folder_path).resolve()
 
-    if Config.IS_FLATPAK:
-        try:
-            bus = dbus.SessionBus()
-            obj = bus.get_object(
-                "org.freedesktop.FileManager1",
-                "/org/freedesktop/FileManager1",
-            )
-            interface = dbus.Interface(obj, "org.freedesktop.FileManager1")
-            uri = f"file://{path}"
-            interface.ShowFolders([uri], "")
-        except dbus.DBusException:
-            pass
-    else:
-        # Non-Flatpak: Use GIO
-        gfile = Gio.File.new_for_path(str(path))
-        try:
-            app_info = Gio.AppInfo.get_default_for_type("inode/directory", True)  # noqa: FBT003
-            if app_info:
-                app_info.launch([gfile], None)
-        except GLib.Error:
-            pass
+        if Config.IS_FLATPAK:
+            try:
+                bus = dbus.SessionBus()
+                obj = bus.get_object(
+                    "org.freedesktop.FileManager1",
+                    "/org/freedesktop/FileManager1",
+                )
+                interface = dbus.Interface(obj, "org.freedesktop.FileManager1")
+                uri = f"file://{path}"
+                interface.ShowFolders([uri], "")
+            except dbus.DBusException:
+                logger.exception(
+                    "Failed to open folder in file manager via D-Bus: %s",
+                    path,
+                )
+        else:
+            # Non-Flatpak: Use GIO
+            gfile = Gio.File.new_for_path(str(path))
+            try:
+                app_info = Gio.AppInfo.get_default_for_type(
+                    "inode/directory",
+                    must_support_uris=True,
+                )
+                if app_info:
+                    app_info.launch([gfile], None)
+            except GLib.Error:
+                logger.exception(
+                    "Failed to open folder in file manager via GIO: %s",
+                    path,
+                )
+    except ValueError:
+        logger.exception("Invalid folder path: %s", folder_path)

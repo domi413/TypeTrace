@@ -28,9 +28,10 @@ def run_application() -> int:
     """Run TypeTrace application and returns its exit code."""
     from typetrace.application import Application
 
+    args = [arg for arg in sys.argv if arg not in ("-d", "--debug")]
     app = Application(APPLICATION_ID, VERSION)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    return app.run(sys.argv)
+    return app.run(args)
 
 
 def print_help() -> None:
@@ -71,11 +72,14 @@ def main() -> int:
     if args.version:
         print(VERSION)
         sys.exit()
+    if args.debug:
+        from typetrace.config import Config
+        Config.DEBUG = True
     if args.backend:
         from backend import cli
 
         cli = cli.CLI()
-        sys.exit(cli.run(args))
+        sys.exit(cli.run())
 
     set_resources()
     return run_application()

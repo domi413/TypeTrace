@@ -11,14 +11,12 @@ from typing import TYPE_CHECKING, final
 
 from backend.db import DatabaseManager
 from backend.dbus_service import DbusServiceManager
-from backend.logging_setup import LoggerSetup
 from gi.repository import GLib
 
 from typetrace.config import Config, DatabasePath, ExitCodes
+from typetrace.logging_setup import LoggerSetup
 
 if TYPE_CHECKING:
-    import argparse
-
     from backend.events.base import BaseEventProcessor
 
 logger = logging.getLogger(__name__)
@@ -54,9 +52,8 @@ class CLI:
             "D-Bus service loop stopping callback triggered (backend will exit).",
         )
 
-    def run(self, args: argparse.Namespace) -> int:
+    def run(self) -> int:
         """Run the backend service with processor as daemon thread."""
-        Config.DEBUG = bool(args.debug)
         LoggerSetup.setup_logging()
 
         logger.info("TypeTrace Backend starting...")

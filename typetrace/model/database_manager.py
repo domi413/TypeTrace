@@ -1,5 +1,6 @@
 """Class used to manipulate the database file."""
 
+import logging
 import shutil
 from pathlib import Path
 from typing import ClassVar
@@ -7,6 +8,8 @@ from typing import ClassVar
 from gi.repository import GObject
 
 from typetrace.config import DatabasePath
+
+logger = logging.getLogger(__name__)
 
 
 class DatabaseManager(GObject.Object):
@@ -26,8 +29,10 @@ class DatabaseManager(GObject.Object):
         try:
             shutil.copy2(self.db_path, dest_path)
         except OSError:
+            logger.exception("Failed to export database to %s", dest_path)
             return False
         else:
+            logger.debug("Exported database from %s to %s", self.db_path, dest_path)
             return True
 
     def import_database(self, src_path: Path) -> bool:
@@ -36,7 +41,9 @@ class DatabaseManager(GObject.Object):
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src_path, self.db_path)
         except OSError:
+            logger.exception("Failed to import database from %s", src_path)
             return False
         else:
+            logger.debug("Imported database from %s to %s", src_path, self.db_path)
             self.emit("changed")
             return True
