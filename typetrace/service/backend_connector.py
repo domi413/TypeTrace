@@ -34,12 +34,6 @@ class BackendConnector(GObject.Object):
         self._cancellable = Gio.Cancellable()  # To cancel ongoing async operations
         self._is_available = False  # Cache the last known status
 
-    @property
-    def is_available(self) -> bool:
-        """Returns the last known availability status of the backend."""
-        logger.debug("Checking backend availability: %s", self._is_available)
-        return self._is_available
-
     def check_and_activate_async(self) -> None:
         """Asynchronously attempts to connect to and activate the backend service.
 
@@ -55,7 +49,7 @@ class BackendConnector(GObject.Object):
                 logger.debug("Proxy is stale, cleaning up")
                 self._cleanup_proxy()
                 self._set_availability("Connection lost", available=False)
-            if self.is_available:
+            if self._is_available:
                 logger.debug("Backend already available, skipping proxy creation")
                 return
 
@@ -138,10 +132,11 @@ class BackendConnector(GObject.Object):
 
     def _cleanup_proxy(self) -> None:
         """Disconnects signals and releases the proxy object."""
-        logger.debug("Cleaning up proxy")
-        self._disconnect_proxy_signals()
-        self._proxy = None
-        logger.debug("Proxy released")
+        if self._proxy:
+            logger.debug("Cleaning up proxy")
+            self._disconnect_proxy_signals()
+            self._proxy = None
+            logger.debug("Proxy released")
 
     def _on_backend_signal(
         self,
@@ -273,8 +268,6 @@ class BackendConnector(GObject.Object):
             self._set_availability(available=True)
         else:
             logger.debug("Initial ping failed: %s", error_msg)
-            self._cleanup_proxy()
-            self._set_availability(f"Initial ping failed: {error_msg}", available=False)
 
     def _on_reconnect_ping_result(self, error_msg: str) -> None:
         """Handle result of ping after owner reappeared."""
@@ -323,7 +316,6 @@ class BackendConnector(GObject.Object):
             source_object.call_finish(res)
             logger.debug("Quit call completed successfully")
         except GLib.Error:
-            # This might happen if backend quits *before* replying, which is fine.
             logger.debug("Quit call failed, likely backend already terminated")
         finally:
             logger.debug("Cleaning up proxy after quit request")
@@ -334,6 +326,5 @@ class BackendConnector(GObject.Object):
         """Cancel ongoing operations and cleans up."""
         logger.debug("Shutting down BackendConnector")
         self._cancellable.cancel()
-        logger.debug("Cancellable cancelled")
         self._cleanup_proxy()
         logger.debug("BackendConnector shutdown completed")
