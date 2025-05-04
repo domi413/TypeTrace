@@ -262,12 +262,12 @@ class BackendConnector(GObject.Object):
     # --- Callbacks passed to ping_async ---
     def _on_initial_ping_result(self, error_msg: str) -> None:
         """Handle result of ping right after proxy creation."""
-        logger.debug("Handling initial ping result, error: %s", error_msg or "none")
+        logger.debug("Handling initial ping result")
         if not error_msg:
-            logger.debug("Initial ping successful, setting availability to True")
+            logger.debug("Initial ping successful")
             self._set_availability(available=True)
         else:
-            logger.debug("Initial ping failed: %s", error_msg)
+            logger.debug("Initial ping failed")
 
     def _on_reconnect_ping_result(self, error_msg: str) -> None:
         """Handle result of ping after owner reappeared."""
