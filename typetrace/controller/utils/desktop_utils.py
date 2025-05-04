@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Callable
 
 import dbus
@@ -9,6 +10,8 @@ from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib
 
 from typetrace.config import Config
+
+logger = logging.getLogger(__name__)
 
 
 def is_autostart_enabled() -> bool:
@@ -21,16 +24,14 @@ def enable_autostart(
 ) -> None:
     """Enable autostart using portal for Flatpak or symlink for non-Flatpak."""
 
-    def invoke_callback(error_msg: str | None, success: bool) -> None:  # noqa: FBT001
+    def invoke_callback(error_msg: str | None, *, success: bool) -> None:
         if callback:
             GLib.idle_add(callback, success, error_msg)
 
     try:
         if Config.IS_FLATPAK:
-            # Initialize D-Bus main loop
             DBusGMainLoop(set_as_default=True)
 
-            # Connect to the session bus
             bus = dbus.SessionBus()
 
             # Get the Background portal object
@@ -43,7 +44,6 @@ def enable_autostart(
             # Use empty window handle for portal request
             window_handle = ""
 
-            # Prepare the request options
             options = {
                 "handle_token": "typetrace_autostart",
                 "reason": "Backend needs to run at startup to monitor typing activity.",
@@ -88,11 +88,17 @@ def enable_autostart(
         invoke_callback(None, success=True)
 
     except FileExistsError:
-        invoke_callback("Autostart symlink already existed.", success=True)
+        error_msg = "Autostart symlink already existed."
+        logger.exception(error_msg)
+        invoke_callback(error_msg, success=True)
     except PermissionError:
-        invoke_callback("Denied trying to create autostart symlink.", success=False)
+        error_msg = "Denied trying to create autostart symlink."
+        logger.exception(error_msg)
+        invoke_callback(error_msg, success=False)
     except dbus.DBusException as e:
-        invoke_callback(f"D-Bus error: {e!s}", success=False)
+        error_msg = f"D-Bus error: {e!s}"
+        logger.exception(error_msg)
+        invoke_callback(error_msg, success=False)
 
 
 def disable_autostart() -> tuple[bool, str | None]:
@@ -102,8 +108,14 @@ def disable_autostart() -> tuple[bool, str | None]:
             Config.AUTOSTART_TARGET_FILE.unlink()
             return True, None
     except PermissionError:
-        return False, "Permission denied when trying to remove autostart symlink."
+        error_msg = "Permission denied when trying to remove autostart symlink"
+        logger.exception(error_msg)
+        return False, error_msg
     except OSError as e:
-        return False, f"Failed to remove autostart symlink: {e!s}"
-    else:
-        return True, "Autostart was already not enabled."
+        error_msg = f"Failed to remove autostart symlink: {e!s}"
+        logger.exception(error_msg)
+        return False, error_msg
+    except FileNotFoundError:
+        error_msg = "Autostart was already not enabled"
+        logger.debug(error_msg)
+        return True, error_msg

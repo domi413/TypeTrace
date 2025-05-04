@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import sqlite3
 from typing import ClassVar
 
@@ -9,6 +10,8 @@ from gi.repository import GObject
 
 from typetrace.config import DatabasePath
 from typetrace.sql import SQLQueries
+
+logger = logging.getLogger(__name__)
 
 
 class Keystroke(GObject.Object):
@@ -62,6 +65,7 @@ class KeystrokeStore(GObject.Object):
                 for row in rows
             ]
         except sqlite3.Error:
+            logger.exception("Failed to retrieve all keystrokes")
             return []
 
     def get_total_presses(self) -> int:
@@ -71,6 +75,7 @@ class KeystrokeStore(GObject.Object):
             cursor.execute(SQLQueries.GET_TOTAL_PRESSES)
             result = cursor.fetchone()[0]
         except sqlite3.Error:
+            logger.exception("Failed to retrieve total key presses")
             return 0
         else:
             return result or 0
@@ -82,6 +87,7 @@ class KeystrokeStore(GObject.Object):
             cursor.execute(SQLQueries.GET_HIGHEST_COUNT)
             result = cursor.fetchone()[0]
         except sqlite3.Error:
+            logger.exception("Failed to retrieve highest keystroke count")
             return 0
         else:
             return result or 0
@@ -110,6 +116,7 @@ class KeystrokeStore(GObject.Object):
                 for row in rows
             ]
         except sqlite3.Error:
+            logger.exception("Failed to retrieve keystrokes for date: %s", date)
             return []
 
     def get_top_keystrokes(
@@ -147,6 +154,11 @@ class KeystrokeStore(GObject.Object):
                 for row in rows
             ]
         except sqlite3.Error:
+            logger.exception(
+                "Failed to retrieve top keystrokes for limit: %d, date: %s",
+                limit,
+                date or "all time",
+            )
             return []
 
     def get_total_keystroke_count(self, date: str | None = None) -> int:
@@ -167,6 +179,10 @@ class KeystrokeStore(GObject.Object):
                 cursor.execute(SQLQueries.GET_TOTAL_PRESSES)
             result = cursor.fetchone()[0]
         except sqlite3.Error:
+            logger.exception(
+                "Failed to retrieve total keystroke count for date: %s",
+                date or "all time",
+            )
             return 0
         else:
             return result or 0
@@ -179,6 +195,7 @@ class KeystrokeStore(GObject.Object):
             self.conn.commit()
             self.emit("changed")
         except sqlite3.Error:
+            logger.exception("Failed to clear keystrokes")
             return False
         else:
             return True
@@ -202,4 +219,5 @@ class KeystrokeStore(GObject.Object):
                 for row in rows
             ]
         except sqlite3.Error:
+            logger.exception("Failed to retrieve daily keystroke counts")
             return []

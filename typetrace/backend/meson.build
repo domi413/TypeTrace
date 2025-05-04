@@ -7,7 +7,6 @@ backend_main_sources = [
   'cli.py',
   'db.py',
   'dbus_service.py',
-  'logging_setup.py',
 ]
 install_data(
   backend_main_sources,
