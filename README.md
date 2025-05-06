@@ -35,6 +35,7 @@ Note that:
 
   - `curl`
   - `jq`
+  - GNOME Shell 48 or later
 
 - The local install requires the following dependencies:
 
