@@ -65,7 +65,7 @@ class LineChart(Chart):
     ) -> tuple[dict, float, float, float]:
         """Set up chart parameters."""
         colors = self.get_colors()
-        padding = 40
+        padding = 60
         graph_width = width - 2 * padding
         graph_height = height - 2 * padding
         return colors, padding, graph_width, graph_height
@@ -96,15 +96,16 @@ class LineChart(Chart):
             config.cr.line_to(config.width - config.padding, y)
             config.cr.stroke()
             value = int(i * step)
+            text_width = config.cr.text_extents(str(value)).width
             self._draw_text(
                 TextConfig(
                     cr=config.cr,
                     text=str(value),
-                    x=config.padding - 25,
+                    x=config.padding - 10 - text_width,
                     y=y + 5,
                     font_size=12,
                     font_weight=cairo.FONT_WEIGHT_NORMAL,
-                    center=True,
+                    center=False,
                 ),
                 config.colors["text"],
             )
