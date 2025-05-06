@@ -1,6 +1,6 @@
 # TypeTrace
 
-![](/data/icons/hicolor/scalable/apps/edu.ost.typetrace.svg)
+<img src="/data/icons/hicolor/scalable/apps/edu.ost.typetrace.svg" width="100" height="100">
 
 TypeTrace is an open-source application that tracks your keyboard input and
 visualizes it through a heatmap and various charts. It provides insights into
@@ -32,7 +32,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/domi413/T
 ################## TODO: new heatmap picture
 Note that:
 
-- The script has following dependencies:
+- The script requires the following dependencies:
 
   - `curl`
   - `jq`
