@@ -1,6 +1,6 @@
 # TypeTrace
 
-![Typetrace Logo](/data/icons/hicolor/scalable/apps/edu.ost.typetrace.svg)
+![](/data/icons/hicolor/scalable/apps/edu.ost.typetrace.svg | width=100)
 
 TypeTrace is an open-source application that tracks your keyboard input and
 visualizes it through a heatmap and various charts. It provides insights into
