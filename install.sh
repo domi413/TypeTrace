@@ -47,8 +47,8 @@ print_error() {
 }
 
 # Function to ensure script is running with root privileges
-# Usage: ensure_sudo "$@"
-ensure_sudo() {
+# Usage: get_root_permission "$@"
+get_root_permission() {
     if [[ $EUID -eq 0 ]]; then
         return 0
     fi
@@ -60,11 +60,11 @@ ensure_sudo() {
     fi
 
     print_warning "This operation requires root privileges."
-    print_info "Attempting to re-run script with sudo..."
+    print_info "Attempting leverage root privileges..."
 
-    # Execute sudo, passing all original arguments
-    sudo "$0" "$@"
-    exit $?
+    if ! sudo -v; then
+        print_error "Failed to obtain sudo privileges."
+    fi
 }
 
 # Checks if a list of commands are available in PATH
@@ -122,11 +122,10 @@ prompt_add_to_input_group() {
     print_warning "$APP_NAME requires access to input devices (/dev/input/event*)."
     print_info "Adding user '$USER' to the 'input' group requires elevated privileges."
 
-    ensure_sudo "$@"
+    get_root_permission "$@"
 
     print_info "Attempting 'usermod -aG input $USER' (as root)..."
-
-    if usermod -aG input "$USER"; then
+    if sudo usermod -aG input "$USER"; then
         print_success "Successfully added user '$USER' to the 'input' group."
         print_warning "${C_BOLD}User '$USER' MUST log out for the group change to take effect!${C_RESET}"
         return 0
