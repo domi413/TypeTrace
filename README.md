@@ -13,7 +13,7 @@ is stored locally and under your control.
 - **Keyboard Tracking**: Logs keystrokes locally with daily timestamps.
 - **Visualizations**: Displays data via heatmaps and charts for intuitive analysis.
 - **Privacy First**: Stores data in a local SQLite database, making it nearly impossible to reverse-engineer sensitive information like passwords.
-- **Open Source**: Fully transparent codebase, welcoming contributions and audits.
+- **Open Source**: Fully transparent codebase
 
 ## Screenshots
 
