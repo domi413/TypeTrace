@@ -29,7 +29,6 @@ TypeTrace can be installed on any Linux distribution using the following command
 curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/domi413/TypeTrace/main/install.sh | bash
 ```
 
-################## TODO: new heatmap picture
 Note that:
 
 - The script requires the following dependencies:
