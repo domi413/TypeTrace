@@ -12,6 +12,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "gobject"
     "ruff",
     "pytest",
     "pytest-mock",
