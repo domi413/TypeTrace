@@ -20,3 +20,4 @@ dbus
 autohide
 gsettings
 signum
+usefixtures
