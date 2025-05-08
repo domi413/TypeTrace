@@ -6,9 +6,8 @@ import logging
 import signal
 from typing import Callable
 
+from config import Config, ExitCodes
 from gi.repository import Gio, GLib
-
-from typetrace.config import Config, ExitCodes
 
 logger = logging.getLogger(__name__)
 

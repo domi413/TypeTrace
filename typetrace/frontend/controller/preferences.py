@@ -4,22 +4,21 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable
 
-from gi.repository import Adw, Gdk, Gio, GObject, Gtk
-
-from typetrace.config import Config, DatabasePath
-from typetrace.controller.utils import desktop_utils, dialog_utils
-from typetrace.controller.utils.color_utils import (
+from config import Config, DatabasePath
+from frontend.controller.utils import desktop_utils, dialog_utils
+from frontend.controller.utils.color_utils import (
     get_system_accent_color,
     parse_color_string,
     rgba_to_rgb_string,
 )
-from typetrace.model.layouts import KEYBOARD_LAYOUTS
+from frontend.model.layouts import KEYBOARD_LAYOUTS
+from gi.repository import Adw, Gdk, Gio, GObject, Gtk
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from typetrace.model.database_manager import DatabaseManager
-    from typetrace.model.keystrokes import KeystrokeStore
+    from frontend.model.database_manager import DatabaseManager
+    from frontend.model.keystrokes import KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/preferences.ui")

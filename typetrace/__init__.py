@@ -1,1 +1,1 @@
-"""The __init__.py file for the TypeTrace."""
+"""The main module."""
