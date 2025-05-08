@@ -18,7 +18,7 @@ from typetrace.frontend.model.layouts import KEYBOARD_LAYOUTS
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from typetrace.frontend.model.database_manager import DatabaseManager
+    from typetrace.frontend.model.db_filehandler import DatabaseFileHandler
     from typetrace.frontend.model.keystrokes import KeystrokeStore
 
 
@@ -50,7 +50,7 @@ class Preferences(Adw.PreferencesDialog):
     def __init__(
         self,
         parent_window: Gtk.Window,
-        db_manager: DatabaseManager,
+        db_filehandler: DatabaseFileHandler,
         keystroke_store: KeystrokeStore,
         settings: Gio.Settings,
     ) -> None:
@@ -58,7 +58,7 @@ class Preferences(Adw.PreferencesDialog):
 
         Args:
             parent_window: The main application window, used as parent for dialogs.
-            db_manager: Manages database import/export operations.
+            db_filehandler: Manages database import/export operations.
             keystroke_store: Manages access to and clearing of keystroke data.
             settings: Application settings.
 
@@ -67,7 +67,7 @@ class Preferences(Adw.PreferencesDialog):
         self.parent_window = parent_window
 
         self.settings = settings
-        self.db_manager = db_manager
+        self.db_manager = db_filehandler
         self.keystroke_store = keystroke_store
 
         begin_dialog = Gtk.ColorDialog(title="Select Begin Color", modal=True)

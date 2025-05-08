@@ -136,7 +136,7 @@ class Application(Adw.Application):
         try:
             pref_dialog = Preferences(
                 parent_window=self.props.active_window,
-                db_manager=self.db_filehandler,
+                db_filehandler=self.db_filehandler,
                 keystroke_store=self.keystroke_store,
                 settings=self.settings,
             )

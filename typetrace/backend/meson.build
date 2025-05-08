@@ -24,7 +24,6 @@ backend_events_sources = [
   'events/__init__.py',
   'events/base.py',
   'events/linux.py',
-  'events/windows_darwin.py',
 ]
 install_data(
   backend_events_sources,
