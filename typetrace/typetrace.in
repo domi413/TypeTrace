@@ -4,11 +4,12 @@ import signal
 import sys
 from pathlib import Path
 
-APPLICATION_ID = "@application_id@"
+APPLICATION_ID = "@ID@"
 VERSION = "@VERSION@"
-PKGDATA_DIR = "@pkgdatadir@"
+DATA_DIR = "@DATADIR@"
+PKGDATA_DIR = "@PKGDATADIR@"
 
-sys.path.insert(1, PKGDATA_DIR)
+sys.path.insert(1, DATA_DIR)
 
 
 def set_resources() -> None:
@@ -26,7 +27,7 @@ def set_resources() -> None:
 
 def run_application() -> int:
     """Run TypeTrace application and returns its exit code."""
-    from frontend.application import Application
+    from typetrace.frontend.application import Application
 
     args = [arg for arg in sys.argv if arg not in ("-d", "--debug")]
     app = Application(APPLICATION_ID, VERSION)
@@ -73,10 +74,10 @@ def main() -> int:
         print(VERSION)
         sys.exit()
     if args.debug:
-        from config import Config
+        from typetrace.config import Config
         Config.DEBUG = True
     if args.backend:
-        from backend import cli
+        from typetrace.backend import cli
 
         cli = cli.CLI()
         sys.exit(cli.run())

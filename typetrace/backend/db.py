@@ -8,13 +8,13 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, final
 
-from sql import SQLQueries
+from typetrace.sql import SQLQueries
 
 if TYPE_CHECKING:
     from collections.abc import Generator
     from pathlib import Path
 
-    from config import Event
+    from typetrace.config import Event
 
 logger = logging.getLogger(__name__)
 
