@@ -255,7 +255,7 @@ class Preferences(Adw.PreferencesDialog):
     def _on_autostart_toggled(self, row: Adw.SwitchRow, *_: any) -> None:
         """Handle the autostart toggle change."""
 
-        def on_autostart_result(success: bool, error_msg: str | None) -> None:  # noqa: FBT001
+        def on_autostart_result(error_msg: str | None, *, success: bool) -> None:
             """Use callback to handle autostart enable/disable result."""
             if success:
                 dialog_utils.show_toast(
@@ -276,10 +276,12 @@ class Preferences(Adw.PreferencesDialog):
                     row.handler_unblock(handler_id)
 
         if row.get_active():
-            desktop_utils.enable_autostart(callback=on_autostart_result)
+            desktop_utils.enable_autostart(
+                callback=lambda s, e: on_autostart_result(e, success=s),
+            )
         else:
             success, error_msg = desktop_utils.disable_autostart()
-            on_autostart_result(success, error_msg)
+            on_autostart_result(error_msg, success=success)
 
     def _on_export_clicked(self, _button: Gtk.Button) -> None:
         """Handle the export button click event, opens a save dialog for export."""
