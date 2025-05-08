@@ -2,3 +2,6 @@
 source = typetrace
 omit =
     */__init__.py
+    layouts.py
+    config.py
+    sql.py
