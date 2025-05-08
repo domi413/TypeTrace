@@ -23,7 +23,9 @@ jobs:
               with:
                   python-version: "3.13"
                   enable-cache: true
-                  cache-dependency-glob: "**/pyproject.toml"
+                  cache-dependency-glob: |
+                      **/pyproject.toml
+                      **/uv.lock
 
             - name: Cache APT packages
               id: cache-apt
