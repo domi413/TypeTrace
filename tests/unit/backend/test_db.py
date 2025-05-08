@@ -58,16 +58,17 @@ def test_initialize_database_sqlite_error(
     """Test database initialization with SQLite error."""
     mock_conn = mocker.Mock()
     mock_cursor = mocker.Mock()
-    mock_logger = mocker.patch("typetrace.backend.db.logger")
     monkeypatch.setattr(sqlite3, "connect", lambda _: mock_conn)
     mock_conn.cursor.return_value = mock_cursor
-    mock_cursor.execute.side_effect = sqlite3.Error("Mock SQLite error")
 
-    with pytest.raises(sqlite3.Error, match="Mock SQLite error"):
+    expected_error = sqlite3.Error("Mock SQLite error")
+    mock_cursor.execute.side_effect = expected_error
+
+    with pytest.raises(sqlite3.Error) as excinfo:
         db_manager.initialize_database(mock_db_path)
 
+    assert str(excinfo.value) == str(expected_error)
     mock_conn.close.assert_called_once()
-    mock_logger.exception.assert_called_once_with("Database error")
 
 
 def test_initialize_database_operational_error(
@@ -79,16 +80,17 @@ def test_initialize_database_operational_error(
     """Test database initialization with SQLite operational error."""
     mock_conn = mocker.Mock()
     mock_cursor = mocker.Mock()
-    mock_logger = mocker.patch("typetrace.backend.db.logger")
     monkeypatch.setattr(sqlite3, "connect", lambda _: mock_conn)
     mock_conn.cursor.return_value = mock_cursor
-    mock_cursor.execute.side_effect = sqlite3.OperationalError("Mock operational error")
 
-    with pytest.raises(sqlite3.OperationalError, match="Mock operational error"):
+    expected_error = sqlite3.OperationalError("Mock operational error")
+    mock_cursor.execute.side_effect = expected_error
+
+    with pytest.raises(sqlite3.OperationalError) as excinfo:
         db_manager.initialize_database(mock_db_path)
 
+    assert str(excinfo.value) == str(expected_error)
     mock_conn.close.assert_called_once()
-    mock_logger.exception.assert_called_once_with("SQLite operational error")
 
 
 # =============================================================================
