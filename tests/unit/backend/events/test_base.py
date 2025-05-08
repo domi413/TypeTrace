@@ -23,7 +23,7 @@ class ConcreteBaseEventProcessor(BaseEventProcessor):
     def _buffer(self, devices: list[str]) -> None:
         """Implement the abstract _buffer method for testing."""
 
-    def _process_single_event(self, event: dict[str, Any]) -> None:
+    def _process_single_event(self, event: Event) -> None:
         """Implement the abstract _process_single_event method for testing."""
 
 
@@ -168,7 +168,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_print_event(self) -> None:
         """Test the _print_event method with a valid event."""
-        event: dict[Event] = {"scan_code": 1, "name": "a", "date": "2023-10-01"}
+        event: Event = {"scan_code": 1, "name": "a", "date": "2023-10-01"}
 
         with patch("logging.Logger.debug") as mock_debug:
             self.processor._print_event(event)
@@ -181,7 +181,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_print_event_missing_keys(self) -> None:
         """Test the _print_event method with an event missing required keys."""
-        event: dict[Event] = {"scan_code": 1}
+        event: Event = {"scan_code": 1}
 
         with patch("logging.Logger.debug") as mock_debug:
             with pytest.raises(KeyError):
@@ -190,7 +190,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_print_event_invalid_values(self) -> None:
         """Test the _print_event method with an event containing invalid values."""
-        event: dict[Event] = {"scan_code": None, "name": "", "date": ""}
+        event: Event = {"scan_code": None, "name": "", "date": ""}
 
         with patch("logging.Logger.debug") as mock_debug:
             self.processor._print_event(event)
