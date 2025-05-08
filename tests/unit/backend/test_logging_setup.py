@@ -4,7 +4,6 @@ Tests include logging configuration in both debug and normal modes,
 color formatting for log messages, and integration of log output.
 """
 
-import io
 import logging
 from unittest import TestCase, mock
 
