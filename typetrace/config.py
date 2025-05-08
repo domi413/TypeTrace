@@ -45,7 +45,7 @@ class Config:
     DEBUG: bool = False
 
     @classmethod
-    def resolve_db_path(cls) -> Path:
+    def resolve_db_path(cls:type[Config]) -> Path:
         """Determine the database path using appdirs for cross-platform support."""
         data_dir = appdirs.user_data_dir(cls.APP_NAME)
         db_path = Path(data_dir) / cls.DB_NAME
