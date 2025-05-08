@@ -1,9 +1,11 @@
+"""Configuration settings for TypeTrace."""
+
 from __future__ import annotations
 
 import os
 from enum import IntEnum
 from pathlib import Path
-from typing import Final, Type, TypedDict, final
+from typing import Final, TypedDict, final
 
 import appdirs
 
@@ -30,7 +32,7 @@ class Config:
     )
     AUTOSTART_SOURCE: Final[Path] = (
         Path.home()
-        / "@datadir@"  # This is changed by meson depending on install prefix
+        / "@datadir@" # This is changed by meson depending on install prefix
         / "applications"
         / "edu.ost.typetrace-backend.desktop"
     )
@@ -43,7 +45,7 @@ class Config:
     DEBUG: bool = False
 
     @classmethod
-    def resolve_db_path(cls: Type[Config]) -> Path:
+    def resolve_db_path(cls) -> Path:
         """Determine the database path using appdirs for cross-platform support."""
         data_dir = appdirs.user_data_dir(cls.APP_NAME)
         db_path = Path(data_dir) / cls.DB_NAME
