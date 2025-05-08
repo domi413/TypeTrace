@@ -49,11 +49,6 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
 
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
       - name: Install additional dependencies for dbus-python
         run: |
             sudo apt-get update
