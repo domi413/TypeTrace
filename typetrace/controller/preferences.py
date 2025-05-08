@@ -1,4 +1,6 @@
-"""A preferences dialog that handles various settings and preferences."""
+"""A preferences dialog that handles various settings
+and preferences."""
+
 
 from __future__ import annotations
 
@@ -255,7 +257,7 @@ class Preferences(Adw.PreferencesDialog):
     def _on_autostart_toggled(self, row: Adw.SwitchRow, *_: any) -> None:
         """Handle the autostart toggle change."""
 
-        def on_autostart_result(success: bool, error_msg: str | None) -> None:  # noqa: FBT001
+        def on_autostart_result(success: bool, error_msg: str | None) -> None: 
             """Use callback to handle autostart enable/disable result."""
             if success:
                 dialog_utils.show_toast(

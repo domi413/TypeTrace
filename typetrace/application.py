@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Any, Callable
+from typing import Callable, Optional, Tuple
 
 from gi.repository import Adw, Gio
 
@@ -16,7 +16,6 @@ from typetrace.model.database_manager import DatabaseManager
 from typetrace.model.keystrokes import KeystrokeStore
 
 logger = logging.getLogger(__name__)
-
 
 class Application(Adw.Application):
     """The main application singleton class."""
@@ -107,7 +106,7 @@ class Application(Adw.Application):
         for args in actions:
             self.create_action(*args)
 
-    def on_about_action(self, *_: Any) -> None:
+    def on_about_action(self, *args: Tuple) -> None:
         """Display the about dialog with application information."""
         logger.debug("Opening about dialog")
         try:
@@ -130,7 +129,7 @@ class Application(Adw.Application):
             logger.exception("Failed to present about dialog")
             raise
 
-    def on_preferences_action(self, *_: Any) -> None:
+    def on_preferences_action(self, *args: Tuple) -> None:
         """Show the application preferences dialog."""
         logger.debug("Opening preferences dialog")
         try:
@@ -149,8 +148,8 @@ class Application(Adw.Application):
     def create_action(
         self,
         name: str,
-        callback: Callable[..., Any],
-        shortcuts: list[str] | None = None,
+        callback: Callable[..., None],
+        shortcuts: Optional[list[str]] = None,
     ) -> None:
         """Add an application action with optional keyboard shortcuts.
 
