@@ -319,7 +319,7 @@ def test_read_device_events_error(
     mock_device.read.side_effect = OSError("Device error")
 
     buffer: list[Event] = [
-        {"scan_code": 42, "name": "KEY_LEFTSHIFT", "date": "2022-01-01"}
+        {"scan_code": 42, "name": "KEY_LEFTSHIFT", "date": "2022-01-01"},
     ]
 
     result = event_processor._read_device_events(mock_device, buffer)

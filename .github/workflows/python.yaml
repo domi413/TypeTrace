@@ -9,7 +9,7 @@ on:
       - reopened
 
 jobs:
-  check:
+  check-python:
     runs-on: ubuntu-latest
 
     if: ${{ !github.event.pull_request.draft }}
