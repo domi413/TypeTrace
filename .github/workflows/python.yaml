@@ -23,17 +23,22 @@ jobs:
               with:
                   python-version: "3.13"
                   enable-cache: true
-                  cache-dependency-glob: "**/pyproject.toml"
+                  cache-dependency-glob: |
+                      **/pyproject.toml
+                      **/uv.lock
 
             - name: Cache APT packages
               id: cache-apt
               uses: actions/cache@v4
               with:
                   path: apt-cache
-                  key: ${{ runner.os }}-apt
+                  key: ${{ runner.os }}-apt-${{ hashFiles('**/*.yml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-apt-
 
-            - name: Install dbus
+            - name: Install system dependencies
               run: |
+                  mkdir -p apt-cache
                   sudo apt-get update
                   sudo apt-get -o dir::cache::archives=apt-cache install -y libdbus-1-dev libgirepository-2.0-0 libgirepository1.0-dev
 
