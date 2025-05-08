@@ -37,7 +37,7 @@ install_data(sources, install_dir: moduledir)
 
 sources_model = [
   'model/__init__.py',
-  'model/database_manager.py',
+  'model/db_filehandler.py',
   'model/keystrokes.py',
   'model/layouts.py',
 ]

@@ -11,7 +11,7 @@ from gi.repository import Adw, Gio
 from typetrace.config import DatabasePath
 from typetrace.frontend.controller.preferences import Preferences
 from typetrace.frontend.controller.window import TypetraceWindow
-from typetrace.frontend.model.database_manager import DatabaseManager
+from typetrace.frontend.model.db_filehandler import DatabaseFileHandler
 from typetrace.frontend.model.keystrokes import KeystrokeStore
 from typetrace.logging_setup import LoggerSetup
 
@@ -46,7 +46,7 @@ class Application(Adw.Application):
             self.db_conn = sqlite3.connect(DatabasePath.DB_PATH)
             logger.debug("Database connection established to: %s", DatabasePath.DB_PATH)
             self.keystroke_store = KeystrokeStore(self.db_conn)
-            self.db_manager = DatabaseManager()
+            self.db_filehandler = DatabaseFileHandler()
         except Exception:
             logger.exception("Failed to initialize database components")
             raise
@@ -64,7 +64,7 @@ class Application(Adw.Application):
         if not win:
             try:
                 win = TypetraceWindow(
-                    self.db_manager,
+                    self.db_filehandler,
                     self.keystroke_store,
                     self.settings,
                     application=self,
@@ -136,7 +136,7 @@ class Application(Adw.Application):
         try:
             pref_dialog = Preferences(
                 parent_window=self.props.active_window,
-                db_manager=self.db_manager,
+                db_manager=self.db_filehandler,
                 keystroke_store=self.keystroke_store,
                 settings=self.settings,
             )

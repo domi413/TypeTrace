@@ -32,7 +32,7 @@ class Config:
     )
     AUTOSTART_SOURCE: Final[Path] = (
         Path.home()
-        / "@datadir@"  # This is changed by meson depending on install prefix
+        / "@DATADIR@"  # This is changed by meson depending on install prefix
         / "applications"
         / "edu.ost.typetrace-backend.desktop"
     )
