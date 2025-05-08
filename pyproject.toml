@@ -33,10 +33,10 @@ ignore = [
     "D213",   # In conflict with D212
 ]
 
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = [
-    "ANN201",  # Ignore missing return type
-    "SLF001",  # Allow access to private member
-    "PLR2004", # Ignore magic values
-    "S101",    # Ignore asserts
-]
+# [tool.ruff.lint.per-file-ignores]
+# "tests/*" = [
+#     "ANN201",  # Ignore missing return type
+#     "SLF001",  # Allow access to private member
+#     "PLR2004", # Ignore magic values
+#     "S101",    # Ignore asserts
+# ]
