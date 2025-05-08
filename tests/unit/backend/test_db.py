@@ -66,7 +66,7 @@ class TestDatabaseManager(unittest.TestCase):
                 {"scan_code": 42, "name": "KEY_LEFTSHIFT", "date": "2025-04-22"},
             ]
 
-            expected_processed_events = [
+            expected_processed_events: list[dict[str, int | str]] = [
                 {"scan_code": 30, "key_name": "KEY_A", "date": "2025-04-22"},
                 {"scan_code": 42, "key_name": "KEY_LEFTSHIFT", "date": "2025-04-22"},
             ]
@@ -141,7 +141,7 @@ class TestDatabaseManager(unittest.TestCase):
                 },
             ]
 
-            expected_processed_events = [
+            expected_processed_events: list[dict[str, int | str]] = [
                 {
                     "scan_code": 30,
                     "key_name": "KEY_A;DROP TABLE keystrokes;",

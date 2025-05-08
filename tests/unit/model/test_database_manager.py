@@ -4,8 +4,12 @@ import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from typetrace.backend.db import DatabaseManager
+
+if TYPE_CHECKING:
+    from typetrace.config import Event
 
 
 class TestDatabaseManager(unittest.TestCase):
@@ -40,7 +44,7 @@ class TestDatabaseManager(unittest.TestCase):
         """Test that write_to_database inserts events into the database."""
         self.db_manager.initialize_database(self.db_path)
 
-        events = [{"scan_code": 16, "name": "q", "date": "2025-04-21"}]
+        events: list[Event] = [{"scan_code": 16, "name": "q", "date": "2025-04-21"}]
         self.db_manager.write_to_database(self.db_path, events)
 
         conn = sqlite3.connect(str(self.db_path))

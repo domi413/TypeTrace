@@ -7,6 +7,8 @@ color formatting for log messages, and integration of log output.
 import logging
 from unittest import TestCase, mock
 
+import pytest
+
 from typetrace.logging_setup import ColoredFormatter, LogColor
 
 
@@ -53,10 +55,10 @@ class TestLoggerSetup(TestCase):
         formatter = ColoredFormatter()
         assert not formatter._should_use_colors()
 
+    @pytest.mark.usefixtures("_mock_should_use_colors")
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=True)
     def test_format_with_colors(
         self,
-        _mock_should_use_colors: mock.MagicMock,  # noqa: PT019
     ) -> None:
         """Test formatting with colors enabled."""
         formatter = ColoredFormatter()
@@ -100,10 +102,10 @@ class TestLoggerSetup(TestCase):
         assert LogColor.YELLOW not in formatted
         assert LogColor.RED not in formatted
 
+    @pytest.mark.usefixtures("_mock_should_use_colors")
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=False)
     def test_format_without_colors(
         self,
-        _mock_should_use_colors: mock.MagicMock,  # noqa: PT019
     ) -> None:
         """Test formatting with colors disabled."""
         formatter = ColoredFormatter()

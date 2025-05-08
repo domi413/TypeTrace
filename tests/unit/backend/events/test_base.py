@@ -11,7 +11,7 @@ from unittest.mock import patch
 import pytest
 
 from typetrace.backend.events.base import BaseEventProcessor
-from typetrace.config import Config
+from typetrace.config import Config, Event
 
 
 class ConcreteBaseEventProcessor(BaseEventProcessor):
@@ -44,7 +44,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_check_timeout_and_flush_no_flush(self) -> None:
         """Test _check_timeout_and_flush with no flush condition."""
-        buffer: list[dict[str, Any]] = [
+        buffer: list[Event] = [
             {"scan_code": 1, "name": "a", "date": "2023-10-01"},
         ]
         start_time: float = time.time()
@@ -63,7 +63,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_check_timeout_and_flush_with_flush_timeout(self) -> None:
         """Test _check_timeout_and_flush with a flush due to timeout."""
-        buffer: list[dict[str, Any]] = [
+        buffer: list[Event] = [
             {"scan_code": 1, "name": "a", "date": "2023-10-01"},
         ]
         start_time: float = time.time() - Config.BUFFER_TIMEOUT - 1
@@ -85,7 +85,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_check_timeout_and_flush_with_flush_size(self) -> None:
         """Test _check_timeout_and_flush with a flush due to buffer size."""
-        buffer: list[dict[str, Any]] = [
+        buffer: list[Event] = [
             {"scan_code": i, "name": f"key_{i}", "date": "2023-10-01"}
             for i in range(Config.BUFFER_SIZE)
         ]
@@ -108,7 +108,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_check_timeout_and_flush_empty_buffer(self) -> None:
         """Test _check_timeout_and_flush with an empty buffer."""
-        buffer: list[dict[str, Any]] = []
+        buffer: list[Event] = []
         start_time: float = time.time()
 
         with patch(
@@ -125,7 +125,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_check_timeout_and_flush_force_flush(self) -> None:
         """Test _check_timeout_and_flush with a forced flush."""
-        buffer: list[dict[str, Any]] = [
+        buffer: list[Event] = [
             {"scan_code": 1, "name": "a", "date": "2023-10-01"},
         ]
         start_time: float = time.time()
@@ -148,7 +148,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_check_timeout_and_flush_almost_full_buffer(self) -> None:
         """Test _check_timeout_and_flush with an almost full buffer."""
-        buffer: list[dict[str, Any]] = [
+        buffer: list[Event] = [
             {"scan_code": i, "name": f"key_{i}", "date": "2023-10-01"}
             for i in range(Config.BUFFER_SIZE - 1)
         ]
@@ -168,7 +168,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_print_event(self) -> None:
         """Test the _print_event method with a valid event."""
-        event: dict[str, Any] = {"scan_code": 1, "name": "a", "date": "2023-10-01"}
+        event: dict[Event] = {"scan_code": 1, "name": "a", "date": "2023-10-01"}
 
         with patch("logging.Logger.debug") as mock_debug:
             self.processor._print_event(event)
@@ -181,7 +181,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_print_event_missing_keys(self) -> None:
         """Test the _print_event method with an event missing required keys."""
-        event: dict[str, Any] = {"scan_code": 1}
+        event: dict[Event] = {"scan_code": 1}
 
         with patch("logging.Logger.debug") as mock_debug:
             with pytest.raises(KeyError):
@@ -190,7 +190,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_print_event_invalid_values(self) -> None:
         """Test the _print_event method with an event containing invalid values."""
-        event: dict[str, Any] = {"scan_code": None, "name": "", "date": ""}
+        event: dict[Event] = {"scan_code": None, "name": "", "date": ""}
 
         with patch("logging.Logger.debug") as mock_debug:
             self.processor._print_event(event)
