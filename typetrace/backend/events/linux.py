@@ -14,8 +14,8 @@ if TYPE_CHECKING:
     from collections.abc import Generator
     from pathlib import Path
 
-from typetrace.backend.events.base import BaseEventProcessor
-from typetrace.config import Config, Event
+from backend.events.base import BaseEventProcessor
+from config import Config, Event
 
 logger = logging.getLogger(__name__)
 

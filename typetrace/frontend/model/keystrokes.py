@@ -6,10 +6,9 @@ import logging
 import sqlite3
 from typing import ClassVar
 
+from config import DatabasePath
 from gi.repository import GObject
-
-from typetrace.config import DatabasePath
-from typetrace.sql import SQLQueries
+from sql import SQLQueries
 
 logger = logging.getLogger(__name__)
 

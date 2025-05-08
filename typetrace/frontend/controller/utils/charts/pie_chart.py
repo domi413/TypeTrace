@@ -11,7 +11,7 @@ import cairo
 if TYPE_CHECKING:
     from gi.repository import Gtk
 
-from typetrace.controller.utils.charts.base_chart import Chart, ChartColor, TextConfig
+from frontend.controller.utils.charts.base_chart import Chart, ChartColor, TextConfig
 
 
 @dataclass

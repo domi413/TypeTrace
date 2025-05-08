@@ -26,7 +26,7 @@ def set_resources() -> None:
 
 def run_application() -> int:
     """Run TypeTrace application and returns its exit code."""
-    from typetrace.application import Application
+    from frontend.application import Application
 
     args = [arg for arg in sys.argv if arg not in ("-d", "--debug")]
     app = Application(APPLICATION_ID, VERSION)
@@ -73,7 +73,7 @@ def main() -> int:
         print(VERSION)
         sys.exit()
     if args.debug:
-        from typetrace.config import Config
+        from config import Config
         Config.DEBUG = True
     if args.backend:
         from backend import cli

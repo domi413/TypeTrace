@@ -7,13 +7,13 @@ import sqlite3
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, final
 
-from typetrace.sql import SQLQueries
+from sql import SQLQueries
 
 if TYPE_CHECKING:
     from collections.abc import Generator
     from pathlib import Path
 
-    from typetrace.config import Event
+    from config import Event
 
 logger = logging.getLogger(__name__)
 

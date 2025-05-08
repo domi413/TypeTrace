@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING, Callable, Generic, TypeVar, final
 if TYPE_CHECKING:
     from pathlib import Path
 
-from typetrace.backend.db import DatabaseManager
-from typetrace.config import Config, Event
+from backend.db import DatabaseManager
+from config import Config, Event
 
 DeviceType = TypeVar("DeviceType")
 

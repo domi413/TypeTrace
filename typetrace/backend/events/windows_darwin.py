@@ -10,7 +10,7 @@ from backend.events.base import BaseEventProcessor
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from typetrace.config import Event
+    from config import Event
 
 logger = logging.getLogger(__name__)
 

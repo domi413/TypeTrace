@@ -9,12 +9,11 @@ import sqlite3
 import threading
 from typing import TYPE_CHECKING, final
 
+from backend.db import DatabaseManager
+from backend.dbus_service import DbusServiceManager
+from config import Config, DatabasePath, ExitCodes
 from gi.repository import GLib
-
-from typetrace.backend.db import DatabaseManager
-from typetrace.backend.dbus_service import DbusServiceManager
-from typetrace.config import Config, DatabasePath, ExitCodes
-from typetrace.logging_setup import LoggerSetup
+from logging_setup import LoggerSetup
 
 if TYPE_CHECKING:
     from backend.events.base import BaseEventProcessor

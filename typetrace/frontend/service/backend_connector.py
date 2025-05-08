@@ -6,9 +6,8 @@ import contextlib
 import logging
 from typing import Callable, ClassVar
 
+from config import Config
 from gi.repository import Gio, GLib, GObject
-
-from typetrace.config import Config
 
 logger = logging.getLogger(__name__)
 
