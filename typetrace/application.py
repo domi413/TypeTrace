@@ -107,7 +107,7 @@ class Application(Adw.Application):
         for args in actions:
             self.create_action(*args)
 
-    def on_about_action(self, *args: object) -> None:
+    def on_about_action(self) -> None:
         """Display the about dialog with application information."""
         logger.debug("Opening about dialog")
         try:
@@ -130,7 +130,7 @@ class Application(Adw.Application):
             logger.exception("Failed to present about dialog")
             raise
 
-    def on_preferences_action(self, *args: object) -> None:
+    def on_preferences_action(self) -> None:
         """Show the application preferences dialog."""
         logger.debug("Opening preferences dialog")
         try:

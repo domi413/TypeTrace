@@ -30,5 +30,6 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
     "S101",  # Ignore asserts
-    "SLF001" # Allow access to private member
+    "SLF001", # Allow access to private member
+    "PT"
 ]

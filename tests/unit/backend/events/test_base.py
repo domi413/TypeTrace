@@ -183,7 +183,7 @@ class TestBaseEventProcessor(unittest.TestCase):
         event: Event = {"scan_code": 1}
 
         with patch("logging.Logger.debug") as mock_debug:
-            with pytest.raises(KeyError):  
+            with pytest.raises(KeyError):
                 self.processor._print_event(event)
             mock_debug.assert_not_called()
 

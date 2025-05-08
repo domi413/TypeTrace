@@ -4,148 +4,125 @@ Tests include logging configuration in both debug and normal modes,
 color formatting for log messages, and integration of log output.
 """
 
+import io
 import logging
-from unittest import TestCase, mock
+import unittest
+from unittest import mock
 
-import pytest
-
-from typetrace.logging_setup import ColoredFormatter, LogColor
+from typetrace.logging_setup import ColoredFormatter, LogColor, LoggerSetup
 
 
-class TestLoggerSetup(TestCase):
+class TestLoggerSetup(unittest.TestCase):
     """Test suite for the LoggerSetup class."""
 
     def test_logger_setup_instantiation_fails(self) -> None:
         """Test that LoggerSetup cannot be instantiated."""
+        with self.assertRaises(TypeError):
+            LoggerSetup()
 
+
+class TestColoredFormatter(unittest.TestCase):
     """Test suite for the ColoredFormatter class."""
 
     def test_formatter_initialization(self) -> None:
         """Test ColoredFormatter initialization."""
         formatter = ColoredFormatter()
-        assert hasattr(formatter, "_ColoredFormatter__use_colors")
+        self.assertTrue(hasattr(formatter, "_ColoredFormatter__use_colors"))
 
     @mock.patch("platform.system")
-    def test_should_use_colors_linux(
-        self,
-        mock_platform_system: mock.MagicMock,
-    ) -> None:
+    def test_should_use_colors_linux(self, mock_platform_system: mock.Mock) -> None:
         """Test color detection on Linux."""
         mock_platform_system.return_value = "Linux"
         formatter = ColoredFormatter()
-        assert formatter._should_use_colors()
+        self.assertTrue(formatter._should_use_colors())
 
     @mock.patch("platform.system")
-    def test_should_use_colors_darwin(
-        self,
-        mock_platform_system: mock.MagicMock,
-    ) -> None:
+    def test_should_use_colors_darwin(self, mock_platform_system: mock.Mock) -> None:
         """Test color detection on macOS."""
         mock_platform_system.return_value = "Darwin"
         formatter = ColoredFormatter()
-        assert formatter._should_use_colors()
+        self.assertTrue(formatter._should_use_colors())
 
     @mock.patch("platform.system")
-    def test_should_use_colors_windows(
-        self,
-        mock_platform_system: mock.MagicMock,
-    ) -> None:
+    def test_should_use_colors_windows(self, mock_platform_system: mock.Mock) -> None:
         """Test color detection on Windows."""
         mock_platform_system.return_value = "Windows"
         formatter = ColoredFormatter()
-        assert not formatter._should_use_colors()
+        self.assertFalse(formatter._should_use_colors())
 
-    @pytest.mark.usefixtures("_mock_should_use_colors")
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=True)
-    def test_format_with_colors(
-        self,
-    ) -> None:
+    def test_format_with_colors(self, _mock_should_use_colors: mock.Mock) -> None:
         """Test formatting with colors enabled."""
         formatter = ColoredFormatter()
 
-        record = logging.LogRecord(
-            name="test",
-            level=logging.WARNING,
-            pathname="",
-            lineno=0,
-            msg="Test warning",
-            args=(),
-            exc_info=None,
-        )
+        record = logging.LogRecord("test", logging.WARNING, "", 0, "Test warning", (),
+        None)
         formatted = formatter.format(record)
-        assert LogColor.YELLOW in formatted
-        assert LogColor.RESET in formatted
+        self.assertIn(LogColor.YELLOW, formatted)
+        self.assertIn(LogColor.RESET, formatted)
 
-        record = logging.LogRecord(
-            name="test",
-            level=logging.ERROR,
-            pathname="",
-            lineno=0,
-            msg="Test error",
-            args=(),
-            exc_info=None,
-        )
+        record = logging.LogRecord("test", logging.ERROR, "", 0, "Test error", (), None)
         formatted = formatter.format(record)
-        assert LogColor.RED in formatted
-        assert LogColor.RESET in formatted
+        self.assertIn(LogColor.RED, formatted)
+        self.assertIn(LogColor.RESET, formatted)
 
-        record = logging.LogRecord(
-            name="test",
-            level=logging.INFO,
-            pathname="",
-            lineno=0,
-            msg="Test info",
-            args=(),
-            exc_info=None,
-        )
+        record = logging.LogRecord("test", logging.INFO, "", 0, "Test info", (), None)
         formatted = formatter.format(record)
-        assert LogColor.YELLOW not in formatted
-        assert LogColor.RED not in formatted
+        self.assertNotIn(LogColor.YELLOW, formatted)
+        self.assertNotIn(LogColor.RED, formatted)
 
-    @pytest.mark.usefixtures("_mock_should_use_colors")
     @mock.patch.object(ColoredFormatter, "_should_use_colors", return_value=False)
-    def test_format_without_colors(
-        self,
-    ) -> None:
+    def test_format_without_colors(self, _mock_should_use_colors: mock.Mock) -> None:
         """Test formatting with colors disabled."""
         formatter = ColoredFormatter()
 
         for level in [logging.INFO, logging.WARNING, logging.ERROR]:
-            record = logging.LogRecord(
-                name="test",
-                level=level,
-                pathname="",
-                lineno=0,
-                msg="Test message",
-                args=(),
-                exc_info=None,
-            )
+            record = logging.LogRecord("test", level, "", 0, "Test message", (), None)
             formatted = formatter.format(record)
-            assert LogColor.YELLOW not in formatted
-            assert LogColor.RED not in formatted
-            assert LogColor.RESET not in formatted
+            self.assertNotIn(LogColor.YELLOW, formatted)
+            self.assertNotIn(LogColor.RED, formatted)
+            self.assertNotIn(LogColor.RESET, formatted)
 
     def test_format_with_non_string_msg(self) -> None:
         """Test formatting with a non-string message."""
         formatter = ColoredFormatter(fmt="%(levelname)s: %(message)s")
+        formatter._ColoredFormatter__use_colors = True
 
-        exception_instance = Exception("Test exception")
         record = logging.LogRecord(
-            name="test",
-            level=logging.ERROR,
-            pathname="",
-            lineno=0,
-            msg=exception_instance,
-            args=(),
-            exc_info=None,
+            "test", logging.ERROR, "", 0, Exception("Test exception"), (), None,
         )
-
         formatted = formatter.format(record)
-
-
         self.assertIn(LogColor.RED + "ERROR" + LogColor.RESET, formatted)
+        self.assertIn("Test exception", formatted)
 
-        self.assertIn(str(exception_instance), formatted)
+    def test_log_output_integration(self) -> None:
+        """Integration test for actual log output."""
+        captured_output = io.StringIO()
+        handler = logging.StreamHandler(captured_output)
 
-        self.assertNotIn(LogColor.RED + str(exception_instance) +
-        LogColor.RESET, formatted)
+        formatter = ColoredFormatter(fmt="%(levelname)s - %(message)s")
+        formatter._ColoredFormatter__use_colors = True
+        handler.setFormatter(formatter)
+
+        logger = logging.getLogger("test_logger")
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(handler)
+        logger.propagate = False  # Avoid duplicate output
+
+        logger.info("Info message")
+        logger.warning("Warning message")
+        logger.error("Error message")
+
+        captured_output.flush()
+        output = captured_output.getvalue()
+        lines = output.strip().split("\n")
+
+        self.assertGreaterEqual(len(lines), 3)
+
+        self.assertIn("INFO - Info message", lines[0])
+        self.assertIn(f"{LogColor.YELLOW}WARNING{LogColor.RESET}", lines[1])
+        self.assertIn(f"{LogColor.RED}ERROR{LogColor.RESET}", lines[2])
+
+
+if __name__ == "__main__":
+    unittest.main()
