@@ -6,10 +6,9 @@ import logging
 from typing import Callable
 
 import dbus
+from config import Config
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib
-
-from typetrace.config import Config
 
 logger = logging.getLogger(__name__)
 

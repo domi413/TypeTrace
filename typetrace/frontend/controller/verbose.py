@@ -1,9 +1,8 @@
 """The verbose widget that displays keystroke data in text."""
 from __future__ import annotations
 
+from frontend.model.keystrokes import Keystroke, KeystrokeStore
 from gi.repository import Gio, Gtk
-
-from typetrace.model.keystrokes import Keystroke, KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/verbose.ui")
