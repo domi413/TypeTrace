@@ -26,7 +26,7 @@ is stored locally and under your control.
 TypeTrace can be installed on any Linux distribution using the following command:
 
 ```bash
-curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/domi413/TypeTrace/main/install.sh | bash
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/domi413/TypeTrace/main/install.sh | sh
 ```
 
 Note that:
