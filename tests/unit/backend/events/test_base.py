@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+import pytest
+
 from typetrace.backend.events.base import BaseEventProcessor
 from typetrace.config import Config
 
@@ -38,7 +40,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_init(self) -> None:
         """Test the initialization of BaseEventProcessor."""
-        self.assertEqual(self.processor._db_path, self.tmp_path / "test.db")
+        assert self.processor._db_path == self.tmp_path / "test.db"
 
     def test_check_timeout_and_flush_no_flush(self) -> None:
         """Test _check_timeout_and_flush with no flush condition."""
@@ -55,8 +57,8 @@ class TestBaseEventProcessor(unittest.TestCase):
                 start_time,
                 self.processor._db_path,
             )
-            self.assertEqual(new_buffer, buffer)
-            self.assertEqual(new_start_time, start_time)
+            assert new_buffer == buffer
+            assert new_start_time == start_time
             mock_write.assert_not_called()
 
     def test_check_timeout_and_flush_with_flush_timeout(self) -> None:
@@ -74,8 +76,8 @@ class TestBaseEventProcessor(unittest.TestCase):
                 start_time,
                 self.processor._db_path,
             )
-            self.assertEqual(new_buffer, [])
-            self.assertGreater(new_start_time, start_time)
+            assert new_buffer == []
+            assert new_start_time > start_time
             mock_write.assert_called_once_with(
                 self.processor._db_path,
                 buffer,
@@ -97,8 +99,8 @@ class TestBaseEventProcessor(unittest.TestCase):
                 start_time,
                 self.processor._db_path,
             )
-            self.assertEqual(new_buffer, [])
-            self.assertGreater(new_start_time, start_time)
+            assert new_buffer == []
+            assert new_start_time > start_time
             mock_write.assert_called_once_with(
                 self.processor._db_path,
                 buffer,
@@ -117,8 +119,8 @@ class TestBaseEventProcessor(unittest.TestCase):
                 start_time,
                 self.processor._db_path,
             )
-            self.assertEqual(new_buffer, [])
-            self.assertEqual(new_start_time, start_time)
+            assert new_buffer == []
+            assert new_start_time == start_time
             mock_write.assert_not_called()
 
     def test_check_timeout_and_flush_force_flush(self) -> None:
@@ -137,8 +139,8 @@ class TestBaseEventProcessor(unittest.TestCase):
                 self.processor._db_path,
                 flush=True,
             )
-            self.assertEqual(new_buffer, [])
-            self.assertGreater(new_start_time, start_time)
+            assert new_buffer == []
+            assert new_start_time > start_time
             mock_write.assert_called_once_with(
                 self.processor._db_path,
                 buffer,
@@ -160,8 +162,8 @@ class TestBaseEventProcessor(unittest.TestCase):
                 start_time,
                 self.processor._db_path,
             )
-            self.assertEqual(new_buffer, buffer)
-            self.assertEqual(new_start_time, start_time)
+            assert new_buffer == buffer
+            assert new_start_time == start_time
             mock_write.assert_not_called()
 
     def test_print_event(self) -> None:
@@ -182,7 +184,7 @@ class TestBaseEventProcessor(unittest.TestCase):
         event: dict[str, Any] = {"scan_code": 1}
 
         with patch("logging.Logger.debug") as mock_debug:
-            with self.assertRaises(KeyError):  # noqa: PT027
+            with pytest.raises(KeyError):
                 self.processor._print_event(event)
             mock_debug.assert_not_called()
 
