@@ -8,8 +8,10 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+import pytest
+
 from typetrace.backend.events.base import BaseEventProcessor
-from typetrace.config import Config
+from typetrace.config import Config, Event
 
 
 class ConcreteBaseEventProcessor(BaseEventProcessor):
@@ -179,16 +181,16 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_print_event_missing_keys(self) -> None:
         """Test the _print_event method with an event missing required keys."""
-        event: dict[str, Any] = {"scan_code": 1}
+        event: Event = {"scan_code": 1}
 
         with patch("logging.Logger.debug") as mock_debug:
-            with self.assertRaises(KeyError):  # noqa: PT027
+            with pytest.raises(KeyError):  
                 self.processor._print_event(event)
             mock_debug.assert_not_called()
 
     def test_print_event_invalid_values(self) -> None:
         """Test the _print_event method with an event containing invalid values."""
-        event: dict[str, Any] = {"scan_code": None, "name": "", "date": ""}
+        event: Event = {"scan_code": None, "name": "", "date": ""}
 
         with patch("logging.Logger.debug") as mock_debug:
             self.processor._print_event(event)
