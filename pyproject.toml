@@ -19,7 +19,7 @@ dev = [
 [tool.setuptools]
 packages = [
     "typetrace",
-    "tests"
+    # "tests"
 ]
 
 [tool.ruff.lint]
