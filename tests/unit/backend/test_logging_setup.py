@@ -128,8 +128,6 @@ class TestLoggerSetup(TestCase):
     def test_format_with_non_string_msg(self) -> None:
         """Test formatting with a non-string message."""
         formatter = ColoredFormatter(fmt="%(levelname)s: %(message)s")
-    
-        formatter._ColoredFormatter__use_colors = True
 
         exception_instance = Exception("Test exception")
         record = logging.LogRecord(
@@ -144,10 +142,10 @@ class TestLoggerSetup(TestCase):
 
         formatted = formatter.format(record)
 
-    
+
         self.assertIn(LogColor.RED + "ERROR" + LogColor.RESET, formatted)
-    
+
         self.assertIn(str(exception_instance), formatted)
 
-        self.assertNotIn(LogColor.RED + str(exception_instance) + 
+        self.assertNotIn(LogColor.RED + str(exception_instance) +
         LogColor.RESET, formatted)

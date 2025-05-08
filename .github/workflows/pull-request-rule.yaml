@@ -5,6 +5,8 @@ on:
     types:
       - edited
       - opened
+      - synchronize
+      - reopened
 
 jobs:
   pull-request-title:
