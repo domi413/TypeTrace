@@ -1,13 +1,14 @@
 """Window module for the Typetrace application."""
 
-from frontend.controller.heatmap import Heatmap
-from frontend.controller.statistics import Statistics
-from frontend.controller.utils import dialog_utils
-from frontend.controller.verbose import Verbose
-from frontend.model.database_manager import DatabaseManager
-from frontend.model.keystrokes import KeystrokeStore
-from frontend.service.backend_connector import BackendConnector
 from gi.repository import Adw, Gio, GLib, Gtk
+
+from typetrace.frontend.controller.heatmap import Heatmap
+from typetrace.frontend.controller.statistics import Statistics
+from typetrace.frontend.controller.utils import dialog_utils
+from typetrace.frontend.controller.verbose import Verbose
+from typetrace.frontend.model.database_manager import DatabaseManager
+from typetrace.frontend.model.keystrokes import KeystrokeStore
+from typetrace.frontend.service.backend_connector import BackendConnector
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/window.ui")

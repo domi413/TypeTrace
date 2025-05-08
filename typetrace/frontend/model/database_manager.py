@@ -5,8 +5,9 @@ import shutil
 from pathlib import Path
 from typing import ClassVar
 
-from config import DatabasePath
 from gi.repository import GObject
+
+from typetrace.config import DatabasePath
 
 logger = logging.getLogger(__name__)
 

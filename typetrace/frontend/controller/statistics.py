@@ -5,12 +5,13 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
-from frontend.controller.utils.charts.line_chart import LineChart
-from frontend.controller.utils.charts.pie_chart import PieChart
 from gi.repository import Gtk
 
+from typetrace.frontend.controller.utils.charts.line_chart import LineChart
+from typetrace.frontend.controller.utils.charts.pie_chart import PieChart
+
 if TYPE_CHECKING:
-    from frontend.model.keystrokes import Keystroke, KeystrokeStore
+    from typetrace.frontend.model.keystrokes import Keystroke, KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/statistics.ui")

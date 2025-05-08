@@ -7,8 +7,9 @@ from pathlib import Path
 from typing import Callable
 
 import dbus
-from config import Config
 from gi.repository import Adw, Gio, GLib, Gtk
+
+from typetrace.config import Config
 
 logger = logging.getLogger(__name__)
 
