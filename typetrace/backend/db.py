@@ -11,11 +11,13 @@ from typing import TYPE_CHECKING, final
 from typetrace.sql import SQLQueries
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
     from pathlib import Path
 
     from typetrace.config import Event
 
 logger = logging.getLogger(__name__)
+
 
 @final
 class DatabaseManager:
@@ -27,6 +29,7 @@ class DatabaseManager:
 
         Args:
             db_path: Path to the SQLite database file.
+
         """
         with self._get_db_connection(db_path) as conn:
             cursor = conn.cursor()
@@ -42,6 +45,7 @@ class DatabaseManager:
         Args:
             db_path: Path to the SQLite database file.
             events: List of key events to write to the database.
+
         """
         if not events:
             return
@@ -77,6 +81,7 @@ class DatabaseManager:
 
         Yields:
             SQLite database connection.
+
         """
         conn = sqlite3.connect(db_path)
         try:
