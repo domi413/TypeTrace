@@ -9,10 +9,10 @@ import sqlite3
 import threading
 from typing import TYPE_CHECKING, final
 
-from backend.db import DatabaseManager
-from backend.dbus_service import DbusServiceManager
 from gi.repository import GLib
 
+from typetrace.backend.db import DatabaseManager
+from typetrace.backend.dbus_service import DbusServiceManager
 from typetrace.config import Config, DatabasePath, ExitCodes
 from typetrace.logging_setup import LoggerSetup
 
@@ -70,7 +70,7 @@ class CLI:
             # --- Start processor Thread ---
             match platform.system().lower():
                 case "linux":
-                    from backend.events.linux import LinuxEventProcessor
+                    from typetrace.backend.events.linux import LinuxEventProcessor
 
                     if not Config.IS_FLATPAK:
                         self._check_input_group()

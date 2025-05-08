@@ -1,0 +1,57 @@
+"""Unit tests for LinuxEventProcessor from typetrace.backend.events.linux."""
+
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import evdev
+
+from typetrace.backend.events.linux import LinuxEventProcessor
+
+
+class TestLinuxEventProcessor(unittest.TestCase):
+    """Test suite for LinuxEventProcessor."""
+
+    def setUp(self) -> None:
+        """Set up test environment."""
+        self.temp_dir = Path(tempfile.mkdtemp())
+        self.db_path = self.temp_dir / "test.db"
+        self.linux_processor = LinuxEventProcessor(str(self.db_path))
+
+    def tearDown(self) -> None:
+        """Clean up temporary files."""
+        import shutil
+        shutil.rmtree(self.temp_dir)
+
+    def test_check_device_accessibility_success(self) -> None:
+        """Ensure no error when devices are accessible."""
+        with patch.object(
+            self.linux_processor,
+            "_select_devices",
+            return_value=[MagicMock()],
+        ):
+            self.linux_processor.check_device_accessibility()
+
+    def test_select_devices(self) -> None:
+        """Return mocked device from _select_devices()."""
+        mock_device = MagicMock()
+        mock_device.capabilities.return_value = {
+            evdev.ecodes.EV_KEY: [],
+        }
+
+        with (
+            patch("evdev.util.list_devices", return_value=["/dev/input/event0"]),
+            patch("evdev.device.InputDevice", return_value=mock_device),
+        ):
+            devices = self.linux_processor._select_devices()
+            self.assertEqual(len(devices), 1, "Expected exactly one device")
+            self.assertEqual(
+                devices[0],
+                mock_device,
+                "Device does not match mock_device",
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()
