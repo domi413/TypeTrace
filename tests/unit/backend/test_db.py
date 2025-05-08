@@ -105,7 +105,8 @@ def test_write_events(
     db_manager.write_to_database(mock_db_path, input_events)
 
     mock_cursor.executemany.assert_called_once_with(
-        SQLQueries.INSERT_OR_UPDATE_KEYSTROKE, expected
+        SQLQueries.INSERT_OR_UPDATE_KEYSTROKE,
+        expected,
     )
     mock_conn.commit.assert_called_once()
     mock_conn.close.assert_called_once()
