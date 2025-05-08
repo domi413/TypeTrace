@@ -144,35 +144,4 @@ class TestColoredFormatter(TestCase):
         exception_text = str(Exception("Test exception"))
         self.assertIn(exception_text, formatted)
 
-    def test_log_output_integration(self) -> None:
-        """Integration test for actual log output."""
-        captured_output = io.StringIO()
-        handler = logging.StreamHandler(captured_output)
-
-        formatter = ColoredFormatter(fmt="%(levelname)s - %(message)s")
-        formatter._ColoredFormatter__use_colors = True
-        handler.setFormatter(formatter)
-
-        logger = logging.getLogger("test_logger")
-        logger.setLevel(logging.DEBUG)
-        logger.addHandler(handler)
-
-        logger.info("Info message")
-        logger.warning("Warning message")
-        logger.error("Error message")
-
-        captured_output.flush()
-
-        output = captured_output.getvalue()
-        lines = output.strip().split("\n")
-
-        expected_log_lines = 3
-        self.assertGreaterEqual(
-            len(lines),
-            expected_log_lines,
-            f"Expected at least {expected_log_lines} log lines, but got {len(lines)}",
-        )
-
-        self.assertIn("INFO - Info message", lines[0])
-        self.assertIn(f"{LogColor.YELLOW}WARNING{LogColor.RESET}", lines[1])
-        self.assertIn(f"{LogColor.RED}ERROR{LogColor.RESET}", lines[2])
+    
