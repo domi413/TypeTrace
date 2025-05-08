@@ -82,7 +82,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         GLib.idle_add(self._backend_connector.check_and_activate_async)
 
-    def _update_view(self, _:any) -> None:
+    def _update_view(self, _: any) -> None:
         """Handle refresh button click."""
         keystrokes = self.keystroke_store.get_all_keystrokes()
         self.heatmap.update(keystrokes)
