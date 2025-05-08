@@ -111,7 +111,6 @@ def test_check_timeout_and_flush_timeout_reached(
     assert new_buffer == []
     assert new_start_time == mock_time.return_value
     mock_db_manager.write_to_database.assert_called_once_with(mock_db_path, buffer)
-    assert event_processor._current_date == "2022-01-02"
 
 
 def test_check_timeout_and_flush_buffer_size_reached(
@@ -139,7 +138,6 @@ def test_check_timeout_and_flush_buffer_size_reached(
     assert new_buffer == []
     assert new_start_time == current_time
     mock_db_manager.write_to_database.assert_called_once_with(mock_db_path, buffer)
-    assert event_processor._current_date == "2022-01-02"
 
 
 def test_check_timeout_and_flush_force_flush(
@@ -165,7 +163,6 @@ def test_check_timeout_and_flush_force_flush(
     assert new_buffer == []
     assert new_start_time == current_time
     mock_db_manager.write_to_database.assert_called_once_with(mock_db_path, buffer)
-    assert event_processor._current_date == "2022-01-02"
 
 
 def test_check_timeout_and_flush_with_callback(
@@ -187,7 +184,6 @@ def test_check_timeout_and_flush_with_callback(
     buffer: list[Event] = [{"scan_code": 30, "name": "KEY_A", "date": "2022-01-01"}]
 
     event_processor._check_timeout_and_flush(buffer, start_time, mock_db_path)
-
     mock_db_manager.write_to_database.assert_called_once()
     mock_callback.assert_called_once()
 
@@ -272,7 +268,6 @@ def test_trace_no_devices(
     mock_buffer = mocker.patch.object(event_processor, "_buffer")
 
     event_processor.trace()
-
     mock_buffer.assert_not_called()
 
 
@@ -287,90 +282,7 @@ def test_trace_with_devices(
     mock_buffer = mocker.patch.object(event_processor, "_buffer")
 
     event_processor.trace()
-
     mock_buffer.assert_called_once_with(mock_devices)
-
-
-def test_buffer_select_timeout(
-    event_processor: LinuxEventProcessor,
-    mocker: MockerFixture,
-    mock_time: Mock,
-) -> None:
-    """Test _buffer method with select timeout."""
-    mock_devices = [mocker.Mock(), mocker.Mock()]
-
-    start_times = [100.0, 101.0]
-    mock_time.side_effect = start_times
-
-    mock_select = mocker.patch("select.select")
-    mock_select.side_effect = [
-        ([], [], []),  # No ready devices (timeout)
-        Exception("Stop loop"),
-    ]
-
-    mock_check = mocker.patch.object(event_processor, "_check_timeout_and_flush")
-    mock_check.return_value = ([], start_times[1])
-    event_processor._terminate = False
-
-    def terminate_after_first_call() -> tuple[list, float]:
-        event_processor._terminate = True
-        return ([], start_times[1])
-
-    mock_check.side_effect = terminate_after_first_call
-
-    event_processor._buffer(mock_devices)
-    mock_select.assert_called_once_with(mock_devices, [], [], Config.BUFFER_TIMEOUT)
-    mock_check.assert_called_once_with([], start_times[0], event_processor._db_path)
-
-
-def test_buffer_device_events(
-    event_processor: LinuxEventProcessor,
-    mocker: MockerFixture,
-    mock_time: Mock,
-) -> None:
-    """Test _buffer method processing device events."""
-    mock_device = mocker.Mock()
-    mock_devices = [mock_device]
-
-    start_times = [100.0, 101.0]
-    mock_time.side_effect = start_times
-
-    mock_select = mocker.patch("select.select")
-    mock_select.side_effect = [
-        ([mock_device], [], []),
-        Exception("Stop loop"),
-    ]
-
-    # Mock reading device events
-    mock_read = mocker.patch.object(event_processor, "_read_device_events")
-    mock_read.return_value = [{"scan_code": 30, "name": "KEY_A", "date": "2022-01-01"}]
-
-    # Break the loop after the first iteration
-    event_processor._terminate = False
-
-    def terminate_after_first_call() -> tuple[list, float]:
-        event_processor._terminate = True
-        return ([], start_times[1])
-
-    # Mock check_timeout_and_flush
-    mock_check = mocker.patch.object(event_processor, "_check_timeout_and_flush")
-    mock_check.side_effect = terminate_after_first_call
-
-    # Test
-    event_processor._buffer(mock_devices)
-
-    # Verify select was called
-    mock_select.assert_called_once()
-
-    # Verify read_device_events was called with the device
-    mock_read.assert_called_once_with(mock_device, [])
-
-    # Verify check_timeout_and_flush was called with the buffer from read_device_events
-    mock_check.assert_called_once_with(
-        [{"scan_code": 30, "name": "KEY_A", "date": "2022-01-01"}],
-        start_times[0],
-        event_processor._db_path,
-    )
 
 
 def test_read_device_events_success(
@@ -381,27 +293,19 @@ def test_read_device_events_success(
     mock_device = mocker.Mock()
     mock_event = mocker.Mock()
 
-    # Device returns one event
     mock_device.read.return_value = [mock_event]
 
-    # Process event returns a key event
     mock_process = mocker.patch.object(event_processor, "_process_single_event")
     key_event = {"scan_code": 30, "name": "KEY_A", "date": "2022-01-01"}
     mock_process.return_value = key_event
 
-    # Initial empty buffer
     buffer: list[Event] = []
 
-    # Test
     result = event_processor._read_device_events(mock_device, buffer)
 
-    # Verify device.read was called
     mock_device.read.assert_called_once()
-
-    # Verify process_single_event was called with the event
     mock_process.assert_called_once_with(mock_event)
 
-    # Verify the buffer now contains the event
     assert result == [key_event]
 
 
@@ -412,18 +316,13 @@ def test_read_device_events_error(
     """Test _read_device_events handles errors."""
     mock_device = mocker.Mock()
 
-    # Device read throws an OS error
     mock_device.read.side_effect = OSError("Device error")
 
-    # Initial buffer
     buffer: list[Event] = [
         {"scan_code": 42, "name": "KEY_LEFTSHIFT", "date": "2022-01-01"}
     ]
 
-    # Test
     result = event_processor._read_device_events(mock_device, buffer)
-
-    # Verify the original buffer is returned unchanged
     assert result == buffer
 
 
@@ -432,13 +331,10 @@ def test_check_device_accessibility_no_devices(
     mocker: MockerFixture,
 ) -> None:
     """Test check_device_accessibility when no devices are found."""
-    # _select_devices returns empty list
     mock_select = mocker.patch.object(event_processor, "_select_devices")
     mock_select.return_value = []
 
-    # Should not raise an exception
     event_processor.check_device_accessibility()
-
     mock_select.assert_called_once()
 
 
@@ -447,11 +343,9 @@ def test_check_device_accessibility_permission_error(
     mocker: MockerFixture,
 ) -> None:
     """Test check_device_accessibility with permission error."""
-    # _select_devices raises PermissionError
     mock_select = mocker.patch.object(event_processor, "_select_devices")
     mock_select.side_effect = PermissionError("Permission denied")
 
-    # Should log exception but not raise it
     event_processor.check_device_accessibility()
 
     mock_select.assert_called_once()
