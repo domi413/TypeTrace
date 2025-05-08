@@ -3,7 +3,7 @@ name = "typetrace"
 version = "0.1.0" # TODO: Set this to release version
 
 # TODO: Add needed dependency versions e.g. "appdirs>=1.4.4",
-requires-python = ">=3.8" 
+requires-python = ">=3.8"
 dependencies = [
     "appdirs",
     "dbus-python",
@@ -13,6 +13,13 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "ruff",
+    "pytest",
+]
+
+[tool.setuptools]
+packages = [
+    "typetrace",
+    # "tests"
 ]
 
 [tool.ruff.lint]
@@ -20,8 +27,16 @@ extend-select = [
     "ALL",
 ]
 ignore = [
-    "ANN003", # Ignore missing type annotation for **kwargs
     "ANN401", # Ignore `Any` type annotation for functions
+    "ANN003", # Ignore missing type annotation for **kwargs
     "D203",   # In conflict with D211
     "D213",   # In conflict with D212
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "ANN201",  # Ignore missing return type
+    "SLF001",  # Allow access to private member
+    "PLR2004", # Ignore magic values
+    "S101",    # Ignore asserts
 ]

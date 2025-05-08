@@ -13,7 +13,7 @@ from gi.repository import Adw
 if TYPE_CHECKING:
     from gi.repository import Gtk
 
-from frontend.controller.utils import color_utils
+from typetrace.frontend.controller.utils import color_utils
 
 
 class ChartColor(StrEnum):

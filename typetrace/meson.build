@@ -2,10 +2,10 @@ datadir = get_option('prefix') / get_option('datadir')
 pkgdatadir = datadir / meson.project_name()
 
 conf = configuration_data()
-conf.set('application_id', 'edu.ost.typetrace')
+conf.set('ID', 'edu.ost.typetrace')
 conf.set('PYTHON', python.find_installation('python3').full_path())
-conf.set('datadir', datadir)
-conf.set('pkgdatadir', pkgdatadir)
+conf.set('DATADIR', datadir)
+conf.set('PKGDATADIR', pkgdatadir)
 conf.set('VERSION', meson.project_version())
 configure_file(
   input: 'typetrace.in',

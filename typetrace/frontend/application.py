@@ -6,13 +6,14 @@ import logging
 import sqlite3
 from typing import Any, Callable
 
-from config import DatabasePath
-from frontend.controller.preferences import Preferences
-from frontend.controller.window import TypetraceWindow
-from frontend.model.database_manager import DatabaseManager
-from frontend.model.keystrokes import KeystrokeStore
 from gi.repository import Adw, Gio
-from logging_setup import LoggerSetup
+
+from typetrace.config import DatabasePath
+from typetrace.frontend.controller.preferences import Preferences
+from typetrace.frontend.controller.window import TypetraceWindow
+from typetrace.frontend.model.database_manager import DatabaseManager
+from typetrace.frontend.model.keystrokes import KeystrokeStore
+from typetrace.logging_setup import LoggerSetup
 
 logger = logging.getLogger(__name__)
 

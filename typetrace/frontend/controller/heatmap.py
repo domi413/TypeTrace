@@ -4,12 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from frontend.controller.utils.color_utils import get_color_scheme
-from frontend.model.layouts import KEYBOARD_LAYOUTS
 from gi.repository import Gdk, Gio, Gtk
 
+from typetrace.frontend.controller.utils.color_utils import get_color_scheme
+from typetrace.frontend.model.layouts import KEYBOARD_LAYOUTS
+
 if TYPE_CHECKING:
-    from frontend.model.keystrokes import Keystroke, KeystrokeStore
+    from typetrace.frontend.model.keystrokes import Keystroke, KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/heatmap.ui")
