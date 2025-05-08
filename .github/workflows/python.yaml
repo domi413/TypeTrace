@@ -35,7 +35,7 @@ jobs:
             - name: Install dbus
               run: |
                   sudo apt-get update
-                  sudo apt-get -o dir::cache::archives=apt-cache install -y libdbus-1-dev libdbus-glib-1-dev libcairo2-dev
+                  sudo apt-get -o dir::cache::archives=apt-cache install -y libdbus-1-dev libdbus-glib-1-dev libcairo2-dev libgirepository-2.0-0
 
             - name: Create virtual environment
               run: uv venv
