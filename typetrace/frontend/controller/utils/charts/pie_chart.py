@@ -274,7 +274,6 @@ class PieChart(Chart):
     @override
     def draw(
         self,
-        _area: Gtk.DrawingArea,
         cr: cairo.Context,
         width: int,
         height: int,

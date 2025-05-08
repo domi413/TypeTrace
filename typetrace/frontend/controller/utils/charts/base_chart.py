@@ -62,7 +62,6 @@ class Chart(ABC):
     @abstractmethod
     def draw(
         self,
-        area: Gtk.DrawingArea,
         cr: cairo.Context,
         width: int,
         height: int,
