@@ -9,8 +9,10 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from typetrace.backend.db import DatabaseManager
-from typetrace.config import Config
+from typetrace.config import Config, Event
 from typetrace.logging_setup import ColoredFormatter, LoggerSetup
 from typetrace.sql import SQLQueries
 
@@ -39,7 +41,9 @@ class TestDatabaseManager(unittest.TestCase):
             self.db_manager.initialize_database(self.mock_db_path)
 
             mock_connect.assert_called_once_with(self.mock_db_path)
-            mock_cursor.execute.assert_called_once_with(SQLQueries.CREATE_KEYSTROKES_TABLE)
+            mock_cursor.execute.assert_called_once_with(
+                SQLQueries.CREATE_KEYSTROKES_TABLE,
+            )
             mock_conn.commit.assert_called_once()
             mock_conn.close.assert_called_once()
 
@@ -57,12 +61,12 @@ class TestDatabaseManager(unittest.TestCase):
             mock_connect.return_value = mock_conn
             mock_conn.cursor.return_value = mock_cursor
 
-            input_events = [
+            input_events: list[Event] = [
                 {"scan_code": 30, "name": "KEY_A", "date": "2025-04-22"},
                 {"scan_code": 42, "name": "KEY_LEFTSHIFT", "date": "2025-04-22"},
             ]
 
-            expected_processed_events = [
+            expected_processed_events: list[dict[str, int | str]] = [
                 {"scan_code": 30, "key_name": "KEY_A", "date": "2025-04-22"},
                 {"scan_code": 42, "key_name": "KEY_LEFTSHIFT", "date": "2025-04-22"},
             ]
@@ -87,14 +91,16 @@ class TestDatabaseManager(unittest.TestCase):
             mock_conn.cursor.return_value = mock_cursor
             mock_cursor.executemany.side_effect = sqlite3.Error("Mock SQLite error")
 
-            input_events = [{"scan_code": 30, "name": "KEY_A", "date": "2025-04-22"}]
+            input_events: list[Event] = [
+                {"scan_code": 30, "name": "KEY_A", "date": "2025-04-22"},
+            ]
 
             stderr = sys.stderr
             sys.stderr = StringIO()
             try:
-                with self.assertRaises(sqlite3.Error) as cm:  # noqa: PT027
+                with pytest.raises(sqlite3.Error, match="Mock SQLite error") as cm:
                     self.db_manager.write_to_database(self.mock_db_path, input_events)
-                self.assertEqual(str(cm.exception), "Mock SQLite error")
+                assert str(cm.value) == "Mock SQLite error"
             finally:
                 sys.stderr = stderr
 
@@ -112,7 +118,7 @@ class TestDatabaseManager(unittest.TestCase):
             mock_connect.return_value = mock_conn
             mock_conn.cursor.return_value = mock_cursor
 
-            input_events = [
+            input_events: list[Event] = [
                 {
                     "scan_code": 30,
                     "name": "KEY_A;DROP TABLE keystrokes;",
@@ -135,7 +141,7 @@ class TestDatabaseManager(unittest.TestCase):
                 },
             ]
 
-            expected_processed_events = [
+            expected_processed_events: list[dict[str, int | str]] = [
                 {
                     "scan_code": 30,
                     "key_name": "KEY_A;DROP TABLE keystrokes;",
@@ -180,11 +186,10 @@ class TestColoredFormatter(unittest.TestCase):
     def test_formatter_initialization(self) -> None:
         """Test ColoredFormatter initialization."""
         formatter = ColoredFormatter()
-        self.assertIsInstance(formatter, logging.Formatter)
+        assert isinstance(formatter, logging.Formatter)
 
     def test_format_without_colors(self) -> None:
         """Test formatting with colors disabled."""
-        formatter = ColoredFormatter()
         record = logging.LogRecord(
             name="test",
             level=logging.INFO,
@@ -194,12 +199,11 @@ class TestColoredFormatter(unittest.TestCase):
             args=(),
             exc_info=None,
         )
-        formatted = formatter.format(record)
-        self.assertNotIn("\033[32m", formatted)
+        formatted = self.formatter.format(record)
+        assert "\033[32m" not in formatted
 
     def test_format_with_non_string_msg(self) -> None:
         """Test formatting with a non-string message."""
-        formatter = ColoredFormatter()
         record = logging.LogRecord(
             name="test",
             level=logging.INFO,
@@ -209,8 +213,8 @@ class TestColoredFormatter(unittest.TestCase):
             args=(),
             exc_info=None,
         )
-        formatted = formatter.format(record)
-        self.assertIn("123", formatted)
+        formatted = self.formatter.format(record)
+        assert "123" in formatted
 
 
 class TestLoggerSetup(unittest.TestCase):
@@ -218,7 +222,7 @@ class TestLoggerSetup(unittest.TestCase):
 
     def test_logger_setup_instantiation_fails(self) -> None:
         """Test that LoggerSetup cannot be instantiated."""
-        with self.assertRaises(TypeError):  # noqa: PT027
+        with pytest.raises(TypeError):
             LoggerSetup()
 
 

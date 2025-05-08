@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 import unittest
 from pathlib import Path
-from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -23,7 +22,7 @@ class ConcreteBaseEventProcessor(BaseEventProcessor):
     def _buffer(self, devices: list[str]) -> None:
         """Implement the abstract _buffer method for testing."""
 
-    def _process_single_event(self, event: dict[str, Any]) -> None:
+    def _process_single_event(self, event: Event) -> None:
         """Implement the abstract _process_single_event method for testing."""
 
 
@@ -40,11 +39,11 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_init(self) -> None:
         """Test the initialization of BaseEventProcessor."""
-        self.assertEqual(self.processor._db_path, self.tmp_path / "test.db")
+        assert self.processor._db_path == self.tmp_path / "test.db"
 
     def test_check_timeout_and_flush_no_flush(self) -> None:
         """Test _check_timeout_and_flush with no flush condition."""
-        buffer: list[dict[str, Any]] = [
+        buffer: list[Event] = [
             {"scan_code": 1, "name": "a", "date": "2023-10-01"},
         ]
         start_time: float = time.time()
@@ -57,13 +56,13 @@ class TestBaseEventProcessor(unittest.TestCase):
                 start_time,
                 self.processor._db_path,
             )
-            self.assertEqual(new_buffer, buffer)
-            self.assertEqual(new_start_time, start_time)
+            assert new_buffer == buffer
+            assert new_start_time == start_time
             mock_write.assert_not_called()
 
     def test_check_timeout_and_flush_with_flush_timeout(self) -> None:
         """Test _check_timeout_and_flush with a flush due to timeout."""
-        buffer: list[dict[str, Any]] = [
+        buffer: list[Event] = [
             {"scan_code": 1, "name": "a", "date": "2023-10-01"},
         ]
         start_time: float = time.time() - Config.BUFFER_TIMEOUT - 1
@@ -76,8 +75,8 @@ class TestBaseEventProcessor(unittest.TestCase):
                 start_time,
                 self.processor._db_path,
             )
-            self.assertEqual(new_buffer, [])
-            self.assertGreater(new_start_time, start_time)
+            assert new_buffer == []
+            assert new_start_time > start_time
             mock_write.assert_called_once_with(
                 self.processor._db_path,
                 buffer,
@@ -85,7 +84,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_check_timeout_and_flush_with_flush_size(self) -> None:
         """Test _check_timeout_and_flush with a flush due to buffer size."""
-        buffer: list[dict[str, Any]] = [
+        buffer: list[Event] = [
             {"scan_code": i, "name": f"key_{i}", "date": "2023-10-01"}
             for i in range(Config.BUFFER_SIZE)
         ]
@@ -99,8 +98,8 @@ class TestBaseEventProcessor(unittest.TestCase):
                 start_time,
                 self.processor._db_path,
             )
-            self.assertEqual(new_buffer, [])
-            self.assertGreater(new_start_time, start_time)
+            assert new_buffer == []
+            assert new_start_time > start_time
             mock_write.assert_called_once_with(
                 self.processor._db_path,
                 buffer,
@@ -108,7 +107,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_check_timeout_and_flush_empty_buffer(self) -> None:
         """Test _check_timeout_and_flush with an empty buffer."""
-        buffer: list[dict[str, Any]] = []
+        buffer: list[Event] = []
         start_time: float = time.time()
 
         with patch(
@@ -119,13 +118,13 @@ class TestBaseEventProcessor(unittest.TestCase):
                 start_time,
                 self.processor._db_path,
             )
-            self.assertEqual(new_buffer, [])
-            self.assertEqual(new_start_time, start_time)
+            assert new_buffer == []
+            assert new_start_time == start_time
             mock_write.assert_not_called()
 
     def test_check_timeout_and_flush_force_flush(self) -> None:
         """Test _check_timeout_and_flush with a forced flush."""
-        buffer: list[dict[str, Any]] = [
+        buffer: list[Event] = [
             {"scan_code": 1, "name": "a", "date": "2023-10-01"},
         ]
         start_time: float = time.time()
@@ -139,8 +138,8 @@ class TestBaseEventProcessor(unittest.TestCase):
                 self.processor._db_path,
                 flush=True,
             )
-            self.assertEqual(new_buffer, [])
-            self.assertGreater(new_start_time, start_time)
+            assert new_buffer == []
+            assert new_start_time > start_time
             mock_write.assert_called_once_with(
                 self.processor._db_path,
                 buffer,
@@ -148,7 +147,7 @@ class TestBaseEventProcessor(unittest.TestCase):
 
     def test_check_timeout_and_flush_almost_full_buffer(self) -> None:
         """Test _check_timeout_and_flush with an almost full buffer."""
-        buffer: list[dict[str, Any]] = [
+        buffer: list[Event] = [
             {"scan_code": i, "name": f"key_{i}", "date": "2023-10-01"}
             for i in range(Config.BUFFER_SIZE - 1)
         ]
@@ -162,13 +161,13 @@ class TestBaseEventProcessor(unittest.TestCase):
                 start_time,
                 self.processor._db_path,
             )
-            self.assertEqual(new_buffer, buffer)
-            self.assertEqual(new_start_time, start_time)
+            assert new_buffer == buffer
+            assert new_start_time == start_time
             mock_write.assert_not_called()
 
     def test_print_event(self) -> None:
         """Test the _print_event method with a valid event."""
-        event: dict[str, Any] = {"scan_code": 1, "name": "a", "date": "2023-10-01"}
+        event: Event = {"scan_code": 1, "name": "a", "date": "2023-10-01"}
 
         with patch("logging.Logger.debug") as mock_debug:
             self.processor._print_event(event)

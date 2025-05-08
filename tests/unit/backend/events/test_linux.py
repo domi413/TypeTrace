@@ -17,11 +17,12 @@ class TestLinuxEventProcessor(unittest.TestCase):
         """Set up test environment."""
         self.temp_dir = Path(tempfile.mkdtemp())
         self.db_path = self.temp_dir / "test.db"
-        self.linux_processor = LinuxEventProcessor(str(self.db_path))
+        self.linux_processor = LinuxEventProcessor(self.db_path)
 
     def tearDown(self) -> None:
         """Clean up temporary files."""
         import shutil
+
         shutil.rmtree(self.temp_dir)
 
     def test_check_device_accessibility_success(self) -> None:
@@ -45,12 +46,8 @@ class TestLinuxEventProcessor(unittest.TestCase):
             patch("evdev.device.InputDevice", return_value=mock_device),
         ):
             devices = self.linux_processor._select_devices()
-            self.assertEqual(len(devices), 1, "Expected exactly one device")
-            self.assertEqual(
-                devices[0],
-                mock_device,
-                "Device does not match mock_device",
-            )
+            assert len(devices) == 1, "Expected exactly one device"
+            assert devices[0] == mock_device, "Device does not match mock_device"
 
 
 if __name__ == "__main__":
