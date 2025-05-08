@@ -52,6 +52,11 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
+      - name: Install system dependencies for PyGObject
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-gi gir1.2-glib-2.0
+
       - name: Install additional dependencies for dbus-python
         run: |
             sudo apt-get update
