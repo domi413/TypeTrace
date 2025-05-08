@@ -1,16 +1,21 @@
 """Tests for the DatabaseManager class."""
 
+from __future__ import annotations
+
 import sqlite3
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-import pytest_mock
 
 from typetrace.backend.db import DatabaseManager
 from typetrace.sql import SQLQueries
 
 if TYPE_CHECKING:
+    from pathlib import Path
+    from unittest.mock import Mock
+
+    from pytest_mock import MockerFixture
+
     from typetrace.config import Event
 
 
@@ -26,135 +31,105 @@ def mock_db_path(tmp_path: Path) -> Path:
     return tmp_path / "test.db"
 
 
-# =============================================================================
-# ====================== Tests for initialize_database method =================
-# =============================================================================
-def test_initialize_database(
-    monkeypatch: pytest.MonkeyPatch,
-    mocker: pytest_mock.MockerFixture,
-    db_manager: DatabaseManager,
-    mock_db_path: Path,
-) -> None:
-    """Test database initialization creates the keystrokes table."""
+@pytest.fixture
+def mock_sqlite(mocker: MockerFixture) -> tuple[Mock, Mock]:
+    """Mock SQLite connection and cursor."""
     mock_conn = mocker.Mock()
     mock_cursor = mocker.Mock()
-    monkeypatch.setattr(sqlite3, "connect", lambda _: mock_conn)
     mock_conn.cursor.return_value = mock_cursor
+    mocker.patch("sqlite3.connect", return_value=mock_conn)
+    return mock_conn, mock_cursor
 
+
+# =============================================================================
+# =================== Tests for initialize_database method ====================
+# =============================================================================
+def test_initialize_database(
+    db_manager: DatabaseManager,
+    mock_db_path: Path,
+    mock_sqlite: tuple[Mock, Mock],
+) -> None:
+    """Test database initialization creates the keystrokes table."""
+    mock_conn, mock_cursor = mock_sqlite
+    mock_conn, mock_cursor = mock_sqlite
     db_manager.initialize_database(mock_db_path)
 
-    assert mock_conn.cursor.called
     mock_cursor.execute.assert_called_once_with(SQLQueries.CREATE_KEYSTROKES_TABLE)
     mock_conn.commit.assert_called_once()
     mock_conn.close.assert_called_once()
 
 
-def test_initialize_database_sqlite_error(
-    monkeypatch: pytest.MonkeyPatch,
-    mocker: pytest_mock.MockerFixture,
+@pytest.mark.parametrize(
+    ("error_type", "error_msg"),
+    [
+        (sqlite3.Error, "Mock SQLite error"),
+        (sqlite3.OperationalError, "Mock operational error"),
+    ],
+)
+def test_init_fails_on_error(
     db_manager: DatabaseManager,
     mock_db_path: Path,
+    mock_sqlite: tuple[Mock, Mock],
+    error_type: type[Exception],
+    error_msg: str,
 ) -> None:
-    """Test database initialization with SQLite error."""
-    mock_conn = mocker.Mock()
-    mock_cursor = mocker.Mock()
-    monkeypatch.setattr(sqlite3, "connect", lambda _: mock_conn)
-    mock_conn.cursor.return_value = mock_cursor
+    """Test database initialization handles SQLite errors."""
+    mock_conn, mock_cursor = mock_sqlite
+    mock_cursor.execute.side_effect = error_type(error_msg)
 
-    expected_error = sqlite3.Error("Mock SQLite error")
-    mock_cursor.execute.side_effect = expected_error
-
-    with pytest.raises(sqlite3.Error) as excinfo:
+    with pytest.raises(error_type, match=error_msg):
         db_manager.initialize_database(mock_db_path)
 
-    assert str(excinfo.value) == str(expected_error)
-    mock_conn.close.assert_called_once()
-
-
-def test_initialize_database_operational_error(
-    monkeypatch: pytest.MonkeyPatch,
-    mocker: pytest_mock.MockerFixture,
-    db_manager: DatabaseManager,
-    mock_db_path: Path,
-) -> None:
-    """Test database initialization with SQLite operational error."""
-    mock_conn = mocker.Mock()
-    mock_cursor = mocker.Mock()
-    monkeypatch.setattr(sqlite3, "connect", lambda _: mock_conn)
-    mock_conn.cursor.return_value = mock_cursor
-
-    expected_error = sqlite3.OperationalError("Mock operational error")
-    mock_cursor.execute.side_effect = expected_error
-
-    with pytest.raises(sqlite3.OperationalError) as excinfo:
-        db_manager.initialize_database(mock_db_path)
-
-    assert str(excinfo.value) == str(expected_error)
     mock_conn.close.assert_called_once()
 
 
 # =============================================================================
-# ====================== Tests for write_to_database method ===================
+# ========================= Tests for write method ============================
 # =============================================================================
-def test_write_to_database_with_events(
-    monkeypatch: pytest.MonkeyPatch,
-    mocker: pytest_mock.MockerFixture,
+def test_write_events(
     db_manager: DatabaseManager,
     mock_db_path: Path,
+    mock_sqlite: tuple[Mock, Mock],
 ) -> None:
     """Test writing events to the database."""
-    mock_conn = mocker.Mock()
-    mock_cursor = mocker.Mock()
-    monkeypatch.setattr(sqlite3, "connect", lambda _: mock_conn)
-    mock_conn.cursor.return_value = mock_cursor
-
+    mock_conn, mock_cursor = mock_sqlite
     input_events: list[Event] = [
         {"scan_code": 30, "name": "KEY_A", "date": "2022-01-01"},
         {"scan_code": 42, "name": "KEY_LEFTSHIFT", "date": "2022-01-01"},
     ]
-
-    expected_processed_events = [
+    expected = [
         {"scan_code": 30, "key_name": "KEY_A", "date": "2022-01-01"},
         {"scan_code": 42, "key_name": "KEY_LEFTSHIFT", "date": "2022-01-01"},
     ]
 
     db_manager.write_to_database(mock_db_path, input_events)
 
-    assert mock_conn.cursor.called
     mock_cursor.executemany.assert_called_once_with(
-        SQLQueries.INSERT_OR_UPDATE_KEYSTROKE,
-        expected_processed_events,
+        SQLQueries.INSERT_OR_UPDATE_KEYSTROKE, expected
     )
     mock_conn.commit.assert_called_once()
     mock_conn.close.assert_called_once()
 
 
-def test_write_to_database_empty_events(
+def test_write_no_events(
     db_manager: DatabaseManager,
     mock_db_path: Path,
-    mocker: pytest_mock.MockerFixture,
+    mocker: MockerFixture,
 ) -> None:
-    """Test writing to database with an empty events list."""
+    """Test writing an empty events list does nothing."""
     mock_connect = mocker.patch("sqlite3.connect")
-
     db_manager.write_to_database(mock_db_path, [])
-
     mock_connect.assert_not_called()
 
 
-def test_write_to_database_sqlite_error(
-    monkeypatch: pytest.MonkeyPatch,
-    mocker: pytest_mock.MockerFixture,
+def test_write_fails_on_sqlite_error(
     db_manager: DatabaseManager,
     mock_db_path: Path,
+    mock_sqlite: tuple[Mock, Mock],
 ) -> None:
-    """Test write_to_database with SQLite error."""
-    mock_conn = mocker.Mock()
-    mock_cursor = mocker.Mock()
-    monkeypatch.setattr(sqlite3, "connect", lambda _: mock_conn)
-    mock_conn.cursor.return_value = mock_cursor
+    """Test writing events handles SQLite errors."""
+    mock_conn, mock_cursor = mock_sqlite
     mock_cursor.executemany.side_effect = sqlite3.Error("Mock SQLite error")
-
     input_events: list[Event] = [
         {"scan_code": 30, "name": "KEY_A", "date": "2022-01-01"},
     ]
@@ -165,66 +140,35 @@ def test_write_to_database_sqlite_error(
     mock_conn.close.assert_called_once()
 
 
-def test_write_to_database_with_invalid_characters(
-    monkeypatch: pytest.MonkeyPatch,
-    mocker: pytest_mock.MockerFixture,
+def test_write_special_characters(
     db_manager: DatabaseManager,
     mock_db_path: Path,
+    mock_sqlite: tuple[Mock, Mock],
 ) -> None:
-    """Test writing to database with events containing special characters."""
-    mock_conn = mocker.Mock()
-    mock_cursor = mocker.Mock()
-    monkeypatch.setattr(sqlite3, "connect", lambda _: mock_conn)
-    mock_conn.cursor.return_value = mock_cursor
-
+    """Test writing events with special characters."""
+    mock_conn, mock_cursor = mock_sqlite
     input_events: list[Event] = [
-        {
-            "scan_code": 30,
-            "name": "KEY_A;DROP TABLE keystrokes;",
-            "date": "2022-01-01",
-        },  # SQL injection attempt
-        {
-            "scan_code": 42,
-            "name": "KEY_'\"\\",
-            "date": "2022-01-01",
-        },  # Quote characters
-        {
-            "scan_code": 44,
-            "name": "KEY_\u2022\u00a9\u00ae",
-            "date": "2022-01-01",
-        },  # Unicode characters
-        {
-            "scan_code": 45,
-            "name": ("MULTI", "KEY", "COMBO"),
-            "date": "2022-01-01",
-        },  # Tuple of names
+        {"scan_code": 30, "name": "KEY_A;DROP TABLE keystrokes;", "date": "2022-01-01"},
+        {"scan_code": 42, "name": "KEY_'\"\\", "date": "2022-01-01"},
+        {"scan_code": 44, "name": "KEY_\u2022\u00a9\u00ae", "date": "2022-01-01"},
+        {"scan_code": 45, "name": ("MULTI", "KEY", "COMBO"), "date": "2022-01-01"},
     ]
-
-    expected_processed_events = [
+    expected = [
         {
             "scan_code": 30,
             "key_name": "KEY_A;DROP TABLE keystrokes;",
             "date": "2022-01-01",
         },
         {"scan_code": 42, "key_name": "KEY_'\"\\", "date": "2022-01-01"},
-        {
-            "scan_code": 44,
-            "key_name": "KEY_\u2022\u00a9\u00ae",
-            "date": "2022-01-01",
-        },
-        {
-            "scan_code": 45,
-            "key_name": "MULTI, KEY, COMBO",
-            "date": "2022-01-01",
-        },
+        {"scan_code": 44, "key_name": "KEY_\u2022\u00a9\u00ae", "date": "2022-01-01"},
+        {"scan_code": 45, "key_name": "MULTI, KEY, COMBO", "date": "2022-01-01"},
     ]
 
     db_manager.write_to_database(mock_db_path, input_events)
 
-    assert mock_conn.cursor.called
     mock_cursor.executemany.assert_called_once_with(
         SQLQueries.INSERT_OR_UPDATE_KEYSTROKE,
-        expected_processed_events,
+        expected,
     )
     mock_conn.commit.assert_called_once()
     mock_conn.close.assert_called_once()
