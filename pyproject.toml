@@ -16,19 +16,27 @@ dev = [
     "pytest",
 ]
 
+[tool.setuptools]
+packages = [
+    "typetrace",
+    "tests"
+]
+
 [tool.ruff.lint]
 extend-select = [
     "ALL",
 ]
 ignore = [
-    "ANN003", # Ignore missing type annotation for **kwargs
     "ANN401", # Ignore `Any` type annotation for functions
+    "ANN003", # Ignore missing type annotation for **kwargs
     "D203",   # In conflict with D211
     "D213",   # In conflict with D212
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
-    "S101",  # Ignore asserts
-    "SLF001" # Allow access to private member
+    "ANN201",  # Ignore missing return type
+    "SLF001",  # Allow access to private member
+    "PLR2004", # Ignore magic values
+    "S101",    # Ignore asserts
 ]
