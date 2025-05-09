@@ -20,7 +20,7 @@ class LogColor(StrEnum):
 
 @final
 class ColoredFormatter(logging.Formatter):
-    """Custom formatter with colored output for specific log levels."""
+    """Custom  test formatter with colored output for specific log levels."""
 
     def __init__(self, **kwargs) -> None:
         """Initialize formatter with color support detection."""
