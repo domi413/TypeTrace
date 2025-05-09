@@ -12,6 +12,7 @@ gresource
 gresources
 gsettings
 levelname
+libcairo
 pynput
 filemanager
 adwaita
