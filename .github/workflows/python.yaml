@@ -38,9 +38,31 @@ jobs:
 
       - name: Install system dependencies
         run: |
+          # Color definitions
+          RED='\033[1;91m'
+          GREEN='\033[1;92m'
+          YELLOW='\033[1;93m'
+          CYAN='\033[1;96m'
+          NC='\033[0m'
+
           mkdir -p apt-cache
-          sudo apt-get update
-          sudo apt-get -o dir::cache::archives=apt-cache install -y libdbus-1-dev libgirepository-2.0-0 libgirepository1.0-dev libcairo2-dev
+
+          if [[ "${{ steps.cache-apt.outputs.cache-hit }}" == "true" ]]; then
+            echo -e "${GREEN}APT package cache hit! Using cached packages.${NC}"
+
+            sudo ln -sf $PWD/apt-cache /var/cache/apt/archives
+            echo -e "${GREEN}Linked cached packages to apt cache directory.${NC}"
+          else
+            echo -e "${YELLOW}APT package cache miss. Downloading packages...${NC}"
+
+            echo -e "${CYAN}Updating package lists...${NC}"
+            sudo apt-get update
+
+            echo -e "${CYAN}Installing required system dependencies...${NC}"
+            sudo apt-get -o dir::cache::archives=apt-cache install -y libdbus-1-dev libgirepository-2.0-0 libgirepository1.0-dev libcairo2-dev
+
+            echo -e "${GREEN}System dependencies installed successfully.${NC}"
+          fi
 
       - name: Create virtual environment
         run: uv venv
