@@ -16,6 +16,7 @@ dev = [
     "ruff",
     "pytest",
     "pytest-mock",
+    "libcairo2-dev"
 ]
 
 [tool.setuptools]
