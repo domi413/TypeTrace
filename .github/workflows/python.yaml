@@ -27,16 +27,14 @@ jobs:
             **/pyproject.toml
             **/uv.lock
 
-      - name: Cache APT packages
-        id: cache-apt
-        uses: actions/cache@v4
+      - name: Cache and install APT packages
+        id: cache-apt-pkgs
+        uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          path: apt-cache
-          key: ${{ runner.os }}-apt-${{ hashFiles('**/*.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-apt-
+          packages: libdbus-1-dev libgirepository-2.0-0 libgirepository1.0-dev libcairo2-dev
+          version: 1.0
 
-      - name: Install system dependencies
+      - name: Display APT cache status
         run: |
           # Color definitions
           RED='\033[1;91m'
@@ -45,21 +43,12 @@ jobs:
           CYAN='\033[1;96m'
           NC='\033[0m'
 
-          mkdir -p apt-cache
-
-          if [[ "${{ steps.cache-apt.outputs.cache-hit }}" == "true" ]]; then
-           echo -e "${GREEN}APT package cache hit! Using cached packages.${NC}"
+          if [[ "${{ steps.cache-apt-pkgs.outputs.cache-hit }}" == "true" ]]; then
+            echo -e "${GREEN}APT package cache hit! Using cached packages.${NC}"
+            echo -e "${CYAN}Installed packages: ${{ steps.cache-apt-pkgs.outputs.package-version-list }}${NC}"
           else
-           echo -e "${YELLOW}APT package cache miss. Downloading packages...${NC}"
+            echo -e "${YELLOW}APT package cache miss. Packages were freshly installed.${NC}"
           fi
-
-          echo -e "${CYAN}Updating package lists...${NC}"
-          sudo apt-get update
-
-          echo -e "${CYAN}Installing required system dependencies...${NC}"
-          sudo apt-get -o dir::cache::archives=apt-cache install -y libdbus-1-dev libgirepository-2.0-0 libgirepository1.0-dev libcairo2-dev
-
-          echo -e "${GREEN}System dependencies installed successfully.${NC}"
 
       - name: Create virtual environment
         run: uv venv
