@@ -19,6 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up uv and Python
+        id: setup-uv
         uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.13"
@@ -26,6 +27,22 @@ jobs:
           cache-dependency-glob: |
             **/pyproject.toml
             **/uv.lock
+
+      - name: Display uv cache status
+        run: |
+          # Color definitions
+          RED='\033[1;91m'
+          GREEN='\033[1;92m'
+          YELLOW='\033[1;93m'
+          CYAN='\033[1;96m'
+          NC='\033[0m'
+
+          # Check if the output contains "Cache hit" or "Cache restored successfully"
+          if [[ "${{ steps.setup-uv.outputs.cache-hit }}" == "true" || "${{ steps.setup-uv.outputs.cache-restored }}" == "true" ]]; then
+            echo -e "${GREEN}uv cache hit! Using cached dependencies.${NC}"
+          else
+            echo -e "${YELLOW}uv cache miss. Dependencies will be freshly installed.${NC}"
+          fi
 
       - name: Cache and install APT packages
         id: cache-apt-pkgs
