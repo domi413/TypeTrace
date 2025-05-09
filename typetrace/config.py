@@ -15,7 +15,7 @@ class Config:
     """Constants and global settings for TypeTrace."""
 
     # Constants
-    PROJECT_VERSION: Final[str] = os.getenv("TYPETRACE_VERSION")
+    PROJECT_VERSION: Final[str | None] = os.getenv("TYPETRACE_VERSION")
 
     PROJECT_NAME: Final[str] = "TypeTrace"
     APP_NAME: Final[str] = PROJECT_NAME.lower()
@@ -32,7 +32,7 @@ class Config:
     )
     AUTOSTART_SOURCE: Final[Path] = (
         Path.home()
-        / "@datadir@" # This is changed by meson depending on install prefix
+        / "@DATADIR@"  # This is changed by meson depending on install prefix
         / "applications"
         / "edu.ost.typetrace-backend.desktop"
     )

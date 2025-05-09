@@ -12,7 +12,7 @@ from typetrace.config import DatabasePath
 logger = logging.getLogger(__name__)
 
 
-class DatabaseManager(GObject.Object):
+class DatabaseFileHandler(GObject.Object):
     """Used for manipulations concerning the database file."""
 
     def __init__(self) -> None:

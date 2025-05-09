@@ -6,7 +6,7 @@ from typetrace.frontend.controller.heatmap import Heatmap
 from typetrace.frontend.controller.statistics import Statistics
 from typetrace.frontend.controller.utils import dialog_utils
 from typetrace.frontend.controller.verbose import Verbose
-from typetrace.frontend.model.database_manager import DatabaseManager
+from typetrace.frontend.model.db_filehandler import DatabaseFileHandler
 from typetrace.frontend.model.keystrokes import KeystrokeStore
 from typetrace.frontend.service.backend_connector import BackendConnector
 
@@ -29,7 +29,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
     def __init__(
         self,
-        db_manager: DatabaseManager,
+        db_filehandler: DatabaseFileHandler,
         keystroke_store: KeystrokeStore,
         settings: Gio.Settings,
         **kwargs,
@@ -38,7 +38,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         Args:
             **kwargs: Keyword arguments passed to the parent constructor
-            db_manager: DB File operations
+            db_filehandler: DB File operations
             keystroke_store: Access to keystrokes
             settings: GSettings used to persist preferences of a user
 
@@ -52,7 +52,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self.backend_toggle.connect("clicked", self._on_backend_label_clicked)
         self.is_backend_running = False
 
-        self.db_manager = db_manager
+        self.db_manager = db_filehandler
         self.keystroke_store = keystroke_store
         self.heatmap = Heatmap(keystroke_store=keystroke_store, settings=settings)
         self.verbose = Verbose(keystroke_store=keystroke_store)
@@ -82,7 +82,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         GLib.idle_add(self._backend_connector.check_and_activate_async)
 
-    def _update_view(self, _:any) -> None:
+    def _update_view(self, _: any) -> None:
         """Handle refresh button click."""
         keystrokes = self.keystroke_store.get_all_keystrokes()
         self.heatmap.update(keystrokes)

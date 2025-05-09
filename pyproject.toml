@@ -12,14 +12,16 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "pygobject<3.52.0",
     "ruff",
     "pytest",
+    "pytest-mock",
 ]
 
 [tool.setuptools]
 packages = [
     "typetrace",
-    # "tests"
+    "tests"
 ]
 
 [tool.ruff.lint]
@@ -35,7 +37,6 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
-    "ANN201",  # Ignore missing return type
     "SLF001",  # Allow access to private member
     "PLR2004", # Ignore magic values
     "S101",    # Ignore asserts
