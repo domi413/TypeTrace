@@ -75,6 +75,7 @@ class PieChart(Chart):
         """Initialize the pie chart.
 
         Args:
+        ----
             drawing_area: The GTK drawing area to draw on
             data_provider: A function that returns the data for the chart
             total_count_provider: A function that returns the total count of all data
@@ -104,10 +105,12 @@ class PieChart(Chart):
         """Calculate others count and return data with others info.
 
         Args:
+        ----
             data: List of data items
             total_count: Total count of all items
 
         Returns:
+        -------
             Tuple containing (data items, others count, others color)
 
         """
@@ -128,7 +131,8 @@ class PieChart(Chart):
     ) -> float:
         """Draw a single pie slice with optional label.
 
-        Returns:
+        Returns
+        -------
             The end angle of the slice
 
         """

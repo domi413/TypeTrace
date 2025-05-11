@@ -37,6 +37,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         """Initialize the application window.
 
         Args:
+        ----
             **kwargs: Keyword arguments passed to the parent constructor
             db_filehandler: DB File operations
             keystroke_store: Access to keystrokes

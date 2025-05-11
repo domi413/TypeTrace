@@ -52,6 +52,7 @@ class Chart(ABC):
         """Initialize the chart.
 
         Args:
+        ----
             drawing_area: The GTK drawing area to draw on
 
         """
@@ -70,6 +71,7 @@ class Chart(ABC):
         """Draw the chart.
 
         Args:
+        ----
             area: The drawing area
             cr: The Cairo context
             width: The width of the drawing area
@@ -91,6 +93,7 @@ class Chart(ABC):
         """Draw text on the chart.
 
         Args:
+        ----
             config: The text configuration
             color: The text color as RGB tuple
 
@@ -115,6 +118,7 @@ class Chart(ABC):
         """Draw a message when no data is available.
 
         Args:
+        ----
             cr: The Cairo context
             width: The width of the drawing area
             height: The height of the drawing area
@@ -138,7 +142,8 @@ class Chart(ABC):
     def _get_accent_color(self) -> tuple:
         """Get the system accent color.
 
-        Returns:
+        Returns
+        -------
             The accent color as RGB tuple
 
         """
@@ -149,7 +154,8 @@ class Chart(ABC):
     def get_colors(self) -> dict[str, Any]:
         """Get the color scheme for the chart.
 
-        Returns:
+        Returns
+        -------
             A dictionary with color values
 
         """

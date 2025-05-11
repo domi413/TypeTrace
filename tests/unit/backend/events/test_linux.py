@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 
-@pytest.fixture
+@pytest.fixture()
 def event_processor(
     tmp_path: Path,
 ) -> LinuxEventProcessor:
@@ -24,13 +24,13 @@ def event_processor(
     return LinuxEventProcessor(tmp_path / "test.db")
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_db_path(tmp_path: Path) -> Path:
     """Provide a mock database path."""
     return tmp_path / "test.db"
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_db_manager(
     mocker: MockerFixture,
     event_processor: LinuxEventProcessor,
@@ -42,13 +42,13 @@ def mock_db_manager(
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_time(mocker: MockerFixture) -> Mock:
     """Mock time.time function."""
     return mocker.patch("time.time")
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_datetime(mocker: MockerFixture) -> tuple[Mock, Mock]:
     """Mock datetime for consistent date values."""
     mock_now = mocker.patch("datetime.datetime")
@@ -58,7 +58,7 @@ def mock_datetime(mocker: MockerFixture) -> tuple[Mock, Mock]:
     return mock_now, mock_dt
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_evdev(mocker: MockerFixture) -> Mock:
     """Mock evdev module."""
     mock_ev = mocker.patch("typetrace.backend.events.linux.evdev")

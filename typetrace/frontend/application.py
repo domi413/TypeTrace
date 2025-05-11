@@ -155,6 +155,7 @@ class Application(Adw.Application):
         """Add an application action with optional keyboard shortcuts.
 
         Args:
+        ----
             name: The name of the action to create
             callback: The function to call when the action is activated
             shortcuts: List of keyboard accelerators for the action

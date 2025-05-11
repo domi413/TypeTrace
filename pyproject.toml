@@ -24,7 +24,7 @@ packages = [
     "tests"
 ]
 
-[tool.ruff.lint]
+[tool.ruff]
 extend-select = [
     "ALL",
 ]
@@ -35,7 +35,7 @@ ignore = [
     "D213",   # In conflict with D212
 ]
 
-[tool.ruff.lint.per-file-ignores]
+[tool.ruff.per-file-ignores]
 "tests/*" = [
     "SLF001",  # Allow access to private member
     "PLR2004", # Ignore magic values

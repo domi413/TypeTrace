@@ -19,6 +19,7 @@ class DbusServiceManager:
         """Initialize the D-Bus Service Manager.
 
         Args:
+        ----
             stop_callback: A function to call when a shutdown is requested
                            (e.g., via D-Bus Quit or OS signal).
 
@@ -178,7 +179,8 @@ class DbusServiceManager:
     def run(self) -> int:
         """Acquires the D-Bus name and runs the GLib MainLoop.
 
-        Returns:
+        Returns
+        -------
             Exit code (0 for success, 1 for D-Bus error).
 
         """

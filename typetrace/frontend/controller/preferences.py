@@ -57,6 +57,7 @@ class Preferences(Adw.PreferencesDialog):
         """Initialize the preferences dialog with a parent window and database manager.
 
         Args:
+        ----
             parent_window: The main application window, used as parent for dialogs.
             db_filehandler: Manages database import/export operations.
             keystroke_store: Manages access to and clearing of keystroke data.
@@ -160,6 +161,7 @@ class Preferences(Adw.PreferencesDialog):
         """Update all color buttons with the given colors.
 
         Args:
+        ----
             single_color: The color to set for single color mode.
             begin_color: The color to set for multi-color begin.
             end_color: The color to set for the end color button.
@@ -178,6 +180,7 @@ class Preferences(Adw.PreferencesDialog):
         """Set up a switch and bind it to a setting.
 
         Args:
+        ----
             switch: The switch widget to set up
             setting_key: The setting key to bind to
             handler: The callback function for notify::active signal
@@ -238,6 +241,7 @@ class Preferences(Adw.PreferencesDialog):
         """Handle color change from a color button.
 
         Args:
+        ----
             button: The color dialog button that was changed.
             setting_key: The settings key to update.
 
@@ -327,6 +331,7 @@ class Preferences(Adw.PreferencesDialog):
         """Perform the database import operation after user confirmation.
 
         Args:
+        ----
             src_path: The path to the database file for import.
 
         """
@@ -383,6 +388,7 @@ class Preferences(Adw.PreferencesDialog):
         """Handle the keyboard layout selection change.
 
         Args:
+        ----
             row: The combo row widget that was changed.
             _: The property that changed (unused).
 
