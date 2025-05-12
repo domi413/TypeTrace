@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 class DbusServiceManager:
     """Manages the D-Bus service lifecycle for the TypeTrace backend."""
 
-    def __init__(self, stop_callback: Callable[[], None] | None = None) -> None:
+    def __init__(self:DbusServiceManager,
+                    stop_callback: Callable[[], None] | None = None) -> None:
         """Initialize the D-Bus Service Manager.
 
         Args:
