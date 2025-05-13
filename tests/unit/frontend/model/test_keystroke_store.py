@@ -1,4 +1,5 @@
 """Tests for the KeystrokeStore class."""
+
 from __future__ import annotations
 
 import sqlite3
@@ -15,6 +16,9 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 
+# =============================================================================
+# ========================== Fixtures =========================================
+# =============================================================================
 @pytest.fixture
 def mock_conn(mocker: MockerFixture) -> Mock:
     """Provide a mock SQLite connection."""

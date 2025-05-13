@@ -19,6 +19,9 @@ if TYPE_CHECKING:
     from typetrace.config import Event
 
 
+# =============================================================================
+# ========================== Fixtures =========================================
+# =============================================================================
 @pytest.fixture
 def db_manager() -> DatabaseManager:
     """Provide a DatabaseManager instance for testing."""
