@@ -1,14 +1,20 @@
 """Window module for the Typetrace application."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 from gi.repository import Adw, Gio, GLib, Gtk
 
 from typetrace.frontend.controller.heatmap import Heatmap
 from typetrace.frontend.controller.statistics import Statistics
 from typetrace.frontend.controller.utils import dialog_utils
 from typetrace.frontend.controller.verbose import Verbose
-from typetrace.frontend.model.db_filehandler import DatabaseFileHandler
-from typetrace.frontend.model.keystrokes import KeystrokeStore
 from typetrace.frontend.service.backend_connector import BackendConnector
+
+if TYPE_CHECKING:
+    from typetrace.frontend.model.db_filehandler import DatabaseFileHandler
+    from typetrace.frontend.model.keystrokes import KeystrokeStore
 
 
 @Gtk.Template(resource_path="/edu/ost/typetrace/view/window.ui")
@@ -82,21 +88,21 @@ class TypetraceWindow(Adw.ApplicationWindow):
 
         GLib.idle_add(self._backend_connector.check_and_activate_async)
 
-    def _update_view(self, _: any) -> None:
+    def _update_view(self, _: Any) -> None:
         """Handle refresh button click."""
         keystrokes = self.keystroke_store.get_all_keystrokes()
         self.heatmap.update(keystrokes)
         self.verbose.update(keystrokes)
         self.statistics.update()
 
-    def _on_available(self, _: any) -> None:
+    def _on_available(self, _: Any) -> None:
         """Call when the backend becomes available."""
         dialog_utils.show_toast(self.toast_overlay, "Backend service connected.")
         self.backend_toggle.set_label("Backend running")
         self.backend_toggle.set_css_classes(["backend-status-running", "flat"])
         self.is_backend_running = True
 
-    def _on_unavailable(self, _: any, reason: str) -> None:
+    def _on_unavailable(self, _: Any, reason: str) -> None:
         """Call when the backend becomes unavailable."""
         dialog_utils.show_toast(
             self.toast_overlay,
@@ -106,7 +112,7 @@ class TypetraceWindow(Adw.ApplicationWindow):
         self.backend_toggle.set_css_classes(["backend-status-stopped", "flat"])
         self.is_backend_running = False
 
-    def _on_backend_label_clicked(self, _: any) -> None:
+    def _on_backend_label_clicked(self, _: Any) -> None:
         """Call when the backend becomes unavailable."""
         if self.is_backend_running:
             GLib.idle_add(self._backend_connector.request_quit_async)

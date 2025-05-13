@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import logging
-from typing import Callable
+from typing import TYPE_CHECKING
 
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib
 
 from typetrace.config import Config
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +118,5 @@ def disable_autostart() -> tuple[bool, str | None]:
         error_msg = f"Failed to remove autostart symlink: {e!s}"
         logger.exception(error_msg)
         return False, error_msg
-    except FileNotFoundError:
-        error_msg = "Autostart was already not enabled"
-        logger.debug(error_msg)
-        return True, error_msg
+    else:
+        return True, "Autostart was already not enabled"

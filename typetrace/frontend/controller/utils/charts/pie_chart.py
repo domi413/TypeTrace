@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any, final, override
 import cairo
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from gi.repository import Gtk
 
 from typetrace.frontend.controller.utils.charts.base_chart import (
@@ -69,8 +71,8 @@ class PieChart(Chart):
     def __init__(
         self,
         drawing_area: Gtk.DrawingArea,
-        data_provider: callable,
-        total_count_provider: callable | None = None,
+        data_provider: Callable,
+        total_count_provider: Callable | None = None,
     ) -> None:
         """Initialize the pie chart.
 
@@ -118,7 +120,12 @@ class PieChart(Chart):
         others_count = max(0, total_count - selected_count)
 
         # Get color for "Others" category
-        others_color = tuple(float(x) for x in ChartColor.GRAY.value.split(","))
+        color_values = ChartColor.GRAY.value.split(",")
+        others_color = (
+            float(color_values[0]),
+            float(color_values[1]),
+            float(color_values[2]),
+        )
 
         return data, others_count, others_color
 
@@ -299,7 +306,12 @@ class PieChart(Chart):
             return
 
         pie_colors = [
-            tuple(float(x) for x in color.value.split(",")) for color in ChartColor
+            (
+                float(color.value.split(",")[0]),
+                float(color.value.split(",")[1]),
+                float(color.value.split(",")[2]),
+            )
+            for color in ChartColor
         ]
         center_x, center_y, radius = self._calculate_geometry(width, height)
 

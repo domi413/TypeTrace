@@ -116,7 +116,7 @@ def test_run_unknown_platform(
 # =================== Tests for try-except block ==============================
 # =============================================================================
 @pytest.mark.parametrize(
-    "exception_type, exit_code, log_message",
+    ("exception_type", "exit_code", "log_message"),
     [
         (
             PermissionError,

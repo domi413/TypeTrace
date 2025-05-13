@@ -5,10 +5,11 @@ from __future__ import annotations
 import logging
 import time
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Callable, Generic, TypeVar, final
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 from typetrace.backend.db import DatabaseManager
@@ -30,7 +31,7 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
         """Initialize the processor with a database path."""
         self.__db_manager = DatabaseManager()
         self._db_path: Path = db_path
-        self._current_date: str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        self._current_date: str = datetime.now(UTC).strftime("%Y-%m-%d")
         self._terminate: bool = False
         self.db_updated_callback = db_updated_callback
 
@@ -71,7 +72,7 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
             self.__db_manager.write_to_database(db_path, buffer)
             buffer.clear()
             start_time = current_time
-            self._current_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            self._current_date = datetime.now(UTC).strftime("%Y-%m-%d")
             if self.db_updated_callback:
                 self.db_updated_callback()
 
