@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 from gi.repository import Gtk
@@ -113,7 +113,7 @@ class Statistics(Gtk.Box):
         latest_date = (
             datetime.fromisoformat(data_points[-1]["date"]).date()
             if data_points
-            else datetime.now(timezone.utc).date()
+            else datetime.now(UTC).date()
         )
 
         all_days = {
