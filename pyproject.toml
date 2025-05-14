@@ -16,7 +16,6 @@ dev = [
     "pytest-mock==3.10.0",
     "ruff>=0.11",
 ]
-    
 
 [tool.setuptools]
 packages = [
