@@ -22,7 +22,7 @@ jobs:
         id: setup-uv
         uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.13"
+          python-version: "3.12"
           enable-cache: true
           cache-dependency-glob: |
             **/pyproject.toml
@@ -71,7 +71,9 @@ jobs:
         run: uv venv
 
       - name: Install project dependencies (including dev)
-        run: uv pip install -e .[dev]
+        run: |
+          uv lock
+          uv sync --frozen --all-extras
 
       - name: Run ruff
         run: uv run ruff check
