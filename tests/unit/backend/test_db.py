@@ -19,19 +19,19 @@ if TYPE_CHECKING:
     from typetrace.config import Event
 
 
-@pytest.fixture()
+@pytest.fixture
 def db_manager() -> DatabaseManager:
     """Provide a DatabaseManager instance for testing."""
     return DatabaseManager()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_db_path(tmp_path: Path) -> Path:
     """Provide a mock database path."""
     return tmp_path / "test.db"
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_sqlite(mocker: MockerFixture) -> tuple[Mock, Mock]:
     """Mock SQLite connection and cursor."""
     mock_conn = mocker.Mock()

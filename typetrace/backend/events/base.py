@@ -52,14 +52,12 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
         Additionally, update the current date if the buffer is flushed.
 
         Args:
-        ----
             buffer: Current buffer of events
             start_time: Time when the buffer started
             db_path: Path to the database
             flush: Force flushing
 
         Returns:
-        -------
             Updated buffer and start time
 
         """
@@ -84,7 +82,6 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
         """Print event information if in debug mode.
 
         Args:
-        ----
             event: Dictionary containing event details.
 
         """
@@ -100,7 +97,6 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
         """Buffer events.
 
         Args:
-        ----
             devices: List of input devices to monitor.
 
         """
@@ -110,11 +106,9 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
         """Process a single input event.
 
         Args:
-        ----
             event: Event to process
 
         Returns:
-        -------
             Updated buffer and start time
 
         """

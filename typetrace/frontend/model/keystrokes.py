@@ -96,11 +96,9 @@ class KeystrokeStore(GObject.Object):
         """Retrieve keystrokes for a specific date.
 
         Args:
-        ----
             date: Date in ISO format (YYYY-MM-DD)
 
         Returns:
-        -------
             List of Keystroke objects for the specified date
 
         """
@@ -129,12 +127,10 @@ class KeystrokeStore(GObject.Object):
         """Retrieve the top N keystrokes, optionally filtered by date.
 
         Args:
-        ----
             limit: The maximum number of keystrokes to return
             date: Optional date in ISO format (YYYY-MM-DD) to filter by
 
         Returns:
-        -------
             List of top Keystroke objects
 
         """
@@ -169,11 +165,9 @@ class KeystrokeStore(GObject.Object):
         """Get the total count of keystrokes, optionally filtered by date.
 
         Args:
-        ----
             date: Optional date in ISO format (YYYY-MM-DD) to filter by
 
         Returns:
-        -------
             Total keystroke count
 
         """
@@ -209,8 +203,7 @@ class KeystrokeStore(GObject.Object):
     def get_daily_keystroke_counts(self) -> list[dict]:
         """Get daily keystroke counts for the past 7 days.
 
-        Returns
-        -------
+        Returns:
             List of dictionaries with date and count for each day
 
         """

@@ -39,20 +39,20 @@ def _run_processor_thread(processor: BaseEventProcessor) -> None:
 class CLI:
     """Command-line interface for TypeTrace Backend."""
 
-    def __init__(self: CLI) -> None:
+    def __init__(self) -> None:
         """Initialize the CLI."""
         self.__db_manager = DatabaseManager()
         self.__db_path = DatabasePath.DB_PATH
         self._processor_thread: threading.Thread | None = None
         self._dbus_manager: DbusServiceManager | None = None
 
-    def _initiate_shutdown_callback(self: CLI) -> None:
+    def _initiate_shutdown_callback(self) -> None:
         """Trigger Callback by DbusServiceManager when its loop is stopping."""
         logger.debug(
             "D-Bus service loop stopping callback triggered (backend will exit).",
         )
 
-    def run(self: CLI) -> int:
+    def run(self) -> int:
         """Run the backend service with processor as daemon thread."""
         LoggerSetup.setup_logging()
 
@@ -131,7 +131,7 @@ class CLI:
 
         return exit_code
 
-    def _check_input_group(self: CLI) -> None:
+    def _check_input_group(self) -> None:
         """Check if the user is in the 'input' group on Linux."""
         import grp
 

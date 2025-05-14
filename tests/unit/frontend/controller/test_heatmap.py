@@ -1,14 +1,18 @@
-"""Unit tests for the Heatmap controller."""
+"""Tests for the Heatmap controller."""
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pytest
 
+if TYPE_CHECKING:
+    from unittest.mock import Mock
+
 
 @pytest.fixture(autouse=True)
-def _mock_gtk() -> None:
+def mock_gtk() -> None:
     """Mock GTK and related imports."""
     with patch.dict("sys.modules", {
         "gi": MagicMock(),
@@ -21,59 +25,9 @@ def _mock_gtk() -> None:
         yield
 
 
-class MockKeystroke:
-    """Mock keystroke class for testing."""
-
-    def __init__(self:MockKeystroke, scan_code: int, count: int) -> None:
-        """Initialize mock keystroke."""
-        self.scan_code = scan_code
-        self.count = count
-
-
-class MockKeystrokeStore:
-    """Mock keystroke store for testing."""
-
-    def get_all_keystrokes(self:MockKeystroke) -> list[MockKeystroke]:
-        """Get all mock keystrokes."""
-        return []
-
-    def get_highest_count(self:MockKeystroke) -> int:
-        """Get highest count from mock keystrokes."""
-        return 0
-
-
-class MockHeatmap:
-    """Mock heatmap class for testing."""
-
-    def __init__(self:MockHeatmap, settings: MagicMock,
-                 keystroke_store: MockKeystrokeStore) -> None:
-        """Initialize mock heatmap."""
-        self.settings = settings
-        self.keystroke_store = keystroke_store
-        self.layout = "en_US"
-        self.key_widgets = {}
-
-        self.settings.get_string.return_value = "en_US"
-        self.settings.get_int.return_value = 50
-        self.settings.get_boolean.return_value = False
-
-    def update(self:MockHeatmap, keystrokes: list[MockKeystroke] | None = None) -> None:
-        """Update mock heatmap with keystrokes."""
-        if keystrokes is None:
-            keystrokes = self.keystroke_store.get_all_keystrokes()
-
-        for keystroke in keystrokes:
-            self.key_widgets[keystroke.scan_code] = MagicMock()
-
-    def _on_zoom_clicked(self:MockHeatmap, amount: int) -> None:
-        """Handle zoom functionality in mock heatmap."""
-        size = max(self.settings.get_int("key-size") + amount, 40)
-        self.settings.set_int("key-size", size)
-
-
-@pytest.fixture()
-def mock_settings() -> MagicMock:
-    """Fixture for mock settings."""
+@pytest.fixture
+def mock_settings() -> Mock:
+    """Provide mock settings object."""
     settings = MagicMock()
     settings.get_string.return_value = "en_US"
     settings.get_int.return_value = 50
@@ -81,62 +35,108 @@ def mock_settings() -> MagicMock:
     return settings
 
 
-@pytest.fixture()
-def mock_keystroke_store() -> MagicMock:
-    """Fixture for mock keystroke store."""
-    store = MagicMock(spec=MockKeystrokeStore)
+@pytest.fixture
+def mock_keystroke_store() -> Mock:
+    """Provide mock keystroke store."""
+    store = MagicMock()
     store.get_all_keystrokes.return_value = []
     store.get_highest_count.return_value = 0
     return store
 
 
-@pytest.fixture()
-def heatmap(mock_settings: MagicMock, mock_keystroke_store: MagicMock) -> MockHeatmap:
-    """Fixture for mock heatmap instance."""
-    return MockHeatmap(mock_settings, mock_keystroke_store)
+@pytest.fixture
+def mock_keystroke() -> Mock:
+    """Provide mock keystroke object."""
+    keystroke = MagicMock()
+    keystroke.scan_code = 30
+    keystroke.count = 10
+    return keystroke
 
 
-def test_heatmap_initialization(heatmap: MockHeatmap) -> None:
-    """Test that heatmap initializes correctly with default values."""
+@pytest.fixture
+def heatmap(mock_settings: Mock, mock_keystroke_store: Mock) -> Mock:
+    """Provide a mock Heatmap instance."""
+    heatmap = MagicMock()
+    heatmap.settings = mock_settings
+    heatmap.keystroke_store = mock_keystroke_store
+    heatmap.layout = "en_US"
+    heatmap.key_widgets = {}
+
+    # Configure update method to populate key_widgets
+    def update_side_effect(keystrokes: list[Mock] | None = None) -> None:
+        if keystrokes is None:
+            keystrokes = mock_keystroke_store.get_all_keystrokes()
+        for keystroke in keystrokes:
+            heatmap.key_widgets[keystroke.scan_code] = MagicMock()
+
+    heatmap.update.side_effect = update_side_effect
+
+    # Configure _on_zoom_clicked method to adjust key size
+    def zoom_side_effect(amount: int) -> None:
+        current_size = mock_settings.get_int("key-size")
+        new_size = max(current_size + amount, 40)
+        mock_settings.set_int("key-size", new_size)
+
+    heatmap._on_zoom_clicked.side_effect = zoom_side_effect
+
+    return heatmap
+
+
+# =============================================================================
+# ==================== Tests for Heatmap initialization =======================
+# =============================================================================
+def test_heatmap_initialization(heatmap: Mock) -> None:
+    """Test that Heatmap initializes correctly with default values."""
     assert heatmap.layout == "en_US"
     assert isinstance(heatmap.key_widgets, dict)
 
 
 def test_invalid_keyboard_layout(
-    mock_settings: MagicMock,
-    mock_keystroke_store: MagicMock,
+    mock_settings: Mock,
+    mock_keystroke_store: Mock,
 ) -> None:
     """Test handling of invalid keyboard layout."""
     mock_settings.get_string.return_value = "invalid_layout"
-    heatmap = MockHeatmap(mock_settings, mock_keystroke_store)
+    heatmap = MagicMock()
+    heatmap.settings = mock_settings
+    heatmap.keystroke_store = mock_keystroke_store
+    heatmap.layout = "en_US"  # Fallback to default
+    heatmap.key_widgets = {}
     assert heatmap.layout == "en_US"
 
 
-def test_empty_keystrokes(heatmap: MockHeatmap) -> None:
-    """Test heatmap with empty keystroke data."""
+# =============================================================================
+# ==================== Tests for Heatmap update method ========================
+# =============================================================================
+def test_empty_keystrokes(heatmap: Mock) -> None:
+    """Test Heatmap update with empty keystroke data."""
     heatmap.update()
     assert len(heatmap.key_widgets) == 0
 
 
 def test_single_keystroke(
-    mock_keystroke_store: MagicMock,
-    heatmap: MockHeatmap,
+    mock_keystroke_store: Mock,
+    mock_keystroke: Mock,
+    heatmap: Mock,
 ) -> None:
-    """Test heatmap with a single keystroke."""
-    test_keystroke = MockKeystroke(scan_code=30, count=10)
-    mock_keystroke_store.get_all_keystrokes.return_value = [test_keystroke]
+    """Test Heatmap update with a single keystroke."""
+    mock_keystroke_store.get_all_keystrokes.return_value = [mock_keystroke]
     mock_keystroke_store.get_highest_count.return_value = 10
 
     heatmap.update()
     assert 30 in heatmap.key_widgets
+    assert heatmap.key_widgets[30] is not None
 
 
+# =============================================================================
+# ==================== Tests for Heatmap zoom functionality ===================
+# =============================================================================
 def test_zoom_functionality(
-    mock_settings: MagicMock,
-    heatmap: MockHeatmap,
+    mock_settings: Mock,
+    heatmap: Mock,
 ) -> None:
     """Test zoom in/out functionality."""
-    initial_size = mock_settings.get_int("key-size")
+    initial_size = mock_settings.get_int.return_value
 
     heatmap._on_zoom_clicked(5)
     mock_settings.set_int.assert_called_with("key-size", initial_size + 5)

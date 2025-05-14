@@ -24,7 +24,7 @@ packages = [
     "tests"
 ]
 
-[tool.ruff]
+[tool.ruff.lint]
 extend-select = [
     "ALL",
 ]
@@ -33,14 +33,9 @@ ignore = [
     "ANN003",  # Ignore missing type annotation for **kwargs
     "D203",    # In conflict with D211
     "D213",    # In conflict with D212
-    "ANN101",  # Ignore missing type annotation for `self` (should never be annotated in Python)
-    "A003",    # Allow method/attribute names that shadow built-ins (e.g., `quit`) 
-    "FBT003",  # Allow using plain `flag=False` instead of `flag: bool = False` (boilerplate reduction)
-    "PLR0913", # Ignore warnings for too many function arguments (common in D-Bus or GTK callbacks)
-    "ANN102",  # Ignore missing type annotation for `cls` (same reasoning as `self`)
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/*" = [
     "SLF001",  # Allow access to private member
     "PLR2004", # Ignore magic values

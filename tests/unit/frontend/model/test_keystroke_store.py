@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_conn(mocker: MockerFixture) -> Mock:
     """Provide a mock SQLite connection."""
     mock_conn = mocker.Mock()
@@ -24,7 +24,7 @@ def mock_conn(mocker: MockerFixture) -> Mock:
     return mock_conn
 
 
-@pytest.fixture()
+@pytest.fixture
 def keystroke_store(mock_conn: Mock) -> KeystrokeStore:
     """Provide a KeystrokeStore instance for testing."""
     return KeystrokeStore(mock_conn)

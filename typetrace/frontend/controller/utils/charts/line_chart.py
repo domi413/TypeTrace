@@ -51,7 +51,6 @@ class LineChart(Chart):
         """Initialize the line chart.
 
         Args:
-        ----
             drawing_area: The GTK drawing area to draw on
             data_provider: A function that returns the data for the chart
 

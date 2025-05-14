@@ -199,7 +199,6 @@ class BackendConnector(GObject.Object):
         """Asynchronously pings the backend.
 
         Args:
-        ----
             callback: Optional function to call with result (bool: success, str: error)
 
         """

@@ -15,12 +15,10 @@ logger = logging.getLogger(__name__)
 class DbusServiceManager:
     """Manages the D-Bus service lifecycle for the TypeTrace backend."""
 
-    def __init__(self:DbusServiceManager,
-                    stop_callback: Callable[[], None] | None = None) -> None:
+    def __init__(self, stop_callback: Callable[[], None] | None = None) -> None:
         """Initialize the D-Bus Service Manager.
 
         Args:
-        ----
             stop_callback: A function to call when a shutdown is requested
                            (e.g., via D-Bus Quit or OS signal).
 
@@ -180,8 +178,7 @@ class DbusServiceManager:
     def run(self) -> int:
         """Acquires the D-Bus name and runs the GLib MainLoop.
 
-        Returns
-        -------
+        Returns:
             Exit code (0 for success, 1 for D-Bus error).
 
         """

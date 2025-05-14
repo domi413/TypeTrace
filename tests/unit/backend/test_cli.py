@@ -8,7 +8,7 @@ from typetrace.backend import cli
 from typetrace.config import ExitCodes
 
 
-@pytest.fixture()
+@pytest.fixture
 def cli_instance() -> cli.CLI:
     """Fixture for creating a CLI instance."""
     return cli.CLI()

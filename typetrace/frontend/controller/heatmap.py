@@ -32,7 +32,6 @@ class Heatmap(Gtk.Box):
         """Initialize the heatmap widget.
 
         Args:
-        ----
             settings: Gio settings used to persist and apply preferences.
             keystroke_store: Access to keystrokes.
 
@@ -86,7 +85,6 @@ class Heatmap(Gtk.Box):
         """Handle keyboard layout setting changes.
 
         Args:
-        ----
             settings: The settings object.
             key: The key that changed.
 

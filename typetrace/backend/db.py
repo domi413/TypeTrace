@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+from collections.abc import Generator
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, final
 
@@ -23,11 +24,10 @@ class DatabaseManager:
     """Database manager for handling TypeTrace database operations."""
 
     @final
-    def initialize_database(self: DatabaseManager, db_path: Path) -> None:
+    def initialize_database(self, db_path: Path) -> None:
         """Initialize the database by creating necessary tables.
 
         Args:
-        ----
             db_path: Path to the SQLite database file.
 
         """
@@ -39,12 +39,10 @@ class DatabaseManager:
             logger.debug("Database initialized at %s", db_path)
 
     @final
-    def write_to_database(self: DatabaseManager,
-                          db_path: Path, events: list[Event]) -> None:
+    def write_to_database(self, db_path: Path, events: list[Event]) -> None:
         """Write keystroke events to the database.
 
         Args:
-        ----
             db_path: Path to the SQLite database file.
             events: List of key events to write to the database.
 
@@ -73,17 +71,15 @@ class DatabaseManager:
     @final
     @contextmanager
     def _get_db_connection(
-        self: DatabaseManager,
+        self,
         db_path: Path,
     ) -> Generator[sqlite3.Connection, None, None]:
         """Get a database connection to the SQLite database.
 
         Args:
-        ----
             db_path: Path to the SQLite database file.
 
         Yields:
-        ------
             SQLite database connection.
 
         """

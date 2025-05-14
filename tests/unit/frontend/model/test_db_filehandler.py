@@ -12,7 +12,7 @@ import pytest
 from typetrace.frontend.model.db_filehandler import DatabaseFileHandler
 
 
-@pytest.fixture()
+@pytest.fixture
 def db_file_handler() -> DatabaseFileHandler:
     """Fixture to create a DatabaseFileHandler instance."""
     return DatabaseFileHandler()

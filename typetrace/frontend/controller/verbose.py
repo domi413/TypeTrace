@@ -18,7 +18,6 @@ class Verbose(Gtk.Box):
         """Initialize the verbose widget with keystroke data.
 
         Args:
-        ----
             keystroke_store: Access to keystrokes models
             **kwargs: Keyword arguments passed to the parent constructor
 

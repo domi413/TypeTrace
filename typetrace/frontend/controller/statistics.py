@@ -31,7 +31,6 @@ class Statistics(Gtk.Box):
         """Initialize the statistics page with keystroke data.
 
         Args:
-        ----
             keystroke_store: Access to keystrokes models
             **kwargs: Keyword arguments passed to the parent constructor
 
@@ -79,8 +78,7 @@ class Statistics(Gtk.Box):
     def _get_top_keystrokes(self) -> list[Keystroke]:
         """Get the top keystrokes for the pie chart.
 
-        Returns
-        -------
+        Returns:
             The list of top keystrokes ordered by count
 
         """
@@ -92,8 +90,7 @@ class Statistics(Gtk.Box):
     def _get_total_keystroke_count(self) -> int:
         """Get the total count of all keystrokes.
 
-        Returns
-        -------
+        Returns:
             Total count of all keystrokes for the selected date or all time
 
         """
@@ -104,8 +101,7 @@ class Statistics(Gtk.Box):
     def _get_keystroke_data(self) -> list[dict]:
         """Get daily keystroke data for the line chart using SQL queries.
 
-        Returns
-        -------
+        Returns:
             A list of data points with date and count values
 
         """
