@@ -34,6 +34,9 @@ ignore = [
     "D213",   # In conflict with D212
 ]
 
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
     "FBT003",  # Ignore boolean position in function call
