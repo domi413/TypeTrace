@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, final
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
+    # fdf
 
 from typetrace.backend.db import DatabaseManager
 from typetrace.config import Config, Event
