@@ -83,7 +83,10 @@ def mock_platform(mocker: MockerFixture, request: pytest.FixtureRequest) -> Mock
 def mock_linux_processor(mocker: MockerFixture) -> Mock:
     """Mock the LinuxEventProcessor."""
     mock_processor = mocker.Mock()
-    mocker.patch("typetrace.backend.events.linux.LinuxEventProcessor", return_value=mock_processor)
+    mocker.patch(
+        "typetrace.backend.events.linux.LinuxEventProcessor",
+        return_value=mock_processor,
+    )
     return mock_processor
 
 
