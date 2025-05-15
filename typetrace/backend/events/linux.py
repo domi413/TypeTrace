@@ -6,12 +6,12 @@ import logging
 import select
 import time
 from contextlib import contextmanager, suppress
-from typing import TYPE_CHECKING, Callable, final, override
+from typing import TYPE_CHECKING, final, override
 
 import evdev
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Callable, Generator
     from pathlib import Path
 
 from typetrace.backend.events.base import BaseEventProcessor
