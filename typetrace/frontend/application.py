@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from gi.repository import Adw, Gio
 
@@ -14,6 +14,9 @@ from typetrace.frontend.controller.window import TypetraceWindow
 from typetrace.frontend.model.db_filehandler import DatabaseFileHandler
 from typetrace.frontend.model.keystrokes import KeystrokeStore
 from typetrace.logging_setup import LoggerSetup
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 

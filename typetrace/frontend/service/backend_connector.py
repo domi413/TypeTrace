@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import contextlib
 import logging
-from typing import Callable, ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from gi.repository import Gio, GLib, GObject
 
 from typetrace.config import Config
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +91,11 @@ class BackendConnector(GObject.Object):
             logger.debug("D-Bus proxy created successfully")
             self._connect_proxy_signals()
             logger.debug("Initiating async ping to verify backend responsiveness")
-            self.ping_async(self._on_initial_ping_result)
+            self.ping_async(
+                lambda _, error_msg: self._on_initial_ping_result(
+                    error_msg,
+                ),
+            )
         except GLib.Error as e:
             logger.exception("Failed to create D-Bus proxy: %s", e.message)
             self._proxy = None
@@ -168,7 +175,11 @@ class BackendConnector(GObject.Object):
             logger.debug("Backend owner present: %s", owner)
             if not self._is_available:
                 logger.debug("Initiating async ping to verify reconnect")
-                self.ping_async(self._on_reconnect_ping_result)
+                self.ping_async(
+                    lambda _, error_msg: self._on_reconnect_ping_result(
+                        error_msg,
+                    ),
+                )
         else:
             logger.debug("No backend owner, cleaning up proxy")
             self._cleanup_proxy()
@@ -202,11 +213,12 @@ class BackendConnector(GObject.Object):
             callback: Optional function to call with result (bool: success, str: error)
 
         """
+        success = False
         logger.debug("Initiating async ping to backend")
         if not self._proxy:
             logger.debug("No proxy available for ping")
             if callback:
-                callback("No connection")
+                callback(success, "No connection")
             return
 
         try:
@@ -223,7 +235,7 @@ class BackendConnector(GObject.Object):
         except Exception:
             logger.exception("Failed to initiate ping call")
             if callback:
-                callback("Failed to initiate ping")
+                callback(success, "Failed to initiate ping")
             self._cleanup_proxy()
             self._set_availability("Ping initiation failed", available=False)
 
@@ -231,16 +243,18 @@ class BackendConnector(GObject.Object):
         self,
         source_object: Gio.DBusProxy,
         res: Gio.AsyncResult,
-        user_data: None,
+        user_data: Callable[[bool, str], None] | None,
     ) -> None:
         """Use callback for the async ping response."""
         logger.debug("Handling async ping response")
         original_callback = user_data
+        success = False
         error_msg = ""
         try:
             result = source_object.call_finish(res)
             if result:
                 logger.debug("Ping successful, setting availability to True")
+                success = True
                 self._set_availability(available=True)
             else:
                 error_msg = "Ping returned no result"
@@ -254,10 +268,11 @@ class BackendConnector(GObject.Object):
 
         if original_callback:
             logger.debug(
-                "Calling ping callback with error message: %s",
+                "Calling ping callback with success: %s, error message: %s",
+                success,
                 error_msg or "none",
             )
-            original_callback(error_msg)
+            original_callback(success, error_msg)
 
     # --- Callbacks passed to ping_async ---
     def _on_initial_ping_result(self, error_msg: str) -> None:

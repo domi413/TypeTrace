@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import logging
 import signal
-from typing import Callable
+from typing import TYPE_CHECKING
 
 from gi.repository import Gio, GLib
 
 from typetrace.config import Config, ExitCodes
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 
