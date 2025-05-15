@@ -66,7 +66,8 @@ def mock_thread(mocker: MockerFixture) -> Mock:
     """Mock the threading.Thread."""
     mock_thread_instance = mocker.Mock()
     mocker.patch(
-        "threading.Thread", return_value=mock_thread_instance,
+        "threading.Thread",
+        return_value=mock_thread_instance,
     )
     return mock_thread_instance
 
@@ -75,8 +76,7 @@ def mock_thread(mocker: MockerFixture) -> Mock:
 def mock_platform(mocker: MockerFixture, request: pytest.FixtureRequest) -> Mock:
     """Mock the platform.system function."""
     platform_name = getattr(request, "param", "Linux")
-    mock_platform = mocker.patch("platform.system", return_value=platform_name)
-    return mock_platform
+    return mocker.patch("platform.system", return_value=platform_name)
 
 
 @pytest.fixture
@@ -91,7 +91,7 @@ def mock_linux_processor(mocker: MockerFixture, mock_processor: Mock) -> Mock:
 
 
 @pytest.fixture
-def mock_windows_darwin_processor(mocker: MockerFixture) -> Mock:
+def mock_windows_darwin_processor(mocker: MockerFixture, mock_processor: Mock) -> Mock:
     """Mock the WindowsDarwinEventProcessor."""
     mock_processor = mocker.Mock()
     mocker.patch(
@@ -116,7 +116,9 @@ def test_run_linux(
     mocker: MockerFixture,
 ) -> None:
     """Test the run method on Linux platform."""
-    mocker.patch.object(Config, "IS_FLATPAK", False)
+    mock_platform.reset_mock()
+    is_new = False
+    mocker.patch.object(Config, "IS_FLATPAK", is_new)
     mock_check_input = mocker.patch.object(cli, "_check_input_group")
     mocker.patch.object(cli, "_CLI__db_path", mock_db_path)
     mock_logger_setup = mocker.patch("typetrace.backend.cli.LoggerSetup")
@@ -138,12 +140,12 @@ def test_run_linux(
 def test_run_unsupported_platform(
     cli: CLI,
     mock_db_path: Path,
-    mock_db_manager: Mock,
     mock_platform: Mock,
     mock_logger: Mock,
     mocker: MockerFixture,
 ) -> None:
     """Test the run method on an unsupported platform."""
+    mock_platform.reset_mock()
     mocker.patch.object(cli, "_CLI__db_path", mock_db_path)
     result = cli.run()
 
@@ -179,7 +181,9 @@ def test_run_permission_error(
 ) -> None:
     """Test the run method handles permission errors."""
     mocker.patch.object(cli, "_CLI__db_path", mock_db_path)
-    mock_db_manager.initialize_database.side_effect = PermissionError("Test permission error")
+    mock_db_manager.initialize_database.side_effect = PermissionError(
+        "Test permission error",
+    )
     result = cli.run()
 
     assert result == ExitCodes.PERMISSION_ERROR
@@ -207,7 +211,6 @@ def test_run_runtime_error(
 def test_run_cleanup(
     cli: CLI,
     mock_db_path: Path,
-    mock_db_manager: Mock,
     mock_platform: Mock,
     mock_linux_processor: Mock,
     mock_thread: Mock,
@@ -215,8 +218,10 @@ def test_run_cleanup(
     mocker: MockerFixture,
 ) -> None:
     """Test the run method cleans up resources."""
+    mock_platform.reset_mock()
     mocker.patch.object(cli, "_CLI__db_path", mock_db_path)
-    mocker.patch.object(Config, "IS_FLATPAK", True)
+    is_new = True
+    mocker.patch.object(Config, "IS_FLATPAK", is_new)
     mocker.patch.object(cli, "_check_input_group")
     mock_thread.is_alive.return_value = True
     cli._processor_thread = mock_thread
