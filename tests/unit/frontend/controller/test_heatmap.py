@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -12,16 +12,19 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(autouse=True)
-def mock_gtk() -> None:
+def mock_gtk() -> Generator[None, Mock, None]:
     """Mock GTK and related imports."""
-    with patch.dict("sys.modules", {
-        "gi": MagicMock(),
-        "gi.repository": MagicMock(),
-        "gi.repository.Gtk": MagicMock(),
-        "gi.repository.Gio": MagicMock(),
-        "gi.repository.Gdk": MagicMock(),
-        "gi.repository.Adw": MagicMock(),
-    }):
+    with patch.dict(
+        "sys.modules",
+        {
+            "gi": MagicMock(),
+            "gi.repository": MagicMock(),
+            "gi.repository.Gtk": MagicMock(),
+            "gi.repository.Gio": MagicMock(),
+            "gi.repository.Gdk": MagicMock(),
+            "gi.repository.Adw": MagicMock(),
+        },
+    ):
         yield
 
 
@@ -66,6 +69,8 @@ def heatmap(mock_settings: Mock, mock_keystroke_store: Mock) -> Mock:
     def update_side_effect(keystrokes: list[Mock] | None = None) -> None:
         if keystrokes is None:
             keystrokes = mock_keystroke_store.get_all_keystrokes()
+        if keystrokes is None:
+            return
         for keystroke in keystrokes:
             heatmap.key_widgets[keystroke.scan_code] = MagicMock()
 
