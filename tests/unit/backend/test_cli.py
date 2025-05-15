@@ -65,7 +65,9 @@ def mock_dbus_manager(mocker: MockerFixture) -> Mock:
 def mock_thread(mocker: MockerFixture) -> Mock:
     """Mock the threading.Thread."""
     mock_thread_instance = mocker.Mock()
-    mock_thread_class = mocker.patch("threading.Thread", return_value=mock_thread_instance)
+    mocker.patch(
+        "threading.Thread", return_value=mock_thread_instance,
+    )
     return mock_thread_instance
 
 
