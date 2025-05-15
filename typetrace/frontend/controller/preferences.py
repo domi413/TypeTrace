@@ -136,19 +136,21 @@ class Preferences(Adw.PreferencesDialog):
 
     def _init_color_buttons(self) -> None:
         """Initialize color buttons with current settings."""
+        begin_color = parse_color_string(
+            self.settings.get_string("heatmap-begin-color"),
+        )
+        end_color = parse_color_string(
+            self.settings.get_string("heatmap-end-color"),
+        )
+
         if self.settings.get_boolean("use-accent-color"):
             accent_color = get_system_accent_color()
             single_color = accent_color
-            begin_color = accent_color
         else:
             single_color = parse_color_string(
                 self.settings.get_string("heatmap-single-color"),
             )
-            begin_color = parse_color_string(
-                self.settings.get_string("heatmap-begin-color"),
-            )
 
-        end_color = parse_color_string(self.settings.get_string("heatmap-end-color"))
         self._update_color_buttons(single_color, begin_color, end_color)
 
     def _update_color_buttons(
