@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any, final, override
 import cairo
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from gi.repository import Gtk
 
 from typetrace.frontend.controller.utils.charts.base_chart import Chart, TextConfig
@@ -46,7 +48,7 @@ class LineChart(Chart):
     def __init__(
         self,
         drawing_area: Gtk.DrawingArea,
-        data_provider: callable,
+        data_provider: Callable,
     ) -> None:
         """Initialize the line chart.
 
@@ -90,7 +92,12 @@ class LineChart(Chart):
                 + config.graph_height
                 - (i * config.graph_height / num_steps)
             )
-            config.cr.set_source_rgba(*config.colors["grid"], 0.5)
+            config.cr.set_source_rgba(
+                config.colors["grid"][0],
+                config.colors["grid"][1],
+                config.colors["grid"][2],
+                0.5,
+            )
             config.cr.set_line_width(0.5)
             config.cr.move_to(config.padding, y)
             config.cr.line_to(config.width - config.padding, y)
@@ -111,7 +118,12 @@ class LineChart(Chart):
             )
 
         # Draw axes
-        config.cr.set_source_rgba(*config.colors["text"], 1)
+        config.cr.set_source_rgba(
+            config.colors["text"][0],
+            config.colors["text"][1],
+            config.colors["text"][2],
+            1,
+        )
         config.cr.set_line_width(2)
         config.cr.move_to(config.padding, config.padding)
         config.cr.line_to(config.padding, config.height - config.padding)
@@ -153,7 +165,7 @@ class LineChart(Chart):
             return
 
         cr.set_line_width(2)
-        cr.set_source_rgba(*colors["line"], 1)
+        cr.set_source_rgba(colors["line"][0], colors["line"][1], colors["line"][2], 1)
         cr.move_to(*points[0])
         for i in range(1, len(points)):
             x0, y0 = points[i - 1]
@@ -169,9 +181,14 @@ class LineChart(Chart):
 
     def _draw_data_labels(self, config: DataLabelsConfig) -> None:
         """Draw data points and labels on the chart."""
-        for i, ((x, y), d) in enumerate(zip(config.points, config.data)):
+        for i, ((x, y), d) in enumerate(zip(config.points, config.data, strict=False)):
             # Draw points
-            config.cr.set_source_rgba(*config.colors["line"], 1)
+            config.cr.set_source_rgba(
+                config.colors["line"][0],
+                config.colors["line"][1],
+                config.colors["line"][2],
+                1,
+            )
             config.cr.arc(x, y, 3, 0, 2 * math.pi)
             config.cr.fill()
 

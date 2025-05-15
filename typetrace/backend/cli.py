@@ -78,13 +78,6 @@ class CLI:
                     processor = LinuxEventProcessor(self.__db_path, db_updated_callback)
                     processor.check_device_accessibility()
 
-                case "darwin" | "windows":
-                    from typetrace.backend.events.windows_darwin import (
-                        WindowsDarwinEventProcessor,
-                    )
-
-                    processor = WindowsDarwinEventProcessor(self.__db_path)
-
                 case _:
                     logger.error("Unsupported platform: %s", platform.system())
                     return ExitCodes.PLATFORM_ERROR
@@ -125,7 +118,8 @@ class CLI:
             logger.debug("Initiating backend shutdown sequence (main thread exiting)..")
             if self._processor_thread and self._processor_thread.is_alive():
                 logger.debug("Processor thread will be terminated.")
-                processor.stop()
+                if processor is not None:
+                    processor.stop()
                 self._processor_thread.join()
             logger.info("TypeTrace Backend finished.")
 

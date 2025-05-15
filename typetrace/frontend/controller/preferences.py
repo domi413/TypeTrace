@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from gi.repository import Adw, Gdk, Gio, GObject, Gtk
 
@@ -16,6 +16,7 @@ from typetrace.frontend.controller.utils.color_utils import (
 from typetrace.frontend.model.layouts import KEYBOARD_LAYOUTS
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
     from typetrace.frontend.model.db_filehandler import DatabaseFileHandler
@@ -196,7 +197,7 @@ class Preferences(Adw.PreferencesDialog):
             handler,
         )
 
-    def _on_single_color_toggled(self, switch: Adw.SwitchRow, _: any) -> None:
+    def _on_single_color_toggled(self, switch: Adw.SwitchRow, _: Any) -> None:
         """Handle the single color switch toggle."""
         is_single_color = switch.get_active()
         self.single_color_expander.set_visible(is_single_color)
@@ -209,13 +210,13 @@ class Preferences(Adw.PreferencesDialog):
         mode = "Single color" if is_single_color else "Multi-color"
         dialog_utils.show_toast(self, f"Heatmap mode set to: {mode}")
 
-    def _on_reverse_gradient_toggled(self, switch: Adw.SwitchRow, _: any) -> None:
+    def _on_reverse_gradient_toggled(self, switch: Adw.SwitchRow, _: Any) -> None:
         """Handle the reverse gradient switch toggle."""
         is_reversed = switch.get_active()
         direction = "Dark → Light" if is_reversed else "Light → Dark"
         dialog_utils.show_toast(self, f"Gradient direction: {direction}")
 
-    def _on_accent_color_toggled(self, switch: Adw.SwitchRow, _: any) -> None:
+    def _on_accent_color_toggled(self, switch: Adw.SwitchRow, _: Any) -> None:
         """Handle the accent color switch toggle."""
         use_accent = switch.get_active()
         self.color_row.set_sensitive(not use_accent)
@@ -254,7 +255,7 @@ class Preferences(Adw.PreferencesDialog):
         self.settings.set_string(setting_key, rgba_to_rgb_string(rgba))
         dialog_utils.show_toast(self, "Heatmap color updated")
 
-    def _on_autostart_toggled(self, row: Adw.SwitchRow, *_: any) -> None:
+    def _on_autostart_toggled(self, row: Adw.SwitchRow, *_: Any) -> None:
         """Handle the autostart toggle change."""
 
         def on_autostart_result(error_msg: str | None, *, success: bool) -> None:

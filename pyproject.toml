@@ -2,26 +2,25 @@
 name = "typetrace"
 version = "0.1.0" # TODO: Set this to release version
 
-# TODO: Add needed dependency versions e.g. "appdirs>=1.4.4",
 requires-python = ">=3.8"
 dependencies = [
-    "appdirs",
-    "dbus-python",
-    "evdev",
+    "appdirs==1.1.0",
+    "dbus-python==1.3.2",
+    "evdev==1.6.0",
+    "pygobject==3.48.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pygobject<3.52.0",
-    "ruff",
-    "pytest",
-    "pytest-mock",
+    "pytest==7.3.2",
+    "pytest-mock==3.10.0",
+    "ruff>=0.11",
 ]
 
 [tool.setuptools]
 packages = [
     "typetrace",
-    "tests"
+    "tests",
 ]
 
 [tool.ruff.lint]
@@ -37,7 +36,8 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
-    "SLF001",  # Allow access to private member
+    "FBT003",  # Ignore boolean position in function call
     "PLR2004", # Ignore magic values
     "S101",    # Ignore asserts
+    "SLF001",  # Allow access to private member
 ]
