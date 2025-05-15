@@ -80,7 +80,7 @@ def mock_platform(mocker: MockerFixture, request: pytest.FixtureRequest) -> Mock
 
 
 @pytest.fixture
-def mock_linux_processor(mocker: MockerFixture) -> Mock:
+def mock_linux_processor(mocker: MockerFixture, mock_processor: Mock) -> Mock:
     """Mock the LinuxEventProcessor."""
     mock_processor = mocker.Mock()
     mocker.patch(
