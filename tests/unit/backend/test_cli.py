@@ -105,7 +105,7 @@ def mock_windows_darwin_processor(mocker: MockerFixture, mock_processor: Mock) -
 # ========================= Tests for CLI.run method ==========================
 # =============================================================================
 @pytest.mark.parametrize("mock_platform", ["Linux"], indirect=True)
-def test_run_linux(
+def test_run_linux( # noqa: PLR0913 Ignore, because all the arguments are needed
     cli: CLI,
     mock_db_path: Path,
     mock_db_manager: Mock,
@@ -208,7 +208,7 @@ def test_run_runtime_error(
     mock_logger.exception.assert_called_once()
 
 
-def test_run_cleanup(
+def test_run_cleanup(  # noqa: PLR0913 Ignore, because all the arguments are needed
     cli: CLI,
     mock_db_path: Path,
     mock_platform: Mock,
