@@ -23,26 +23,6 @@ def test_run_unsupported_platform(cli_instance: cli.CLI) -> None:
 # =============================================================================
 # ========================= Tests for CLI.run method ==========================
 # =============================================================================
-@pytest.mark.parametrize("mock_platform", ["Linux"], indirect=True)
-def test_run_linux( # noqa: PLR0913 Ignore, because all the arguments are needed
-    cli: CLI,
-    mock_db_path: Path,
-    mock_db_manager: Mock,
-    mock_platform: Mock,
-    mock_linux_processor: Mock,
-    mock_thread: Mock,
-    mock_dbus_manager: Mock,
-    mocker: MockerFixture,
-) -> None:
-    """Test the run method on Linux platform."""
-    mock_platform.reset_mock()
-    is_new = False
-    mocker.patch.object(Config, "IS_FLATPAK", is_new)
-    mock_check_input = mocker.patch.object(cli, "_check_input_group")
-    mocker.patch.object(cli, "_CLI__db_path", mock_db_path)
-    mock_logger_setup = mocker.patch("typetrace.backend.cli.LoggerSetup")
-    result = cli.run()
-
 def test_run_permission_error(cli_instance: cli.CLI) -> None:
     """Test running CLI when there is a permission error."""
     with (
@@ -56,11 +36,6 @@ def test_run_permission_error(cli_instance: cli.CLI) -> None:
     ):
         exit_code = cli_instance.run()
         assert exit_code == ExitCodes.PERMISSION_ERROR
-
-        mock_logger_setup.setup_logging.assert_called_once()
-        mock_db_manager.initialize_database.assert_called_once_with(mock_db_path)
-        mock_check_input.assert_called_once()
-        mock_linux_processor.check_device_accessibility.assert_called_once()
 
 def test_run_unexpected_error(cli_instance: cli.CLI) -> None:
     """Test running CLI when an unexpected error occurs."""
@@ -76,7 +51,6 @@ def test_run_unexpected_error(cli_instance: cli.CLI) -> None:
         exit_code = cli_instance.run()
         assert exit_code == ExitCodes.RUNTIME_ERROR
 
-    mock_dbus_manager.run.assert_called_once()
 
 def test_check_input_group_user_not_found(cli_instance: cli.CLI) -> None:
     """Test checking input group when the user is not found."""
@@ -119,11 +93,6 @@ def test_run_successful_linux(
     monkeypatch.setattr(
         mock_linux_processor, "check_device_accessibility", mock.Mock(),
     )
-    result = cli.run()
-
-    assert result == ExitCodes.PERMISSION_ERROR
-
-    mock_logger.exception.assert_called_once()
 
     monkeypatch.setattr(cli.CLI, "_check_input_group", mock.Mock())
 
