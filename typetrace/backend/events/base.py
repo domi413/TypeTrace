@@ -31,13 +31,7 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
         """Initialize the processor with a database path."""
         self.__db_manager = DatabaseManager()
         self._db_path: Path = db_path
-        self._current_date: str = (
-            datetime.now()
-            .astimezone()
-            .strftime(
-                "%Y-%m-%d",
-            )
-        )
+        self._current_date: str = datetime.now().astimezone().strftime("%Y-%m-%d")
         self._terminate: bool = False
         self.db_updated_callback = db_updated_callback
 
