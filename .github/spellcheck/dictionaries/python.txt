@@ -21,3 +21,4 @@ dbus
 autohide
 gsettings
 signum
+autouse
