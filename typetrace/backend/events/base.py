@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import time
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 if TYPE_CHECKING:
@@ -31,7 +31,7 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
         """Initialize the processor with a database path."""
         self.__db_manager = DatabaseManager()
         self._db_path: Path = db_path
-        self._current_date: str = datetime.now(UTC).strftime("%Y-%m-%d")
+        self._current_date: str = datetime.now().astimezone().strftime("%Y-%m-%d")
         self._terminate: bool = False
         self.db_updated_callback = db_updated_callback
 
@@ -72,7 +72,7 @@ class BaseEventProcessor(ABC, Generic[DeviceType]):
             self.__db_manager.write_to_database(db_path, buffer)
             buffer.clear()
             start_time = current_time
-            self._current_date = datetime.now(UTC).strftime("%Y-%m-%d")
+            self._current_date = datetime.now().astimezone().strftime("%Y-%m-%d")
             if self.db_updated_callback:
                 self.db_updated_callback()
 
