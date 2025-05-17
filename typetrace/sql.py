@@ -11,9 +11,6 @@ class SQLQueries:
         """Private constructor to prevent instantiation."""
         raise TypeError
 
-    # Database setup
-    BEGIN_TRANSACTION = "BEGIN TRANSACTION"
-
     CREATE_KEYSTROKES_TABLE = """
     CREATE TABLE IF NOT EXISTS keystrokes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
