@@ -148,7 +148,7 @@ def test_get_keystrokes_by_date(
 
     mock_cursor.execute.assert_called_once_with(
         SQLQueries.GET_KEYSTROKES_BY_DATE,
-        ("2022-01-01",),
+        {"target_date": "2022-01-01"},
     )
     assert len(result) == 1
     assert result[0].key_name == "A"
@@ -167,7 +167,7 @@ def test_get_keystrokes_by_date_handles_error(
     assert result == []
     mock_cursor.execute.assert_called_once_with(
         SQLQueries.GET_KEYSTROKES_BY_DATE,
-        ("2022-01-01",),
+        {"target_date": "2022-01-01"},
     )
 
 
@@ -189,7 +189,7 @@ def test_get_top_keystrokes_all_time(
 
     mock_cursor.execute.assert_called_once_with(
         SQLQueries.GET_TOP_KEYSTROKES_ALL_TIME,
-        (2,),
+        {"limit": 2},
     )
     assert len(result) == 2
     assert result[0].count == 100
@@ -209,7 +209,7 @@ def test_get_top_keystrokes_by_date(
 
     mock_cursor.execute.assert_called_once_with(
         SQLQueries.GET_TOP_KEYSTROKES_BY_DATE,
-        ("2022-01-01", 1),
+        {"target_date": "2022-01-01", "limit": 1},
     )
     assert len(result) == 1
 
@@ -227,7 +227,7 @@ def test_get_top_keystrokes_handles_error(
     assert result == []
     mock_cursor.execute.assert_called_once_with(
         SQLQueries.GET_TOP_KEYSTROKES_ALL_TIME,
-        (2,),
+        {"limit": 2},
     )
 
 
@@ -260,7 +260,7 @@ def test_get_total_keystroke_count_by_date(
 
     mock_cursor.execute.assert_called_once_with(
         SQLQueries.GET_TOTAL_KEYSTROKE_COUNT_BY_DATE,
-        ("2022-01-01",),
+        {"target_date": "2022-01-01"},
     )
     assert result == 500
 
