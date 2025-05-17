@@ -104,7 +104,7 @@ class KeystrokeStore(GObject.Object):
         """
         try:
             cursor = self.conn.cursor()
-            cursor.execute(SQLQueries.GET_KEYSTROKES_BY_DATE, (date,))
+            cursor.execute(SQLQueries.GET_KEYSTROKES_BY_DATE, {"target_date": date})
             rows = cursor.fetchall()
             return [
                 Keystroke(
@@ -139,10 +139,10 @@ class KeystrokeStore(GObject.Object):
             if date:
                 cursor.execute(
                     SQLQueries.GET_TOP_KEYSTROKES_BY_DATE,
-                    (date, limit),
+                    {"target_date": date, "limit": limit},
                 )
             else:
-                cursor.execute(SQLQueries.GET_TOP_KEYSTROKES_ALL_TIME, (limit,))
+                cursor.execute(SQLQueries.GET_TOP_KEYSTROKES_ALL_TIME, {"limit": limit})
             rows = cursor.fetchall()
             return [
                 Keystroke(
@@ -174,7 +174,10 @@ class KeystrokeStore(GObject.Object):
         try:
             cursor = self.conn.cursor()
             if date:
-                cursor.execute(SQLQueries.GET_TOTAL_KEYSTROKE_COUNT_BY_DATE, (date,))
+                cursor.execute(
+                    SQLQueries.GET_TOTAL_KEYSTROKE_COUNT_BY_DATE,
+                    {"target_date": date},
+                )
             else:
                 cursor.execute(SQLQueries.GET_TOTAL_PRESSES)
             result = cursor.fetchone()[0]
