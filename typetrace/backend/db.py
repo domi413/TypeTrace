@@ -31,12 +31,15 @@ class DatabaseManager:
             db_path: Path to the SQLite database file.
 
         """
-        with self._get_db_connection(db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute(SQLQueries.CREATE_KEYSTROKES_TABLE)
-            conn.commit()
-
-            logger.debug("Database initialized at %s", db_path)
+        try:
+            with self._get_db_connection(db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(SQLQueries.CREATE_KEYSTROKES_TABLE)
+                conn.commit()
+                logger.debug("Database initialized at %s", db_path)
+        except sqlite3.Error:
+            logger.exception("Failed to initialize database at %s", db_path)
+            raise
 
     @final
     def write_to_database(self, db_path: Path, events: list[Event]) -> None:
@@ -50,23 +53,28 @@ class DatabaseManager:
         if not events:
             return
 
-        processed_events = [
-            {
-                "scan_code": event["scan_code"],
-                "key_name": ", ".join(event["name"])
-                if isinstance(event["name"], tuple)
-                else event["name"],
-                "date": event["date"],
-            }
-            for event in events
-        ]
+        try:
+            processed_events = [
+                {
+                    "scan_code": event["scan_code"],
+                    "key_name": ", ".join(event["name"])
+                    if isinstance(event["name"], tuple)
+                    else event["name"],
+                    "date": event["date"],
+                }
+                for event in events
+            ]
 
-        with self._get_db_connection(db_path) as conn:
-            cursor = conn.cursor()
-            cursor.executemany(SQLQueries.INSERT_OR_UPDATE_KEYSTROKE, processed_events)
-            conn.commit()
-
-            logger.debug("Updated database with %d keystroke events", len(events))
+            with self._get_db_connection(db_path) as conn:
+                cursor = conn.cursor()
+                cursor.executemany(
+                    SQLQueries.INSERT_OR_UPDATE_KEYSTROKE, processed_events,
+                )
+                conn.commit()
+                logger.debug("Updated database with %d keystroke events", len(events))
+        except sqlite3.Error:
+            logger.exception("Failed to write to database at %s", db_path)
+            raise
 
     @final
     @contextmanager
