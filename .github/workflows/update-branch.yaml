@@ -1,16 +1,24 @@
-name: Auto Update PRs
+name: Auto Update PR Branch
+
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types:
+      - opened
+      - synchronize
+      - reopened
+
 jobs:
-  autoupdate:
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
+  update-branch:
+    runs-on: ubuntu-latest
     steps:
-      - uses: chinthakagodawita/autoupdate-action@v1.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-          MERGE_CONFLICT_ACTION: fail
-          PR_FILTER: all
-          MERGE_MSG: "Auto-updated PR with latest changes from main"
+      - uses: lcdsmao/update-branch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          autoMergeMethod: MERGE
+          requiredApprovals: 0
+          fetchMaxPr: 50
+          fetchMaxPrChecks: 100
+          fetchMaxPrLabels: 10
+          fetchMaxComments: 50
+          prChecksFetchOrder: first
+          disableAutoMerge: true
