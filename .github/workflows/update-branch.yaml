@@ -1,4 +1,4 @@
-name: Update PR with Main (Check for Updates)
+name: Update out-of-date PR
 
 on:
   pull_request:
@@ -14,9 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # We need to fetch the base branch to merge it
           fetch-depth: 0
-          # The token is needed to push to the PR branch
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
@@ -30,42 +28,32 @@ jobs:
       - name: Attempt merge main into PR branch
         id: merge
         run: |
-          # Get the base branch name
           BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-          # Get the head branch name (the PR branch)
           HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
 
           echo "Attempting to merge '${BASE_BRANCH}' into '${HEAD_BRANCH}'"
 
-          # Attempt the merge with --no-commit and --no-ff to check for conflicts
-          # Redirect stderr to stdout and use '|| true' to prevent the step from failing immediately on merge conflicts
           if merge_output=$(git merge origin/${BASE_BRANCH} --no-commit --no-ff 2>&1); then
-            # Merge command succeeded, now check if there were actual changes
             if [[ -n "$(git status --porcelain)" ]]; then
               echo "Merge was clean and introduced changes."
-              # Commit the merge
               git commit -m "Merge branch 'main' into ${HEAD_BRANCH}"
-              echo "::set-output name=merge_successful::true"
-              echo "::set-output name=changes_committed::true"
+              echo "merge_successful=true" >> $GITHUB_OUTPUT
+              echo "changes_committed=true" >> $GITHUB_OUTPUT
             else
               echo "Merge was clean but no changes were introduced (already up-to-date)."
-              # No changes, no commit needed, but the branch is up-to-date
-              echo "::set-output name=merge_successful::true"
-              echo "::set-output name=changes_committed::false" # Indicate no new commit
+              echo "merge_successful=true" >> $GITHUB_OUTPUT
+              echo "changes_committed=false" >> $GITHUB_OUTPUT
             fi
           else
-            # Merge command failed (likely due to conflicts)
             echo "Merge resulted in conflicts."
             echo "${merge_output}"
-            # Abort the merge
             git merge --abort
-            echo "::set-output name=merge_successful::false"
-            echo "::set-output name=changes_committed::false"
+            echo "merge_successful=false" >> $GITHUB_OUTPUT
+            echo "changes_committed=false" >> $GITHUB_OUTPUT
           fi
         shell: bash
 
       - name: Push changes
-        # Only push if the merge was successful AND a new commit was created
         if: steps.merge.outputs.merge_successful == 'true' && steps.merge.outputs.changes_committed == 'true'
         run: |
           HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
@@ -73,11 +61,8 @@ jobs:
           git push origin ${HEAD_BRANCH}
 
       - name: Notify on merge conflict
-        # This step will run if the merge was NOT successful (conflicts occurred)
         if: steps.merge.outputs.merge_successful == 'false'
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
           echo "Merge conflicts detected when updating PR #${PR_NUMBER} with main."
           echo "Please resolve conflicts manually."
-          # Optionally, you could add a step here to leave a comment on the PR
-          # using the GitHub CLI or another action to notify the user.
