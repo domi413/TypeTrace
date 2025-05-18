@@ -5,6 +5,8 @@ on:
 jobs:
   autoupdate:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
     steps:
       - uses: chinthakagodawita/autoupdate-action@v1.0.0
         env:
