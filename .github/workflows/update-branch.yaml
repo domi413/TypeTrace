@@ -1,4 +1,4 @@
-name: Auto Update PR Branch
+name: Update PR with Main
 
 on:
   pull_request:
@@ -8,17 +8,63 @@ on:
       - reopened
 
 jobs:
-  update-branch:
+  merge_main_into_pr:
     runs-on: ubuntu-latest
     steps:
-      - uses: lcdsmao/update-branch@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
+          # We need to fetch the base branch to merge it
+          fetch-depth: 0
+          # The token is needed to push to the PR branch
           token: ${{ secrets.GITHUB_TOKEN }}
-          autoMergeMethod: MERGE
-          requiredApprovals: 0
-          fetchMaxPr: 50
-          fetchMaxPrChecks: 100
-          fetchMaxPrLabels: 10
-          fetchMaxComments: 50
-          prChecksFetchOrder: first
-          disableAutoMerge: true
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Fetch base branch
+        run: git fetch origin ${{ github.event.pull_request.base.ref }}
+
+      - name: Attempt merge main into PR branch
+        id: merge
+        run: |
+          # Get the base branch name
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          # Get the head branch name (the PR branch)
+          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+
+          echo "Attempting to merge '${BASE_BRANCH}' into '${HEAD_BRANCH}'"
+
+          # Attempt the merge with --no-commit and --no-ff to check for conflicts
+          if git merge origin/${BASE_BRANCH} --no-commit --no-ff; then
+            echo "Merge was clean."
+            # Commit the merge if it was clean
+            git commit -m "Merge branch 'main' into ${HEAD_BRANCH}"
+            echo "::set-output name=merge_successful::true"
+          else
+            echo "Merge resulted in conflicts. Aborting merge."
+            # Abort the merge if there were conflicts
+            git merge --abort
+            echo "::set-output name=merge_successful::false"
+          fi
+        shell: bash
+
+      - name: Push changes
+        # Only push if the merge was successful (no conflicts)
+        if: steps.merge.outputs.merge_successful == 'true'
+        run: |
+          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+          echo "Pushing merged changes to ${HEAD_BRANCH}"
+          git push origin ${HEAD_BRANCH}
+
+      - name: Notify on merge conflict
+        # This step will run if the merge was NOT successful (conflicts occurred)
+        if: steps.merge.outputs.merge_successful == 'false'
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          echo "Merge conflicts detected when updating PR #${PR_NUMBER} with main."
+          echo "Please resolve conflicts manually."
+          # Optionally, you could add a step here to leave a comment on the PR
+          # using the GitHub CLI or another action to notify the user.
