@@ -1,4 +1,4 @@
-name: Update PR with Main
+name: Update PR with Main (Check for Updates)
 
 on:
   pull_request:
@@ -38,22 +38,35 @@ jobs:
           echo "Attempting to merge '${BASE_BRANCH}' into '${HEAD_BRANCH}'"
 
           # Attempt the merge with --no-commit and --no-ff to check for conflicts
-          if git merge origin/${BASE_BRANCH} --no-commit --no-ff; then
-            echo "Merge was clean."
-            # Commit the merge if it was clean
-            git commit -m "Merge branch 'main' into ${HEAD_BRANCH}"
-            echo "::set-output name=merge_successful::true"
+          # Redirect stderr to stdout and use '|| true' to prevent the step from failing immediately on merge conflicts
+          if merge_output=$(git merge origin/${BASE_BRANCH} --no-commit --no-ff 2>&1); then
+            # Merge command succeeded, now check if there were actual changes
+            if [[ -n "$(git status --porcelain)" ]]; then
+              echo "Merge was clean and introduced changes."
+              # Commit the merge
+              git commit -m "Merge branch 'main' into ${HEAD_BRANCH}"
+              echo "::set-output name=merge_successful::true"
+              echo "::set-output name=changes_committed::true"
+            else
+              echo "Merge was clean but no changes were introduced (already up-to-date)."
+              # No changes, no commit needed, but the branch is up-to-date
+              echo "::set-output name=merge_successful::true"
+              echo "::set-output name=changes_committed::false" # Indicate no new commit
+            fi
           else
-            echo "Merge resulted in conflicts. Aborting merge."
-            # Abort the merge if there were conflicts
+            # Merge command failed (likely due to conflicts)
+            echo "Merge resulted in conflicts."
+            echo "${merge_output}"
+            # Abort the merge
             git merge --abort
             echo "::set-output name=merge_successful::false"
+            echo "::set-output name=changes_committed::false"
           fi
         shell: bash
 
       - name: Push changes
-        # Only push if the merge was successful (no conflicts)
-        if: steps.merge.outputs.merge_successful == 'true'
+        # Only push if the merge was successful AND a new commit was created
+        if: steps.merge.outputs.merge_successful == 'true' && steps.merge.outputs.changes_committed == 'true'
         run: |
           HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
           echo "Pushing merged changes to ${HEAD_BRANCH}"
