@@ -1,17 +1,12 @@
 name: Auto Update PRs
-
 on:
   pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-
+    types: [opened, synchronize, reopened]
 jobs:
   autoupdate:
     runs-on: ubuntu-22.04
     steps:
-      - uses: chinthakagodawita/autoupdate-action@v1
+      - uses: chinthakagodawita/autoupdate-action@v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           MERGE_CONFLICT_ACTION: fail
