@@ -10,13 +10,13 @@ on:
 
 jobs:
   autoupdate:
-    runs-on: ubuntu-22.04 # Use the version specified in the action's docs
+    runs-on: ubuntu-latest
     name: Auto Update PRs
     steps:
       - uses: docker://chinthakagodawita/autoupdate-action@v1
         id: autoupdate
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }} # Use a Personal Access Token
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           MERGE_CONFLICT_ACTION: "fail"
           PR_FILTER: "all"
           MERGE_MSG: "Auto-updated PR branch with latest changes from main"
