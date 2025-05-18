@@ -10,19 +10,21 @@ on:
 
 jobs:
   autoupdate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Auto Update PRs
     steps:
-      - uses: docker://chinthakagodawita/autoupdate-action@v1
+      - uses: docker://chinthakagodawita/autoupdate-action:v1
         id: autoupdate
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: "${{ secrets.PAT_TOKEN }}"
           MERGE_CONFLICT_ACTION: "fail"
           PR_FILTER: "all"
           MERGE_MSG: "Auto-updated PR branch with latest changes from main"
+
       - name: Log Merge Conflicts
         if: steps.autoupdate.outputs.conflicted == 'true'
         run: echo "Merge conflicts detected in one or more PRs"
+
       - name: Log Success
         if: steps.autoupdate.outputs.conflicted == 'false'
         run: echo "PRs updated successfully or no updates needed"
