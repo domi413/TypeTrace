@@ -12,9 +12,3 @@ jobs:
           MERGE_CONFLICT_ACTION: fail
           PR_FILTER: all
           MERGE_MSG: "Auto-updated PR with latest changes from main"
-      - name: Log Merge Conflicts
-        if: steps.autoupdate.outputs.conflicted == 'true'
-        run: echo "Merge conflicts detected"
-      - name: Log Success
-        if: steps.autoupdate.outputs.conflicted == 'false'
-        run: echo "PRs updated successfully"
