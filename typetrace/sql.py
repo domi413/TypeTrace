@@ -11,9 +11,6 @@ class SQLQueries:
         """Private constructor to prevent instantiation."""
         raise TypeError
 
-    # Database setup
-    BEGIN_TRANSACTION = "BEGIN TRANSACTION"
-
     CREATE_KEYSTROKES_TABLE = """
     CREATE TABLE IF NOT EXISTS keystrokes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,22 +46,22 @@ class SQLQueries:
     FROM keystrokes
     GROUP BY scan_code, key_name
     ORDER BY total_count DESC
-    LIMIT ?
+    LIMIT :limit
     """
 
     GET_TOP_KEYSTROKES_BY_DATE = """
     SELECT scan_code, count, key_name, date
     FROM keystrokes
-    WHERE date = ?
+    WHERE date = :target_date
     ORDER BY count DESC
-    LIMIT ?
+    LIMIT :limit
     """
 
     GET_TOTAL_PRESSES = "SELECT SUM(count) FROM keystrokes"
 
     GET_TOTAL_KEYSTROKE_COUNT_BY_DATE = """
     SELECT SUM(count) FROM keystrokes
-    WHERE date = ?
+    WHERE date = :target_date
     """
 
     GET_HIGHEST_COUNT = """
@@ -77,7 +74,7 @@ class SQLQueries:
 
     GET_KEYSTROKES_BY_DATE = """
     SELECT scan_code, count, key_name, date FROM keystrokes
-    WHERE date = ?
+    WHERE date = :target_date
     """
 
     GET_DAILY_KEYSTROKE_COUNTS = """
