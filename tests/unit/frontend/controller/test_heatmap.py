@@ -149,3 +149,20 @@ def test_zoom_functionality(
 
     heatmap._on_zoom_clicked(-100)
     mock_settings.set_int.assert_called_with("key-size", 40)
+
+
+# =============================================================================
+# ==================== TEMPORARY TEST TO DEMO PYTEST-MD-REPORT ===============
+# =============================================================================
+def test_temporary_failure_demo() -> None:
+    """Temporary test that fails to demonstrate pytest-md-report.
+    
+    TODO: Remove this test after verifying the report functionality works.
+    """
+    assert 1 == 2, "This test intentionally fails to demo pytest-md-report"
+
+
+def test_another_temporary_failure() -> None:
+    """Another failing test to show multiple failures in the report."""
+    msg = "Another intentional failure for the demo"
+    raise ValueError(msg)
