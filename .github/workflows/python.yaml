@@ -11,6 +11,9 @@ on:
 jobs:
   check-python:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     if: ${{ !github.event.pull_request.draft }}
 
@@ -79,4 +82,16 @@ jobs:
         run: uv run ruff check
 
       - name: Run tests
-        run: uv run pytest
+        env:
+          REPORT_OUTPUT: test-report.md
+        run: |
+          echo "REPORT_FILE=${REPORT_OUTPUT}" >> "$GITHUB_ENV"
+          uv run pytest --md-report --md-report-flavor gfm --md-report-exclude-outcomes passed skipped xpassed --md-report-output "$REPORT_OUTPUT"
+
+      - name: Render the report to the PR when tests fail
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: failure()
+        with:
+          header: test-report
+          recreate: true
+          path: ${{ env.REPORT_FILE }}
