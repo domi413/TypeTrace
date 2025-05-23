@@ -8,6 +8,9 @@ on:
       - ready_for_review
       - reopened
 
+permissions:
+  pull-requests: write
+
 jobs:
   check-python:
     runs-on: ubuntu-latest
@@ -37,7 +40,6 @@ jobs:
           CYAN='\033[1;96m'
           NC='\033[0m'
 
-          # Check if the output contains "Cache hit" or "Cache restored successfully"
           if [[ "${{ steps.setup-uv.outputs.cache-hit }}" == "true" || "${{ steps.setup-uv.outputs.cache-restored }}" == "true" ]]; then
             echo -e "${GREEN}uv cache hit! Using cached dependencies.${NC}"
           else
@@ -79,4 +81,13 @@ jobs:
         run: uv run ruff check
 
       - name: Run tests
-        run: uv run pytest
+        run: |
+          uv pip install pytest-cov
+          uv run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=. | tee pytest-coverage.txt
+
+      - name: Add coverage comment to PR
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+          junitxml-path: ./pytest.xml
+          title: "TypeTrace Coverage Report"
