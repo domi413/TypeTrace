@@ -155,11 +155,8 @@ def test_zoom_functionality(
 # ==================== TEMPORARY TEST TO DEMO PYTEST-MD-REPORT ===============
 # =============================================================================
 def test_temporary_failure_demo() -> None:
-    """Temporary test that fails to demonstrate pytest-md-report.
-    
-    TODO: Remove this test after verifying the report functionality works.
-    """
-    assert 1 == 2, "This test intentionally fails to demo pytest-md-report"
+    """Temporary test that fails to demonstrate pytest-md-report."""
+    pytest.fail("asd")
 
 
 def test_another_temporary_failure() -> None:
