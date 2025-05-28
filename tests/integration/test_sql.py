@@ -142,7 +142,7 @@ def test_get_top_keystrokes_all_time(
     db_connection.commit()
 
     # Query top 1 keystroke
-    cursor.execute(SQLQueries.GET_TOP_KEYSTROKES_ALL_TIME, (1,))
+    cursor.execute(SQLQueries.GET_TOP_KEYSTROKES_ALL_TIME, {"limit": 1})
     results = cursor.fetchall()
     assert results == [(1, 2, "A", "2025-05-27")]
 
@@ -171,7 +171,10 @@ def test_get_top_keystrokes_by_date(
     db_connection.commit()
 
     # Query top 1 keystroke for 2025-05-27
-    cursor.execute(SQLQueries.GET_TOP_KEYSTROKES_BY_DATE, ("2025-05-27", 1))
+    cursor.execute(
+        SQLQueries.GET_TOP_KEYSTROKES_BY_DATE,
+        {"target_date": "2025-05-27", "limit": 1},
+    )
     results = cursor.fetchall()
     assert results == [(1, 2, "A", "2025-05-27")]
 
@@ -226,7 +229,10 @@ def test_get_total_keystroke_count_by_date(
     db_connection.commit()
 
     # Query total count for 2025-05-27
-    cursor.execute(SQLQueries.GET_TOTAL_KEYSTROKE_COUNT_BY_DATE, ("2025-05-27",))
+    cursor.execute(
+        SQLQueries.GET_TOTAL_KEYSTROKE_COUNT_BY_DATE,
+        {"target_date": "2025-05-27"},
+    )
     assert cursor.fetchone()[0] == 2
 
 
@@ -280,7 +286,7 @@ def test_get_keystrokes_by_date(
     db_connection.commit()
 
     # Query keystrokes for 2025-05-27
-    cursor.execute(SQLQueries.GET_KEYSTROKES_BY_DATE, ("2025-05-27",))
+    cursor.execute(SQLQueries.GET_KEYSTROKES_BY_DATE, {"target_date": "2025-05-27"})
     results = cursor.fetchall()
     expected = [
         (1, 1, "A", "2025-05-27"),
