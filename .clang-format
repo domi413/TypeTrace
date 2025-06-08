@@ -1,0 +1,14 @@
+---
+AlignArrayOfStructures: Right
+AlignEscapedNewlines: Left
+AllowShortLoopsOnASingleLine: true
+AlwaysBreakAfterDefinitionReturnType: None
+BasedOnStyle: Mozilla
+BreakAfterReturnType: None
+# BreakBeforeBraces: Allman
+ColumnLimit: 90
+IndentPPDirectives: BeforeHash
+IndentWidth: 4
+PointerAlignment: Right
+ReflowComments: false
+TabWidth: 4

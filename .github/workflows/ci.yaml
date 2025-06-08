@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+
+jobs:
+  spellcheck:
+    runs-on: ubuntu-latest
+    name: Spellcheck
+
+    if: ${{ !github.event.pull_request.draft }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Starting cspell
+        uses: streetsidesoftware/cspell-action@v7
+        with:
+          files: ""
+          root: "."
+          check_dot_files: false
+          inline: error
+          treat_flagged_words_as_errors: false
+          suggestions: true
+          strict: true
+          config: ".cspell.yaml"
+          incremental_files_only: ${{ env.ACT != 'true' }}
+          verbose: true
+          use_cspell_files: false
