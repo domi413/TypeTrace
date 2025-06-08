@@ -95,7 +95,7 @@ int perm_check_device_accessibility(struct libinput *li)
  */
 int perm_check_input_group_membership(void)
 {
-    char *username = nullptr;
+    const char *username = nullptr;
     struct passwd pwd;
     struct passwd *pw_result = nullptr;
 
@@ -108,7 +108,7 @@ int perm_check_input_group_membership(void)
         char pwd_buffer[MAX_PATH_LENGTH];
         if (getpwuid_r(geteuid(), &pwd, pwd_buffer, sizeof(pwd_buffer), &pw_result) ==
               0 &&
-            pw_result != NULL) {
+            pw_result != nullptr) {
             username = pwd.pw_name;
         }
     }

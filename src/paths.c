@@ -23,9 +23,60 @@
 // ============================================================================
 
 /**
+ * @brief Create a directory recursively (like mkdir -p)
+ *
+ * Helper function to create a directory and all its parent directories.
+ *
+ * @param path Path to create
+ * @return 0 on success, -1 on failure
+ */
+static int create_directory_recursive(const char *path)
+{
+    char path_copy[MAX_PATH_LENGTH];
+    char *current_path = nullptr;
+    size_t len = 0;
+
+    strncpy(path_copy, path, MAX_PATH_LENGTH - 1);
+    path_copy[MAX_PATH_LENGTH - 1] = '\0';
+
+    len = strlen(path_copy);
+    if (path_copy[len - 1] == '/') {
+        path_copy[len - 1] = '\0';
+    }
+
+    for (current_path = path_copy + 1; *current_path; current_path++) {
+        if (*current_path == '/') {
+            *current_path = '\0';
+
+            if (mkdir(path_copy, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+                if (errno != EEXIST) {
+                    DEBUG_PRINT("Failed to create directory: %s (%s)\n",
+                                path_copy,
+                                strerror(errno));
+                    return -1;
+                }
+            }
+
+            *current_path = '/';
+        }
+    }
+
+    // Create the final directory
+    if (mkdir(path_copy, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+        if (errno != EEXIST) {
+            DEBUG_PRINT(
+              "Failed to create directory: %s (%s)\n", path_copy, strerror(errno));
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+/**
  * @brief Creates all directories needed for the database path
  *
- * Uses the system command 'mkdir -p' to create all necessary parent directories.
+ * Creates all necessary parent directories using mkdir() system calls.
  *
  * @param path Path for which to create directories
  * @return 0 on success, -1 on failure
@@ -40,20 +91,11 @@ int paths_ensure_db_directories(const char *path)
 
     dir = dirname(path_copy);
 
-    char cmd[MAX_PATH_LENGTH];
-    if (snprintf(cmd, sizeof(cmd), "mkdir -p \"%s\"", dir) < 0) {
-        perror("snprintf failed");
-        return -1;
-    }
-
-    DEBUG_PRINT("Executing command: %s\n", cmd);
-    int result = system(cmd);
+    DEBUG_PRINT("Creating directory path: %s\n", dir);
+    const int result = create_directory_recursive(dir);
 
     if (result != 0) {
-        DEBUG_PRINT("Failed to create directory for %s (error: %d, errno: %s)\n",
-                    path,
-                    result,
-                    strerror(errno));
+        DEBUG_PRINT("Failed to create directory for %s\n", path);
         return -1;
     }
 
@@ -71,17 +113,15 @@ int paths_ensure_db_directories(const char *path)
  * @param size Size of the buffer
  * @return 0 on success, -1 on failure (e.g., buffer too small)
  */
-int paths_resolve_db_path(char *buffer, size_t size)
+int paths_resolve_db_path(char *buffer, const size_t size)
 {
     char data_path[MAX_PATH_LENGTH];
     const char *data_dir = getenv("XDG_DATA_HOME");
 
-    if (data_dir == NULL || data_dir[0] == '\0') {
+    if (data_dir == nullptr || data_dir[0] == '\0') {
         const char *home = getenv("HOME");
-        if (home == NULL || home[0] == '\0') {
-            if (fprintf(stderr, "HOME environment variable not set\n") < 0) {
-                perror("fprintf failed");
-            }
+        if (home == nullptr || home[0] == '\0') {
+            (void)fprintf(stderr, "HOME environment variable not set\n");
             return -1;
         }
 
@@ -93,13 +133,11 @@ int paths_resolve_db_path(char *buffer, size_t size)
         data_dir = data_path;
     }
 
-    int path =
+    const int path_length =
       snprintf(buffer, size, "%s/%s/%s", data_dir, PROJECT_DIR_NAME, DB_FILE_NAME);
 
-    if (path < 0 || (size_t)path >= size) {
-        if (fprintf(stderr, "Path buffer too small\n") < 0) {
-            perror("fprintf failed");
-        }
+    if (path_length < 0 || (size_t)path_length >= size) {
+        (void)fprintf(stderr, "Path buffer too small\n");
         return -1;
     }
 
