@@ -5,12 +5,12 @@ all: build
 build:
 	@rm -rf build/
 	@mkdir build
-	@cd build && cmake .. && make
+	@cd build && cmake .. && make CFLAGS="-Wall -Wextra -Werror -fsanitize=address -fsanitize=undefined -g"
 
 clean:
 	@rm -rf build/
 
-run: all
+run: build
 	@./build/typetrace_backend -d
 
 check-format:

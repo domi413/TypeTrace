@@ -26,7 +26,7 @@
  * which will be written to the database when the buffer is full or times out.
  *
  * @param event The libinput event to process
- * @return 0 on success, -1 on failure
+ * @return OK on success, -1 on failure
  */
 static int eh_process_key_event(struct libinput_event *event)
 {
@@ -40,7 +40,7 @@ static int eh_process_key_event(struct libinput_event *event)
 
     if (libinput_event_keyboard_get_key_state(keyboard_event) !=
         LIBINPUT_KEY_STATE_PRESSED) {
-        return 0;
+        return OK;
     }
 
     const uint32_t key_code = libinput_event_keyboard_get_key(keyboard_event);
@@ -57,7 +57,7 @@ static int eh_process_key_event(struct libinput_event *event)
                 "\"added to buffer\"}\n",
                 key_name,
                 key_code);
-    return 0;
+    return OK;
 }
 
 // ============================================================================

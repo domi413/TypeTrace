@@ -34,3 +34,36 @@ jobs:
           incremental_files_only: ${{ env.ACT != 'true' }}
           verbose: true
           use_cspell_files: false
+
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    timeout-minutes: 5
+    container:
+      image: archlinux:base-devel
+
+    if: ${{ !github.event.pull_request.draft }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          # echo 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+          # echo 'Server = https://mirrors.kernel.org/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
+
+          pacman -Sy --noconfirm --needed \
+            clang \
+            gcc \
+            cmake \
+            make \
+            cppcheck \
+            sqlite \
+            systemd-libs \
+            libinput \
+            libevdev \
+            pkgconf
+
+      - name: Run lint
+        run: make lint
