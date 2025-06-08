@@ -36,4 +36,5 @@ int paths_ensure_db_directories(const char *path);
  */
 int paths_resolve_db_path(char *buffer, size_t size);
 
+
 #endif /* PATHS_H */
