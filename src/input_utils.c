@@ -26,7 +26,9 @@
  * @param user_data User data pointer (unused)
  * @return File descriptor on success, negative errno on failure
  */
-static int open_restricted_impl(const char *path, const int flags, const void *user_data)
+static int open_restricted_impl(const char *path,
+                                const int flags,
+                                const void *user_data __attribute__((unused)))
 {
     const int fd = open(path, flags);
     if (fd < 0) {
@@ -48,7 +50,8 @@ static int open_restricted_impl(const char *path, const int flags, const void *u
  * @param fd File descriptor to close
  * @param user_data User data pointer (unused)
  */
-static void close_restricted_impl(const int fd, const void *user_data)
+static void close_restricted_impl(const int fd,
+                                  const void *user_data __attribute__((unused)))
 {
     close(fd);
     DEBUG_PRINT("Closed device (fd: %d)\n", fd);

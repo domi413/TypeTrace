@@ -47,7 +47,7 @@ int paths_ensure_db_directories(const char *path)
     }
 
     DEBUG_PRINT("Executing command: %s\n", cmd);
-    int result = system(cmd);
+    const int result = system(cmd);
 
     if (result != 0) {
         DEBUG_PRINT("Failed to create directory for %s (error: %d, errno: %s)\n",
@@ -76,9 +76,9 @@ int paths_resolve_db_path(char *buffer, const size_t size)
     char data_path[MAX_PATH_LENGTH];
     const char *data_dir = getenv("XDG_DATA_HOME");
 
-    if (data_dir == NULL || data_dir[0] == '\0') {
+    if (data_dir == nullptr || data_dir[0] == '\0') {
         const char *home = getenv("HOME");
-        if (home == NULL || home[0] == '\0') {
+        if (home == nullptr || home[0] == '\0') {
             (void)fprintf(stderr, "HOME environment variable not set\n");
             return -1;
         }
@@ -91,10 +91,10 @@ int paths_resolve_db_path(char *buffer, const size_t size)
         data_dir = data_path;
     }
 
-    const int path =
+    const int path_length =
       snprintf(buffer, size, "%s/%s/%s", data_dir, PROJECT_DIR_NAME, DB_FILE_NAME);
 
-    if (path < 0 || (size_t)path >= size) {
+    if (path_length < 0 || (size_t)path_length >= size) {
         (void)fprintf(stderr, "Path buffer too small\n");
         return -1;
     }

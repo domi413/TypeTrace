@@ -23,9 +23,6 @@ static keystroke_event_t *keystroke_buffer = nullptr;
 static int buffer_count = 0;
 static struct timespec buffer_start_time;
 
-/* Forward declaration for static function */
-static void db_write_buffer_to_database(keystroke_event_t *events, int count);
-
 // ============================================================================
 // Static Functions
 // ============================================================================
@@ -96,7 +93,7 @@ static int db_execute_batch_insert(sqlite3 *db,
 
     // Process each event
     for (int i = 0; i < count; i++) {
-        sqlite3_bind_int(stmt, 1, events[i].key_code);
+        sqlite3_bind_int(stmt, 1, (int)events[i].key_code);
         sqlite3_bind_text(stmt, 2, events[i].key_name, -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 3, events[i].date, -1, SQLITE_STATIC);
 
@@ -176,7 +173,7 @@ static int db_prepare_statement(sqlite3 *db, sqlite3_stmt **stmt)
  * @param events Array of keystroke events
  * @param count Number of events in the array
  */
-static void db_write_buffer_to_database(keystroke_event_t *events, const int count)
+static void db_write_buffer_to_database(const keystroke_event_t *events, const int count)
 {
     if (events == nullptr || count <= 0) {
         return;
@@ -245,7 +242,7 @@ int db_add_to_buffer(const uint32_t key_code, const char *key_name)
     }
 
     struct tm tm_info;
-    if (localtime_r(&t, &tm_info) == NULL) {
+    if (localtime_r(&t, &tm_info) == nullptr) {
         (void)fprintf(stderr, "Failed to get local time.\n");
         return BUFFER_ERROR;
     }
@@ -254,8 +251,10 @@ int db_add_to_buffer(const uint32_t key_code, const char *key_name)
         // Add keystroke to buffer
         keystroke_event_t *event = &keystroke_buffer[buffer_count];
         event->key_code = key_code;
-        strncpy(event->key_name, key_name, sizeof(event->key_name) - 1);
-        event->key_name[sizeof(event->key_name) - 1] = '\0';
+        if (snprintf(event->key_name, sizeof(event->key_name), "%s", key_name) >=
+            (int)sizeof(event->key_name)) {
+            DEBUG_PRINT("Key name truncated: %s\n", key_name);
+        }
 
         if (strftime(event->date, sizeof(event->date), "%Y-%m-%d", &tm_info) == 0) {
             strcpy(event->date, "UNKNOWN");
@@ -297,9 +296,9 @@ int db_check_and_flush_buffer(const bool force_flush)
     if (clock_gettime(CLOCK_MONOTONIC, &current_time) != 0) {
         perror("clock_gettime failed");
     }
-    const double elapsed =
-      (current_time.tv_sec - buffer_start_time.tv_sec) +
-      ((current_time.tv_nsec - buffer_start_time.tv_nsec) / NANOSECONDS_PER_SECOND);
+    const double elapsed = (double)(current_time.tv_sec - buffer_start_time.tv_sec) +
+                           ((double)(current_time.tv_nsec - buffer_start_time.tv_nsec) /
+                            NANOSECONDS_PER_SECOND);
 
     if (force_flush || buffer_count >= BUFFER_SIZE || elapsed >= BUFFER_TIMEOUT) {
         DEBUG_PRINT("Flushing buffer with %d keystrokes to %s (elapsed: %.2f seconds)\n",

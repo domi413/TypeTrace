@@ -167,7 +167,7 @@ static void print_help(const char *program_name)
  * @param argv Argument vector
  * @return Error code indicating success (NO_ERROR) or failure
  */
-static int process_arguments(int argc, char *argv[])
+static int process_arguments(int argc, char *const argv[])
 {
     const struct option k_long_options[] = {
         { "version", no_argument, nullptr, 'v' },
@@ -219,13 +219,11 @@ static int process_arguments(int argc, char *argv[])
 static void run_event_loop(struct libinput *li)
 {
     // Set up polling for libinput events
-    struct pollfd fds;
-    fds.fd = libinput_get_fd(li);
-    fds.events = POLLIN;
+    struct pollfd fds = { .fd = libinput_get_fd(li), .events = POLLIN };
 
     // Main event loop
     while (running) {
-        int poll_result = poll(&fds, 1, POLL_TIMEOUT_MS);
+        const int poll_result = poll(&fds, 1, POLL_TIMEOUT_MS);
 
         if (poll_result > 0) {
             if (fds.revents & POLLIN) {
@@ -348,7 +346,7 @@ static void signal_handler(const int signal)
  * @param argv Argument vector
  * @return Error code indicating success (NO_ERROR) or failure
  */
-int main(int argc, char *argv[])
+int main(int argc, char *const argv[])
 {
     int result = process_arguments(argc, argv);
     if (result != OK) {
