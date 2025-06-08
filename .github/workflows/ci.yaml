@@ -34,6 +34,3 @@ jobs:
           incremental_files_only: ${{ env.ACT != 'true' }}
           verbose: true
           use_cspell_files: false
-
-      - name: Wait 20 seconds
-        run: sleep 20
