@@ -18,12 +18,15 @@ jobs:
         with:
           script: |
             const patterns = {
-              '^fix': 'bug',
-              '^feat': 'enhancement',
-              '^pipeline': 'pipeline',
-              '^doc': 'documentation',
-              '^wip': 'wip',
-              '^test': 'enhancement'
+              '^build':    'build',
+              '^chore':    'chore',
+              '^ci':       'pipeline',
+              '^docs':     'documentation',
+              '^feat':     'feature',
+              '^fix':      'fix',
+              '^perf':     'performance',
+              '^refactor': 'refactor',
+              '^test':     'test'
             };
 
             // Get label of the title
