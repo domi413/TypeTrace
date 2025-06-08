@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.16)
 # ============================================================================
 project(TypeTraceBackend
     VERSION 0.1.0
-    DESCRIPTION "TypeTrace keyboard input tracking backend"
+    DESCRIPTION "The backend for the TypeTrace project"
     LANGUAGES C
 )
 

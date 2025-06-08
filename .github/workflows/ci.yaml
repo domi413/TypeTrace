@@ -38,7 +38,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     name: Lint
-    timeout-minutes: 5
+    timeout-minutes: 3
     container:
       image: archlinux:base-devel
 
@@ -50,20 +50,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          echo 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
-          echo 'Server = https://mirrors.kernel.org/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
-
           pacman -Sy --noconfirm --needed \
             clang \
-            gcc \
             cmake \
-            make \
             cppcheck \
-            sqlite \
-            systemd-libs \
-            libinput \
             libevdev \
-            pkgconf
+            libinput
 
       - name: Run lint
         run: make lint
