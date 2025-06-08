@@ -10,6 +10,6 @@ ColumnLimit: 90
 IndentPPDirectives: BeforeHash
 IndentWidth: 4
 PointerAlignment: Right
-ReflowComments: false
+# ReflowComments: false
 TabWidth: 4
 QualifierAlignment: Left

@@ -3,7 +3,8 @@
  * @brief Implementation of keyboard event handling functions
  *
  * This file contains the implementation for processing keyboard events from libinput,
- * extracting key information, and buffering the keystroke data before writing to the database.
+ * extracting key information, and buffering the keystroke data before writing to the
+ * database.
  */
 #include "eventhandler.h"
 #include "common.h"

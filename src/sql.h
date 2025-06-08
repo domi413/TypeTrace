@@ -26,11 +26,11 @@ static constexpr char CREATE_KEYSTROKES_TABLE_SQL[] =
   ");";
 
 /**
-  * @brief SQL query for inserting or updating keystroke data
-  *
-  * Uses SQLite's "INSERT OR ... ON CONFLICT" syntax to either insert a new
-  * record or update an existing one by incrementing the count.
-  */
+ * @brief SQL query for inserting or updating keystroke data
+ *
+ * Uses SQLite's "INSERT OR ... ON CONFLICT" syntax to either insert a new
+ * record or update an existing one by incrementing the count.
+ */
 static constexpr char UPSERT_KEYSTROKE_SQL[] =
   "INSERT INTO keystrokes (scan_code, key_name, date, count) "
   "VALUES (?, ?, ?, 1) "

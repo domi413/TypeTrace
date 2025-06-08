@@ -26,7 +26,7 @@ int paths_ensure_db_directories(const char *path);
 /**
  * @brief Resolves the path to the database file
  *
-* Determines the correct path to the database file according to
+ * Determines the correct path to the database file according to
  * the XDG Base Directory Specification. On Linux, this is typically
  * ~/.local/share/typetrace/TypeTrace.db
  *
