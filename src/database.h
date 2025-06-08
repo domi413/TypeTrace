@@ -19,7 +19,7 @@
  *
  * @param key_code The key code from the input event
  * @param key_name The human-readable name of the key
- * @return 0 on success, error code on failure
+ * @return OK on success, error code on failure
  */
 int db_add_to_buffer(uint32_t key_code, const char *key_name);
 
@@ -30,7 +30,7 @@ int db_add_to_buffer(uint32_t key_code, const char *key_name);
  * and flushes it to the database if needed.
  *
  * @param force_flush If true, flush the buffer regardless of timeout or size
- * @return 0 on success, error code on failure
+ * @return OK on success, error code on failure
  */
 int db_check_and_flush_buffer(bool force_flush);
 

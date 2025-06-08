@@ -19,20 +19,20 @@
  * creating them if necessary.
  *
  * @param path Path for which to create directories
- * @return 0 on success, -1 on failure
+ * @return OK on success, -1 on failure
  */
 int paths_ensure_db_directories(const char *path);
 
 /**
  * @brief Resolves the path to the database file
  *
-* Determines the correct path to the database file according to
+ * Determines the correct path to the database file according to
  * the XDG Base Directory Specification. On Linux, this is typically
  * ~/.local/share/typetrace/TypeTrace.db
  *
  * @param buffer Buffer to store the resolved path
  * @param size Size of the buffer
- * @return 0 on success, -1 on failure (e.g., buffer too small)
+ * @return OK on success, -1 on failure (e.g., buffer too small)
  */
 int paths_resolve_db_path(char *buffer, size_t size);
 

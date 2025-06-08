@@ -224,7 +224,7 @@ static void db_write_buffer_to_database(const keystroke_event_t *events, const i
  *
  * @param key_code The numeric code of the pressed key
  * @param key_name The human-readable name of the key
- * @return 0 on success, error code on failure
+ * @return OK on success, error code on failure
  */
 int db_add_to_buffer(const uint32_t key_code, const char *key_name)
 {
@@ -282,7 +282,7 @@ int db_add_to_buffer(const uint32_t key_code, const char *key_name)
  * and flushes it if necessary.
  *
  * @param force_flush If true, flush regardless of timeout or size
- * @return 0 on success, error code on failure
+ * @return OK on success, error code on failure
  */
 int db_check_and_flush_buffer(const bool force_flush)
 {

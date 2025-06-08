@@ -2,3 +2,4 @@
 clangd
 libevdev
 libudev
+Wextra

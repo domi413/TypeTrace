@@ -20,7 +20,7 @@
  * This confirms that sufficient permissions exist to read from devices.
  *
  * @param li Initialized libinput context to use for checking devices
- * @return 0 on success (devices can be accessed), NO_DEVICES_ERROR if no devices
+ * @return OK on success (devices can be accessed), NO_DEVICES_ERROR if no devices
  *         are available, PERMISSION_ERROR if devices exist but can't be accessed
  */
 int perm_check_device_accessibility(struct libinput *li);
@@ -31,7 +31,7 @@ int perm_check_device_accessibility(struct libinput *li);
  * Verifies if the user running the program is a member of the 'input' group,
  * which is required for accessing input devices on Linux systems.
  *
- * @return 0 on success (user is in the group), PERMISSION_ERROR otherwise
+ * @return OK on success (user is in the group), PERMISSION_ERROR otherwise
  */
 int perm_check_input_group_membership(void);
 

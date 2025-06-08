@@ -28,7 +28,7 @@
  * Helper function to create a directory and all its parent directories.
  *
  * @param path Path to create
- * @return 0 on success, -1 on failure
+ * @return OK on success, -1 on failure
  */
 static int create_directory_recursive(const char *path)
 {
@@ -70,7 +70,7 @@ static int create_directory_recursive(const char *path)
         }
     }
 
-    return 0;
+    return OK;
 }
 
 /**
@@ -79,7 +79,7 @@ static int create_directory_recursive(const char *path)
  * Creates all necessary parent directories using mkdir() system calls.
  *
  * @param path Path for which to create directories
- * @return 0 on success, -1 on failure
+ * @return OK on success, -1 on failure
  */
 int paths_ensure_db_directories(const char *path)
 {
@@ -107,11 +107,11 @@ int paths_ensure_db_directories(const char *path)
  *
  * Determines the correct path to the database file according to
  * the XDG Base Directory Specification. On Linux, this is typically
- * ~/.local/share/typetrace/TypeTrace.db
+ * `~/.local/share/typetrace/TypeTrace.db`
  *
  * @param buffer Buffer to store the resolved path
  * @param size Size of the buffer
- * @return 0 on success, -1 on failure (e.g., buffer too small)
+ * @return OK on success, -1 on failure (e.g., buffer too small)
  */
 int paths_resolve_db_path(char *buffer, const size_t size)
 {

@@ -1,6 +1,7 @@
 /**
  * @file common.h
- * @brief Common definitions, constants, and macros used throughout the TypeTrace application.
+ * @brief Common definitions, constants, and macros used throughout the TypeTrace
+ *        application.
  *
  * This header file contains shared definitions for error codes, debugging macros,
  * and global constants used by the TypeTrace keyboard input tracking application.
@@ -48,7 +49,8 @@ static constexpr unsigned int POLL_TIMEOUT_MS = 100;
 static constexpr size_t ERROR_BUFFER_SIZE = 256;
 
 /**
- * @brief Maximum length for file paths. 4096 characters is the maximum path length on Linux
+ * @brief Maximum length for file paths. 4096 characters is the maximum path length on
+ * Linux
  */
 static constexpr size_t MAX_PATH_LENGTH = 4096;
 
