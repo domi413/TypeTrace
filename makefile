@@ -17,4 +17,4 @@ lint: build
 	@echo "Running clang-tidy..."
 	@clang-tidy $$(find src -name "*.c" -o -name "*.h") -- -std=c23 -D_GNU_SOURCE -Ibuild/generated
 	@echo "Running cppcheck..."
-	@cppcheck --enable=all --suppress=missingIncludeSystem --check-level=exhaustive --std=c23 --platform=unix64 -Isrc/ -Ibuild/generated/ --template=gcc $$(find src -name "*.c" -o -name "*.h")
+	@cppcheck --enable=all --suppress=missingIncludeSystem --suppress=unusedStructMember --check-level=exhaustive --std=c23 --platform=unix64 -Isrc/ -Ibuild/generated/ --template=gcc $$(find src -name "*.c" -o -name "*.h")

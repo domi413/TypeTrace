@@ -24,7 +24,7 @@ CheckOptions:
   - key: readability-identifier-naming.VariableCase
     value: "lower_case"
 
-  # We any case since; const variables should be snake_case and const values
+  # We use `aNy_CasE` since const variables should be snake_case and const values
   # should be UPPER_SNAKE_CASE which configuartion is not possibly yet.
   - key: readability-identifier-naming.ConstantCase
     value: "aNy_CasE"
