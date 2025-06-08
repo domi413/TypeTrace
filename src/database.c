@@ -41,7 +41,7 @@ static void db_write_buffer_to_database(keystroke_event_t *events, int count);
 static int db_begin_transaction(sqlite3 *db)
 {
     char *err_msg = nullptr;
-    int rc = sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, &err_msg);
+    const int rc = sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, &err_msg);
 
     if (rc != SQLITE_OK) {
         (void)fprintf(stderr, "Failed to begin transaction: %s\n", err_msg);
@@ -63,7 +63,7 @@ static int db_begin_transaction(sqlite3 *db)
 static int db_commit_transaction(sqlite3 *db)
 {
     char *err_msg = nullptr;
-    int rc = sqlite3_exec(db, "COMMIT;", nullptr, nullptr, &err_msg);
+    const int rc = sqlite3_exec(db, "COMMIT;", nullptr, nullptr, &err_msg);
 
     if (rc != SQLITE_OK) {
         (void)fprintf(stderr, "Failed to commit transaction: %s\n", err_msg);
@@ -89,8 +89,8 @@ static int db_commit_transaction(sqlite3 *db)
  */
 static int db_execute_batch_insert(sqlite3 *db,
                                    sqlite3_stmt *stmt,
-                                   keystroke_event_t *events,
-                                   int count)
+                                   const keystroke_event_t *events,
+                                   const int count)
 {
     int rc = SQLITE_OK;
 
@@ -156,7 +156,7 @@ static int db_open_and_ensure_table(sqlite3 **db)
  */
 static int db_prepare_statement(sqlite3 *db, sqlite3_stmt **stmt)
 {
-    int rc = sqlite3_prepare_v2(db, UPSERT_KEYSTROKE_SQL, -1, stmt, nullptr);
+    const int rc = sqlite3_prepare_v2(db, UPSERT_KEYSTROKE_SQL, -1, stmt, nullptr);
 
     if (rc != SQLITE_OK) {
         (void)fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
@@ -176,7 +176,7 @@ static int db_prepare_statement(sqlite3 *db, sqlite3_stmt **stmt)
  * @param events Array of keystroke events
  * @param count Number of events in the array
  */
-static void db_write_buffer_to_database(keystroke_event_t *events, int count)
+static void db_write_buffer_to_database(keystroke_event_t *events, const int count)
 {
     if (events == nullptr || count <= 0) {
         return;
@@ -229,7 +229,7 @@ static void db_write_buffer_to_database(keystroke_event_t *events, int count)
  * @param key_name The human-readable name of the key
  * @return 0 on success, error code on failure
  */
-int db_add_to_buffer(uint32_t key_code, const char *key_name)
+int db_add_to_buffer(const uint32_t key_code, const char *key_name)
 {
     if (keystroke_buffer == nullptr) {
         if (!db_init_buffer()) {
@@ -238,7 +238,7 @@ int db_add_to_buffer(uint32_t key_code, const char *key_name)
     }
 
     // Get current date
-    time_t t = time(nullptr);
+    const time_t t = time(nullptr);
     if (t == (time_t)-1) {
         (void)fprintf(stderr, "Failed to get current time.\n");
         return BUFFER_ERROR;
@@ -285,7 +285,7 @@ int db_add_to_buffer(uint32_t key_code, const char *key_name)
  * @param force_flush If true, flush regardless of timeout or size
  * @return 0 on success, error code on failure
  */
-int db_check_and_flush_buffer(bool force_flush)
+int db_check_and_flush_buffer(const bool force_flush)
 {
     // Early exit if buffer is empty
     if (keystroke_buffer == nullptr || buffer_count == 0) {
@@ -297,7 +297,7 @@ int db_check_and_flush_buffer(bool force_flush)
     if (clock_gettime(CLOCK_MONOTONIC, &current_time) != 0) {
         perror("clock_gettime failed");
     }
-    double elapsed =
+    const double elapsed =
       (current_time.tv_sec - buffer_start_time.tv_sec) +
       ((current_time.tv_nsec - buffer_start_time.tv_nsec) / NANOSECONDS_PER_SECOND);
 
@@ -350,14 +350,17 @@ bool db_init_buffer(void)
     if (keystroke_buffer == nullptr) {
         keystroke_buffer =
           (keystroke_event_t *)calloc(BUFFER_SIZE, sizeof(keystroke_event_t));
+
         if (keystroke_buffer == nullptr) {
             (void)fprintf(stderr, "Failed to allocate keystroke buffer\n");
             return false;
         }
-        buffer_count = 0;
         if (clock_gettime(CLOCK_MONOTONIC, &buffer_start_time) != 0) {
             perror("clock_gettime failed");
         }
+
+        buffer_count = 0;
+
         DEBUG_PRINT("Keystroke buffer initialized with size %u\n", BUFFER_SIZE);
     }
     return true;

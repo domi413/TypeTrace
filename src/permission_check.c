@@ -95,7 +95,7 @@ int perm_check_device_accessibility(struct libinput *li)
  */
 int perm_check_input_group_membership(void)
 {
-    char *username = nullptr;
+    const char *username = nullptr;
     struct passwd pwd;
     struct passwd *pw_result = nullptr;
 

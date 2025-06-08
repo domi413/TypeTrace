@@ -12,3 +12,4 @@ IndentWidth: 4
 PointerAlignment: Right
 ReflowComments: false
 TabWidth: 4
+QualifierAlignment: Left

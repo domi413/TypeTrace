@@ -71,7 +71,7 @@ int paths_ensure_db_directories(const char *path)
  * @param size Size of the buffer
  * @return 0 on success, -1 on failure (e.g., buffer too small)
  */
-int paths_resolve_db_path(char *buffer, size_t size)
+int paths_resolve_db_path(char *buffer, const size_t size)
 {
     char data_path[MAX_PATH_LENGTH];
     const char *data_dir = getenv("XDG_DATA_HOME");
@@ -79,9 +79,7 @@ int paths_resolve_db_path(char *buffer, size_t size)
     if (data_dir == NULL || data_dir[0] == '\0') {
         const char *home = getenv("HOME");
         if (home == NULL || home[0] == '\0') {
-            if (fprintf(stderr, "HOME environment variable not set\n") < 0) {
-                perror("fprintf failed");
-            }
+            (void)fprintf(stderr, "HOME environment variable not set\n");
             return -1;
         }
 
@@ -93,13 +91,11 @@ int paths_resolve_db_path(char *buffer, size_t size)
         data_dir = data_path;
     }
 
-    int path =
+    const int path =
       snprintf(buffer, size, "%s/%s/%s", data_dir, PROJECT_DIR_NAME, DB_FILE_NAME);
 
     if (path < 0 || (size_t)path >= size) {
-        if (fprintf(stderr, "Path buffer too small\n") < 0) {
-            perror("fprintf failed");
-        }
+        (void)fprintf(stderr, "Path buffer too small\n");
         return -1;
     }
 
