@@ -1,5 +1,4 @@
 name: PR Labeler
-
 on:
   pull_request:
     types:
@@ -19,16 +18,14 @@ jobs:
         with:
           script: |
             const patterns = {
-              '^build':    'build',
-              '^chore':    'chore',
-              '^ci':       'pipeline',
-              '^docs':     'documentation',
-              '^feat':     'feature',
-              '^fix':      'fix',
-              '^perf':     'performance',
-              '^refactor': 'refactor',
-              '^test':     'test'
+              '^fix': 'bug',
+              '^feat': 'enhancement',
+              '^pipeline': 'pipeline',
+              '^doc': 'documentation',
+              '^wip': 'wip',
+              '^test': 'enhancement'
             };
+
             // Get label of the title
             let newLabel = null;
             for (const [pattern, label] of Object.entries(patterns)) {
@@ -37,16 +34,19 @@ jobs:
                 break;
               }
             }
+
             // Get current labels
             const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number
             });
+
             const allPatternLabels = Object.values(patterns);
             const currentPatternLabels = currentLabels
               .filter(label => allPatternLabels.includes(label.name))
               .map(label => label.name);
+
             // If correct label already exists, do nothing
             if (newLabel && currentPatternLabels.includes(newLabel)) {
               console.log(`Label '${newLabel}' already exists. No changes needed.`);
@@ -60,6 +60,7 @@ jobs:
                   name: labelName
                 });
               }
+
               // Add new label if applicable
               if (newLabel) {
                 await github.rest.issues.addLabels({
@@ -70,4 +71,3 @@ jobs:
                 });
               }
             }
-          shell: bash
