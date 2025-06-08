@@ -1,12 +1,7 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
     types:
       - opened
       - ready_for_review
@@ -22,18 +17,10 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
 
     steps:
-      - name: Skip on main branch
-        if: github.event_name == 'push'
-        run: |
-          echo "Skipping spellcheck on main branch - this job exists only for status check requirements"
-          exit 0
-
       - name: Checkout repository
-        if: github.event_name == 'pull_request'
         uses: actions/checkout@v4
 
       - name: Starting cspell
-        if: github.event_name == 'pull_request'
         uses: streetsidesoftware/cspell-action@v7
         with:
           files: ""
