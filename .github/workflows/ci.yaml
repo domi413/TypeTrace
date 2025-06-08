@@ -12,6 +12,7 @@ jobs:
   spellcheck:
     runs-on: ubuntu-latest
     name: Spellcheck
+    timeout-minutes: 1
 
     if: ${{ !github.event.pull_request.draft }}
 
