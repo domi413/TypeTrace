@@ -13,3 +13,4 @@ dictionaries:
 
 ignorePaths:
   - "build/"
+  - ".*"
