@@ -32,7 +32,7 @@ static int get_current_username(char *buffer, size_t size)
     }
 
     if (username) {
-        size_t username_len = strlen(username);
+        size_t username_len = strnlen(username, size);
         if (username_len >= size) {
             return -1;
         }
@@ -49,7 +49,7 @@ static int get_current_username(char *buffer, size_t size)
         == 0
         && pw_result
         != nullptr) {
-        size_t name_len = strlen(pwd.pw_name);
+        size_t name_len = strnlen(pwd.pw_name, size);
         if (name_len >= size) {
             return -1;
         }
