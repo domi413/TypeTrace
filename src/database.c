@@ -178,12 +178,11 @@ static int get_current_time_info(struct tm *tm_info)
 static void set_event_date(keystroke_event_t *event, const struct tm *tm_info)
 {
     if (strftime(event->date, sizeof(event->date), "%Y-%m-%d", tm_info) == 0) {
-        event->date[sizeof(event->date) - 1] = '\0';
-        strncpy(event->date, "UNKNOWN", sizeof(event->date));
-        if (event->date[sizeof(event->date) - 1] != '\0') {
-            DEBUG_PRINT("Date string truncated during copy\n");
-            strncpy(event->date, "ERR", sizeof(event->date) - 1);
-            event->date[sizeof(event->date) - 1] = '\0';
+        // Use snprintf for safe string handling with guaranteed null termination
+        int result = snprintf(event->date, sizeof(event->date), "UNKNOWN");
+        if (result >= (int)sizeof(event->date)) {
+            // Fallback if even "UNKNOWN" doesn't fit
+            (void)snprintf(event->date, sizeof(event->date), "ERR");
         }
     }
 }

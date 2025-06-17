@@ -32,15 +32,12 @@ static int get_current_username(char *buffer, size_t size)
     }
 
     if (username) {
-        if (strlen(username) >= size) {
+        size_t username_len = strlen(username);
+        if (username_len >= size) {
             return -1;
         }
-        buffer[size - 1] = '\0';
-        strncpy(buffer, username, size);
-        if (buffer[size - 1] != '\0') {
-            (void)fprintf(stderr, "Username truncated during copy\n");
-            return -1;
-        }
+        // Safe copy using snprintf with guaranteed null termination
+        (void)snprintf(buffer, size, "%s", username);
         return OK;
     }
 
@@ -52,15 +49,12 @@ static int get_current_username(char *buffer, size_t size)
         == 0
         && pw_result
         != nullptr) {
-        if (strlen(pwd.pw_name) >= size) {
+        size_t name_len = strlen(pwd.pw_name);
+        if (name_len >= size) {
             return -1;
         }
-        buffer[size - 1] = '\0';
-        strncpy(buffer, pwd.pw_name, size);
-        if (buffer[size - 1] != '\0') {
-            (void)fprintf(stderr, "Username truncated during copy\n");
-            return -1;
-        }
+        // Safe copy using snprintf with guaranteed null termination
+        (void)snprintf(buffer, size, "%s", pwd.pw_name);
         return OK;
     }
 

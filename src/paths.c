@@ -29,12 +29,8 @@ static int validate_and_copy_path(const char *path, char *buffer, size_t buffer_
         return -1;
     }
 
-    buffer[buffer_size - 1] = '\0';
-    strncpy(buffer, path, buffer_size);
-    if (buffer[buffer_size - 1] != '\0') {
-        DEBUG_PRINT("Path truncated during copy: %s\n", path);
-        return -1;
-    }
+    // Safe copy using snprintf with guaranteed null termination
+    (void)snprintf(buffer, buffer_size, "%s", path);
     return OK;
 }
 
