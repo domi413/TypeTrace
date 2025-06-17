@@ -12,16 +12,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// ============================================================================
-// Static Functions
-// ============================================================================
-
 /// Structure to hold device detection status
 typedef struct device_status
 {
     bool has_devices;  ///< True if any input devices were found
     bool has_keyboard; ///< True if keyboard devices were found
 } device_status_t;
+
+// ============================================================================
+// Static Functions
+// ============================================================================
 
 /// Get the current username
 static int get_current_username(char *buffer, size_t size)
