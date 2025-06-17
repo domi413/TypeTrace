@@ -1,11 +1,4 @@
-/**
- * @file eventhandler.c
- * @brief Implementation of keyboard event handling functions
- *
- * This file contains the implementation for processing keyboard events from libinput,
- * extracting key information, and buffering the keystroke data before writing to the
- * database.
- */
+/// Implementation of keyboard event handling functions
 #include "eventhandler.h"
 #include "common.h"
 #include "database.h"
@@ -18,28 +11,19 @@
 // Static Functions
 // ============================================================================
 
-/**
- * @brief Process a keyboard key event
- *
- * Extracts key information from a keyboard event, including key code and name.
- * If the event is a key press (not release), it adds the keystroke to the buffer,
- * which will be written to the database when the buffer is full or times out.
- *
- * @param event The libinput event to process
- * @return OK on success, -1 on failure
- */
+/// Process a keyboard key event
 static int eh_process_key_event(struct libinput_event *event)
 {
-    struct libinput_event_keyboard *keyboard_event =
-      libinput_event_get_keyboard_event(event);
+    struct libinput_event_keyboard *keyboard_event
+      = libinput_event_get_keyboard_event(event);
 
     if (!keyboard_event) {
         (void)fprintf(stderr, " Failed to get keyboard event details.\n");
         return -1;
     }
 
-    if (libinput_event_keyboard_get_key_state(keyboard_event) !=
-        LIBINPUT_KEY_STATE_PRESSED) {
+    if (libinput_event_keyboard_get_key_state(keyboard_event)
+        != LIBINPUT_KEY_STATE_PRESSED) {
         return OK;
     }
 
@@ -64,16 +48,7 @@ static int eh_process_key_event(struct libinput_event *event)
 // Public Functions
 // ============================================================================
 
-/**
- * @brief Handle all pending libinput events
- *
- * Dispatches libinput events and processes each event, focusing
- * on keyboard key events. Other event types are ignored.
- * Periodically checks if the keystroke buffer should be flushed.
- *
- * @param li Pointer to the initialized libinput context
- * @return Error code indicating success (NO_ERROR) or failure
- */
+/// Handle all pending libinput events
 int eh_handle_events(struct libinput *li)
 {
     int result = OK;

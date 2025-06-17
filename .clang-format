@@ -1,15 +1,20 @@
 ---
+AlignAfterOpenBracket: Align
 AlignArrayOfStructures: Right
 AlignEscapedNewlines: Left
+AlignOperands: AlignAfterOperator
 AllowShortLoopsOnASingleLine: true
 AlwaysBreakAfterDefinitionReturnType: None
 BasedOnStyle: Mozilla
+BinPackParameters: false
 BreakAfterReturnType: None
+BreakBeforeBinaryOperators: true
 # BreakBeforeBraces: Allman
+BreakBinaryOperations: OnePerLine
 ColumnLimit: 90
 IndentPPDirectives: BeforeHash
 IndentWidth: 4
 PointerAlignment: Right
 # ReflowComments: false
-TabWidth: 4
 QualifierAlignment: Left
+TabWidth: 4

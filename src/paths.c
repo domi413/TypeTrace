@@ -1,16 +1,11 @@
-/**
- * @file paths.c
- * @brief Implementation of path resolution functions
- *
- * This file implements functions for resolving file paths in the application,
- * following the XDG Base Directory specification on Linux systems.
- */
+/// Implementation of path resolution functions
 
 #include "paths.h"
 #include "common.h"
 
 #include <errno.h>
 #include <libgen.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,42 +14,90 @@
 #include <unistd.h>
 
 // ============================================================================
-// Public Functions
+// Static Functions
 // ============================================================================
 
-/**
- * @brief Create a directory recursively (like mkdir -p)
- *
- * Helper function to create a directory and all its parent directories.
- *
- * @param path Path to create
- * @return OK on success, -1 on failure
- */
+/// Validate and copy a path to a buffer
+static int validate_and_copy_path(const char *path, char *buffer, size_t buffer_size)
+{
+    if (path == nullptr) {
+        return -1;
+    }
+
+    size_t path_len = strnlen(path, MAX_PATH_LENGTH);
+    if (path_len >= MAX_PATH_LENGTH || path_len >= buffer_size) {
+        DEBUG_PRINT("Path too long: %s\n", path);
+        return -1;
+    }
+
+    strncpy(buffer, path, buffer_size - 1);
+    buffer[buffer_size - 1] = '\0';
+    return OK;
+}
+
+/// Safe snprintf with error checking
+static int safe_snprintf(char *buffer, size_t size, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int result = vsnprintf(buffer, size, format, args);
+    va_end(args);
+
+    if (result < 0 || (size_t)result >= size) {
+        return -1;
+    }
+    return OK;
+}
+
+/// Get the data directory path (XDG or ~/.local/share fallback)
+static int get_data_directory(char *data_path, size_t size)
+{
+    const char *data_dir = getenv("XDG_DATA_HOME");
+
+    if (data_dir != nullptr && data_dir[0] != '\0') {
+        return validate_and_copy_path(data_dir, data_path, size);
+    }
+
+    const char *home = getenv("HOME");
+    if (home == nullptr || home[0] == '\0') {
+        (void)fprintf(stderr, "HOME environment variable not set\n");
+        return -1;
+    }
+
+    return safe_snprintf(data_path, size, "%s/.local/share", home);
+}
+
+/// Create a single directory with error handling
+static int create_single_directory(const char *path)
+{
+    if (mkdir(path, S_IRWXU) != 0 && errno != EEXIST) {
+        DEBUG_PRINT("Failed to create directory: %s (%s)\n", path, strerror(errno));
+        return -1;
+    }
+    return OK;
+}
+
+/// Create a directory recursively (like mkdir -p)
 static int create_directory_recursive(const char *path)
 {
     char path_copy[MAX_PATH_LENGTH];
-    char *current_path = nullptr;
     size_t len = 0;
 
-    strncpy(path_copy, path, MAX_PATH_LENGTH - 1);
-    path_copy[MAX_PATH_LENGTH - 1] = '\0';
+    if (validate_and_copy_path(path, path_copy, sizeof(path_copy)) != OK) {
+        return -1;
+    }
 
-    len = strlen(path_copy);
-    if (path_copy[len - 1] == '/') {
+    len = strnlen(path_copy, MAX_PATH_LENGTH);
+    if (len > 0 && path_copy[len - 1] == '/') {
         path_copy[len - 1] = '\0';
     }
 
-    for (current_path = path_copy + 1; *current_path; current_path++) {
+    for (char *current_path = path_copy + 1; *current_path; current_path++) {
         if (*current_path == '/') {
             *current_path = '\0';
 
-            if (mkdir(path_copy, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-                if (errno != EEXIST) {
-                    DEBUG_PRINT("Failed to create directory: %s (%s)\n",
-                                path_copy,
-                                strerror(errno));
-                    return -1;
-                }
+            if (create_single_directory(path_copy) != OK) {
+                return -1;
             }
 
             *current_path = '/';
@@ -62,32 +105,26 @@ static int create_directory_recursive(const char *path)
     }
 
     // Create the final directory
-    if (mkdir(path_copy, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-        if (errno != EEXIST) {
-            DEBUG_PRINT(
-              "Failed to create directory: %s (%s)\n", path_copy, strerror(errno));
-            return -1;
-        }
+    if (create_single_directory(path_copy) != OK) {
+        return -1;
     }
 
     return OK;
 }
 
-/**
- * @brief Creates all directories needed for the database path
- *
- * Creates all necessary parent directories using mkdir() system calls.
- *
- * @param path Path for which to create directories
- * @return OK on success, -1 on failure
- */
+// ============================================================================
+// Public Functions
+// ============================================================================
+
+/// Creates all directories needed for the database path
 int paths_ensure_db_directories(const char *path)
 {
     char path_copy[MAX_PATH_LENGTH];
     const char *dir = nullptr;
 
-    strncpy(path_copy, path, MAX_PATH_LENGTH - 1);
-    path_copy[MAX_PATH_LENGTH - 1] = '\0';
+    if (validate_and_copy_path(path, path_copy, sizeof(path_copy)) != OK) {
+        return -1;
+    }
 
     dir = dirname(path_copy);
 
@@ -102,45 +139,21 @@ int paths_ensure_db_directories(const char *path)
     return OK;
 }
 
-/**
- * @brief Resolves the path to the database file
- *
- * Determines the correct path to the database file according to
- * the XDG Base Directory Specification. On Linux, this is typically
- * `~/.local/share/typetrace/TypeTrace.db`
- *
- * @param buffer Buffer to store the resolved path
- * @param size Size of the buffer
- * @return OK on success, -1 on failure (e.g., buffer too small)
- */
+/// Resolves the path to the database file following XDG Base Directory spec
 int paths_resolve_db_path(char *buffer, const size_t size)
 {
     char data_path[MAX_PATH_LENGTH];
-    const char *data_dir = getenv("XDG_DATA_HOME");
 
-    if (data_dir == nullptr || data_dir[0] == '\0') {
-        const char *home = getenv("HOME");
-        if (home == nullptr || home[0] == '\0') {
-            (void)fprintf(stderr, "HOME environment variable not set\n");
-            return -1;
-        }
-
-        // Construct the default XDG data path
-        if (snprintf(data_path, sizeof(data_path), "%s/.local/share", home) < 0) {
-            perror("snprintf failed");
-            return -1;
-        }
-        data_dir = data_path;
+    if (get_data_directory(data_path, sizeof(data_path)) != OK) {
+        return -1;
     }
 
-    const int path_length =
-      snprintf(buffer, size, "%s/%s/%s", data_dir, PROJECT_DIR_NAME, DB_FILE_NAME);
-
-    if (path_length < 0 || (size_t)path_length >= size) {
+    if (safe_snprintf(buffer, size, "%s/%s/%s", data_path, PROJECT_DIR_NAME, DB_FILE_NAME)
+        != OK) {
         (void)fprintf(stderr, "Path buffer too small\n");
         return -1;
     }
 
-    DEBUG_PRINT("Database path: %s (using data_dir: %s)\n", buffer, data_dir);
+    DEBUG_PRINT("Database path: %s (using data_dir: %s)\n", buffer, data_path);
     return OK;
 }
