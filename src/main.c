@@ -1,11 +1,4 @@
-/**
- * @file main.c
- * @brief Main entry point for the TypeTrace backend application
- *
- * This file contains the main function and initialization code for the
- * TypeTrace keystroke tracking backend. It handles command-line arguments,
- * initializes the input subsystem, and runs the main event loop.
- */
+/// Main entry point for the TypeTrace backend application
 
 #include "common.h"
 #include "database.h"
@@ -26,33 +19,25 @@
 #include <string.h>
 #include <unistd.h>
 
-/* Global variables */
+/// Global variables
 static volatile atomic_bool running = true;
 static struct libinput *global_li = nullptr;
 static struct udev *global_udev = nullptr;
 
-/* Debug mode control */
+/// Debug mode control
 bool debug_mode = false;
 
-/* Database path */
+/// Database path
 char db_file_path[MAX_PATH_LENGTH];
 
-/* Forward declaration for signal handler */
+/// Forward declaration for signal handler
 static void signal_handler(int signal);
 
 // ============================================================================
 // Static Functions
 // ============================================================================
 
-/**
- * @brief Check user permissions and device accessibility
- *
- * Verifies if the user has the necessary permissions to access input devices
- * and if any keyboard devices are available and accessible.
- *
- * @param li The libinput context to use for checking device access
- * @return OK on success, error code on failure
- */
+/// Check user permissions and device accessibility
 static int check_permissions(struct libinput *li)
 {
     int result = perm_check_input_group_membership();
@@ -74,15 +59,7 @@ static int check_permissions(struct libinput *li)
     return OK;
 }
 
-/**
- * @brief Clean up libinput and udev contexts
- *
- * Releases resources allocated for libinput and udev.
- * Also ensures the keystroke buffer is flushed and cleaned up.
- *
- * @param li Libinput context to clean up
- * @param udev Udev context to clean up
- */
+/// Clean up libinput and udev contexts
 static void cleanup_input(struct libinput *li, struct udev *udev)
 {
     DEBUG_PRINT("Cleaning up and exiting...\n");
@@ -98,15 +75,7 @@ static void cleanup_input(struct libinput *li, struct udev *udev)
     }
 }
 
-/**
- * @brief Initialize libinput and udev contexts
- *
- * Sets up the udev and libinput subsystems for event handling.
- *
- * @param li Pointer to store the libinput context
- * @param udev Pointer to store the udev context
- * @return Error code indicating success (NO_ERROR) or failure
- */
+/// Initialize libinput and udev contexts
 static int initialize_input(struct libinput **li, struct udev **udev)
 {
     DEBUG_PRINT("initializing udev...\n");
@@ -138,13 +107,7 @@ static int initialize_input(struct libinput **li, struct udev **udev)
     return OK;
 }
 
-/**
- * @brief Display program usage and help information
- *
- * Prints the program version, usage syntax, and available command-line options.
- *
- * @param program_name The name of the executable
- */
+/// Display program usage and help information
 static void print_help(const char *program_name)
 {
     printf("The backend of TypeTrace\n");
@@ -158,15 +121,7 @@ static void print_help(const char *program_name)
            "You should run the frontend of TypeTrace which will run this.\n");
 }
 
-/**
- * @brief Process command-line arguments
- *
- * Handles parsing and processing of command-line options.
- *
- * @param argc Argument count
- * @param argv Argument vector
- * @return Error code indicating success (NO_ERROR) or failure
- */
+/// Process command-line arguments
 static int process_arguments(int argc, char *const argv[])
 {
     const struct option k_long_options[] = {
@@ -208,14 +163,7 @@ static int process_arguments(int argc, char *const argv[])
     return OK;
 }
 
-/**
- * @brief Run the main event loop for input handling
- *
- * Sets up polling for input events and processes them,
- * periodically checking if the buffer needs flushing.
- *
- * @param li The libinput context to use for event handling
- */
+/// Run the main event loop for input handling
 static void run_event_loop(struct libinput *li)
 {
     // Set up polling for libinput events
@@ -248,14 +196,7 @@ static void run_event_loop(struct libinput *li)
     db_check_and_flush_buffer(false);
 }
 
-/**
- * @brief Initialize the database path and create necessary directories
- *
- * Resolves the database path according to the XDG Base Directory spec
- * and creates any necessary directories for storing the database file.
- *
- * @return OK on success, error code on failure
- */
+/// Initialize the database path and create necessary directories
 static int setup_database(void)
 {
     if (paths_resolve_db_path(db_file_path, sizeof(db_file_path)) != 0) {
@@ -271,14 +212,7 @@ static int setup_database(void)
     return OK;
 }
 
-/**
- * @brief Set up signal handlers for graceful termination
- *
- * Configures handlers for SIGINT and SIGTERM to ensure the program
- * can shut down gracefully, flushing buffers before exiting.
- *
- * @return OK on success, error code on failure
- */
+/// Set up signal handlers for graceful termination
 static int setup_signal_handlers(void)
 {
     struct sigaction sa;
@@ -304,14 +238,7 @@ static int setup_signal_handlers(void)
     return OK;
 }
 
-/**
- * @brief Signal handler for SIGINT and SIGTERM
- *
- * This function handles program termination signals to ensure
- * a graceful shutdown, flushing the keystroke buffer before exiting.
- *
- * @param signal The signal number received
- */
+/// Signal handler for SIGINT and SIGTERM
 static void signal_handler(const int signal)
 {
     static volatile sig_atomic_t exiting = 0;
@@ -336,16 +263,7 @@ static void signal_handler(const int signal)
 // Public Functions
 // ============================================================================
 
-/**
- * @brief Main function for the TypeTrace backend
- *
- * Processes command-line arguments, initializes the udev and libinput
- * subsystems, and runs the main event loop to capture and log keyboard events.
- *
- * @param argc Argument count
- * @param argv Argument vector
- * @return Error code indicating success (NO_ERROR) or failure
- */
+/// Main function for the TypeTrace backend
 int main(int argc, char *const argv[])
 {
     int result = process_arguments(argc, argv);

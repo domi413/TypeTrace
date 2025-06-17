@@ -1,12 +1,4 @@
-/**
- * @file database.c
- * @brief Implementation of database operations for keystroke logging
- *
- * This file implements functions for storing keystroke data in an SQLite database,
- * with features for creating tables if they don't exist and updating
- * keystroke counts for existing entries. It also implements a buffer system
- * to batch write keystrokes for better performance.
- */
+/// Implementation of database operations for keystroke logging
 
 #include "database.h"
 #include "common.h"
@@ -27,14 +19,7 @@ static struct timespec buffer_start_time;
 // Static Functions
 // ============================================================================
 
-/**
- * @brief Begin an SQLite transaction
- *
- * Helper function to start an SQLite transaction.
- *
- * @param db The database connection
- * @return SQLITE_OK on success, error code on failure
- */
+/// Begin an SQLite transaction
 static int db_begin_transaction(sqlite3 *db)
 {
     char *err_msg = nullptr;
@@ -49,14 +34,7 @@ static int db_begin_transaction(sqlite3 *db)
     return rc;
 }
 
-/**
- * @brief Commit an SQLite transaction
- *
- * Helper function to commit an SQLite transaction.
- *
- * @param db The database connection
- * @return SQLITE_OK on success, error code on failure
- */
+/// Commit an SQLite transaction
 static int db_commit_transaction(sqlite3 *db)
 {
     char *err_msg = nullptr;
@@ -73,17 +51,7 @@ static int db_commit_transaction(sqlite3 *db)
     return rc;
 }
 
-/**
- * @brief Execute batch insert of keystroke events
- *
- * Helper function to insert multiple keystroke events using a prepared statement.
- *
- * @param db The database connection
- * @param stmt The prepared statement
- * @param events Array of keystroke events
- * @param count Number of events in the array
- * @return SQLITE_OK on success, error code on failure
- */
+/// Execute batch insert of keystroke events
 static int db_execute_batch_insert(sqlite3 *db,
                                    sqlite3_stmt *stmt,
                                    const keystroke_event_t *events,
@@ -110,15 +78,7 @@ static int db_execute_batch_insert(sqlite3 *db,
     return rc;
 }
 
-/**
- * @brief Opens the database and ensures the keystrokes table exists
- *
- * Helper function to open the SQLite database connection and create
- * the keystrokes table if it doesn't exist.
- *
- * @param db Pointer to store the database connection
- * @return SQLITE_OK on success, error code on failure
- */
+/// Opens the database and ensures the keystrokes table exists
 static int db_open_and_ensure_table(sqlite3 **db)
 {
     char *err_msg = nullptr;
@@ -142,15 +102,7 @@ static int db_open_and_ensure_table(sqlite3 **db)
     return SQLITE_OK;
 }
 
-/**
- * @brief Prepare an SQL statement for execution
- *
- * Helper function to prepare an SQLite statement.
- *
- * @param db The database connection
- * @param stmt Pointer to store the prepared statement
- * @return SQLITE_OK on success, error code on failure
- */
+/// Prepare an SQL statement for execution
 static int db_prepare_statement(sqlite3 *db, sqlite3_stmt **stmt)
 {
     const int rc = sqlite3_prepare_v2(db, UPSERT_KEYSTROKE_SQL, -1, stmt, nullptr);
@@ -164,15 +116,7 @@ static int db_prepare_statement(sqlite3 *db, sqlite3_stmt **stmt)
     return rc;
 }
 
-/**
- * @brief Writes multiple buffered keystroke events to the database
- *
- * This function takes an array of keystroke events and writes them all
- * to the database in a single transaction for better performance.
- *
- * @param events Array of keystroke events
- * @param count Number of events in the array
- */
+/// Writes multiple buffered keystroke events to the database
 static void db_write_buffer_to_database(const keystroke_event_t *events, const int count)
 {
     if (events == nullptr || count <= 0) {
@@ -213,59 +157,80 @@ static void db_write_buffer_to_database(const keystroke_event_t *events, const i
     sqlite3_close(db);
 }
 
-// ============================================================================
-// Public Functions
-// ============================================================================
-
-/**
- * @brief Add a keystroke event to the buffer
- *
- * Adds a keystroke event to the buffer and checks if the buffer should be flushed.
- *
- * @param key_code The numeric code of the pressed key
- * @param key_name The human-readable name of the key
- * @return OK on success, error code on failure
- */
-int db_add_to_buffer(const uint32_t key_code, const char *key_name)
+/// Get current time information
+static int get_current_time_info(struct tm *tm_info)
 {
-    if (keystroke_buffer == nullptr) {
-        if (!db_init_buffer()) {
-            return BUFFER_ERROR;
-        }
-    }
-
-    // Get current date
     const time_t t = time(nullptr);
     if (t == (time_t)-1) {
         (void)fprintf(stderr, "Failed to get current time.\n");
         return BUFFER_ERROR;
     }
 
-    struct tm tm_info;
-    if (localtime_r(&t, &tm_info) == nullptr) {
+    if (localtime_r(&t, tm_info) == nullptr) {
         (void)fprintf(stderr, "Failed to get local time.\n");
         return BUFFER_ERROR;
     }
 
+    return OK;
+}
+
+/// Set date string for keystroke event
+static void set_event_date(keystroke_event_t *event, const struct tm *tm_info)
+{
+    if (strftime(event->date, sizeof(event->date), "%Y-%m-%d", tm_info) == 0) {
+        // Use snprintf for safe string handling with guaranteed null termination
+        int result = snprintf(event->date, sizeof(event->date), "UNKNOWN");
+        if (result >= (int)sizeof(event->date)) {
+            // Fallback if even "UNKNOWN" doesn't fit
+            (void)snprintf(event->date, sizeof(event->date), "ERR");
+        }
+    }
+}
+
+/// Add keystroke to buffer
+static int add_keystroke_to_buffer(uint32_t key_code,
+                                   const char *key_name,
+                                   const struct tm *tm_info)
+{
+    keystroke_event_t *event = &keystroke_buffer[buffer_count];
+    event->key_code = key_code;
+
+    if (snprintf(event->key_name, sizeof(event->key_name), "%s", key_name)
+        >= (int)sizeof(event->key_name)) {
+        DEBUG_PRINT("Key name truncated: %s\n", key_name);
+    }
+
+    set_event_date(event, tm_info);
+    buffer_count++;
+
+    DEBUG_PRINT("Added keystroke [%d/%u] to buffer: %s (code %u)\n",
+                buffer_count,
+                BUFFER_SIZE,
+                key_name,
+                key_code);
+
+    return OK;
+}
+
+// ============================================================================
+// Public Functions
+// ============================================================================
+
+/// Add a keystroke event to the buffer
+int db_add_to_buffer(const uint32_t key_code, const char *key_name)
+{
+    if (keystroke_buffer == nullptr && !db_init_buffer()) {
+        return BUFFER_ERROR;
+    }
+
+    struct tm tm_info;
+    int result = get_current_time_info(&tm_info);
+    if (result != OK) {
+        return result;
+    }
+
     if (buffer_count < BUFFER_SIZE) {
-        // Add keystroke to buffer
-        keystroke_event_t *event = &keystroke_buffer[buffer_count];
-        event->key_code = key_code;
-        if (snprintf(event->key_name, sizeof(event->key_name), "%s", key_name) >=
-            (int)sizeof(event->key_name)) {
-            DEBUG_PRINT("Key name truncated: %s\n", key_name);
-        }
-
-        if (strftime(event->date, sizeof(event->date), "%Y-%m-%d", &tm_info) == 0) {
-            strcpy(event->date, "UNKNOWN");
-        }
-        buffer_count++;
-
-        DEBUG_PRINT("Added keystroke [%d/%u] to buffer: %s (code %u)\n",
-                    buffer_count,
-                    BUFFER_SIZE,
-                    key_name,
-                    key_code);
+        add_keystroke_to_buffer(key_code, key_name, &tm_info);
     } else {
         // Buffer is full, flush it
         return db_check_and_flush_buffer(true);
@@ -275,15 +240,7 @@ int db_add_to_buffer(const uint32_t key_code, const char *key_name)
     return db_check_and_flush_buffer(false);
 }
 
-/**
- * @brief Check if buffer should be flushed and flush if needed
- *
- * Checks if the buffer should be flushed due to timeout or size,
- * and flushes it if necessary.
- *
- * @param force_flush If true, flush regardless of timeout or size
- * @return OK on success, error code on failure
- */
+/// Check if buffer should be flushed and flush if needed
 int db_check_and_flush_buffer(const bool force_flush)
 {
     // Early exit if buffer is empty
@@ -296,9 +253,9 @@ int db_check_and_flush_buffer(const bool force_flush)
     if (clock_gettime(CLOCK_MONOTONIC, &current_time) != 0) {
         perror("clock_gettime failed");
     }
-    const double elapsed = (double)(current_time.tv_sec - buffer_start_time.tv_sec) +
-                           ((double)(current_time.tv_nsec - buffer_start_time.tv_nsec) /
-                            NANOSECONDS_PER_SECOND);
+    const double elapsed = (double)(current_time.tv_sec - buffer_start_time.tv_sec)
+                         + ((double)(current_time.tv_nsec - buffer_start_time.tv_nsec)
+                            / NANOSECONDS_PER_SECOND);
 
     if (force_flush || buffer_count >= BUFFER_SIZE || elapsed >= BUFFER_TIMEOUT) {
         DEBUG_PRINT("Flushing buffer with %d keystrokes to %s (elapsed: %.2f seconds)\n",
@@ -317,12 +274,7 @@ int db_check_and_flush_buffer(const bool force_flush)
     return OK;
 }
 
-/**
- * @brief Flush and free the keystroke buffer
- *
- * Ensures all remaining keystrokes are written to the database
- * and frees the buffer memory.
- */
+/// Flush and free the keystroke buffer
 void db_cleanup_buffer(void)
 {
     if (keystroke_buffer != nullptr) {
@@ -337,18 +289,12 @@ void db_cleanup_buffer(void)
     }
 }
 
-/**
- * @brief Initialize the keystroke buffer
- *
- * Allocates memory for the keystroke buffer and initializes the start time.
- *
- * @return true on success, false on failure
- */
+/// Initialize the keystroke buffer
 bool db_init_buffer(void)
 {
     if (keystroke_buffer == nullptr) {
-        keystroke_buffer =
-          (keystroke_event_t *)calloc(BUFFER_SIZE, sizeof(keystroke_event_t));
+        keystroke_buffer
+          = (keystroke_event_t *)calloc(BUFFER_SIZE, sizeof(keystroke_event_t));
 
         if (keystroke_buffer == nullptr) {
             (void)fprintf(stderr, "Failed to allocate keystroke buffer\n");
