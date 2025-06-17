@@ -5,7 +5,6 @@
 
 #include <errno.h>
 #include <libgen.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,19 +29,33 @@ static int validate_and_copy_path(const char *path, char *buffer, size_t buffer_
         return -1;
     }
 
-    strncpy(buffer, path, buffer_size - 1);
     buffer[buffer_size - 1] = '\0';
+    strncpy(buffer, path, buffer_size);
+    if (buffer[buffer_size - 1] != '\0') {
+        DEBUG_PRINT("Path truncated during copy: %s\n", path);
+        return -1;
+    }
     return OK;
 }
 
-/// Safe snprintf with error checking
-static int safe_snprintf(char *buffer, size_t size, const char *format, ...)
+/// Safe snprintf for home path construction
+static int safe_home_path(char *buffer, size_t size, const char *home)
 {
-    va_list args;
-    va_start(args, format);
-    int result = vsnprintf(buffer, size, format, args);
-    va_end(args);
+    int result = snprintf(buffer, size, "%s/.local/share", home);
+    if (result < 0 || (size_t)result >= size) {
+        return -1;
+    }
+    return OK;
+}
 
+/// Safe snprintf for database path construction
+static int safe_db_path(char *buffer,
+                        size_t size,
+                        const char *data_dir,
+                        const char *project_dir,
+                        const char *db_file)
+{
+    int result = snprintf(buffer, size, "%s/%s/%s", data_dir, project_dir, db_file);
     if (result < 0 || (size_t)result >= size) {
         return -1;
     }
@@ -64,7 +77,7 @@ static int get_data_directory(char *data_path, size_t size)
         return -1;
     }
 
-    return safe_snprintf(data_path, size, "%s/.local/share", home);
+    return safe_home_path(data_path, size, home);
 }
 
 /// Create a single directory with error handling
@@ -148,8 +161,7 @@ int paths_resolve_db_path(char *buffer, const size_t size)
         return -1;
     }
 
-    if (safe_snprintf(buffer, size, "%s/%s/%s", data_path, PROJECT_DIR_NAME, DB_FILE_NAME)
-        != OK) {
+    if (safe_db_path(buffer, size, data_path, PROJECT_DIR_NAME, DB_FILE_NAME) != OK) {
         (void)fprintf(stderr, "Path buffer too small\n");
         return -1;
     }

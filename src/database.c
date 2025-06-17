@@ -157,6 +157,62 @@ static void db_write_buffer_to_database(const keystroke_event_t *events, const i
     sqlite3_close(db);
 }
 
+/// Get current time information
+static int get_current_time_info(struct tm *tm_info)
+{
+    const time_t t = time(nullptr);
+    if (t == (time_t)-1) {
+        (void)fprintf(stderr, "Failed to get current time.\n");
+        return BUFFER_ERROR;
+    }
+
+    if (localtime_r(&t, tm_info) == nullptr) {
+        (void)fprintf(stderr, "Failed to get local time.\n");
+        return BUFFER_ERROR;
+    }
+
+    return OK;
+}
+
+/// Set date string for keystroke event
+static void set_event_date(keystroke_event_t *event, const struct tm *tm_info)
+{
+    if (strftime(event->date, sizeof(event->date), "%Y-%m-%d", tm_info) == 0) {
+        event->date[sizeof(event->date) - 1] = '\0';
+        strncpy(event->date, "UNKNOWN", sizeof(event->date));
+        if (event->date[sizeof(event->date) - 1] != '\0') {
+            DEBUG_PRINT("Date string truncated during copy\n");
+            strncpy(event->date, "ERR", sizeof(event->date) - 1);
+            event->date[sizeof(event->date) - 1] = '\0';
+        }
+    }
+}
+
+/// Add keystroke to buffer
+static int add_keystroke_to_buffer(uint32_t key_code,
+                                   const char *key_name,
+                                   const struct tm *tm_info)
+{
+    keystroke_event_t *event = &keystroke_buffer[buffer_count];
+    event->key_code = key_code;
+
+    if (snprintf(event->key_name, sizeof(event->key_name), "%s", key_name)
+        >= (int)sizeof(event->key_name)) {
+        DEBUG_PRINT("Key name truncated: %s\n", key_name);
+    }
+
+    set_event_date(event, tm_info);
+    buffer_count++;
+
+    DEBUG_PRINT("Added keystroke [%d/%u] to buffer: %s (code %u)\n",
+                buffer_count,
+                BUFFER_SIZE,
+                key_name,
+                key_code);
+
+    return OK;
+}
+
 // ============================================================================
 // Public Functions
 // ============================================================================
@@ -168,39 +224,14 @@ int db_add_to_buffer(const uint32_t key_code, const char *key_name)
         return BUFFER_ERROR;
     }
 
-    // Get current date
-    const time_t t = time(nullptr);
-    if (t == (time_t)-1) {
-        (void)fprintf(stderr, "Failed to get current time.\n");
-        return BUFFER_ERROR;
-    }
-
     struct tm tm_info;
-    if (localtime_r(&t, &tm_info) == nullptr) {
-        (void)fprintf(stderr, "Failed to get local time.\n");
-        return BUFFER_ERROR;
+    int result = get_current_time_info(&tm_info);
+    if (result != OK) {
+        return result;
     }
 
     if (buffer_count < BUFFER_SIZE) {
-        // Add keystroke to buffer
-        keystroke_event_t *event = &keystroke_buffer[buffer_count];
-        event->key_code = key_code;
-        if (snprintf(event->key_name, sizeof(event->key_name), "%s", key_name)
-            >= (int)sizeof(event->key_name)) {
-            DEBUG_PRINT("Key name truncated: %s\n", key_name);
-        }
-
-        if (strftime(event->date, sizeof(event->date), "%Y-%m-%d", &tm_info) == 0) {
-            strncpy(event->date, "UNKNOWN", sizeof(event->date) - 1);
-            event->date[sizeof(event->date) - 1] = '\0';
-        }
-        buffer_count++;
-
-        DEBUG_PRINT("Added keystroke [%d/%u] to buffer: %s (code %u)\n",
-                    buffer_count,
-                    BUFFER_SIZE,
-                    key_name,
-                    key_code);
+        add_keystroke_to_buffer(key_code, key_name, &tm_info);
     } else {
         // Buffer is full, flush it
         return db_check_and_flush_buffer(true);
