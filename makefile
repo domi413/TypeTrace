@@ -1,11 +1,11 @@
 .PHONY: all clean run lint format check-format
 
-all: build
+all: clean build
 
 build:
 	@rm -rf build/
 	@mkdir build
-	@cd build && cmake .. && make CFLAGS="-Wall -Wextra -Werror -fsanitize=address -fsanitize=undefined -g"
+	@cd build && cmake .. && make
 
 clean:
 	@rm -rf build/
@@ -15,19 +15,20 @@ run: build
 
 check-format:
 	@echo "Checking code formatting..."
-	@if clang-format --dry-run --Werror $$(find src -name "*.c" -o -name "*.h") 2>&1; then \
+	@if clang-format --dry-run --Werror $$(find src -name "*.cpp" -o -name "*.hpp") 2>&1; then \
 		echo "✓ All files are properly formatted"; \
 	else \
 		exit 1; \
 	fi
 
-format:
+fmt:
 	@echo "Formatting code..."
-	@clang-format -i $$(find src -name "*.c" -o -name "*.h")
+	@clang-format -i $$(find src -name "*.cpp" -o -name "*.hpp")
 	@echo "✓ Code formatting complete"
+
+CLANG_TIDY_FLAGS = --warnings-as-errors='*'
+CLANG_TIDY_COMPILE_FLAGS = -- -std=c++23 -D_GNU_SOURCE -Ibuild/generated
 
 lint: build check-format
 	@echo "Running clang-tidy..."
-	@clang-tidy --warnings-as-errors='*' $$(find src -name "*.c" -o -name "*.h") -- -std=c23 -D_GNU_SOURCE -Ibuild/generated
-	@echo "Running cppcheck..."
-	@cppcheck --enable=all --suppress=missingIncludeSystem --suppress=unusedStructMember --check-level=exhaustive --std=c23 --platform=unix64 -Isrc/ -Ibuild/generated/ --template=gcc --error-exitcode=1 $$(find src -name "*.c" -o -name "*.h")
+	@clang-tidy $(CLANG_TIDY_FLAGS) $$(find src -name "*.cpp" -o -name "*.hpp") $(CLANG_TIDY_COMPILE_FLAGS)

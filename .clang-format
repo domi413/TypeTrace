@@ -11,10 +11,14 @@ BreakAfterReturnType: None
 BreakBeforeBinaryOperators: true
 # BreakBeforeBraces: Allman
 BreakBinaryOperations: OnePerLine
-ColumnLimit: 90
+ColumnLimit: 100
 IndentPPDirectives: BeforeHash
 IndentWidth: 4
 PointerAlignment: Right
 # ReflowComments: false
 QualifierAlignment: Left
 TabWidth: 4
+FixNamespaceComments: true
+IncludeBlocks: Regroup
+BreakConstructorInitializers: AfterColon
+PackConstructorInitializers: CurrentLine

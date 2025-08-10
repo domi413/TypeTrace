@@ -1,5 +1,8 @@
 # Add here words that are not recognized by the spellchecker but are correct
+chrono
 clangd
 libevdev
 libudev
+nodiscard
+println
 Wextra
