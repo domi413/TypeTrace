@@ -150,7 +150,7 @@ auto EventHandler::processEvent(struct libinput_event *const event) -> std::opti
         return std::nullopt;
     }
 
-    auto key_code = libinput_event_keyboard_get_key(keyboard_event);
+    const auto key_code = libinput_event_keyboard_get_key(keyboard_event);
     const char *const raw_name = libevdev_event_code_get_name(EV_KEY, key_code);
     const std::string_view key_name = (raw_name != nullptr) ? raw_name : "UNKNOWN";
 

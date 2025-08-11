@@ -5,6 +5,7 @@
 #include "eventhandler.hpp"
 
 #include <filesystem>
+#include <memory>
 #include <span>
 
 namespace typetrace {
@@ -25,8 +26,10 @@ class Cli
 
     bool debug_mode{ false };
 
-    DatabaseManager db_manager;
-    EventHandler event_handler;
+    // DatabaseManager db_manager;
+    // EventHandler event_handler;
+    std::unique_ptr<DatabaseManager> db_manager;
+    std::unique_ptr<EventHandler> event_handler;
 };
 
 } // namespace typetrace

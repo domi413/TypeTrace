@@ -1,8 +1,22 @@
 # Add here words that are not recognized by the spellchecker but are correct
 chrono
 clangd
+domi
 libevdev
+libsqlitecpp
 libudev
 nodiscard
 println
+SQLITECPP
+Wconversion
+Wdouble
+Wduplicated
+Werror
 Wextra
+Wnon
+Woverloaded
+Wpedantic
+Wshadow
+Wsign
+Wunused
+Wuseless

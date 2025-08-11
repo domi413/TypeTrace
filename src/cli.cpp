@@ -5,6 +5,7 @@
 #include "version.hpp"
 
 #include <cstdlib>
+#include <memory>
 #include <print>
 #include <span>
 #include <stdexcept>
@@ -13,19 +14,22 @@
 
 namespace typetrace {
 
-Cli::Cli(std::span<char *> args) : db_manager(getDatabasePath() / DB_FILE_NAME)
+Cli::Cli(std::span<char *> args)
 {
     parseArguments(args);
 
+    db_manager = std::make_unique<DatabaseManager>(getDatabasePath());
+    event_handler = std::make_unique<EventHandler>();
+
     // Set up callback for EventHandler to flush buffer to database
-    event_handler.setBufferCallback(
-      [this](const std::vector<KeystrokeEvent> &buffer) { db_manager.writeToDatabase(buffer); });
+    event_handler->setBufferCallback(
+      [this](const std::vector<KeystrokeEvent> &buffer) { db_manager->writeToDatabase(buffer); });
 }
 
 auto Cli::run() -> void
 {
     while (true) { // use eventhandler to quit
-        event_handler.trace();
+        event_handler->trace();
     }
 };
 
@@ -38,9 +42,9 @@ Version: {}
 Usage: {} [OPTION…]
 
 Options:
- -h, --help	Display help then exit.
- -v, --version	Display version then exit.
- -d, --debug	Enable debug mode.
+ -h, --help      Display help then exit.
+ -v, --version   Display version then exit.
+ -d, --debug     Enable debug mode.
 
 Warning: This is the backend and is not designed to run by users.
 You should run the frontend of TypeTrace which will run this.
@@ -82,7 +86,7 @@ auto Cli::parseArguments(std::span<char *> args) -> void
         } else if (arg == "-d" || arg == "--debug") {
             debug_mode = true;
         } else {
-            std::println("Unknown option: {}\n", arg);
+            std::println("Unknown option: {}", arg);
             showHelp(args[0]);
             std::exit(1);
         }

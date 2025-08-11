@@ -118,10 +118,8 @@ target_link_libraries(typetrace_backend PRIVATE
 
 # Compiler flags
 target_compile_options(typetrace_backend PRIVATE
-    -Wnon-virtual-dtor
-    -Wold-style-cast
-    -Woverloaded-virtual
     -Wall -Wextra
+    -Wshadow
     -Wcast-align
     -Wconversion
     -Wdouble-promotion
@@ -131,7 +129,10 @@ target_compile_options(typetrace_backend PRIVATE
     -Wformat=2
     -Wlogical-op
     -Wmisleading-indentation
+    -Wnon-virtual-dtor
     -Wnull-dereference
+    -Wold-style-cast
+    -Woverloaded-virtual
     -Wpedantic
     -Wshadow
     -Wsign-conversion
