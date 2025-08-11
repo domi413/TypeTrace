@@ -20,14 +20,12 @@ class Cli
   private:
     static auto showHelp(const char *program_name) -> void;
     static auto showVersion() -> void;
-    [[nodiscard]] static auto getDatabasePath() -> std::filesystem::path;
+    [[nodiscard]] static auto getDatabaseDir() -> std::filesystem::path;
 
     auto parseArguments(std::span<char *> args) -> void;
 
     bool debug_mode{ false };
 
-    // DatabaseManager db_manager;
-    // EventHandler event_handler;
     std::unique_ptr<DatabaseManager> db_manager;
     std::unique_ptr<EventHandler> event_handler;
 };

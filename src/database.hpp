@@ -13,7 +13,7 @@ namespace typetrace {
 class DatabaseManager
 {
   public:
-    explicit DatabaseManager(const std::filesystem::path &db_path);
+    explicit DatabaseManager(const std::filesystem::path &db_dir);
 
     auto writeToDatabase(const std::vector<KeystrokeEvent> &buffer) -> void;
 

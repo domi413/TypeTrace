@@ -1,4 +1,6 @@
 ---
+# BreakBeforeBraces: Allman
+# ReflowComments: false
 AlignAfterOpenBracket: Align
 AlignArrayOfStructures: Right
 AlignEscapedNewlines: Left
@@ -9,16 +11,14 @@ BasedOnStyle: Mozilla
 BinPackParameters: false
 BreakAfterReturnType: None
 BreakBeforeBinaryOperators: true
-# BreakBeforeBraces: Allman
 BreakBinaryOperations: OnePerLine
+BreakConstructorInitializers: AfterColon
 ColumnLimit: 100
-IndentPPDirectives: BeforeHash
-IndentWidth: 4
-PointerAlignment: Right
-# ReflowComments: false
-QualifierAlignment: Left
-TabWidth: 4
 FixNamespaceComments: true
 IncludeBlocks: Regroup
-BreakConstructorInitializers: AfterColon
+IndentPPDirectives: BeforeHash
+IndentWidth: 4
 PackConstructorInitializers: CurrentLine
+PointerAlignment: Right
+QualifierAlignment: Left
+TabWidth: 4

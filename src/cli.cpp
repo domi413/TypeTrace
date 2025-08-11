@@ -1,10 +1,13 @@
 #include "cli.hpp"
 
 #include "constants.hpp"
+#include "database.hpp"
+#include "eventhandler.hpp"
 #include "types.hpp"
 #include "version.hpp"
 
 #include <cstdlib>
+#include <filesystem>
 #include <memory>
 #include <print>
 #include <span>
@@ -18,7 +21,7 @@ Cli::Cli(std::span<char *> args)
 {
     parseArguments(args);
 
-    db_manager = std::make_unique<DatabaseManager>(getDatabasePath());
+    db_manager = std::make_unique<DatabaseManager>(getDatabaseDir());
     event_handler = std::make_unique<EventHandler>();
 
     // Set up callback for EventHandler to flush buffer to database
@@ -58,7 +61,7 @@ auto Cli::showVersion() -> void
     std::println(PROJECT_VERSION);
 };
 
-auto Cli::getDatabasePath() -> std::filesystem::path
+auto Cli::getDatabaseDir() -> std::filesystem::path
 {
     if (const char *xdg_path = std::getenv("XDG_DATA_HOME")) {
         return std::filesystem::path{ xdg_path } / PROJECT_DIR_NAME;

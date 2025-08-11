@@ -1,5 +1,6 @@
 #include "database.hpp"
 
+#include "constants.hpp"
 #include "sql.hpp"
 #include "types.hpp"
 
@@ -8,28 +9,33 @@
 #include <SQLiteCpp/Statement.h>
 #include <SQLiteCpp/Transaction.h>
 #include <filesystem>
+#include <format>
 #include <memory>
 #include <stdexcept>
-#include <string>
 #include <vector>
 
 namespace typetrace {
 
-DatabaseManager::DatabaseManager(const std::filesystem::path &db_path) : db_file(db_path)
+DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
+  db_file(db_dir / DB_FILE_NAME)
 {
-    auto parent_dir = db_path.parent_path();
+    const auto parent_dir = db_dir.parent_path();
     if (!parent_dir.empty() && !std::filesystem::exists(parent_dir)) {
         std::filesystem::create_directories(parent_dir);
     }
 
-    db = std::make_unique<SQLite::Database>(db_path.string(),
-                                            static_cast<unsigned int>(SQLite::OPEN_READWRITE)
-                                              | static_cast<unsigned int>(SQLite::OPEN_CREATE));
+    try {
+        db = std::make_unique<SQLite::Database>(db_file.string(),
+                                                static_cast<unsigned int>(SQLite::OPEN_READWRITE)
+                                                  | static_cast<unsigned int>(SQLite::OPEN_CREATE));
+        // WAL mode
+        // db->exec(OPTIMIZE_DATABASE_SQL);
 
-    // WAL mode
-    // db->exec(OPTIMIZE_DATABASE_SQL);
-
-    createTables();
+        createTables();
+    } catch (const SQLite::Exception &e) {
+        throw std::runtime_error(std::format(
+          "Failed to open database '{}': {}", (db_file / DB_FILE_NAME).string(), e.what()));
+    }
 }
 
 auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer) -> void
@@ -52,16 +58,17 @@ auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer)
         }
 
     } catch (const SQLite::Exception &e) {
-        throw std::runtime_error("Failed to write to database: " + std::string(e.what()));
+        throw std::runtime_error(std::format("Failed to write to database: {}", e.what()));
     }
 }
 
+// Error: unable to open database file
 auto DatabaseManager::createTables() -> void
 {
     try {
         db->exec(CREATE_KEYSTROKES_TABLE_SQL);
     } catch (const SQLite::Exception &e) {
-        throw std::runtime_error("Failed to create tables: " + std::string(e.what()));
+        throw std::runtime_error(std::format("Failed to create tables: {}", e.what()));
     }
 }
 

@@ -13,7 +13,9 @@ Wdouble
 Wduplicated
 Werror
 Wextra
+Wmisleading
 Wnon
+Wnull
 Woverloaded
 Wpedantic
 Wshadow
