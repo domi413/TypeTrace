@@ -1,12 +1,4 @@
 # Add here words that are not recognized by the spellchecker but are correct
-chrono
-clangd
-domi
-libevdev
-libsqlitecpp
-libudev
-nodiscard
-println
 SQLITECPP
 Wconversion
 Wdouble
@@ -22,3 +14,12 @@ Wshadow
 Wsign
 Wunused
 Wuseless
+chrono
+clangd
+domi
+flto
+libevdev
+libsqlitecpp
+libudev
+nodiscard
+println

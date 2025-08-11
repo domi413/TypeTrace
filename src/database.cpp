@@ -1,6 +1,7 @@
 #include "database.hpp"
 
 #include "constants.hpp"
+#include "exceptions.hpp"
 #include "sql.hpp"
 #include "types.hpp"
 
@@ -11,7 +12,6 @@
 #include <filesystem>
 #include <format>
 #include <memory>
-#include <stdexcept>
 #include <vector>
 
 namespace typetrace {
@@ -33,7 +33,7 @@ DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
 
         createTables();
     } catch (const SQLite::Exception &e) {
-        throw std::runtime_error(std::format(
+        throw DatabaseError(std::format(
           "Failed to open database '{}': {}", (db_file / DB_FILE_NAME).string(), e.what()));
     }
 }
@@ -58,7 +58,7 @@ auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer)
         }
 
     } catch (const SQLite::Exception &e) {
-        throw std::runtime_error(std::format("Failed to write to database: {}", e.what()));
+        throw DatabaseError(std::format("Failed to write to database: {}", e.what()));
     }
 }
 
@@ -68,7 +68,7 @@ auto DatabaseManager::createTables() -> void
     try {
         db->exec(CREATE_KEYSTROKES_TABLE_SQL);
     } catch (const SQLite::Exception &e) {
-        throw std::runtime_error(std::format("Failed to create tables: {}", e.what()));
+        throw DatabaseError(std::format("Failed to create tables: {}", e.what()));
     }
 }
 

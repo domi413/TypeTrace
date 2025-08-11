@@ -34,7 +34,7 @@ class EventHandler
   private:
     static auto checkInputGroupMembership() -> void;
     static auto printInputGroupPermissionHelp() -> void;
-    static auto processEvent(struct libinput_event *event) -> std::optional<KeystrokeEvent>;
+    static auto processKeyboardEvent(struct libinput_event *event) -> std::optional<KeystrokeEvent>;
 
     auto checkDeviceAccessibility() const -> void;
     auto initializeLibinput() -> void;
@@ -45,8 +45,8 @@ class EventHandler
     Clock::time_point last_flush_time;
     std::function<void(const std::vector<KeystrokeEvent> &)> buffer_callback;
 
-    std::unique_ptr<struct libinput, decltype(&libinput_unref)> li{ nullptr, libinput_unref };
-    std::unique_ptr<struct udev, decltype(&udev_unref)> udev{ nullptr, udev_unref };
+    std::unique_ptr<struct libinput, decltype(&libinput_unref)> li{ nullptr, &libinput_unref };
+    std::unique_ptr<struct udev, decltype(&udev_unref)> udev{ nullptr, &udev_unref };
 };
 
 } // namespace typetrace

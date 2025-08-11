@@ -3,6 +3,7 @@
 #include "constants.hpp"
 #include "database.hpp"
 #include "eventhandler.hpp"
+#include "exceptions.hpp"
 #include "types.hpp"
 #include "version.hpp"
 
@@ -11,7 +12,6 @@
 #include <memory>
 #include <print>
 #include <span>
-#include <stdexcept>
 #include <string_view>
 #include <vector>
 
@@ -69,7 +69,7 @@ auto Cli::getDatabaseDir() -> std::filesystem::path
 
     const char *home = std::getenv("HOME");
     if (home == nullptr) {
-        throw std::runtime_error("HOME environment variable is not set.");
+        throw SystemError("HOME environment variable is not set.");
     }
 
     return std::filesystem::path{ home } / ".local" / "share" / PROJECT_DIR_NAME;
