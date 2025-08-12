@@ -12,17 +12,19 @@ clean:
 run: build
 	@./build/typetrace_backend -d
 
+SOURCES = $(shell find . -name "*.cpp" -o -name "*.hpp")
+
 check-format:
 	@echo "Checking code formatting..."
-	@if clang-format --dry-run --Werror $$(find src -name "*.cpp" -o -name "*.hpp") 2>&1; then \
+	@if clang-format --dry-run --Werror $(SOURCES) 2>&1; then \
 		echo "✓ All files are properly formatted"; \
-	else \
+		else \
 		exit 1; \
-	fi
+		fi
 
 fmt:
 	@echo "Formatting code..."
-	@clang-format -i $$(find src -name "*.cpp" -o -name "*.hpp")
+	@clang-format -i $(SOURCES)
 	@echo "✓ Code formatting complete"
 
 CLANG_TIDY_FLAGS = --warnings-as-errors=\'*\' --header-filter='^\$' --exclude-header-filter=\'.*\'
@@ -30,10 +32,10 @@ CLANG_TIDY_COMPILE_FLAGS = -- -std=c++23 -Ibuild/generated -Ibuild/vcpkg_install
 
 lint: build check-format
 	@echo "Running clang-tidy..."
-	@clang-tidy $(CLANG_TIDY_FLAGS) $$(find src -name "*.cpp" -o -name "*.hpp") $(CLANG_TIDY_COMPILE_FLAGS)
+	@clang-tidy $(CLANG_TIDY_FLAGS) $(SOURCES) $(CLANG_TIDY_COMPILE_FLAGS)
 	@echo "✓ Linting complete"
 
 fix: build
 	@echo "Auto-fixing clang-tidy issues..."
-	@clang-tidy --fix $(CLANG_TIDY_FLAGS) $$(find src -name "*.cpp" -o -name "*.hpp") $(CLANG_TIDY_COMPILE_FLAGS)
+	@clang-tidy --fix $(CLANG_TIDY_FLAGS) $(SOURCES) $(CLANG_TIDY_COMPILE_FLAGS)
 	@echo "✓ Auto-fixes applied"

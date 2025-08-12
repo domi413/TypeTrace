@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.16)
 
 # ============================================================================
@@ -18,8 +17,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
-
-# add_compile_definitions(_GNU_SOURCE)
 
 # ============================================================================
 # Version Information
@@ -46,6 +43,8 @@ else()
     set(GIT_COMMIT "unknown")
 endif()
 
+configure_file(typetrace/version.hpp.in ${CMAKE_BINARY_DIR}/generated/version.hpp @ONLY)
+
 # ============================================================================
 # Dependencies
 # ============================================================================
@@ -56,61 +55,11 @@ find_package(SQLiteCpp CONFIG REQUIRED)
 pkg_check_modules(DEPS REQUIRED libudev libinput libevdev)
 
 # ============================================================================
-# Generated Files & Executable
+# Subdirectories
 # ============================================================================
-configure_file(src/version.hpp.in ${CMAKE_BINARY_DIR}/generated/version.hpp @ONLY)
-
-add_executable(typetrace_backend
-    src/cli.cpp
-    src/database.cpp
-    src/eventhandler.cpp
-    src/logger.cpp
-    src/main.cpp
-)
-
-target_include_directories(typetrace_backend PRIVATE
-    src
-    ${CMAKE_BINARY_DIR}/generated
-    ${DEPS_INCLUDE_DIRS}
-)
-
-target_link_libraries(typetrace_backend PRIVATE
-    ${DEPS_LIBRARIES}
-    SQLiteCpp
-    spdlog::spdlog
-)
-
-# ============================================================================
-# Compiler Flags
-# ============================================================================
-target_compile_options(typetrace_backend PRIVATE
-    # Optimization
-    -O3
-
-    # Warnings
-    -Wall
-    -Wcast-align
-    -Wconversion
-    -Wdouble-promotion
-    -Werror
-    -Wextra
-    -Wformat=2
-    -Wmisleading-indentation
-    -Wnon-virtual-dtor
-    -Wnull-dereference
-    -Wold-style-cast
-    -Woverloaded-virtual
-    -Wpedantic
-    -Wshadow
-    -Wsign-conversion
-    -Wunused
-
-    ${DEPS_CFLAGS_OTHER}
-)
-
-target_link_options(typetrace_backend PRIVATE
-    -flto -Wl,--gc-sections
-)
+add_subdirectory(typetrace/backend)
+# add_subdirectory(typetrace/frontend)
+# add_subdirectory(tests/unit/backend)
 
 # ============================================================================
 # Installation & Build Info
