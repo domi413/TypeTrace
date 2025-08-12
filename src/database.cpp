@@ -2,6 +2,8 @@
 
 #include "constants.hpp"
 #include "exceptions.hpp"
+#include "logger.hpp"
+#include "spdlog/common.h"
 #include "sql.hpp"
 #include "types.hpp"
 
@@ -16,11 +18,16 @@
 
 namespace typetrace {
 
+/// Constructs a database manager and initializes the database connection
 DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
   db_file(db_dir / DB_FILE_NAME)
 {
+    getLogger()->info("Initializing database at: {}", db_file.string());
+
     const auto parent_dir = db_dir.parent_path();
     if (!parent_dir.empty() && !std::filesystem::exists(parent_dir)) {
+        getLogger()->debug("Creating parent directories for database path: {}",
+                           parent_dir.string());
         std::filesystem::create_directories(parent_dir);
     }
 
@@ -32,12 +39,15 @@ DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
         // db->exec(OPTIMIZE_DATABASE_SQL);
 
         createTables();
+        getLogger()->info("Database tables created successfully.");
     } catch (const SQLite::Exception &e) {
+        getLogger()->critical("Failed to open database '{}': {}", db_file.string(), e.what());
         throw DatabaseError(std::format(
           "Failed to open database '{}': {}", (db_file / DB_FILE_NAME).string(), e.what()));
     }
 }
 
+/// Writes a buffer of keystroke events to the database
 auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer) -> void
 {
     if (buffer.empty()) {
@@ -57,17 +67,23 @@ auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer)
             stmt.reset();
         }
 
+        if (getLogger()->should_log(spdlog::level::debug)) {
+            getLogger()->debug(
+              "Inserted {} keystrokes into the database: {}.", buffer.size(), db_file.string());
+        }
     } catch (const SQLite::Exception &e) {
+        getLogger()->error("Failed to write to database: {}", e.what());
         throw DatabaseError(std::format("Failed to write to database: {}", e.what()));
     }
 }
 
-// Error: unable to open database file
+/// Creates necessary database tables if they don't exist
 auto DatabaseManager::createTables() -> void
 {
     try {
         db->exec(CREATE_KEYSTROKES_TABLE_SQL);
     } catch (const SQLite::Exception &e) {
+        getLogger()->error("Failed to create tables: {}", e.what());
         throw DatabaseError(std::format("Failed to create tables: {}", e.what()));
     }
 }

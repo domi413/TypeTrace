@@ -12,7 +12,7 @@ namespace typetrace {
 // Structures
 // ============================================================================
 
-// TODO(domi): Make benchmark if we can replace std::array with std::string.
+// TODO(domi): Make benchmark to check if we can replace std::array with std::string.
 //             This would simplify the code and improve readability.
 
 /// Structure representing a keystroke event

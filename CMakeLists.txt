@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.16)
 
 # ============================================================================
@@ -18,7 +19,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-add_compile_definitions(_GNU_SOURCE)
+# add_compile_definitions(_GNU_SOURCE)
 
 # ============================================================================
 # Version Information
@@ -49,15 +50,10 @@ endif()
 # Dependencies
 # ============================================================================
 find_package(PkgConfig REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(SQLiteCpp CONFIG REQUIRED)
 
-pkg_check_modules(DEPS REQUIRED libudev libinput libevdev sqlite3)
-
-find_path(SQLITECPP_INCLUDE_DIR SQLiteCpp/SQLiteCpp.h)
-find_library(SQLITECPP_LIBRARY NAMES SQLiteCpp)
-
-if(NOT SQLITECPP_INCLUDE_DIR OR NOT SQLITECPP_LIBRARY)
-    message(FATAL_ERROR "SQLiteCpp not found. Please install libsqlitecpp-dev")
-endif()
+pkg_check_modules(DEPS REQUIRED libudev libinput libevdev)
 
 # ============================================================================
 # Generated Files & Executable
@@ -76,12 +72,12 @@ target_include_directories(typetrace_backend PRIVATE
     src
     ${CMAKE_BINARY_DIR}/generated
     ${DEPS_INCLUDE_DIRS}
-    ${SQLITECPP_INCLUDE_DIR}
 )
 
 target_link_libraries(typetrace_backend PRIVATE
     ${DEPS_LIBRARIES}
-    ${SQLITECPP_LIBRARY}
+    SQLiteCpp
+    spdlog::spdlog
 )
 
 # ============================================================================

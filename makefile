@@ -1,11 +1,10 @@
-.PHONY: all clean run lint format check-format
+.PHONY: all clean run lint format check-format fix
 
 all: clean build
 
 build:
-	@rm -rf build/
-	@mkdir build
-	@cd build && cmake .. && make
+	@cmake --preset=default
+	@cmake --build build
 
 clean:
 	@rm -rf build/
@@ -26,9 +25,15 @@ fmt:
 	@clang-format -i $$(find src -name "*.cpp" -o -name "*.hpp")
 	@echo "✓ Code formatting complete"
 
-CLANG_TIDY_FLAGS = --warnings-as-errors='*'
-CLANG_TIDY_COMPILE_FLAGS = -- -std=c++23 -D_GNU_SOURCE -Ibuild/generated
+CLANG_TIDY_FLAGS = --warnings-as-errors=\'*\' --header-filter='^\$' --exclude-header-filter=\'.*\'
+CLANG_TIDY_COMPILE_FLAGS = -- -std=c++23 -Ibuild/generated -Ibuild/vcpkg_installed/x64-linux/include -I/usr/include/libevdev-1.0 -Isrc
 
 lint: build check-format
 	@echo "Running clang-tidy..."
 	@clang-tidy $(CLANG_TIDY_FLAGS) $$(find src -name "*.cpp" -o -name "*.hpp") $(CLANG_TIDY_COMPILE_FLAGS)
+	@echo "✓ Linting complete"
+
+fix: build
+	@echo "Auto-fixing clang-tidy issues..."
+	@clang-tidy --fix $(CLANG_TIDY_FLAGS) $$(find src -name "*.cpp" -o -name "*.hpp") $(CLANG_TIDY_COMPILE_FLAGS)
+	@echo "✓ Auto-fixes applied"

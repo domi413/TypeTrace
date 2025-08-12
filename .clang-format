@@ -31,7 +31,7 @@ TabWidth: 4
 #   AfterFunction: true
 #   AfterNamespace: false
 #   AfterStruct: true
-#   BeforeCatch: false
+#   BeforeCatch: true
 #   BeforeElse: false
 #   BeforeLambdaBody: false
 #   indentBraces: false
