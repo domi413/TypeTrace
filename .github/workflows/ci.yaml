@@ -71,7 +71,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     name: Lint
-    timeout-minutes: 3
+    timeout-minutes: 10
     container:
       image: archlinux:base-devel
 
@@ -86,9 +86,8 @@ jobs:
           pacman -Sy --noconfirm --needed \
             clang \
             cmake \
-            cppcheck \
-            libevdev \
             libinput
+            # TODO: Add libsqlitecpp-dev (better to use vcpkg for proper library management)
 
       - name: Run lint
         run: make lint

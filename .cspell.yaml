@@ -6,7 +6,6 @@ dictionaryDefinitions:
     path: ./.dictionaries/project-words.txt
 
 dictionaries:
-  - c
   - cpp
   - en_US
   - project-words
