@@ -210,7 +210,7 @@ auto EventHandler::processKeyboardEvent(struct libinput_event *const event)
 
     if (getLogger()->should_log(spdlog::level::debug)) {
         getLogger()->debug("Added keystroke [{}/{}] to buffer: {} (code: {})",
-                           buffer.size(),
+                           buffer.size() + 1,
                            BUFFER_SIZE,
                            keystroke.key_name.data(),
                            key_code);
@@ -223,13 +223,14 @@ auto EventHandler::processKeyboardEvent(struct libinput_event *const event)
 auto EventHandler::shouldFlush() const -> bool
 {
     if (buffer.size() >= BUFFER_SIZE) {
+        getLogger()->debug("Flushing buffer: size threshold reached ({} events)", buffer.size());
         return true;
     }
 
     if (!buffer.empty()) {
-        const auto elapsed = Clock::now() - last_flush_time;
+        const auto elapsed_duration = Clock::now() - last_flush_time;
 
-        if (elapsed >= std::chrono::seconds(BUFFER_TIMEOUT)) {
+        if (elapsed_duration >= std::chrono::seconds(BUFFER_TIMEOUT)) {
             getLogger()->debug("Flushing buffer: time threshold reached ({}s elapsed)",
                                BUFFER_TIMEOUT);
             return true;
@@ -247,7 +248,15 @@ auto EventHandler::flushBuffer() -> void
     }
 
     if (buffer_callback) {
-        getLogger()->info("Flushing buffer with {} events to database", buffer.size());
+        if (getLogger()->should_log(spdlog::level::debug)) {
+            const auto elapsed_duration = Clock::now() - last_flush_time;
+            const auto elapsed_seconds
+              = std::chrono::duration_cast<std::chrono::duration<double>>(elapsed_duration).count();
+
+            getLogger()->debug("Flushing buffer with {} events in {:.2f}s to database",
+                               buffer.size(),
+                               elapsed_seconds);
+        }
         buffer_callback(buffer);
     }
 
