@@ -9,7 +9,7 @@
 namespace typetrace {
 
 // Sets the log level of the global logger based on the debug mode
-void initLogger(bool debug_mode)
+auto initLogger(bool debug_mode) -> void
 {
 
     if (debug_mode) {

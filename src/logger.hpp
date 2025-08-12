@@ -9,7 +9,7 @@ namespace typetrace {
 
 /// Initializes the global logger with a console sink.
 /// If `debug_mode` is true, sets the log level to `debug`, otherwise `info`.
-void initLogger(bool debug_mode);
+auto initLogger(bool debug_mode) -> void;
 
 /// Get the global logger instance.
 auto getLogger() -> std::shared_ptr<spdlog::logger>;
