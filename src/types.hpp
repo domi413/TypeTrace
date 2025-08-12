@@ -18,14 +18,9 @@ namespace typetrace {
 /// Structure representing a keystroke event
 struct KeystrokeEvent
 {
-    /// Code of the pressed key
-    std::size_t key_code{};
-
-    /// Human-readable name of the key
-    std::array<char, KEY_NAME_MAX_LENGTH> key_name{};
-
-    /// Date in YYYY-MM-DD format
-    std::array<char, DATE_STRING_LENGTH> date{};
+    std::size_t key_code{};                           ///< Code of the pressed key
+    std::array<char, KEY_NAME_MAX_LENGTH> key_name{}; ///< Human-readable name of the key
+    std::array<char, DATE_STRING_LENGTH> date{};      ///< Date in YYYY-MM-DD format
 };
 
 } // namespace typetrace

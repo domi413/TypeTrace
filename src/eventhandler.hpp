@@ -49,7 +49,8 @@ class EventHandler
     auto initializeLibinput() -> void;
 
     /// Processes a libinput keyboard event into a keystroke event
-    auto processKeyboardEvent(struct libinput_event *event) -> std::optional<KeystrokeEvent>;
+    [[nodiscard]] auto processKeyboardEvent(struct libinput_event *event)
+      -> std::optional<KeystrokeEvent>;
 
     /// Determines if the buffer should be flushed based on size and time
     [[nodiscard]] auto shouldFlush() const -> bool;

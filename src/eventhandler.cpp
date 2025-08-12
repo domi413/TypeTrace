@@ -25,7 +25,6 @@
 #include <string_view>
 #include <sys/poll.h>
 #include <sys/types.h>
-#include <system_error>
 #include <unistd.h>
 #include <utility>
 #include <vector>
@@ -47,8 +46,7 @@ auto EventHandler::trace() -> void
     const int result = poll(&pfd, 1, POLL_TIMEOUT_MS);
 
     if (result < 0) {
-        getLogger()->error("Poll failed with error: {}",
-                           std::error_code(errno, std::generic_category()));
+        getLogger()->error("Poll failed with error: {}", std::strerror(errno));
         return;
     }
 

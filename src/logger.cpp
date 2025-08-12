@@ -11,7 +11,6 @@ namespace typetrace {
 // Sets the log level of the global logger based on the debug mode
 auto initLogger(bool debug_mode) -> void
 {
-
     if (debug_mode) {
         getLogger()->set_level(spdlog::level::debug);
     } else {
