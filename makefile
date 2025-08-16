@@ -10,9 +10,12 @@ clean:
 	@rm -rf build/
 
 run: build
-	@./build/typetrace_backend -d
+	@./build/typetrace/backend/typetrace_backend
 
-SOURCES = $(shell find . -name "*.cpp" -o -name "*.hpp")
+debug: build
+	@./build/typetrace/backend/typetrace_backend -d
+
+SOURCES = $(shell find typetrace/ tests/ -name "*.cpp" -o -name "*.hpp")
 
 check-format:
 	@echo "Checking code formatting..."

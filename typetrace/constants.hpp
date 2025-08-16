@@ -20,16 +20,6 @@ constexpr std::size_t BUFFER_TIMEOUT = 100;
 constexpr std::size_t POLL_TIMEOUT_MS = 100;
 
 // ============================================================================
-// Key Event Constants
-// ============================================================================
-
-/// Length of the date string in YYYY-MM-DD format
-constexpr std::size_t DATE_STRING_LENGTH = 11;
-
-/// Maximum length for key names in the database
-constexpr std::size_t KEY_NAME_MAX_LENGTH = 32;
-
-// ============================================================================
 // File and Directory Constants
 // ============================================================================
 

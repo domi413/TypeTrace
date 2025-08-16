@@ -22,7 +22,6 @@
 #include <optional>
 #include <poll.h>
 #include <print>
-#include <string_view>
 #include <sys/poll.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -189,24 +188,14 @@ auto EventHandler::processKeyboardEvent(struct libinput_event *const event)
 
     const auto key_code = libinput_event_keyboard_get_key(keyboard_event);
     const char *const raw_name = libevdev_event_code_get_name(EV_KEY, key_code);
-    const std::string_view key_name = (raw_name != nullptr) ? raw_name : "UNKNOWN";
+    const auto time_now = std::chrono::system_clock::now();
 
     KeystrokeEvent keystroke{
         .key_code = key_code,
-        .key_name = {},
-        .date = {},
+        .key_name = (raw_name != nullptr) ? raw_name : "UNKNOWN",
+        .date = std::format("{:%Y-%m-%d}",
+                            std::chrono::zoned_time{ std::chrono::current_zone(), time_now }),
     };
-
-    const auto copy_size = std::min(key_name.size(), keystroke.key_name.size() - 1);
-    std::copy_n(key_name.begin(), copy_size, keystroke.key_name.begin());
-    *(keystroke.key_name.begin() + copy_size) = '\0';
-
-    const auto now = std::chrono::system_clock::now();
-    const auto date_str
-      = std::format("{:%Y-%m-%d}", std::chrono::zoned_time{ std::chrono::current_zone(), now });
-    std::copy_n(date_str.begin(),
-                std::min(date_str.size(), keystroke.date.size() - 1),
-                keystroke.date.begin());
 
     if (getLogger()->should_log(spdlog::level::debug)) {
         getLogger()->debug("Added keystroke [{}/{}] to buffer: {} (code: {})",
