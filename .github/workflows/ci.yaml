@@ -72,8 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint
     timeout-minutes: 10
-    container:
-      image: archlinux:base-devel
+    container: archlinux:latest
 
     if: ${{ !github.event.pull_request.draft }}
 

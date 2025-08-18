@@ -22,10 +22,8 @@
 #include <optional>
 #include <poll.h>
 #include <print>
-#include <string_view>
 #include <sys/poll.h>
 #include <sys/types.h>
-#include <system_error>
 #include <unistd.h>
 #include <utility>
 #include <vector>
@@ -47,8 +45,7 @@ auto EventHandler::trace() -> void
     const int result = poll(&pfd, 1, POLL_TIMEOUT_MS);
 
     if (result < 0) {
-        getLogger()->error("Poll failed with error: {}",
-                           std::error_code(errno, std::generic_category()));
+        getLogger()->error("Poll failed with error: {}", std::strerror(errno));
         return;
     }
 
@@ -80,8 +77,8 @@ auto EventHandler::checkInputGroupMembership() -> void
 
     struct group const *const input_group = getgrnam("input");
     if (input_group == nullptr) {
-        getLogger()->critical("Input group does not exist. Please create it.");
-        throw SystemError("Input group does not exist. Please create it.");
+        getLogger()->critical("Input group does not exist. Please create it");
+        throw SystemError("Input group does not exist. Please create it");
     }
 
     const gid_t input_gid = input_group->gr_gid;
@@ -91,12 +88,12 @@ auto EventHandler::checkInputGroupMembership() -> void
     getgroups(ngroups, groups.data());
 
     if (!(std::ranges::find(groups, input_gid) != groups.end())) {
-        getLogger()->error("User is not a member of the 'input' group.");
+        getLogger()->error("User is not a member of the 'input' group");
         printInputGroupPermissionHelp();
-        throw PermissionError("User not in 'input' group. See instructions above.");
+        throw PermissionError("User not in 'input' group. See instructions above");
     }
 
-    getLogger()->info("User is a member of the 'input' group.");
+    getLogger()->info("User is a member of the 'input' group");
 }
 
 /// Prints help information for input group permission issues
@@ -120,22 +117,22 @@ auto EventHandler::checkDeviceAccessibility() const -> void
     getLogger()->info("Checking for device accessibility...");
 
     if (li == nullptr) {
-        getLogger()->critical("Libinput is not initialized. Cannot check device accessibility.");
-        throw SystemError("Libinput is not initialized. Cannot check device accessibility.");
+        getLogger()->critical("Libinput is not initialized. Cannot check device accessibility");
+        throw SystemError("Libinput is not initialized. Cannot check device accessibility");
     }
 
     if (libinput_dispatch(li.get()) < 0) {
-        getLogger()->critical("Failed to dispatch libinput events.");
-        throw SystemError("Failed to dispatch libinput events.");
+        getLogger()->critical("Failed to dispatch libinput events");
+        throw SystemError("Failed to dispatch libinput events");
     }
 
     struct libinput_event *event = libinput_get_event(li.get());
     if ((event == nullptr) || libinput_event_get_type(event) != LIBINPUT_EVENT_DEVICE_ADDED) {
-        getLogger()->critical("No input devices found or not accessible.");
-        throw SystemError("No input devices found or not accessible.");
+        getLogger()->critical("No input devices found or not accessible");
+        throw SystemError("No input devices found or not accessible");
     }
 
-    getLogger()->info("Input devices are accessible.");
+    getLogger()->info("Input devices are accessible");
     libinput_event_destroy(event);
 }
 
@@ -154,24 +151,24 @@ auto EventHandler::initializeLibinput() -> void
     // Initialize udev
     udev.reset(udev_new());
     if (udev == nullptr) {
-        getLogger()->critical("Failed to initialize udev.");
-        throw SystemError("Failed to initialize udev.");
+        getLogger()->critical("Failed to initialize udev");
+        throw SystemError("Failed to initialize udev");
     }
 
     // Initialize libinput
     li.reset(libinput_udev_create_context(&interface, nullptr, udev.get()));
     if (li == nullptr) {
-        getLogger()->critical("Failed to initialize libinput from udev.");
-        throw SystemError("Failed to initialize libinput from udev.");
+        getLogger()->critical("Failed to initialize libinput from udev");
+        throw SystemError("Failed to initialize libinput from udev");
     }
 
     // Assign seat0
     if (libinput_udev_assign_seat(li.get(), "seat0") < 0) {
-        getLogger()->critical("Failed to assign seat to libinput.");
-        throw SystemError("Failed to assign seat to libinput.");
+        getLogger()->critical("Failed to assign seat to libinput");
+        throw SystemError("Failed to assign seat to libinput");
     }
 
-    getLogger()->info("Libinput initialized successfully.");
+    getLogger()->info("Libinput initialized successfully");
 }
 
 /// Processes a libinput keyboard event into a keystroke event
@@ -180,7 +177,7 @@ auto EventHandler::processKeyboardEvent(struct libinput_event *const event)
 {
     auto *keyboard_event = libinput_event_get_keyboard_event(event);
     if (keyboard_event == nullptr) {
-        getLogger()->warn("Failed to get keyboard event from libinput event.");
+        getLogger()->warn("Failed to get keyboard event from libinput event");
         return std::nullopt;
     }
 
@@ -191,28 +188,18 @@ auto EventHandler::processKeyboardEvent(struct libinput_event *const event)
 
     const auto key_code = libinput_event_keyboard_get_key(keyboard_event);
     const char *const raw_name = libevdev_event_code_get_name(EV_KEY, key_code);
-    const std::string_view key_name = (raw_name != nullptr) ? raw_name : "UNKNOWN";
+    const auto time_now = std::chrono::system_clock::now();
 
     KeystrokeEvent keystroke{
         .key_code = key_code,
-        .key_name = {},
-        .date = {},
+        .key_name = (raw_name != nullptr) ? raw_name : "UNKNOWN",
+        .date = std::format("{:%Y-%m-%d}",
+                            std::chrono::zoned_time{ std::chrono::current_zone(), time_now }),
     };
-
-    const auto copy_size = std::min(key_name.size(), keystroke.key_name.size() - 1);
-    std::copy_n(key_name.begin(), copy_size, keystroke.key_name.begin());
-    *(keystroke.key_name.begin() + copy_size) = '\0';
-
-    const auto now = std::chrono::system_clock::now();
-    const auto date_str
-      = std::format("{:%Y-%m-%d}", std::chrono::zoned_time{ std::chrono::current_zone(), now });
-    std::copy_n(date_str.begin(),
-                std::min(date_str.size(), keystroke.date.size() - 1),
-                keystroke.date.begin());
 
     if (getLogger()->should_log(spdlog::level::debug)) {
         getLogger()->debug("Added keystroke [{}/{}] to buffer: {} (code: {})",
-                           buffer.size(),
+                           buffer.size() + 1,
                            BUFFER_SIZE,
                            keystroke.key_name.data(),
                            key_code);
@@ -225,14 +212,15 @@ auto EventHandler::processKeyboardEvent(struct libinput_event *const event)
 auto EventHandler::shouldFlush() const -> bool
 {
     if (buffer.size() >= BUFFER_SIZE) {
+        getLogger()->debug("Flushing buffer: size threshold reached ({} events)", buffer.size());
         return true;
     }
 
     if (!buffer.empty()) {
-        const auto elapsed = Clock::now() - last_flush_time;
+        const auto elapsed_duration = Clock::now() - last_flush_time;
 
-        if (elapsed >= std::chrono::seconds(BUFFER_TIMEOUT)) {
-            getLogger()->debug("Flushing buffer: time threshold reached ({}s elapsed).",
+        if (elapsed_duration >= std::chrono::seconds(BUFFER_TIMEOUT)) {
+            getLogger()->debug("Flushing buffer: time threshold reached ({}s elapsed)",
                                BUFFER_TIMEOUT);
             return true;
         }
@@ -249,7 +237,15 @@ auto EventHandler::flushBuffer() -> void
     }
 
     if (buffer_callback) {
-        getLogger()->info("Flushing buffer with {} events to database.", buffer.size());
+        if (getLogger()->should_log(spdlog::level::debug)) {
+            const auto elapsed_duration = Clock::now() - last_flush_time;
+            const auto elapsed_seconds
+              = std::chrono::duration_cast<std::chrono::duration<double>>(elapsed_duration).count();
+
+            getLogger()->debug("Flushing buffer with {} events in {:.2f}s to database",
+                               buffer.size(),
+                               elapsed_seconds);
+        }
         buffer_callback(buffer);
     }
 

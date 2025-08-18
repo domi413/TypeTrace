@@ -39,7 +39,7 @@ DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
         // db->exec(OPTIMIZE_DATABASE_SQL);
 
         createTables();
-        getLogger()->info("Database tables created successfully.");
+        getLogger()->info("Database tables created successfully");
     } catch (const SQLite::Exception &e) {
         getLogger()->critical("Failed to open database '{}': {}", db_file.string(), e.what());
         throw DatabaseError(std::format(
@@ -69,7 +69,7 @@ auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer)
 
         if (getLogger()->should_log(spdlog::level::debug)) {
             getLogger()->debug(
-              "Inserted {} keystrokes into the database: {}.", buffer.size(), db_file.string());
+              "Inserted {} keystrokes into the database: {}", buffer.size(), db_file.string());
         }
     } catch (const SQLite::Exception &e) {
         getLogger()->error("Failed to write to database: {}", e.what());

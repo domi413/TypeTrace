@@ -76,8 +76,8 @@ auto Cli::getDatabaseDir() -> std::filesystem::path
 
     const char *home = std::getenv("HOME");
     if (home == nullptr) {
-        getLogger()->critical("HOME environment variable is not set.");
-        throw SystemError("HOME environment variable is not set.");
+        getLogger()->critical("HOME environment variable is not set");
+        throw SystemError("HOME environment variable is not set");
     }
 
     getLogger()->debug("Using default home directory: {}", home);
