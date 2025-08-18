@@ -3,6 +3,7 @@ chrono
 clangd
 domi
 flto
+gtkmm
 libevdev
 libsqlitecpp
 libudev
