@@ -43,7 +43,7 @@ else()
     set(GIT_COMMIT "unknown")
 endif()
 
-configure_file(typetrace/version.hpp.in ${CMAKE_BINARY_DIR}/generated/version.hpp @ONLY)
+configure_file(typetrace/common/include/version.hpp.in ${CMAKE_BINARY_DIR}/generated/version.hpp @ONLY)
 
 # ============================================================================
 # Dependencies
@@ -57,9 +57,10 @@ pkg_check_modules(DEPS REQUIRED libudev libinput libevdev)
 # ============================================================================
 # Subdirectories
 # ============================================================================
+add_subdirectory(typetrace/common)
 add_subdirectory(typetrace/backend)
 # add_subdirectory(typetrace/frontend)
-# add_subdirectory(tests/unit/backend)
+# add_subdirectory(tests)
 
 # ============================================================================
 # Installation & Build Info

@@ -23,6 +23,8 @@ constexpr std::size_t POLL_TIMEOUT_MS = 100;
 // File and Directory Constants
 // ============================================================================
 
+// TODO(domi): I think it makes sense to also generate those with cmake
+
 /// The directory name
 constexpr std::string_view PROJECT_DIR_NAME = "typetrace";
 

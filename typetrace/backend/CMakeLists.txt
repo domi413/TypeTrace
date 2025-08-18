@@ -1,23 +1,23 @@
 add_executable(typetrace_backend
-    cli.cpp
-    database.cpp
-    eventhandler.cpp
-    main.cpp
-    ${CMAKE_SOURCE_DIR}/typetrace/logger.cpp
+    src/cli.cpp
+    src/database.cpp
+    src/eventhandler.cpp
+    src/main.cpp
 )
 
-target_include_directories(typetrace_backend PRIVATE
-    ${CMAKE_SOURCE_DIR}/typetrace
-    ${CMAKE_SOURCE_DIR}/typetrace/backend
-
-    ${CMAKE_BINARY_DIR}/generated
-    ${DEPS_INCLUDE_DIRS}
+target_link_libraries(typetrace_backend
+    PRIVATE
+        typetrace_common
+        SQLiteCpp
+        ${DEPS_LIBRARIES}
 )
 
-target_link_libraries(typetrace_backend PRIVATE
-    ${DEPS_LIBRARIES}
-    SQLiteCpp
-    spdlog::spdlog
+target_include_directories(typetrace_backend
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/generated
+        ${DEPS_INCLUDE_DIRS}
 )
 
 target_compile_options(typetrace_backend PRIVATE
