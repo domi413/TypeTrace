@@ -1,4 +1,4 @@
-### How to run the script
+### How to run the backend (Frontend is missing yet)
 
 - use the make file: `make`
 
