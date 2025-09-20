@@ -24,11 +24,9 @@ DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
 {
     getLogger()->info("Initializing database at: {}", db_file.string());
 
-    const auto parent_dir = db_dir.parent_path();
-    if (!parent_dir.empty() && !std::filesystem::exists(parent_dir)) {
-        getLogger()->debug("Creating parent directories for database path: {}",
-                           parent_dir.string());
-        std::filesystem::create_directories(parent_dir);
+    if (!db_dir.empty() && !std::filesystem::exists(db_dir)) {
+        getLogger()->debug("Creating parent directories for database path: {}", db_dir.string());
+        std::filesystem::create_directories(db_dir);
     }
 
     try {
@@ -42,8 +40,8 @@ DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
         getLogger()->info("Database tables created successfully");
     } catch (const SQLite::Exception &e) {
         getLogger()->critical("Failed to open database '{}': {}", db_file.string(), e.what());
-        throw DatabaseError(std::format(
-          "Failed to open database '{}': {}", (db_file / DB_FILE_NAME).string(), e.what()));
+        throw DatabaseError(
+          std::format("Failed to open database '{}': {}", db_file.string(), e.what()));
     }
 }
 
