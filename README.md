@@ -1,4 +1,4 @@
-### How to run the script
+### How to run the backend (Frontend is missing yet)
 
 - use the make file: `make`
 
@@ -11,3 +11,10 @@ Options:
 	-v, --version   Display version then exit.
 	-d, --debug	    Enable debug mode.
 ```
+
+### Contribution
+
+- You need [vcpkg](https://vcpkg.io/en/) installed and in path (CMake will automatically fetch dependencies through vcpkg)
+- Clang & CMake are required dependencies
+- Only works on Linux (Not sure if only x64)
+- First compilation may take some time because vcpkg must install all the libraries
