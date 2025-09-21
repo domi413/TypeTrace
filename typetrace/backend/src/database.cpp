@@ -34,7 +34,7 @@ DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
                                                 static_cast<unsigned int>(SQLite::OPEN_READWRITE)
                                                   | static_cast<unsigned int>(SQLite::OPEN_CREATE));
         // WAL mode
-        // db->exec(OPTIMIZE_DATABASE_SQL);
+        db->exec(OPTIMIZE_DATABASE_SQL);
 
         createTables();
         getLogger()->info("Database tables created successfully");
@@ -52,8 +52,11 @@ auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer)
         return;
     }
 
+    // TODO(domi413): There's a bug that if the .db file gets deleted during runtime, the following
+    // error occurs: `Database error: Failed to write to database: attempt to write a readonly
+    // database`
     try {
-        const SQLite::Transaction transaction(*db);
+        SQLite::Transaction transaction(*db);
         SQLite::Statement stmt(*db, UPSERT_KEYSTROKE_SQL);
 
         for (const auto &event : buffer) {
@@ -64,6 +67,8 @@ auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer)
             stmt.exec();
             stmt.reset();
         }
+
+        transaction.commit();
 
         getLogger()->debug(
           "Inserted {} keystrokes into the database: {}", buffer.size(), db_file.string());
