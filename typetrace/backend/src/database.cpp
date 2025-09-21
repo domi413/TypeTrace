@@ -65,10 +65,8 @@ auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer)
             stmt.reset();
         }
 
-        if (getLogger()->should_log(spdlog::level::debug)) {
-            getLogger()->debug(
-              "Inserted {} keystrokes into the database: {}", buffer.size(), db_file.string());
-        }
+        getLogger()->debug(
+          "Inserted {} keystrokes into the database: {}", buffer.size(), db_file.string());
     } catch (const SQLite::Exception &e) {
         getLogger()->error("Failed to write to database: {}", e.what());
         throw DatabaseError(std::format("Failed to write to database: {}", e.what()));

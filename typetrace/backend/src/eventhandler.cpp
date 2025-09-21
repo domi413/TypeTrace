@@ -145,7 +145,7 @@ auto EventHandler::initializeLibinput() -> void
         .open_restricted = [](const char *const path, const int flags, void *) -> int {
             return ::open(path, flags);
         },
-        .close_restricted = [](const int fd, void *) { ::close(fd); }
+        .close_restricted = [](const int fd, void *) -> void { ::close(fd); }
     };
 
     // Initialize udev
