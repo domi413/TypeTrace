@@ -3,6 +3,10 @@
 
 namespace typetrace {
 
+// ============================================================================
+// INSERT Queries
+// ============================================================================
+
 /// SQL query to create the keystrokes table if it doesn't exist
 constexpr const char *CREATE_KEYSTROKES_TABLE_SQL = {
     R"(CREATE TABLE IF NOT EXISTS keystrokes (
@@ -29,6 +33,64 @@ constexpr const char *UPSERT_KEYSTROKE_SQL = {
        ON CONFLICT(scan_code, date) DO UPDATE SET
            count = count + 1,
            key_name = excluded.key_name;)"
+};
+
+/// SQL query to clear all entries from the keystrokes table
+constexpr const char *CLEAR_KEYSTROKES_TABLE_SQL = { R"(DELETE FROM keystrokes;)" };
+
+// ============================================================================
+// READ Queries
+// ============================================================================
+
+/// SQL query to get the total count for each key
+///
+/// Example output:
+///
+/// scan_code  total_presses
+/// ---------  -------------
+/// 1          10
+/// 3          19
+/// 11         12
+constexpr const char *GET_TOTAL_KEY_COUNTS_SQL = {
+    R"(SELECT scan_code, SUM(count) AS total_presses
+       FROM keystrokes
+       GROUP BY scan_code
+       ORDER BY scan_code ASC;)"
+};
+
+/// SQL query to get the daily amount of key presses over the last X days
+///
+/// Example output:
+///
+/// date        daily_total
+/// ----------  -----------
+/// 2025-09-20  28
+/// 2025-09-19  43
+/// 2025-09-18  58
+constexpr const char *GET_DAILY_COUNTS_SQL = {
+    R"(SELECT date, SUM(count) AS daily_total
+       FROM keystrokes
+       WHERE date BETWEEN date('now', '-' || ? || ' days') AND date('now', 'localtime')
+       GROUP BY date
+       ORDER BY date DESC;)"
+};
+
+/// SQL query to get the top N most pressed keys in last X days
+///
+/// Example output:
+///
+/// scan_code  total_presses
+/// ---------  -------------
+/// 48         97
+/// 75         87
+/// 27         85
+constexpr const char *GET_TOP_KEYS_SQL = {
+    R"(SELECT scan_code, SUM(count) AS total_presses
+       FROM keystrokes
+       WHERE date >= date('now', 'localtime', '-' || ? || ' days')
+       GROUP BY scan_code
+       ORDER BY total_presses DESC
+       LIMIT ?;)"
 };
 
 } // namespace typetrace
