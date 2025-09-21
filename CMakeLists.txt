@@ -5,7 +5,8 @@ cmake_minimum_required(VERSION 3.16)
 # ==================================================================
 
 set(CMAKE_CXX_COMPILER "clang++")
-project(TypeTrace
+project(
+    TypeTrace
     VERSION 0.1.0
     DESCRIPTION "The backend for the TypeTrace project"
     LANGUAGES CXX
@@ -45,7 +46,11 @@ else()
     set(GIT_COMMIT "unknown")
 endif()
 
-configure_file(typetrace/common/include/version.hpp.in ${CMAKE_BINARY_DIR}/generated/version.hpp @ONLY)
+configure_file(
+    typetrace/common/include/version.hpp.in
+    ${CMAKE_BINARY_DIR}/generated/version.hpp
+    @ONLY
+)
 
 # ==================================================================
 # Dependencies
@@ -75,5 +80,8 @@ install(TARGETS typetrace_backend RUNTIME DESTINATION bin)
 message(STATUS "TypeTrace Backend:")
 message(STATUS "  Version: ${PROJECT_VERSION} (${GIT_COMMIT})")
 message(STATUS "  Build: ${CMAKE_BUILD_TYPE}")
-message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(
+    STATUS
+    "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
+)
 message(STATUS "  Standard: C++${CMAKE_CXX_STANDARD}")

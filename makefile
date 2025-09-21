@@ -1,44 +1,51 @@
-.PHONY: all clean run lint format check-format fix
+.PHONY: all clean run debug lint format check-format fix
 
 all: clean build
 
 build:
-	@cmake --preset=default
+	@echo "Configuring and building with Ninja..."
+	@cmake --preset=default -GNinja
 	@cmake --build build
 
 clean:
+	@echo "Removing build directory..."
 	@rm -rf build/
 
 run: build
+	@echo "Running the typetrace backend..."
 	@./build/typetrace/backend/typetrace_backend
 
 debug: build
+	@echo "Running the typetrace backend in debug mode..."
 	@./build/typetrace/backend/typetrace_backend -d
 
-SOURCES = $(shell find typetrace/ tests/ -name "*.cpp" -o -name "*.hpp")
+SOURCES_CPP = $(shell find typetrace/ tests/ -name "*.cpp" -o -name "*.hpp")
+SOURCES_CMake = $(shell find typetrace/ tests/ -name "*CMakeLists.txt")
 
 check-format:
 	@echo "Checking code formatting..."
-	@if clang-format --dry-run --Werror $(SOURCES) 2>&1; then \
+	@if clang-format --dry-run --Werror $(SOURCES_CPP) && gersemi --check $(SOURCES_CMake); then \
 		echo "✓ All files are properly formatted"; \
-		else \
+	else \
 		exit 1; \
-		fi
+	fi
 
-fmt:
+format:
 	@echo "Formatting code..."
-	@clang-format -i $(SOURCES)
+	@clang-format -i $(SOURCES_CPP)
+	@gersemi -i $(SOURCES_CMake)
 	@echo "✓ Code formatting complete"
 
-CLANG_TIDY_FLAGS = --warnings-as-errors=\'*\' --header-filter='^\$' --exclude-header-filter=\'.*\'
-CLANG_TIDY_COMPILE_FLAGS = -- -std=c++23 -Ibuild/generated -Ibuild/vcpkg_installed/x64-linux/include -I/usr/include/libevdev-1.0 -Isrc
+# Flags for clang-tidy
+LINT_COMMON_FLAGS = -p build/
+LINT_TIDY_FLAGS = --warnings-as-errors='*'
 
-lint: build check-format
+lint: build
 	@echo "Running clang-tidy..."
-	@clang-tidy $(CLANG_TIDY_FLAGS) $(SOURCES) $(CLANG_TIDY_COMPILE_FLAGS)
+	@clang-tidy $(LINT_COMMON_FLAGS) $(LINT_TIDY_FLAGS) $(SOURCES_CPP)
 	@echo "✓ Linting complete"
 
 fix: build
 	@echo "Auto-fixing clang-tidy issues..."
-	@clang-tidy --fix $(CLANG_TIDY_FLAGS) $(SOURCES) $(CLANG_TIDY_COMPILE_FLAGS)
+	@clang-tidy --fix $(LINT_COMMON_FLAGS) $(LINT_TIDY_FLAGS) $(SOURCES_CPP)
 	@echo "✓ Auto-fixes applied"

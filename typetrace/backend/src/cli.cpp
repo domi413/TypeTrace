@@ -27,8 +27,9 @@ Cli::Cli(std::span<char *> args)
     event_handler = std::make_unique<EventHandler>();
 
     // Set up callback for EventHandler to flush buffer to database
-    event_handler->setBufferCallback(
-      [this](const std::vector<KeystrokeEvent> &buffer) { db_manager->writeToDatabase(buffer); });
+    event_handler->setBufferCallback([this](const std::vector<KeystrokeEvent> &buffer) -> void {
+        db_manager->writeToDatabase(buffer);
+    });
 }
 
 /// Runs the main event loop for keystroke tracing
