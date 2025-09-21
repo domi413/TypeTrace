@@ -68,6 +68,14 @@ jobs:
           verbose: true
           use_cspell_files: false
 
+  # TODO: Implement test, lint and formatting. We may not use
+  # archlinux:latest or at least only one runner for all tasks (not
+  # really clean solution)
+  test:
+    runs-on: ubuntu-latest
+    name: Test
+    timeout-minutes: 10
+    container: archlinux:latest
   lint:
     runs-on: ubuntu-latest
     name: Lint
@@ -85,8 +93,6 @@ jobs:
           pacman -Sy --noconfirm --needed \
             clang \
             cmake \
-            libinput
-            # TODO: Add libsqlitecpp-dev (better to use vcpkg for proper library management)
 
       - name: Run lint
         run: make lint

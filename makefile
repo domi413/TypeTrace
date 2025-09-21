@@ -47,5 +47,19 @@ lint: build
 
 fix: build
 	@echo "Auto-fixing clang-tidy issues..."
-	@clang-tidy --fix $(LINT_COMMON_FLAGS) $(LINT_TIDY_FLAGS) $(SOURCES_CPP)
+	@clang-tidy --fix $(LINT_COMMON_FLAGS) $(SOURCES_CPP)
 	@echo "✓ Auto-fixes applied"
+
+sort-dictionary:
+	@echo "Sorting latexindent dictionary..."
+	tr '[:upper:]' '[:lower:]' < .cspell_ignored.txt | sort -f -u -o .cspell_ignored.txt
+	@echo "✓ Sorted and converted .cspell_ignored.txt to lowercase with unique entries"
+
+cleanup-dictionary:
+	@echo "Cleaning up unused words from .cspell_ignored.txt..."
+	@.github/scripts/cleanup-cspell-ignored.sh
+
+check-cspell-ignored:
+	@echo "Checking for unused words in .cspell_ignored.txt..."
+	@.github/scripts/check-cspell-ignored.sh
+	@echo "✓ Cspell ignored file check complete"
