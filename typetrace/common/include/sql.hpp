@@ -36,7 +36,7 @@ constexpr const char *UPSERT_KEYSTROKE_SQL = {
 };
 
 /// SQL query to clear all entries from the keystrokes table
-constexpr const char *CLEAR_KEYSTROKES_TABLE_SQL = { R"(DELETE FROM keystrokes;)" };
+constexpr const char *CLEAR_KEYSTROKES_TABLE_SQL = "DELETE FROM keystrokes;";
 
 // ============================================================================
 // READ Queries
