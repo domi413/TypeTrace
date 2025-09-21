@@ -1,5 +1,8 @@
 .PHONY: all clean run debug lint format check-format fix
 
+SOURCES_CPP = $(shell find typetrace/ tests/ -name "*.cpp" -o -name "*.hpp")
+SOURCES_CMake = $(shell find typetrace/ tests/ -name "*CMakeLists.txt")
+
 all: clean build
 
 build:
@@ -18,9 +21,6 @@ run: build
 debug: build
 	@echo "Running the typetrace backend in debug mode..."
 	@./build/typetrace/backend/typetrace_backend -d
-
-SOURCES_CPP = $(shell find typetrace/ tests/ -name "*.cpp" -o -name "*.hpp")
-SOURCES_CMake = $(shell find typetrace/ tests/ -name "*CMakeLists.txt")
 
 check-format:
 	@echo "Checking code formatting..."
