@@ -88,7 +88,6 @@ auto EventHandler::checkInputGroupMembership() -> void
     getgroups(ngroups, groups.data());
 
     if (!(std::ranges::find(groups, input_gid) != groups.end())) {
-        getLogger()->error("User is not a member of the 'input' group");
         printInputGroupPermissionHelp();
         throw PermissionError("User not in 'input' group. See instructions above");
     }

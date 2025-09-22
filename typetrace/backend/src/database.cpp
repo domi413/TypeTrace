@@ -52,7 +52,7 @@ auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer)
         return;
     }
 
-    // TODO(domi413): There's a bug that if the .db file gets deleted during runtime, the following
+    // TODO(domi): There's a bug that if the .db file gets deleted during runtime, the following
     // error occurs: `Database error: Failed to write to database: attempt to write a readonly
     // database`
     try {
@@ -73,7 +73,6 @@ auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer)
         getLogger()->debug(
           "Inserted {} keystrokes into the database: {}", buffer.size(), db_file.string());
     } catch (const SQLite::Exception &e) {
-        getLogger()->error("Failed to write to database: {}", e.what());
         throw DatabaseError(std::format("Failed to write to database: {}", e.what()));
     }
 }
@@ -84,7 +83,6 @@ auto DatabaseManager::createTables() -> void
     try {
         db->exec(CREATE_KEYSTROKES_TABLE_SQL);
     } catch (const SQLite::Exception &e) {
-        getLogger()->error("Failed to create tables: {}", e.what());
         throw DatabaseError(std::format("Failed to create tables: {}", e.what()));
     }
 }
