@@ -35,7 +35,7 @@ Cli::Cli(std::span<char *> args)
 /// Runs the main event loop for keystroke tracing
 auto Cli::run() -> void
 {
-    while (true) { // use eventhandler to quit
+    while (true) { // TODO(domi): Use eventhandler to quit
         event_handler->trace();
     }
 };
@@ -77,7 +77,6 @@ auto Cli::getDatabaseDir() -> std::filesystem::path
 
     const char *home = std::getenv("HOME");
     if (home == nullptr) {
-        getLogger()->critical("HOME environment variable is not set");
         throw SystemError("HOME environment variable is not set");
     }
 

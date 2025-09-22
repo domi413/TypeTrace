@@ -39,7 +39,6 @@ DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
         createTables();
         getLogger()->info("Database tables created successfully");
     } catch (const SQLite::Exception &e) {
-        getLogger()->critical("Failed to open database '{}': {}", db_file.string(), e.what());
         throw DatabaseError(
           std::format("Failed to open database '{}': {}", db_file.string(), e.what()));
     }
