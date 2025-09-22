@@ -30,14 +30,12 @@
 
 namespace typetrace {
 
-/// Sets the callback function to be called when the buffer needs to be flushed
 auto EventHandler::setBufferCallback(
   std::function<void(const std::vector<KeystrokeEvent> &)> callback) -> void
 {
     buffer_callback = std::move(callback);
 }
 
-/// Traces keyboard events and processes them into keystroke events
 auto EventHandler::trace() -> void
 {
     struct pollfd pfd = { .fd = libinput_get_fd(li.get()), .events = POLLIN, .revents = 0 };
@@ -70,7 +68,6 @@ auto EventHandler::trace() -> void
     }
 }
 
-/// Checks if the current user is a member of the 'input' group
 auto EventHandler::checkInputGroupMembership() -> void
 {
     getLogger()->info("Checking for 'input' group membership...");
@@ -94,7 +91,6 @@ auto EventHandler::checkInputGroupMembership() -> void
     getLogger()->info("User is a member of the 'input' group");
 }
 
-/// Prints help information for input group permission issues
 auto EventHandler::printInputGroupPermissionHelp() -> void
 {
     std::println(stderr, R"(
@@ -109,7 +105,6 @@ Then log out and log back in for the changes to take effect.
 )");
 }
 
-/// Checks if input devices are accessible and functional
 auto EventHandler::checkDeviceAccessibility() const -> void
 {
     getLogger()->info("Checking for device accessibility...");
@@ -131,7 +126,6 @@ auto EventHandler::checkDeviceAccessibility() const -> void
     libinput_event_destroy(event);
 }
 
-/// Initializes libinput context and assigns seat
 auto EventHandler::initializeLibinput() -> void
 {
     getLogger()->info("Initializing libinput context...");
@@ -163,7 +157,6 @@ auto EventHandler::initializeLibinput() -> void
     getLogger()->info("Libinput initialized successfully");
 }
 
-/// Processes a libinput keyboard event into a keystroke event
 auto EventHandler::processKeyboardEvent(struct libinput_event *const event)
   -> std::optional<KeystrokeEvent>
 {
@@ -198,7 +191,6 @@ auto EventHandler::processKeyboardEvent(struct libinput_event *const event)
     return keystroke;
 }
 
-/// Determines if the buffer should be flushed based on size and time
 auto EventHandler::shouldFlush() const -> bool
 {
     if (buffer.size() >= BUFFER_SIZE) {
@@ -219,7 +211,6 @@ auto EventHandler::shouldFlush() const -> bool
     return false;
 }
 
-/// Flushes the current buffer by calling the buffer callback
 auto EventHandler::flushBuffer() -> void
 {
     if (buffer.empty()) {

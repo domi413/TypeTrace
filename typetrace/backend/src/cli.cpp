@@ -18,7 +18,6 @@
 
 namespace typetrace {
 
-/// Constructs a CLI instance and parses command line arguments
 Cli::Cli(std::span<char *> args)
 {
     parseArguments(args);
@@ -32,7 +31,6 @@ Cli::Cli(std::span<char *> args)
     });
 }
 
-/// Runs the main event loop for keystroke tracing
 auto Cli::run() -> void
 {
     while (true) { // TODO(domi): Use eventhandler to quit
@@ -40,7 +38,6 @@ auto Cli::run() -> void
     }
 };
 
-/// Displays help information and usage instructions
 auto Cli::showHelp(const char *program_name) -> void
 {
     std::print(R"(
@@ -61,13 +58,11 @@ You should run the frontend of TypeTrace which will run this.
                program_name);
 };
 
-/// Displays the program version information
 auto Cli::showVersion() -> void
 {
     std::println(PROJECT_VERSION);
 };
 
-/// Gets the database directory path using XDG or fallback locations
 auto Cli::getDatabaseDir() -> std::filesystem::path
 {
     if (const char *xdg_path = std::getenv("XDG_DATA_HOME")) {
@@ -84,13 +79,12 @@ auto Cli::getDatabaseDir() -> std::filesystem::path
     return std::filesystem::path{ home } / ".local" / "share" / PROJECT_DIR_NAME;
 };
 
-/// Parses and processes command line arguments
 auto Cli::parseArguments(std::span<char *> args) -> void
 {
     bool debug_mode{ false };
 
-    for (std::size_t i = 1; i < args.size(); i++) {
-        std::string_view arg{ args[i] };
+    for (const auto &arg_str : args.subspan(1)) {
+        std::string_view arg{ arg_str };
 
         if (arg == "-h" || arg == "--help") {
             showHelp(args[0]);

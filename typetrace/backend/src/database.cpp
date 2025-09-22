@@ -18,7 +18,6 @@
 
 namespace typetrace {
 
-/// Constructs a database manager and initializes the database connection
 DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
   db_file(db_dir / DB_FILE_NAME)
 {
@@ -44,7 +43,6 @@ DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
     }
 }
 
-/// Writes a buffer of keystroke events to the database
 auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer) -> void
 {
     if (buffer.empty()) {
@@ -76,7 +74,6 @@ auto DatabaseManager::writeToDatabase(const std::vector<KeystrokeEvent> &buffer)
     }
 }
 
-/// Creates necessary database tables if they don't exist
 auto DatabaseManager::createTables() -> void
 {
     try {
