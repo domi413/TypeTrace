@@ -51,15 +51,15 @@ fix: build
 	@echo "✓ Auto-fixes applied"
 
 sort-dictionary:
-	@echo "Sorting latexindent dictionary..."
-	tr '[:upper:]' '[:lower:]' < .cspell_ignored.txt | sort -f -u -o .cspell_ignored.txt
-	@echo "✓ Sorted and converted .cspell_ignored.txt to lowercase with unique entries"
+	@echo "Sorting dictionary..."
+	tr '[:upper:]' '[:lower:]' < .cspell_ignored | sort -f -u -o .cspell_ignored
+	@echo "✓ Sorted and converted .cspell_ignored to lowercase with unique entries"
 
 cleanup-dictionary:
-	@echo "Cleaning up unused words from .cspell_ignored.txt..."
+	@echo "Cleaning up unused words from .cspell_ignored..."
 	@.github/scripts/cleanup-cspell-ignored.sh
 
 check-cspell-ignored:
-	@echo "Checking for unused words in .cspell_ignored.txt..."
+	@echo "Checking for unused words in .cspell_ignored..."
 	@.github/scripts/check-cspell-ignored.sh
 	@echo "✓ Cspell ignored file check complete"

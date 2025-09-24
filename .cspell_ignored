@@ -1,8 +1,8 @@
-# Add here words that are not recognized by the spellchecker but are correct
 chrono
 clangd
 domi
 flto
+gersemi
 gtkmm
 libevdev
 libsqlitecpp
@@ -13,7 +13,6 @@ println
 sqlitecpp
 wconversion
 wdouble
-wduplicated
 werror
 wextra
 wmisleading
