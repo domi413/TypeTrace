@@ -36,7 +36,7 @@ auto Cli::run() -> void
     while (true) { // TODO(domi): Use eventhandler to quit
         event_handler->trace();
     }
-};
+}
 
 auto Cli::showHelp(const char *program_name) -> void
 {
@@ -56,12 +56,12 @@ You should run the frontend of TypeTrace which will run this.
 )",
                PROJECT_VERSION,
                program_name);
-};
+}
 
 auto Cli::showVersion() -> void
 {
     std::println(PROJECT_VERSION);
-};
+}
 
 auto Cli::getDatabaseDir() -> std::filesystem::path
 {
@@ -77,7 +77,7 @@ auto Cli::getDatabaseDir() -> std::filesystem::path
 
     getLogger()->debug("Using default home directory: {}", home);
     return std::filesystem::path{ home } / ".local" / "share" / PROJECT_DIR_NAME;
-};
+}
 
 auto Cli::parseArguments(std::span<char *> args) -> void
 {
@@ -102,6 +102,6 @@ auto Cli::parseArguments(std::span<char *> args) -> void
     }
 
     initLogger(debug_mode);
-};
+}
 
 } // namespace typetrace
