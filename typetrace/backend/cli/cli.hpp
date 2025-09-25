@@ -1,8 +1,8 @@
 #ifndef TYPETRACE_CLI_HPP
 #define TYPETRACE_CLI_HPP
 
-#include "database.hpp"
-#include "eventhandler.hpp"
+#include "database_manager.hpp"
+#include "event_handler.hpp"
 
 #include <filesystem>
 #include <memory>

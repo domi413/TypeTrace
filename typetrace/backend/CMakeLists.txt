@@ -1,9 +1,10 @@
 add_executable(
     typetrace_backend
-    src/cli.cpp
-    src/database.cpp
-    src/eventhandler.cpp
-    src/main.cpp
+    cli/cli.cpp
+    database_manager/database_manager.cpp
+    dbus/dbus.cpp
+    event_handler/event_handler.cpp
+    main.cpp
 )
 
 target_link_libraries(
@@ -14,6 +15,10 @@ target_link_libraries(
 target_include_directories(
     typetrace_backend
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC cli
+    PUBLIC database_manager
+    PUBLIC dbus
+    PUBLIC event_handler
     PRIVATE ${CMAKE_BINARY_DIR}/generated ${DEPS_INCLUDE_DIRS}
 )
 

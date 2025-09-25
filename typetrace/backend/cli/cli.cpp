@@ -1,8 +1,8 @@
 #include "cli.hpp"
 
 #include "constants.hpp"
-#include "database.hpp"
-#include "eventhandler.hpp"
+#include "database_manager.hpp"
+#include "event_handler.hpp"
 #include "exceptions.hpp"
 #include "logger.hpp"
 #include "types.hpp"

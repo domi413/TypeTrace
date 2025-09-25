@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 4.1)
 
 # ==================================================================
 # Project Definition
@@ -47,7 +47,7 @@ else()
 endif()
 
 configure_file(
-    typetrace/common/include/version.hpp.in
+    typetrace/common/version/version.hpp.in
     ${CMAKE_BINARY_DIR}/generated/version.hpp
     @ONLY
 )

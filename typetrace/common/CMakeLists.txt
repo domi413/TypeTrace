@@ -1,8 +1,14 @@
-add_library(typetrace_common STATIC src/logger.cpp)
+add_library(typetrace_common STATIC logger/logger.cpp)
 
 target_include_directories(
     typetrace_common
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC contants
+    PUBLIC exceptions
+    PUBLIC logger
+    PUBLIC sql
+    PUBLIC types
+    PUBLIC version
 )
 
 target_link_libraries(typetrace_common PUBLIC spdlog::spdlog)

@@ -1,7 +1,12 @@
 # TODO: Dependencies etc. are still missing
 
-# Add sources from the various subdirectories
-file(GLOB_RECURSE FRONTEND_SOURCES "src/*.cpp")
+file(
+    GLOB_RECURSE FRONTEND_SOURCES
+    "controller/*/*.cpp"
+    "model/*.cpp"
+    "service/*.cpp"
+    "application.cpp"
+)
 
 add_executable(typetrace_frontend ${FRONTEND_SOURCES})
 
@@ -10,6 +15,12 @@ target_link_libraries(typetrace_frontend PRIVATE typetrace_common)
 target_include_directories(
     typetrace_frontend
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC Controller/Heatmap
+    PUBLIC Controller/Preferences
+    PUBLIC Controller/Statistics
+    PUBLIC Controller/Verbose
+    PUBLIC Model
+    PUBLIC Service
     PRIVATE ${CMAKE_BINARY_DIR}/generated
 )
 
