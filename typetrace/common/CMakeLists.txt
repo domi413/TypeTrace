@@ -3,7 +3,7 @@ add_library(typetrace_common STATIC logger/logger.cpp)
 target_include_directories(
     typetrace_common
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PUBLIC contants
+    PUBLIC constants
     PUBLIC exceptions
     PUBLIC logger
     PUBLIC sql
