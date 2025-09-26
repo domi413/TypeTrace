@@ -88,27 +88,12 @@ include(FetchContent)
 # SYSTEM-WIDE DEPENDENCIES
 find_package(PkgConfig REQUIRED)
 
+
 # System-wide package dependencies
 pkg_check_modules(SPDLOG REQUIRED spdlog)
 pkg_check_modules(SQLITE3 REQUIRED sqlite3)
 pkg_check_modules(DEPS REQUIRED libudev libinput libevdev)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
-
-# Fetch SQLiteCpp from GitHub
-FetchContent_Declare(
-    SQLiteCpp
-    GIT_REPOSITORY https://github.com/SRombauts/SQLiteCpp.git
-    GIT_TAG        3.3.3
-)
-
-# Configure SQLiteCpp options
-set(SQLITECPP_RUN_CPPLINT OFF CACHE BOOL "")
-set(SQLITECPP_RUN_CPPCHECK OFF CACHE BOOL "")
-set(SQLITECPP_RUN_DOXYGEN OFF CACHE BOOL "")
-set(SQLITECPP_BUILD_EXAMPLES OFF CACHE BOOL "")
-set(SQLITECPP_BUILD_TESTS OFF CACHE BOOL "")
-
-FetchContent_MakeAvailable(SQLiteCpp)
 
 # ==================================================================
 # Subdirectories
