@@ -175,7 +175,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     name: Lint and Format Check
-    timeout-minutes: 10
+    timeout-minutes: 20
     container:
       image: archlinux:base-devel
 
@@ -185,19 +185,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      #   - name: Cache build artifacts (for clang-tidy)
-      #     uses: actions/cache@v4
-      #     with:
-      #       path: |
-      #         ./build/
-      #         ~/.cache/ccache
-      #         ~/.ccache
-      #         ~/.config/ccache
-      #       key: lint-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-${{ github.sha }}
-      #       restore-keys: |
-      #         lint-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-
-      #         lint-${{ runner.os }}-
-      #         build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/pacman/pkg
+            /home/aur/.cache/yay
+            /home/aur/yay
+          key: arch-deps-${{ runner.os }}-${{ hashFiles('.github/workflows/*.yml') }}-v1
+          restore-keys: |
+            arch-deps-${{ runner.os }}-v1
+            arch-deps-${{ runner.os }}-
 
       - name: Install dependencies
         run: |
@@ -208,7 +206,11 @@ jobs:
           useradd -m -G wheel -s /bin/bash aur
           echo 'aur ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
-          # Install yay as the aur user
+          # Create cache directories
+          mkdir -p /home/aur/.cache/yay
+          chown -R aur:aur /home/aur
+
+          # Install yay
           su - aur -c "
             git clone https://aur.archlinux.org/yay.git
             cd yay
@@ -217,7 +219,7 @@ jobs:
 
           # Install packages
           su - aur -c "
-            yay -Sy --noconfirm \
+            yay -Sy --noconfirm --needed \
               clang \
               cmake \
               gtkmm-4.0 \
