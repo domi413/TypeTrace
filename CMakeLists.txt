@@ -83,11 +83,21 @@ configure_file(
 # Dependencies
 # ==================================================================
 
-find_package(PkgConfig REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
-find_package(SQLiteCpp CONFIG REQUIRED)
+# Vcpkg dependencies (commented out for system-wide packages)
+# find_package(PkgConfig REQUIRED)
+# find_package(spdlog CONFIG REQUIRED)
+# find_package(SQLiteCpp CONFIG REQUIRED)
+# pkg_check_modules(DEPS REQUIRED libudev libinput libevdev)
 
+# SYSTEM-WIDE DEPENDENCIES
+find_package(PkgConfig REQUIRED)
+
+
+# System-wide package dependencies
+pkg_check_modules(SPDLOG REQUIRED spdlog)
+pkg_check_modules(SQLITE3 REQUIRED sqlite3)
 pkg_check_modules(DEPS REQUIRED libudev libinput libevdev)
+pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 
 # ==================================================================
 # Subdirectories

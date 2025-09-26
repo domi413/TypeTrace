@@ -68,52 +68,52 @@ jobs:
           verbose: true
           use_cspell_files: false
 
-  build:
-    runs-on: ${{ matrix.os }}
-    name: Build (${{ matrix.os }})
-    timeout-minutes: 60
-    strategy:
-      matrix:
-        os:
-          # - windows-2022
-          - ubuntu-24.04
-          # - macos-14 # arm64
-          # - macos-13
-        compiler:
-          - llvm
+  # build:
+  #   runs-on: ${{ matrix.os }}
+  #   name: Build (${{ matrix.os }})
+  #   timeout-minutes: 60
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         # - windows-2022
+  #         - ubuntu-24.04
+  #         # - macos-14 # arm64
+  #         # - macos-13
+  #       compiler:
+  #         - llvm
 
-    if: ${{ !github.event.pull_request.draft }}
+  #   if: ${{ !github.event.pull_request.draft }}
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v5
 
-      - name: Cache CMake build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ./build/
-            ~/vcpkg/
-          key: build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', 'vcpkg.json') }}-${{ github.sha }}
-          restore-keys: |
-            build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', 'vcpkg.json') }}-
-            build-${{ runner.os }}-
+  #     - name: Cache CMake build
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ./build/
+  #           ~/vcpkg/
+  #         key: build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', 'vcpkg.json') }}-${{ github.sha }}
+  #         restore-keys: |
+  #           build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', 'vcpkg.json') }}-
+  #           build-${{ runner.os }}-
 
-      - name: Setup C++
-        uses: aminya/setup-cpp@v1
-        with:
-          compiler: llvm
-          cmake: true
-          ninja: true
-          vcpkg: true
-          # ccache: true  (Seems to make the pipeline fail (don't know why)
+  #     - name: Setup C++
+  #       uses: aminya/setup-cpp@v1
+  #       with:
+  #         compiler: llvm
+  #         cmake: true
+  #         ninja: true
+  #         vcpkg: true
+  #         # ccache: true  (Seems to make the pipeline fail (don't know why)
 
-      - name: Set vcpkg environment
-        run: |
-          echo "VCPKG_ROOT=$HOME/vcpkg" >> $GITHUB_ENV
+  #     - name: Set vcpkg environment
+  #       run: |
+  #         echo "VCPKG_ROOT=$HOME/vcpkg" >> $GITHUB_ENV
 
-      - name: Build project
-        run: make build
+  #     - name: Build project
+  #       run: make build
 
   # test:
   #   runs-on: ubuntu-latest
@@ -176,6 +176,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint and Format Check
     timeout-minutes: 10
+    container:
+      image: archlinux:base-devel
 
     if: ${{ !github.event.pull_request.draft }}
 
@@ -197,46 +199,28 @@ jobs:
       #         lint-${{ runner.os }}-
       #         build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-
 
-      #   - name: Setup C++
-      #     uses: aminya/setup-cpp@v1
-      #     with:
-      #       compiler: llvm
-      #       cmake: true
-      #       ninja: true
-      #       clang-tidy: true
-      #       clang-format: true
-
-      #   - name: Setup uv
-      #     uses: astral-sh/setup-uv@v6
-      #     with:
-      #       version: "latest"
-      #       enable-cache: true
-
-      #   - name: Install gersemi
-      #     run: uv pip install gersemi
-
-      # - name: Build project
-      #   run: make build
-
-      # - name: Check code formatting
-      #   run: make check-format
-
-      - name: Run clang-tidy
-        uses: cpp-linter/cpp-linter-action@v2
-        id: linter
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          style: "file"
-          tidy-checks: ""
-          thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
-          file-annotations: true
-          step-summary: true
-          tidy-review: false
-          format-review: false
-
-      - name: Fail if linting issues found
-        if: steps.linter.outputs.checks-failed > 0
+      - name: Install dependencies
         run: |
-          echo "❌ Linting failed with ${{ steps.linter.outputs.checks-failed }} issues"
-          exit 1
+          pacman -S --needed git base-devel
+          git clone https://aur.archlinux.org/yay.git
+          cd yay
+          makepkg -si
+
+          yay -Sy --noconfirm --needed \
+            clang \
+            cmake \
+            gtkmm-4.0 \
+            make \
+            spdlog \
+            sqlite \
+            sqlitecpp \
+            ninja \
+            libevdev \
+            pkgconf \
+            python-gersemi
+
+      - name: Check formatting
+        run: make check-format
+
+      - name: Run lint
+        run: make lint
