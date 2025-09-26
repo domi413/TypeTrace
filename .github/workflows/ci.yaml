@@ -108,6 +108,10 @@ jobs:
           vcpkg: true
           # ccache: true  (Seems to make the pipeline fail (don't know why)
 
+      - name: Set vcpkg environment
+        run: |
+          echo "VCPKG_ROOT=$HOME/vcpkg" >> $GITHUB_ENV
+
       - name: Build project
         run: make build
 
