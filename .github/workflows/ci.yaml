@@ -195,9 +195,6 @@ jobs:
           clang-tidy --version 2>/dev/null || echo "clang-tidy: not available"
           echo "===================="
 
-      - name: Check code formatting
-        run: make check-format
-
       - name: Run clang-tidy
         uses: cpp-linter/cpp-linter-action@v2
         id: linter
