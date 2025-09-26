@@ -71,7 +71,7 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     name: Build (${{ matrix.os }})
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       matrix:
         os:
@@ -176,6 +176,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint and Format Check
     timeout-minutes: 10
+    container: debian:stable-slim
 
     if: ${{ !github.event.pull_request.draft }}
 
@@ -185,6 +186,14 @@ jobs:
 
       - name: Install gersemi
         run: pip install gersemi
+
+      - name: Print tool versions
+        run: |
+          echo "=== Tool Versions ==="
+          clang --version 2>/dev/null || echo "clang: not available"
+          clang-format --version 2>/dev/null || echo "clang-format: not available"
+          clang-tidy --version 2>/dev/null || echo "clang-tidy: not available"
+          echo "===================="
 
       - name: Check code formatting
         run: make check-format
