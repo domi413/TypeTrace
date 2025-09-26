@@ -71,7 +71,7 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     name: Build (${{ matrix.os }})
-    # timeout-minutes: 20
+    timeout-minutes: 60
     strategy:
       matrix:
         os:
@@ -172,71 +172,71 @@ jobs:
   #         name: coverage-reports
   #         path: coverage.html
 
-  # lint:
-  #   runs-on: ubuntu-latest
-  #   name: Lint and Format Check
-  #   timeout-minutes: 10
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint and Format Check
+    timeout-minutes: 10
 
-  #   if: ${{ !github.event.pull_request.draft }}
+    if: ${{ !github.event.pull_request.draft }}
 
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     - name: Cache build artifacts (for clang-tidy)
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: |
-  #           ./build/
-  #           ~/.cache/ccache
-  #           ~/.ccache
-  #           ~/.config/ccache
-  #         key: lint-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-${{ github.sha }}
-  #         restore-keys: |
-  #           lint-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-
-  #           lint-${{ runner.os }}-
-  #           build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-
+      #   - name: Cache build artifacts (for clang-tidy)
+      #     uses: actions/cache@v4
+      #     with:
+      #       path: |
+      #         ./build/
+      #         ~/.cache/ccache
+      #         ~/.ccache
+      #         ~/.config/ccache
+      #       key: lint-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-${{ github.sha }}
+      #       restore-keys: |
+      #         lint-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-
+      #         lint-${{ runner.os }}-
+      #         build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-
 
-  #     - name: Setup C++
-  #       uses: aminya/setup-cpp@v1
-  #       with:
-  #         compiler: llvm
-  #         cmake: true
-  #         ninja: true
-  #         clang-tidy: true
-  #         clang-format: true
+      #   - name: Setup C++
+      #     uses: aminya/setup-cpp@v1
+      #     with:
+      #       compiler: llvm
+      #       cmake: true
+      #       ninja: true
+      #       clang-tidy: true
+      #       clang-format: true
 
-  #     - name: Setup uv
-  #       uses: astral-sh/setup-uv@v6
-  #       with:
-  #         version: "latest"
-  #         enable-cache: true
+      #   - name: Setup uv
+      #     uses: astral-sh/setup-uv@v6
+      #     with:
+      #       version: "latest"
+      #       enable-cache: true
 
-  #     - name: Install gersemi
-  #       run: uv pip install gersemi
+      #   - name: Install gersemi
+      #     run: uv pip install gersemi
 
-  #     - name: Build project
-  #       run: make build
+      # - name: Build project
+      #   run: make build
 
-  #     - name: Check code formatting
-  #       run: make check-format
+      # - name: Check code formatting
+      #   run: make check-format
 
-  #     - name: Run clang-tidy
-  #       uses: cpp-linter/cpp-linter-action@v2
-  #       id: linter
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         style: "file"
-  #         tidy-checks: ""
-  #         thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
-  #         file-annotations: true
-  #         step-summary: true
-  #         tidy-review: false
-  #         format-review: false
+      - name: Run clang-tidy
+        uses: cpp-linter/cpp-linter-action@v2
+        id: linter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          style: "file"
+          tidy-checks: ""
+          thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
+          file-annotations: true
+          step-summary: true
+          tidy-review: false
+          format-review: false
 
-  #     - name: Fail if linting issues found
-  #       if: steps.linter.outputs.checks-failed > 0
-  #       run: |
-  #         echo "❌ Linting failed with ${{ steps.linter.outputs.checks-failed }} issues"
-  #         exit 1
+      - name: Fail if linting issues found
+        if: steps.linter.outputs.checks-failed > 0
+        run: |
+          echo "❌ Linting failed with ${{ steps.linter.outputs.checks-failed }} issues"
+          exit 1
