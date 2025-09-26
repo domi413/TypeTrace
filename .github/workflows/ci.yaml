@@ -226,7 +226,6 @@ jobs:
               spdlog \
               sqlite \
               sqlitecpp \
-              ninja \
               libevdev \
               pkgconf \
               python-gersemi
