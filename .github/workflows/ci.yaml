@@ -221,6 +221,7 @@ jobs:
               clang \
               cmake \
               gtkmm-4.0 \
+              glib2 \
               make \
               ninja \
               spdlog \
