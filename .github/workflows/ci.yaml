@@ -186,9 +186,6 @@ jobs:
       - name: Install gersemi
         run: pip install gersemi
 
-      - name: Build project
-        run: make build
-
       - name: Check code formatting
         run: make check-format
 
