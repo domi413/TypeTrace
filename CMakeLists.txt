@@ -21,6 +21,33 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # ==================================================================
+# Compiler Flags
+# ==================================================================
+
+# Global warning flags for all targets
+add_compile_options(
+    -Wall
+    -Wcast-align
+    -Wconversion
+    -Wdouble-promotion
+    -Werror
+    -Wextra
+    -Wformat=2
+    -Wmisleading-indentation
+    -Wnon-virtual-dtor
+    -Wnull-dereference
+    -Wold-style-cast
+    -Woverloaded-virtual
+    -Wpedantic
+    -Wshadow
+    -Wsign-conversion
+    -Wunused
+)
+
+# Global link options
+add_link_options(-flto -Wl,--gc-sections)
+
+# ==================================================================
 # Version Information
 # ==================================================================
 
@@ -68,7 +95,7 @@ pkg_check_modules(DEPS REQUIRED libudev libinput libevdev)
 
 add_subdirectory(typetrace/common)
 add_subdirectory(typetrace/backend)
-# add_subdirectory(typetrace/frontend)
+add_subdirectory(typetrace/frontend)
 # add_subdirectory(tests)
 
 # ==================================================================

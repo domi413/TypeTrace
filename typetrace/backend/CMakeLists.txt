@@ -1,5 +1,11 @@
-add_executable(
-    typetrace_backend
+# Backend executable for TypeTrace
+
+# Find required dependencies
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBEVDEV REQUIRED libevdev)
+
+# Source files
+set(BACKEND_SOURCES
     cli/cli.cpp
     database_manager/database_manager.cpp
     dbus/dbus.cpp
@@ -7,44 +13,22 @@ add_executable(
     main.cpp
 )
 
+# Create executable
+add_executable(typetrace_backend ${BACKEND_SOURCES})
+
+# Link libraries
 target_link_libraries(
     typetrace_backend
     PRIVATE typetrace_common SQLiteCpp ${DEPS_LIBRARIES}
 )
 
+# Include directories
 target_include_directories(
     typetrace_backend
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PUBLIC cli
-    PUBLIC database_manager
-    PUBLIC dbus
-    PUBLIC event_handler
-    PRIVATE ${CMAKE_BINARY_DIR}/generated ${DEPS_INCLUDE_DIRS}
-)
-
-target_compile_options(
-    typetrace_backend
     PRIVATE
-        # Optimization
-        -O3
-        # Warnings
-        -Wall
-        -Wcast-align
-        -Wconversion
-        -Wdouble-promotion
-        -Werror
-        -Wextra
-        -Wformat=2
-        -Wmisleading-indentation
-        -Wnon-virtual-dtor
-        -Wnull-dereference
-        -Wold-style-cast
-        -Woverloaded-virtual
-        -Wpedantic
-        -Wshadow
-        -Wsign-conversion
-        -Wunused
-        ${DEPS_CFLAGS_OTHER}
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_BINARY_DIR}/generated
+        ${DEPS_INCLUDE_DIRS}
+        ${LIBEVDEV_INCLUDE_DIRS}
+    PUBLIC cli database_manager dbus event_handler
 )
-
-target_link_options(typetrace_backend PRIVATE -flto -Wl,--gc-sections)

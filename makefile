@@ -18,6 +18,10 @@ run: build
 	@echo "Running the typetrace backend..."
 	@./build/typetrace/backend/typetrace_backend
 
+run-frontend: build
+	@echo "Running the typetrace frontend..."
+	@./build/typetrace/frontend/typetrace_frontend
+
 debug: build
 	@echo "Running the typetrace backend in debug mode..."
 	@./build/typetrace/backend/typetrace_backend -d

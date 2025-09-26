@@ -1,38 +1,30 @@
-add_library(typetrace_common STATIC logger/logger.cpp)
+# Common library for TypeTrace
 
-target_include_directories(
-    typetrace_common
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PUBLIC constants
-    PUBLIC exceptions
-    PUBLIC logger
-    PUBLIC sql
-    PUBLIC types
-    PUBLIC version
+# Find required dependencies
+find_package(spdlog CONFIG REQUIRED)
+
+# Source files
+set(COMMON_SOURCES
+    logger/logger.cpp
 )
 
-target_link_libraries(typetrace_common PUBLIC spdlog::spdlog)
+# Create static library
+add_library(typetrace_common STATIC ${COMMON_SOURCES})
 
-target_compile_options(
-    typetrace_common
-    PRIVATE
-        -O3
-        -Wall
-        -Wcast-align
-        -Wconversion
-        -Wdouble-promotion
-        -Werror
-        -Wextra
-        -Wformat=2
-        -Wmisleading-indentation
-        -Wnon-virtual-dtor
-        -Wnull-dereference
-        -Wold-style-cast
-        -Woverloaded-virtual
-        -Wpedantic
-        -Wshadow
-        -Wsign-conversion
-        -Wunused
+# Link libraries
+target_link_libraries(typetrace_common
+    PUBLIC
+        spdlog::spdlog
 )
 
-target_link_options(typetrace_common PRIVATE -flto -Wl,--gc-sections)
+# Include directories
+target_include_directories(typetrace_common
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        constants
+        exceptions
+        logger
+        sql
+        types
+        version
+)
