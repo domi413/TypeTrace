@@ -1,28 +1,17 @@
-#pragma once
-
 #include <gtkmm/button.h>
 #include <gtkmm/window.h>
 
-namespace TypeTrace::Frontend {
+namespace typetrace::frontend {
 
-class TypeTraceWindow : public Gtk::Window
+class Application : public Gtk::Window
 {
   public:
-    TypeTraceWindow();
-    TypeTraceWindow(const TypeTraceWindow &) = delete;
-    TypeTraceWindow(TypeTraceWindow &&) = delete;
+    Application();
 
-    auto operator=(const TypeTraceWindow &) -> TypeTraceWindow & = delete;
-    auto operator=(TypeTraceWindow &&) -> TypeTraceWindow & = delete;
-
-    ~TypeTraceWindow() override = default;
-
-  protected:
-    // Signal handlers:
+  private:
     void on_button_clicked();
 
-    // Member widgets:
     Gtk::Button button;
 };
 
-} // namespace TypeTrace::Frontend
+} // namespace typetrace::frontend

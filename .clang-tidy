@@ -8,6 +8,7 @@ Checks: >
   -cppcoreguidelines-pro-type-vararg,
   -hicpp-vararg,
   -fuchsia-default-arguments-calls,
+  -fuchsia-multiple-inheritance,
   -fuchsia-trailing-return,
   -llvm-header-guard,
   -llvm-header-guard,

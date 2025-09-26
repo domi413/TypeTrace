@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace typetrace {
+namespace typetrace::backend {
 
 class DatabaseManager
 {
@@ -27,6 +27,6 @@ class DatabaseManager
     std::unique_ptr<SQLite::Database> db;
 };
 
-} // namespace typetrace
+} // namespace typetrace::backend
 
 #endif

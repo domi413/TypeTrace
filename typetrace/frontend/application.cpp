@@ -3,23 +3,21 @@
 #include <gtkmm.h>
 #include <print>
 
-namespace TypeTrace::Frontend {
+namespace typetrace::frontend {
 
 // creates a new button with label "TypeTrace".
-TypeTraceWindow::TypeTraceWindow() : button("TypeTrace")
+Application::Application() : button("TypeTrace")
 {
 
-    // When the button receives the "clicked" signal, it will call the
-    // on_button_clicked() method defined below.
-    button.signal_clicked().connect(sigc::mem_fun(*this, &TypeTraceWindow::on_button_clicked));
+    button.signal_clicked().connect(sigc::mem_fun(*this, &Application::on_button_clicked));
 
     // This packs the button into the Window (a container).
     set_child(button);
 }
 
-void TypeTraceWindow::on_button_clicked()
+auto Application::on_button_clicked() -> void
 {
     std::println("TypeTrace Frontend Started!");
 }
 
-} // namespace TypeTrace::Frontend
+} // namespace typetrace::frontend

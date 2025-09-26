@@ -16,7 +16,7 @@
 #include <memory>
 #include <vector>
 
-namespace typetrace {
+namespace typetrace::backend {
 
 DatabaseManager::DatabaseManager(const std::filesystem::path &db_dir) :
   db_file(db_dir / DB_FILE_NAME)
@@ -83,4 +83,4 @@ auto DatabaseManager::createTables() -> void
     }
 }
 
-} // namespace typetrace
+} // namespace typetrace::backend

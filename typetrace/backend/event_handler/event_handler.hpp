@@ -11,7 +11,7 @@
 #include <optional>
 #include <vector>
 
-namespace typetrace {
+namespace typetrace::backend {
 
 using Clock = std::chrono::steady_clock;
 
@@ -67,6 +67,6 @@ class EventHandler
     std::unique_ptr<struct udev, decltype(&udev_unref)> udev{ nullptr, &udev_unref };
 };
 
-} // namespace typetrace
+} // namespace typetrace::backend
 
 #endif

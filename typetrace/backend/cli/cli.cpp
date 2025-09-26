@@ -16,7 +16,7 @@
 #include <string_view>
 #include <vector>
 
-namespace typetrace {
+namespace typetrace::backend {
 
 Cli::Cli(std::span<char *> args)
 {
@@ -104,4 +104,4 @@ auto Cli::parseArguments(std::span<char *> args) -> void
     initLogger(debug_mode);
 }
 
-} // namespace typetrace
+} // namespace typetrace::backend
