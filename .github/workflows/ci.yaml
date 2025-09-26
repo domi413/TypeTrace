@@ -215,13 +215,14 @@ jobs:
             makepkg -si --noconfirm
           "
 
-          # Install AUR packages as the aur user
+          # Install packages
           su - aur -c "
             yay -Sy --noconfirm \
               clang \
               cmake \
               gtkmm-4.0 \
               make \
+              ninja \
               spdlog \
               sqlite \
               sqlitecpp \
