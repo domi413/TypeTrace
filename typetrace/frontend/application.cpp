@@ -14,7 +14,8 @@ Application::Application() : button("TypeTrace")
     set_child(button);
 }
 
-void Application::onButtonClicked() // NOLINT(readability-convert-member-functions-to-static)
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+auto Application::onButtonClicked() -> void
 {
     std::println("TypeTrace Frontend Started!");
 }
