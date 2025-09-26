@@ -184,8 +184,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install gersemi
-        run: pip install gersemi
+      # - name: Install gersemi
+      #   run: pip install gersemi
 
       - name: Print tool versions
         run: |
