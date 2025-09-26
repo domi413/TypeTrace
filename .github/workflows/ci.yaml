@@ -148,7 +148,7 @@ jobs:
   #         cmake: true
   #         ninja: true
   #         vcpkg: true
-  #         ccache: true
+  #         ccache: false
   #         gcovr: true
 
   #     - name: Build project
