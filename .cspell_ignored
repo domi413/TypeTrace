@@ -10,6 +10,7 @@ libudev
 nodiscard
 nolint
 println
+sigc
 sqlitecpp
 wconversion
 wdouble
