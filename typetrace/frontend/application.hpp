@@ -9,7 +9,7 @@ class Application : public Gtk::Window
     Application();
 
   private:
-    void on_button_clicked();
+    auto onButtonClicked() -> void;
 
     Gtk::Button button;
 };

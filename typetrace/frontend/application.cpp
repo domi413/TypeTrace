@@ -1,21 +1,20 @@
 #include "application.hpp"
 
-#include <gtkmm.h>
 #include <print>
+#include <sigc++-3.0/sigc++/functors/mem_fun.h>
 
 namespace typetrace::frontend {
 
-// creates a new button with label "TypeTrace".
 Application::Application() : button("TypeTrace")
 {
 
-    button.signal_clicked().connect(sigc::mem_fun(*this, &Application::on_button_clicked));
+    button.signal_clicked().connect(sigc::mem_fun(*this, &Application::onButtonClicked));
 
     // This packs the button into the Window (a container).
     set_child(button);
 }
 
-auto Application::on_button_clicked() -> void
+void Application::onButtonClicked() // NOLINT(readability-convert-member-functions-to-static)
 {
     std::println("TypeTrace Frontend Started!");
 }
