@@ -227,6 +227,7 @@ jobs:
               sqlite \
               sqlitecpp \
               libevdev \
+              libinput \
               pkgconf \
               python-gersemi
           "
