@@ -99,14 +99,14 @@ jobs:
             build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', 'vcpkg.json') }}-
             build-${{ runner.os }}-
 
-      - name: Setup C++ (without ccache)
+      - name: Setup C++
         uses: aminya/setup-cpp@v1
         with:
           compiler: llvm
           cmake: true
           ninja: true
           vcpkg: true
-          # ccache: true  # Remove this line
+          # ccache: true  (Seems to make the pipeline fail (don't know why)
 
       - name: Build project
         run: make build

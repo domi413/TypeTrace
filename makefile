@@ -7,7 +7,7 @@ all: clean build
 
 build:
 	@echo "Configuring and building with Ninja..."
-	@cmake --preset=default -GNinja
+	@cmake --preset=vcpkg
 	@cmake --build build
 
 clean:
