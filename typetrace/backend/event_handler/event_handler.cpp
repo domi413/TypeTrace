@@ -1,4 +1,4 @@
-#include "eventhandler.hpp"
+#include "event_handler.hpp"
 
 #include "constants.hpp"
 #include "exceptions.hpp"
@@ -30,14 +30,12 @@
 
 namespace typetrace {
 
-/// Sets the callback function to be called when the buffer needs to be flushed
 auto EventHandler::setBufferCallback(
   std::function<void(const std::vector<KeystrokeEvent> &)> callback) -> void
 {
     buffer_callback = std::move(callback);
 }
 
-/// Traces keyboard events and processes them into keystroke events
 auto EventHandler::trace() -> void
 {
     struct pollfd pfd = { .fd = libinput_get_fd(li.get()), .events = POLLIN, .revents = 0 };
@@ -70,14 +68,12 @@ auto EventHandler::trace() -> void
     }
 }
 
-/// Checks if the current user is a member of the 'input' group
 auto EventHandler::checkInputGroupMembership() -> void
 {
     getLogger()->info("Checking for 'input' group membership...");
 
     struct group const *const input_group = getgrnam("input");
     if (input_group == nullptr) {
-        getLogger()->critical("Input group does not exist. Please create it");
         throw SystemError("Input group does not exist. Please create it");
     }
 
@@ -88,7 +84,6 @@ auto EventHandler::checkInputGroupMembership() -> void
     getgroups(ngroups, groups.data());
 
     if (!(std::ranges::find(groups, input_gid) != groups.end())) {
-        getLogger()->error("User is not a member of the 'input' group");
         printInputGroupPermissionHelp();
         throw PermissionError("User not in 'input' group. See instructions above");
     }
@@ -96,7 +91,6 @@ auto EventHandler::checkInputGroupMembership() -> void
     getLogger()->info("User is a member of the 'input' group");
 }
 
-/// Prints help information for input group permission issues
 auto EventHandler::printInputGroupPermissionHelp() -> void
 {
     std::println(stderr, R"(
@@ -111,24 +105,20 @@ Then log out and log back in for the changes to take effect.
 )");
 }
 
-/// Checks if input devices are accessible and functional
 auto EventHandler::checkDeviceAccessibility() const -> void
 {
     getLogger()->info("Checking for device accessibility...");
 
     if (li == nullptr) {
-        getLogger()->critical("Libinput is not initialized. Cannot check device accessibility");
         throw SystemError("Libinput is not initialized. Cannot check device accessibility");
     }
 
     if (libinput_dispatch(li.get()) < 0) {
-        getLogger()->critical("Failed to dispatch libinput events");
         throw SystemError("Failed to dispatch libinput events");
     }
 
     struct libinput_event *event = libinput_get_event(li.get());
     if ((event == nullptr) || libinput_event_get_type(event) != LIBINPUT_EVENT_DEVICE_ADDED) {
-        getLogger()->critical("No input devices found or not accessible");
         throw SystemError("No input devices found or not accessible");
     }
 
@@ -136,7 +126,6 @@ auto EventHandler::checkDeviceAccessibility() const -> void
     libinput_event_destroy(event);
 }
 
-/// Initializes libinput context and assigns seat
 auto EventHandler::initializeLibinput() -> void
 {
     getLogger()->info("Initializing libinput context...");
@@ -145,33 +134,29 @@ auto EventHandler::initializeLibinput() -> void
         .open_restricted = [](const char *const path, const int flags, void *) -> int {
             return ::open(path, flags);
         },
-        .close_restricted = [](const int fd, void *) { ::close(fd); }
+        .close_restricted = [](const int fd, void *) -> void { ::close(fd); }
     };
 
     // Initialize udev
     udev.reset(udev_new());
     if (udev == nullptr) {
-        getLogger()->critical("Failed to initialize udev");
         throw SystemError("Failed to initialize udev");
     }
 
     // Initialize libinput
     li.reset(libinput_udev_create_context(&interface, nullptr, udev.get()));
     if (li == nullptr) {
-        getLogger()->critical("Failed to initialize libinput from udev");
         throw SystemError("Failed to initialize libinput from udev");
     }
 
     // Assign seat0
     if (libinput_udev_assign_seat(li.get(), "seat0") < 0) {
-        getLogger()->critical("Failed to assign seat to libinput");
         throw SystemError("Failed to assign seat to libinput");
     }
 
     getLogger()->info("Libinput initialized successfully");
 }
 
-/// Processes a libinput keyboard event into a keystroke event
 auto EventHandler::processKeyboardEvent(struct libinput_event *const event)
   -> std::optional<KeystrokeEvent>
 {
@@ -197,18 +182,15 @@ auto EventHandler::processKeyboardEvent(struct libinput_event *const event)
                             std::chrono::zoned_time{ std::chrono::current_zone(), time_now }),
     };
 
-    if (getLogger()->should_log(spdlog::level::debug)) {
-        getLogger()->debug("Added keystroke [{}/{}] to buffer: {} (code: {})",
-                           buffer.size() + 1,
-                           BUFFER_SIZE,
-                           keystroke.key_name.data(),
-                           key_code);
-    }
+    getLogger()->debug("Added keystroke [{}/{}] to buffer: {} (code: {})",
+                       buffer.size() + 1,
+                       BUFFER_SIZE,
+                       keystroke.key_name.data(),
+                       key_code);
 
     return keystroke;
 }
 
-/// Determines if the buffer should be flushed based on size and time
 auto EventHandler::shouldFlush() const -> bool
 {
     if (buffer.size() >= BUFFER_SIZE) {
@@ -229,7 +211,6 @@ auto EventHandler::shouldFlush() const -> bool
     return false;
 }
 
-/// Flushes the current buffer by calling the buffer callback
 auto EventHandler::flushBuffer() -> void
 {
     if (buffer.empty()) {
@@ -237,15 +218,12 @@ auto EventHandler::flushBuffer() -> void
     }
 
     if (buffer_callback) {
-        if (getLogger()->should_log(spdlog::level::debug)) {
-            const auto elapsed_duration = Clock::now() - last_flush_time;
-            const auto elapsed_seconds
-              = std::chrono::duration_cast<std::chrono::duration<double>>(elapsed_duration).count();
+        const auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(
+                                       Clock::now() - last_flush_time)
+                                       .count();
+        getLogger()->debug(
+          "Flushing buffer with {} events in {:.2f}s to database", buffer.size(), elapsed_seconds);
 
-            getLogger()->debug("Flushing buffer with {} events in {:.2f}s to database",
-                               buffer.size(),
-                               elapsed_seconds);
-        }
         buffer_callback(buffer);
     }
 

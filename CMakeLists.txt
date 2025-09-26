@@ -1,11 +1,12 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 4.1)
 
 # ==================================================================
 # Project Definition
 # ==================================================================
 
 set(CMAKE_CXX_COMPILER "clang++")
-project(TypeTrace
+project(
+    TypeTrace
     VERSION 0.1.0
     DESCRIPTION "The backend for the TypeTrace project"
     LANGUAGES CXX
@@ -18,6 +19,33 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
+
+# ==================================================================
+# Compiler Flags
+# ==================================================================
+
+# Global warning flags for all targets
+add_compile_options(
+    -Wall
+    -Wcast-align
+    -Wconversion
+    -Wdouble-promotion
+    -Werror
+    -Wextra
+    -Wformat=2
+    -Wmisleading-indentation
+    -Wnon-virtual-dtor
+    -Wnull-dereference
+    -Wold-style-cast
+    -Woverloaded-virtual
+    -Wpedantic
+    -Wshadow
+    -Wsign-conversion
+    -Wunused
+)
+
+# Global link options
+add_link_options(-flto -Wl,--gc-sections)
 
 # ==================================================================
 # Version Information
@@ -45,7 +73,11 @@ else()
     set(GIT_COMMIT "unknown")
 endif()
 
-configure_file(typetrace/common/include/version.hpp.in ${CMAKE_BINARY_DIR}/generated/version.hpp @ONLY)
+configure_file(
+    typetrace/common/version/version.hpp.in
+    ${CMAKE_BINARY_DIR}/generated/version.hpp
+    @ONLY
+)
 
 # ==================================================================
 # Dependencies
@@ -63,7 +95,7 @@ pkg_check_modules(DEPS REQUIRED libudev libinput libevdev)
 
 add_subdirectory(typetrace/common)
 add_subdirectory(typetrace/backend)
-# add_subdirectory(typetrace/frontend)
+add_subdirectory(typetrace/frontend)
 # add_subdirectory(tests)
 
 # ==================================================================
@@ -75,5 +107,8 @@ install(TARGETS typetrace_backend RUNTIME DESTINATION bin)
 message(STATUS "TypeTrace Backend:")
 message(STATUS "  Version: ${PROJECT_VERSION} (${GIT_COMMIT})")
 message(STATUS "  Build: ${CMAKE_BUILD_TYPE}")
-message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(
+    STATUS
+    "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
+)
 message(STATUS "  Standard: C++${CMAKE_CXX_STANDARD}")

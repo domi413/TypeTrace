@@ -27,17 +27,17 @@ jobs:
           BOLD_GREEN="\033[1;32m"
           RESET="\033[0m"
 
-          if [ ! -f ".dictionaries/project-words.txt" ]; then
-            echo -e "${BOLD_RED}Error: .dictionaries/project-words.txt not found${RESET}"
+          if [ ! -f ".cspell_ignored" ]; then
+            echo -e "${BOLD_RED}Error: .cspell_ignored not found${RESET}"
             exit 1
           fi
 
           # Check if file is sorted (case-insensitive)
-          if sort -cf .dictionaries/project-words.txt; then
-            echo -e "${BOLD_GREEN}✓ .dictionaries/project-words.txt is properly sorted${RESET}"
+          if sort -cf .cspell_ignored; then
+            echo -e "${BOLD_GREEN}✓ .cspell_ignored is properly sorted${RESET}"
           else
-            echo -e "${BOLD_RED}Error: .dictionaries/project-words.txt is not sorted alphabetically (case-insensitive)${RESET}"
-            echo -e "${BOLD_YELLOW}To fix this, run: sort -f .dictionaries/project-words.txt -o .dictionaries/project-words.txt${RESET}"
+            echo -e "${BOLD_RED}Error: .cspell_ignored is not sorted alphabetically (case-insensitive)${RESET}"
+            echo -e "${BOLD_YELLOW}To fix this, run: sort -f .cspell_ignored -o .cspell_ignored${RESET}"
             exit 1
           fi
         shell: bash
@@ -68,25 +68,31 @@ jobs:
           verbose: true
           use_cspell_files: false
 
-  lint:
-    runs-on: ubuntu-latest
-    name: Lint
-    timeout-minutes: 10
-    container: archlinux:latest
-
-    if: ${{ !github.event.pull_request.draft }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install archlinux dependencies
-        run: |
-          pacman -Sy --noconfirm --needed \
-            clang \
-            cmake \
-            libinput
-            # TODO: Add libsqlitecpp-dev (better to use vcpkg for proper library management)
-
-      - name: Run lint
-        run: make lint
+  # # TODO: Implement test, lint and formatting. We may not use
+  # # archlinux:latest or at least only one runner for all tasks (not
+  # # really clean solution)
+  # test:
+  #   runs-on: ubuntu-latest
+  #   name: Test
+  #   timeout-minutes: 10
+  #   container: archlinux:latest
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   name: Lint
+  #   timeout-minutes: 10
+  #   container: archlinux:latest
+  #
+  #   if: ${{ !github.event.pull_request.draft }}
+  #
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Install archlinux dependencies
+  #       run: |
+  #         pacman -Sy --noconfirm --needed \
+  #           clang \
+  #           cmake \
+  #
+  #     - name: Run lint
+  #       run: make lint

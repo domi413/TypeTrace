@@ -1,8 +1,8 @@
 #include "cli.hpp"
 
 #include "constants.hpp"
-#include "database.hpp"
-#include "eventhandler.hpp"
+#include "database_manager.hpp"
+#include "event_handler.hpp"
 #include "exceptions.hpp"
 #include "logger.hpp"
 #include "types.hpp"
@@ -18,7 +18,6 @@
 
 namespace typetrace {
 
-/// Constructs a CLI instance and parses command line arguments
 Cli::Cli(std::span<char *> args)
 {
     parseArguments(args);
@@ -27,19 +26,18 @@ Cli::Cli(std::span<char *> args)
     event_handler = std::make_unique<EventHandler>();
 
     // Set up callback for EventHandler to flush buffer to database
-    event_handler->setBufferCallback(
-      [this](const std::vector<KeystrokeEvent> &buffer) { db_manager->writeToDatabase(buffer); });
+    event_handler->setBufferCallback([this](const std::vector<KeystrokeEvent> &buffer) -> void {
+        db_manager->writeToDatabase(buffer);
+    });
 }
 
-/// Runs the main event loop for keystroke tracing
 auto Cli::run() -> void
 {
-    while (true) { // use eventhandler to quit
+    while (true) { // TODO(domi): Use eventhandler to quit
         event_handler->trace();
     }
-};
+}
 
-/// Displays help information and usage instructions
 auto Cli::showHelp(const char *program_name) -> void
 {
     std::print(R"(
@@ -58,15 +56,13 @@ You should run the frontend of TypeTrace which will run this.
 )",
                PROJECT_VERSION,
                program_name);
-};
+}
 
-/// Displays the program version information
 auto Cli::showVersion() -> void
 {
     std::println(PROJECT_VERSION);
-};
+}
 
-/// Gets the database directory path using XDG or fallback locations
 auto Cli::getDatabaseDir() -> std::filesystem::path
 {
     if (const char *xdg_path = std::getenv("XDG_DATA_HOME")) {
@@ -76,21 +72,19 @@ auto Cli::getDatabaseDir() -> std::filesystem::path
 
     const char *home = std::getenv("HOME");
     if (home == nullptr) {
-        getLogger()->critical("HOME environment variable is not set");
         throw SystemError("HOME environment variable is not set");
     }
 
     getLogger()->debug("Using default home directory: {}", home);
     return std::filesystem::path{ home } / ".local" / "share" / PROJECT_DIR_NAME;
-};
+}
 
-/// Parses and processes command line arguments
 auto Cli::parseArguments(std::span<char *> args) -> void
 {
     bool debug_mode{ false };
 
-    for (std::size_t i = 1; i < args.size(); i++) {
-        std::string_view arg{ args[i] };
+    for (const auto &arg_str : args.subspan(1)) {
+        std::string_view arg{ arg_str };
 
         if (arg == "-h" || arg == "--help") {
             showHelp(args[0]);
@@ -108,6 +102,6 @@ auto Cli::parseArguments(std::span<char *> args) -> void
     }
 
     initLogger(debug_mode);
-};
+}
 
 } // namespace typetrace

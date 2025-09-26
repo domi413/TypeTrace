@@ -1,8 +1,8 @@
 #ifndef TYPETRACE_CLI_HPP
 #define TYPETRACE_CLI_HPP
 
-#include "database.hpp"
-#include "eventhandler.hpp"
+#include "database_manager.hpp"
+#include "event_handler.hpp"
 
 #include <filesystem>
 #include <memory>
@@ -32,9 +32,8 @@ class Cli
     /// Gets the database directory path using XDG or fallback locations
     [[nodiscard]] static auto getDatabaseDir() -> std::filesystem::path;
 
-    std::unique_ptr<EventHandler> event_handler = std::make_unique<EventHandler>();
-    std::unique_ptr<DatabaseManager> db_manager
-      = std::make_unique<DatabaseManager>(getDatabaseDir());
+    std::unique_ptr<EventHandler> event_handler;
+    std::unique_ptr<DatabaseManager> db_manager;
 };
 
 } // namespace typetrace

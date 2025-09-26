@@ -5,6 +5,7 @@
 #include <iostream>
 #include <span>
 
+/// The main entry point of the program
 auto main(int argc, char *argv[]) -> int
 {
     try {
