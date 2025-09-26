@@ -51,7 +51,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Starting cspell
         uses: streetsidesoftware/cspell-action@v7
@@ -68,31 +68,123 @@ jobs:
           verbose: true
           use_cspell_files: false
 
-  # # TODO: Implement test, lint and formatting. We may not use
-  # # archlinux:latest or at least only one runner for all tasks (not
-  # # really clean solution)
-  # test:
-  #   runs-on: ubuntu-latest
-  #   name: Test
-  #   timeout-minutes: 10
-  #   container: archlinux:latest
-  # lint:
-  #   runs-on: ubuntu-latest
-  #   name: Lint
-  #   timeout-minutes: 10
-  #   container: archlinux:latest
-  #
-  #   if: ${{ !github.event.pull_request.draft }}
-  #
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Install archlinux dependencies
-  #       run: |
-  #         pacman -Sy --noconfirm --needed \
-  #           clang \
-  #           cmake \
-  #
-  #     - name: Run lint
-  #       run: make lint
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+
+    if: ${{ !github.event.pull_request.draft }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup C++
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: llvm
+          cmake: true
+          ninja: true
+          vcpkg: true
+          ccache: true
+
+      - name: Build project
+        run: make build
+
+  test:
+    runs-on: ubuntu-latest
+    name: Test
+    timeout-minutes: 5
+
+    if: ${{ !github.event.pull_request.draft }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup C++
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: llvm
+          cmake: true
+          ninja: true
+          vcpkg: true
+          ccache: true
+          gcovr: true
+
+      - name: Build project
+        run: make build
+
+      - name: Run tests
+        run: make test
+
+      - name: Check test coverage
+        uses: threeal/gcovr-action@v1
+        with:
+          fail-under-line: 60
+          html-out: coverage.html
+          print-summary: true
+          gcov-executable: llvm-cov gcov
+          # sonarqube-out: path_to_configure
+
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint and Format Check
+    timeout-minutes: 10
+
+    if: ${{ !github.event.pull_request.draft }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup C++
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: llvm
+          cmake: true
+          ninja: true
+          clang-tidy: true
+          clang-format: true
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Install gersemi
+        run: uv pip install gersemi
+
+      - name: Build project
+        run: make build
+
+      - name: Check code formatting
+        run: make check-format
+
+      - name: Run clang-tidy
+        uses: cpp-linter/cpp-linter-action@v2
+        id: linter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          style: "file"
+          tidy-checks: ""
+          thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
+          file-annotations: true
+          step-summary: true
+          tidy-review: false
+          format-review: false
+
+      - name: Fail if linting issues found
+        if: steps.linter.outputs.checks-failed > 0
+        run: |
+          echo "❌ Linting failed with ${{ steps.linter.outputs.checks-failed }} issues"
+          exit 1
