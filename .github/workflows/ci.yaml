@@ -70,6 +70,8 @@ jobs:
 
   build:
     runs-on: ${{ matrix.os }}
+    name: Build (${{ matrix.os }})
+    timeout-minutes: 10
     strategy:
       matrix:
         os:
@@ -79,7 +81,6 @@ jobs:
           - macos-13
         compiler:
           - llvm
-          - gcc
 
     if: ${{ !github.event.pull_request.draft }}
 
@@ -98,7 +99,7 @@ jobs:
             ~/Library/Caches/ccache
             ${{ env.LOCALAPPDATA }}/ccache
             ${{ env.XDG_CACHE_HOME }}/ccache
-          key: build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-${{ github.sha }}
+          key: build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json', 'vcpkg.json') }}-${{ github.sha }}
           restore-keys: |
             build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json', 'vcpkg.json') }}-
             build-${{ runner.os }}-
