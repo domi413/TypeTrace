@@ -175,7 +175,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     name: Lint and Format Check
-    timeout-minutes: 20
+    timeout-minutes: 10
     container:
       image: archlinux:base-devel
 
