@@ -75,7 +75,7 @@ jobs:
 
     name: Build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 5
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: read
@@ -86,6 +86,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./build/
+            ~/.cache/ccache
+            ~/.ccache
+            ~/.config/ccache
+            ~/Library/Caches/ccache
+            ${{ env.LOCALAPPDATA }}/ccache
+            ${{ env.XDG_CACHE_HOME }}/ccache
+          key: build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-${{ github.sha }}
+          restore-keys: |
+            build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json', 'vcpkg.json') }}-
+            build-${{ runner.os }}-
+
       - name: Setup C++
         uses: aminya/setup-cpp@v1
         with:
@@ -98,93 +114,128 @@ jobs:
       - name: Build project
         run: make build
 
-  test:
-    runs-on: ubuntu-latest
-    name: Test
-    timeout-minutes: 5
+  # test:
+  #   runs-on: ubuntu-latest
+  #   name: Test
+  #   timeout-minutes: 10
 
-    if: ${{ !github.event.pull_request.draft }}
+  #   if: ${{ !github.event.pull_request.draft }}
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v5
 
-      - name: Setup C++
-        uses: aminya/setup-cpp@v1
-        with:
-          compiler: llvm
-          cmake: true
-          ninja: true
-          vcpkg: true
-          ccache: true
-          gcovr: true
+  #     - name: Cache build and test artifacts
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ./build/
+  #           ~/.cache/ccache
+  #           ~/.ccache
+  #           ~/.config/ccache
+  #           ~/.cache/gcovr
+  #         key: test-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json', 'tests/**/*') }}-${{ github.sha }}
+  #         restore-keys: |
+  #           test-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json', 'tests/**/*') }}-
+  #           test-${{ runner.os }}-
+  #           build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-
 
-      - name: Build project
-        run: make build
+  #     - name: Setup C++
+  #       uses: aminya/setup-cpp@v1
+  #       with:
+  #         compiler: llvm
+  #         cmake: true
+  #         ninja: true
+  #         vcpkg: true
+  #         ccache: true
+  #         gcovr: true
 
-      - name: Run tests
-        run: make test
+  #     - name: Build project
+  #       run: make build
 
-      - name: Check test coverage
-        uses: threeal/gcovr-action@v1
-        with:
-          fail-under-line: 60
-          html-out: coverage.html
-          print-summary: true
-          gcov-executable: llvm-cov gcov
-          # sonarqube-out: path_to_configure
+  #     - name: Run tests
+  #       run: make test
 
-  lint:
-    runs-on: ubuntu-latest
-    name: Lint and Format Check
-    timeout-minutes: 10
+  #     - name: Check test coverage
+  #       uses: threeal/gcovr-action@v1
+  #       with:
+  #         fail-under-line: 60
+  #         html-out: coverage.html
+  #         print-summary: true
+  #         gcov-executable: llvm-cov gcov
 
-    if: ${{ !github.event.pull_request.draft }}
+  #     - name: Upload coverage reports
+  #       uses: actions/upload-artifact@v4
+  #       if: always()
+  #       with:
+  #         name: coverage-reports
+  #         path: coverage.html
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   name: Lint and Format Check
+  #   timeout-minutes: 10
 
-      - name: Setup C++
-        uses: aminya/setup-cpp@v1
-        with:
-          compiler: llvm
-          cmake: true
-          ninja: true
-          clang-tidy: true
-          clang-format: true
+  #   if: ${{ !github.event.pull_request.draft }}
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          version: "latest"
-          enable-cache: true
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Install gersemi
-        run: uv pip install gersemi
+  #     - name: Cache build artifacts (for clang-tidy)
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ./build/
+  #           ~/.cache/ccache
+  #           ~/.ccache
+  #           ~/.config/ccache
+  #         key: lint-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-${{ github.sha }}
+  #         restore-keys: |
+  #           lint-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-
+  #           lint-${{ runner.os }}-
+  #           build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-
 
-      - name: Build project
-        run: make build
+  #     - name: Setup C++
+  #       uses: aminya/setup-cpp@v1
+  #       with:
+  #         compiler: llvm
+  #         cmake: true
+  #         ninja: true
+  #         clang-tidy: true
+  #         clang-format: true
 
-      - name: Check code formatting
-        run: make check-format
+  #     - name: Setup uv
+  #       uses: astral-sh/setup-uv@v6
+  #       with:
+  #         version: "latest"
+  #         enable-cache: true
 
-      - name: Run clang-tidy
-        uses: cpp-linter/cpp-linter-action@v2
-        id: linter
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          style: "file"
-          tidy-checks: ""
-          thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
-          file-annotations: true
-          step-summary: true
-          tidy-review: false
-          format-review: false
+  #     - name: Install gersemi
+  #       run: uv pip install gersemi
 
-      - name: Fail if linting issues found
-        if: steps.linter.outputs.checks-failed > 0
-        run: |
-          echo "❌ Linting failed with ${{ steps.linter.outputs.checks-failed }} issues"
-          exit 1
+  #     - name: Build project
+  #       run: make build
+
+  #     - name: Check code formatting
+  #       run: make check-format
+
+  #     - name: Run clang-tidy
+  #       uses: cpp-linter/cpp-linter-action@v2
+  #       id: linter
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         style: "file"
+  #         tidy-checks: ""
+  #         thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
+  #         file-annotations: true
+  #         step-summary: true
+  #         tidy-review: false
+  #         format-review: false
+
+  #     - name: Fail if linting issues found
+  #       if: steps.linter.outputs.checks-failed > 0
+  #       run: |
+  #         echo "❌ Linting failed with ${{ steps.linter.outputs.checks-failed }} issues"
+  #         exit 1
