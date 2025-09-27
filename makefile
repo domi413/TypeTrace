@@ -1,4 +1,4 @@
-.PHONY: all clean run debug lint format check-format fix
+.PHONY: all clean run debug lint format check-format
 
 SOURCES_CPP = $(shell find typetrace/ tests/ -name "*.cpp" -o -name "*.hpp")
 SOURCES_CMake = $(shell find typetrace/ tests/ -name "*CMakeLists.txt")
@@ -54,11 +54,6 @@ lint: build
 	@echo "Running clang-tidy..."
 	@clang-tidy $(LINT_COMMON_FLAGS) $(LINT_TIDY_FLAGS) $(SOURCES_CPP)
 	@echo "✓ Linting complete"
-
-fix: build
-	@echo "Auto-fixing clang-tidy issues..."
-	@clang-tidy --fix $(LINT_COMMON_FLAGS) $(SOURCES_CPP)
-	@echo "✓ Auto-fixes applied"
 
 sort-dictionary:
 	@echo "Sorting dictionary..."
