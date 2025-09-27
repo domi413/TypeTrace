@@ -150,10 +150,7 @@ jobs:
     strategy:
       matrix:
         os:
-          # - windows-2022
           - ubuntu-24.04
-          # - macos-14 # arm64
-          # - macos-13
         compiler:
           - llvm
 
@@ -163,25 +160,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      # Install latest CMake and Ninja - more reliable than setup-cpp
-      - name: Setup CMake and Ninja
-        uses: lukka/get-cmake@latest
-
-      # Setup compiler only (no longer need vcpkg, cmake, ninja from setup-cpp)
-      - name: Setup C++ compiler
+      # Setup LLVM compiler only (minimal setup-cpp usage)
+      - name: Setup LLVM compiler
         uses: aminya/setup-cpp@v1
         with:
           compiler: llvm
-          # Removed: cmake, ninja, vcpkg (handled by other actions)
 
-      # Setup vcpkg with automatic caching - this replaces your manual cache
+      # Install latest CMake and Ninja with built-in caching
+      - name: Setup CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      # Setup vcpkg with automatic binary caching - does NOT run vcpkg install
+      # because run-cmake will handle it via the vcpkg.cmake toolchain
       - name: Setup vcpkg (with automatic binary caching)
         uses: lukka/run-vcpkg@v11
-        # The action automatically handles:
-        # - vcpkg installation and bootstrap
-        # - Binary caching to GitHub Actions cache
-        # - Cache key management
-        # No additional configuration needed for basic usage
 
-      - name: Build project
-        run: make build
+      # This is the recommended way - uses CMake presets and integrates perfectly with vcpkg
+      - name: Run CMake with vcpkg integration
+        uses: lukka/run-cmake@v10
+        with:
+          # Use your existing CMake preset that uses vcpkg toolchain
+          configurePreset: "default" # Replace with your actual preset name
+          buildPreset: "default" # Replace with your actual preset name>
