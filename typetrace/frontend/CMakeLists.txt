@@ -17,15 +17,16 @@ target_link_libraries(
 )
 
 # Include directories
-target_include_directories(typetrace_frontend
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
+target_include_directories(
+    typetrace_frontend
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 # System include directories (suppresses warnings)
-target_include_directories(typetrace_frontend
-    SYSTEM PRIVATE
-        ${GTKMM_INCLUDE_DIRS}
+target_include_directories(
+    typetrace_frontend
+    SYSTEM
+    PRIVATE ${GTKMM_INCLUDE_DIRS}
 )
 
 # Link directories

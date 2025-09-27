@@ -8,7 +8,7 @@
 #include <memory>
 #include <span>
 
-namespace typetrace {
+namespace typetrace::backend {
 
 class Cli
 {
@@ -36,6 +36,6 @@ class Cli
     std::unique_ptr<DatabaseManager> db_manager;
 };
 
-} // namespace typetrace
+} // namespace typetrace::backend
 
 #endif

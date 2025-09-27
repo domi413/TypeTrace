@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1)
+cmake_minimum_required(VERSION 3.31)
 
 # ==================================================================
 # Project Definition
@@ -83,11 +83,17 @@ configure_file(
 # Dependencies
 # ==================================================================
 
-find_package(PkgConfig REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
-find_package(SQLiteCpp CONFIG REQUIRED)
+include(FetchContent)
 
+# SYSTEM-WIDE DEPENDENCIES
+find_package(PkgConfig REQUIRED)
+
+
+# System-wide package dependencies
+pkg_check_modules(SPDLOG REQUIRED spdlog)
+pkg_check_modules(SQLITE3 REQUIRED sqlite3)
 pkg_check_modules(DEPS REQUIRED libudev libinput libevdev)
+pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 
 # ==================================================================
 # Subdirectories

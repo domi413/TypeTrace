@@ -28,7 +28,7 @@
 #include <utility>
 #include <vector>
 
-namespace typetrace {
+namespace typetrace::backend {
 
 auto EventHandler::setBufferCallback(
   std::function<void(const std::vector<KeystrokeEvent> &)> callback) -> void
@@ -231,4 +231,4 @@ auto EventHandler::flushBuffer() -> void
     last_flush_time = Clock::now();
 }
 
-} // namespace typetrace
+} // namespace typetrace::backend
