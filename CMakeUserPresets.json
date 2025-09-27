@@ -3,7 +3,7 @@
   "configurePresets": [
     {
       "name": "default",
-      "inherits": "system"
+      "inherits": "vcpkg"
     }
   ]
 }

@@ -2,11 +2,6 @@
   "version": 2,
   "configurePresets": [
     {
-      "name": "system",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build"
-    },
-    {
       "name": "vcpkg",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
