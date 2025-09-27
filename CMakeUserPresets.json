@@ -5,5 +5,11 @@
       "name": "default",
       "inherits": "vcpkg"
     }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "inherits": "vcpkg"
+    }
   ]
 }

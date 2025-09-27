@@ -146,39 +146,49 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     name: Build (${{ matrix.os }})
-    timeout-minutes: 10
+    timeout-minutes: 20
     strategy:
+      fail-fast: false
       matrix:
-        os:
-          - ubuntu-24.04
-        compiler:
-          - llvm
+        os: [ubuntu-24.04, macos-latest, windows-latest]
+        include:
+          - os: windows-latest
+            vcpkgCommitId: "a42af01b72c28a8e1d7b48107b33e4f286a55ef6"
+            triplet: x64-windows
+          - os: ubuntu-24.04
+            vcpkgCommitId: "a42af01b72c28a8e1d7b48107b33e4f286a55ef6"
+            triplet: x64-linux
+          - os: macos-latest
+            vcpkgCommitId: "a42af01b72c28a8e1d7b48107b33e4f286a55ef6"
+            triplet: x64-osx
+
+    env:
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
 
     if: ${{ !github.event.pull_request.draft }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-
-      # Setup LLVM compiler only (minimal setup-cpp usage)
-      - name: Setup LLVM compiler
-        uses: aminya/setup-cpp@v1
         with:
-          compiler: llvm
+          submodules: true
 
-      # Install latest CMake and Ninja with built-in caching
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
 
-      # Setup vcpkg with automatic binary caching - does NOT run vcpkg install
-      # because run-cmake will handle it via the vcpkg.cmake toolchain
-      - name: Setup vcpkg (with automatic binary caching)
+      - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
+        id: runvcpkg
+        with:
+          vcpkgDirectory: "${{ runner.workspace }}/b/vcpkg"
+          vcpkgGitCommitId: "${{ matrix.vcpkgCommitId}}"
+          vcpkgJsonGlob: "**/vcpkg.json"
 
-      # This is the recommended way - uses CMake presets and integrates perfectly with vcpkg
-      - name: Run CMake with vcpkg integration
+      - name: Prints output of run-vcpkg's action
+        run: echo "root='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}', triplet='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_DEFAULT_TRIPLET_OUT }}'"
+
+      - name: Run CMake with vcpkg.json manifest
         uses: lukka/run-cmake@v10
         with:
-          # Use your existing CMake preset that uses vcpkg toolchain
-          configurePreset: "default" # Replace with your actual preset name
-          buildPreset: "default" # Replace with your actual preset name>
+          configurePreset: "default"
+          buildPreset: "default"
