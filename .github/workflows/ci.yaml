@@ -68,114 +68,10 @@ jobs:
           verbose: true
           use_cspell_files: false
 
-  # build:
-  #   runs-on: ${{ matrix.os }}
-  #   name: Build (${{ matrix.os }})
-  #   timeout-minutes: 60
-  #   strategy:
-  #     matrix:
-  #       os:
-  #         # - windows-2022
-  #         - ubuntu-24.04
-  #         # - macos-14 # arm64
-  #         # - macos-13
-  #       compiler:
-  #         - llvm
-
-  #   if: ${{ !github.event.pull_request.draft }}
-
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v5
-
-  #     - name: Cache CMake build
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: |
-  #           ./build/
-  #           ~/vcpkg/
-  #         key: build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', 'vcpkg.json') }}-${{ github.sha }}
-  #         restore-keys: |
-  #           build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', 'vcpkg.json') }}-
-  #           build-${{ runner.os }}-
-
-  #     - name: Setup C++
-  #       uses: aminya/setup-cpp@v1
-  #       with:
-  #         compiler: llvm
-  #         cmake: true
-  #         ninja: true
-  #         vcpkg: true
-  #         # ccache: true  (Seems to make the pipeline fail (don't know why)
-
-  #     - name: Set vcpkg environment
-  #       run: |
-  #         echo "VCPKG_ROOT=$HOME/vcpkg" >> $GITHUB_ENV
-
-  #     - name: Build project
-  #       run: make build
-
-  # test:
-  #   runs-on: ubuntu-latest
-  #   name: Test
-  #   timeout-minutes: 10
-
-  #   if: ${{ !github.event.pull_request.draft }}
-
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v5
-
-  #     - name: Cache build and test artifacts
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: |
-  #           ./build/
-  #           ~/.cache/ccache
-  #           ~/.ccache
-  #           ~/.config/ccache
-  #           ~/.cache/gcovr
-  #         key: test-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json', 'tests/**/*') }}-${{ github.sha }}
-  #         restore-keys: |
-  #           test-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json', 'tests/**/*') }}-
-  #           test-${{ runner.os }}-
-  #           build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/CMakePresets.json') }}-
-
-  #     - name: Setup C++
-  #       uses: aminya/setup-cpp@v1
-  #       with:
-  #         compiler: llvm
-  #         cmake: true
-  #         ninja: true
-  #         vcpkg: true
-  #         ccache: false
-  #         gcovr: true
-
-  #     - name: Build project
-  #       run: make build
-
-  #     - name: Run tests
-  #       run: make test
-
-  #     - name: Check test coverage
-  #       uses: threeal/gcovr-action@v1
-  #       with:
-  #         fail-under-line: 60
-  #         html-out: coverage.html
-  #         print-summary: true
-  #         gcov-executable: llvm-cov gcov
-
-  #     - name: Upload coverage reports
-  #       uses: actions/upload-artifact@v4
-  #       if: always()
-  #       with:
-  #         name: coverage-reports
-  #         path: coverage.html
-
   lint:
     runs-on: ubuntu-latest
-    name: Lint and Format Check
-    timeout-minutes: 15
+    name: Build, Lint, Format Check and Test
+    timeout-minutes: 20
     container:
       image: archlinux:base-devel
 
@@ -235,8 +131,14 @@ jobs:
               python-gersemi
           "
 
+      - name: Build
+        run: make build
+
       - name: Check formatting
         run: make check-format
 
       - name: Run lint
         run: make lint
+
+      # - name: Run tests
+      #   run: make test
