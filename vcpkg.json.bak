@@ -1,9 +1,0 @@
-{
-  "dependencies": [
-    "catch2",
-    "libevdev",
-    "spdlog",
-    "sqlitecpp",
-    "gtkmm"
-  ]
-}

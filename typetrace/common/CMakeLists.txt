@@ -2,6 +2,7 @@
 
 # Find required dependencies
 find_package(spdlog CONFIG REQUIRED)
+find_package(SQLiteCpp CONFIG REQUIRED)
 
 # Source files
 set(COMMON_SOURCES logger/logger.cpp)
@@ -10,7 +11,10 @@ set(COMMON_SOURCES logger/logger.cpp)
 add_library(typetrace_common STATIC ${COMMON_SOURCES})
 
 # Link libraries
-target_link_libraries(typetrace_common PUBLIC spdlog::spdlog)
+target_link_libraries(
+    typetrace_common
+    PUBLIC spdlog::spdlog SQLiteCpp::SQLiteCpp
+)
 
 # Include directories
 target_include_directories(

@@ -1,20 +1,20 @@
-.PHONY: all clean run debug lint format check-format fix
+.PHONY: all build clean run run-frontend debug check-format format lint sort-dictionary cleanup-dictionary check-cspell-ignored
 
 SOURCES_CPP = $(shell find typetrace/ tests/ -name "*.cpp" -o -name "*.hpp")
-SOURCES_CMake = $(shell find typetrace/ tests/ -name "*CMakeLists.txt")
+SOURCES_CMake = $(shell find typetrace/ tests/ -name "CMakeLists.txt -o -name "*.cmake")
 
 all: clean build
 
 build:
-	@echo "Configuring and building with Ninja..."
-	@cmake --preset=default
-	@cmake --build build
-
-# Vcpkg build (commented out for system-wide packages)
-# build-vcpkg:
-# 	@echo "Configuring and building with Ninja..."
-# 	@cmake --preset=vcpkg
-# 	@cmake --build build
+	@echo "Setting up Conan profile..."
+	@conan profile detect --force 2>/dev/null || true
+	@echo "Installing Conan dependencies..."
+	@conan install . --build=missing -s compiler.cppstd=23
+	@echo "Configuring and building with Conan..."
+	@cmake --preset=conan
+	@cmake --build build/Release
+	@echo "Creating symlink for clangd..."
+	@ln -sf build/Release/compile_commands.json .
 
 clean:
 	@echo "Removing build directory..."
@@ -22,15 +22,15 @@ clean:
 
 run: build
 	@echo "Running the typetrace backend..."
-	@./build/typetrace/backend/typetrace_backend
+	@./build/Release/typetrace/backend/typetrace_backend
 
 run-frontend: build
 	@echo "Running the typetrace frontend..."
-	@./build/typetrace/frontend/typetrace_frontend
+	@./build/Release/typetrace/frontend/typetrace_frontend
 
 debug: build
 	@echo "Running the typetrace backend in debug mode..."
-	@./build/typetrace/backend/typetrace_backend -d
+	@./build/Release/typetrace/backend/typetrace_backend -d
 
 check-format:
 	@echo "Checking code formatting..."
