@@ -9,6 +9,7 @@ libsqlitecpp
 libudev
 nodiscard
 nolint
+nolintnextline
 println
 sigc
 sqlitecpp
