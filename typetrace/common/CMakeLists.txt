@@ -13,7 +13,7 @@ add_library(typetrace_common STATIC ${COMMON_SOURCES})
 # Link libraries
 target_link_libraries(
     typetrace_common
-    PUBLIC spdlog::spdlog SQLiteCpp::SQLiteCpp
+    PUBLIC spdlog::spdlog SQLiteCpp
 )
 
 # Include directories

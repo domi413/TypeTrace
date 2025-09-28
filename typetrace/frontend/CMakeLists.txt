@@ -13,7 +13,7 @@ add_executable(typetrace_frontend ${FRONTEND_SOURCES})
 # Link libraries
 target_link_libraries(
     typetrace_frontend
-    PRIVATE typetrace_common PkgConfig::gtkmm-4.0
+    PRIVATE typetrace_common ${GTKMM_VARS_LIBRARIES}
 )
 
 # Include directories
@@ -26,8 +26,8 @@ target_include_directories(
 target_include_directories(
     typetrace_frontend
     SYSTEM
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${GTKMM_VARS_INCLUDE_DIRS}
 )
 
 # Link directories
-target_link_directories(typetrace_frontend PRIVATE ${GTKMM_LIBRARY_DIRS})
+target_link_directories(typetrace_frontend PRIVATE ${GTKMM_VARS_LIBRARY_DIRS})
