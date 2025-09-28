@@ -129,6 +129,7 @@ jobs:
               conan-bin \
               cmake \
               gtkmm-4.0 \
+              libinput \
               make \
               ninja \
               python-gersemi
