@@ -2,6 +2,7 @@
 catch2/3.10.0
 spdlog/1.15.3
 libevdev/1.13.1
+libinput/1.25.0
 sqlitecpp/3.3.2
 
 [generators]
