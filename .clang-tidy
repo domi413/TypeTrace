@@ -1,9 +1,8 @@
 ---
 Checks: >
   *,
-  -altera-id-dependent-backward-branch,
-  -altera-struct-pack-align,
-  -altera-unroll-loops,
+  -altera-*,
+  -llvmlibc-*,
   -concurrency-mt-unsafe,
   -cppcoreguidelines-pro-type-vararg,
   -hicpp-vararg,
@@ -11,12 +10,6 @@ Checks: >
   -fuchsia-multiple-inheritance,
   -fuchsia-trailing-return,
   -llvm-header-guard,
-  -llvm-header-guard,
-  -llvmlibc-callee-namespace,
-  -llvmlibc-callee-namespace,
-  -llvmlibc-implementation-in-namespace,
-  -llvmlibc-inline-function-decl,
-  -llvmlibc-restrict-system-libc-headers,
   -readability-identifier-length,
 
 CheckOptions:

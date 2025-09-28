@@ -83,17 +83,7 @@ configure_file(
 # Dependencies
 # ==================================================================
 
-include(FetchContent)
-
-# SYSTEM-WIDE DEPENDENCIES
-find_package(PkgConfig REQUIRED)
-
-
-# System-wide package dependencies
-pkg_check_modules(SPDLOG REQUIRED spdlog)
-pkg_check_modules(SQLITE3 REQUIRED sqlite3)
-pkg_check_modules(DEPS REQUIRED libudev libinput libevdev)
-pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
+find_package(Catch2 REQUIRED)
 
 # ==================================================================
 # Subdirectories
